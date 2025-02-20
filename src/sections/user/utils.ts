@@ -34,28 +34,45 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 // ----------------------------------------------------------------------
 
-export function getComparator<Key extends keyof any>(
+// export function getComparator<Key extends keyof any>(
+//   order: 'asc' | 'desc',
+//   orderBy: Key
+// ): (
+//   a: {
+//     [key in Key]: number | string;
+//   },
+//   b: {
+//     [key in Key]: number | string;
+//   }
+// ) => number {
+//   return order === 'desc'
+//     ? (a, b) => descendingComparator(a, b, orderBy)
+//     : (a, b) => -descendingComparator(a, b, orderBy);
+// }
+
+export function getComparator<Key extends string | number | symbol>(
   order: 'asc' | 'desc',
   orderBy: Key
 ): (
-  a: {
+  a: { 
     [key in Key]: number | string;
   },
-  b: {
-    [key in Key]: number | string;
-  }
+  b: { 
+    [key in Key]: number | string
+   }
 ) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
+
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
   inputData: UserProps[];
   filterName: string;
-  comparator: (a: any, b: any) => number;
+  comparator: (a: UserProps, b: UserProps) => number;
 };
 
 export function applyFilter({ inputData, comparator, filterName }: ApplyFilterProps) {

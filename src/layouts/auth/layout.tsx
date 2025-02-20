@@ -12,6 +12,7 @@ import { Logo } from 'src/components/logo';
 import { Main } from './main';
 import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
+import { Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +50,20 @@ export function AuthLayout({ sx, children, header }: AuthLayoutProps) {
                 This is an info Alert.
               </Alert>
             ),
-            leftArea: <Logo />,
+            leftArea: (
+              <Typography
+                variant="h4" 
+                fontWeight="bold"
+                sx={{
+                  letterSpacing: 1,
+                  color: 'primary.main',
+                  textTransform: 'uppercase',
+                  textShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
+                }}
+              >
+                VAXTRACK
+              </Typography>
+            ),
             rightArea: (
               <Link
                 component={RouterLink}

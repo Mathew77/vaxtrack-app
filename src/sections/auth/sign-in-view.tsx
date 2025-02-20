@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import { HomePage } from 'src/routes/sections';
 
 import { useRouter } from 'src/routes/hooks';
 
@@ -21,7 +22,8 @@ export function SignInView() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = useCallback(() => {
-    router.push('/');
+    // console.log("here")
+    router.push('/home');
   }, [router]);
 
   const renderForm = (
