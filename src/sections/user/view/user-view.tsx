@@ -20,7 +20,7 @@ import { UserTableRow } from '../user-table-row';
 import { UserTableHead } from '../user-table-head';
 import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
+import { emptyRows, applyFilter } from '../utils';
 
 import type { UserProps } from '../user-table-row';
 
@@ -195,3 +195,7 @@ export function useTable() {
     onChangeRowsPerPage,
   };
 }
+function getComparator(order: string, orderBy: string): (a: UserProps, b: UserProps) => number {
+  throw new Error('Function not implemented.');
+}
+

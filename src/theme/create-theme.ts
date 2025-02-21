@@ -25,7 +25,7 @@ export function createTheme(): Theme {
 
 // ----------------------------------------------------------------------
 
-function shouldSkipGeneratingVar(keys: string[], value: string | number): boolean {
+function shouldSkipGeneratingVar(keys: string[]): boolean {
   const skipGlobalKeys = [
     'mixins',
     'overlays',

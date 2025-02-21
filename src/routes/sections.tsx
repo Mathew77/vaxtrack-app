@@ -11,11 +11,16 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 // ----------------------------------------------------------------------
 
 export const HomePage = lazy(() => import('src/pages/home'));
-export const BlogPage = lazy(() => import('src/pages/blog'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
-export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
+export const UhfHome = lazy(() => import('src/pages/uhf/home'));
+export const AdminHome = lazy(() => import('src/pages/admin/home'));
+export const EhfHome = lazy(() => import('src/pages/ehf/home'));
+
+export const LccoHome = lazy(() => import('src/pages/lcco/home'));
+export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
+export const ThreeplHome = lazy(() => import('src/pages/threepl/home'));
 
 // ----------------------------------------------------------------------
 
@@ -66,8 +71,12 @@ export function Router() {
       children: [
         { path: 'home', element: <HomePage /> },
         { path: 'user', element: <UserPage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
+        { path: 'uhf-home', element: <UhfHome /> },
+        { path: 'admin-home', element: <AdminHome /> },
+        { path: 'ehf-home', element: <EhfHome /> },
+        { path: 'lcco-home', element: <LccoHome /> },
+        { path: 'slwg-home', element: <SlwgHome /> },
+        { path: 'threepl-home', element: <ThreeplHome /> },
       ],
     },
     {
