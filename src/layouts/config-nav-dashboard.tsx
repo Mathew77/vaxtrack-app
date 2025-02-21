@@ -28,16 +28,16 @@ export const navData = [
       </Label>
     ),
   },
-  // {
-  //   title: 'Blog',
-  //   path: '/blog',
-  //   icon: icon('ic-blog'),
-  // },
   {
-    title: 'Sign in',
-    path: '/sign-in',
-    icon: icon('ic-lock'),
+    title: 'Vaccine Request Form',
+    path: '/vaccines',
+    icon: icon('ic-user'),
   },
+  // {
+  //   title: 'Sign in',
+  //   path: '/sign-in',
+  //   icon: icon('ic-lock'),
+  // },
   // {
   //   title: 'Not found',
   //   path: '/404',

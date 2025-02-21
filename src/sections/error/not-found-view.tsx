@@ -32,7 +32,7 @@ export function NotFoundView() {
           }}
         />
 
-        <Button component={RouterLink} href="/" size="large" variant="contained" color="inherit">
+        <Button component={RouterLink} href="/home" size="large" variant="contained" color="inherit">
           Go to home
         </Button>
       </Container>
