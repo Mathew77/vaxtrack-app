@@ -1,5 +1,5 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
-
+import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 
 import Box from '@mui/material/Box';
@@ -76,10 +76,15 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   onClose={() => setNavOpen(false)}
                   // workspaces={_workspaces}
                 />
+              <p ></p>
+              <Typography variant="h4" >
+                 Welcome : EHF-Abuja General Hospital
+              </Typography>
               </>
             ),
             rightArea: (
               <Box gap={1} display="flex" alignItems="center">
+                
                 <Searchbar />
                 {/* <LanguagePopover data={_langs} /> */}
                 <NotificationsPopover data={_notifications} />
