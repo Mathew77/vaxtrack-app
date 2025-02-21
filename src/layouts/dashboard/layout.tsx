@@ -1,6 +1,6 @@
 import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
@@ -37,8 +37,39 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
   const theme = useTheme();
 
   const [navOpen, setNavOpen] = useState(false);
+  const [userRole, setUserRole] = useState('');
+  const [userName, setUserName] = useState('');
 
   const layoutQuery: Breakpoint = 'lg';
+
+  useEffect(() => {
+    const storedUsername = sessionStorage.getItem('username');
+    
+    if (storedUsername) {
+      setUserName(storedUsername);
+      
+      if (storedUsername.includes('admin')) {
+        setUserRole('admin');
+      } else if (storedUsername.includes('ehf')) {
+        setUserRole('ehf');
+      } else if (storedUsername.includes('uhf')) {
+        setUserRole('uhf');
+      } else if (storedUsername.includes('lcco')) {
+        setUserRole('lcco');
+      } else if (storedUsername.includes('slwg')) {
+        setUserRole('slwg');
+      } else if (storedUsername.includes('threepl')) {
+        setUserRole('threepl');
+      } else {
+        setUserRole('guest');
+      }
+    }
+  }, []);
+
+  const filteredNavData = navData.filter(item => 
+    item.roles && item.roles.includes(userRole)
+  );
+
 
   return (
     <LayoutSection
@@ -71,7 +102,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                   }}
                 />
                 <NavMobile
-                  data={navData}
+                  data={filteredNavData}
                   open={navOpen}
                   onClose={() => setNavOpen(false)}
                   // workspaces={_workspaces}
@@ -116,7 +147,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        * Sidebar
        *************************************** */
       sidebarSection={
-        <NavDesktop data={navData} layoutQuery={layoutQuery}  />
+        <NavDesktop data={filteredNavData} layoutQuery={layoutQuery} /> 
       }
       /** **************************************
        * Footer

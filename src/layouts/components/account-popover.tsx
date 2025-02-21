@@ -50,6 +50,14 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
     [handleClosePopover, router]
   );
 
+  const handleLogout = useCallback(() => {
+    handleClosePopover();
+   
+    sessionStorage.clear();
+    
+    router.push('/sign-in');
+  }, [handleClosePopover, router]);
+
   return (
     <>
       <IconButton
@@ -128,11 +136,12 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <Box sx={{ p: 1 }}>
-          <Button fullWidth color="error" size="medium" variant="text">
-            Logout
-          </Button>
-        </Box>
+        <MenuItem 
+          onClick={handleLogout} 
+          sx={{ py: 1, px: 2, mt: 1, borderRadius: 0.75 }}
+        >
+          Logout
+        </MenuItem>
       </Popover>
     </>
   );

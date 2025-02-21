@@ -22,6 +22,7 @@ export const EhfHome = lazy(() => import('src/pages/ehf/home'));
 export const LccoHome = lazy(() => import('src/pages/lcco/home'));
 export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
 export const ThreeplHome = lazy(() => import('src/pages/threepl/home'));
+export const Unauthorized = lazy(() => import('src/pages/unauthorized'))
 
 // ----------------------------------------------------------------------
 
@@ -90,6 +91,10 @@ export function Router() {
     {
       path: '*',
       element: <Navigate to="/404" replace />,
+    },
+    {
+      path: 'unauthorized',
+      element: <Unauthorized />,
     },
   ]);
 }
