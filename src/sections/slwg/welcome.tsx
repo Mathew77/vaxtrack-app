@@ -1,43 +1,72 @@
 import React from 'react';
-import { Box, Typography, Button, Grid } from '@mui/material';
+import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import VaccinesIcon from '@mui/icons-material/Vaccines';
 
-export default function WelcomeCard() {
-  return (
-    <Box
-      sx={{
-        p: 4,
-        borderRadius: 3,
-        background: 'linear-gradient(90deg, #7B8FF7, #E0A9F5)',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        boxShadow: 2,
-      }}
-    >
-      <Grid container spacing={3} alignItems="center">
-        {/* Left Side - Text Content */}
-        <Grid item xs={12} md={8}>
-          {/* <Typography variant="h4" fontWeight="bold">
-            Welcome Back, <strong>Caleb</strong>
-          </Typography> */}
-          <Typography variant="body1" sx={{ mt: 2, mb: 3, maxWidth: '80%' }}>
-            The Supply Chain Application with Offline Capabilities is built to overcome these critical 
-            challenges by integrating cutting-edge digital technologies with an operational model that 
-            prioritizes efficiency, transparency, and real-time decision-making.
-          </Typography>
-          
-        </Grid>
 
-        {/* Right Side - Infographic Image */}
-        <Grid item xs={12} md={4} display="flex" justifyContent="center">
-          <img 
-            src="/assets/illustrations/supply-chain.png" 
-            alt="Supply Chain Illustration"
-            style={{ maxWidth: '150px', height: '150px' }}
-          />
-        </Grid>
-      </Grid>
-    </Box>
-  );
+// Define the types for the props
+interface CardProps {
+  title: string;
+  value: number;
+  icon: React.ReactElement;
+  bgColor: string;
+  shadowColor: string;
 }
+
+const cardData: CardProps[] =[
+  { title: 'Total EHF', value: 35, icon: <LocalHospitalIcon />, bgColor: '#3F51B5', shadowColor: 'rgba(63, 81, 181, 0.3)' },
+  { title: 'Total UHF', value: 23, icon: <OpenInNewIcon />, bgColor: '#F57C00', shadowColor: 'rgba(245, 124, 0, 0.3)' },
+  { title: 'Total LCCO', value: 5, icon: <AccountBalanceIcon />, bgColor: '#1976D2', shadowColor: 'rgba(25, 118, 210, 0.3)' },
+  { title: 'Total Vaccines', value: 12, icon: <VaccinesIcon />, bgColor: '#D81B60', shadowColor: 'rgba(216, 27, 96, 0.3)' }
+];
+
+const StyledCard: React.FC<CardProps> = ({ title, value, icon, bgColor, shadowColor }) => {
+  return (
+    <Card sx={{ p: 2, borderRadius: 1, boxShadow: 2, border: '1px solid #E0E0E0', textAlign: 'center', height: '100%' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: 50,
+          height: 50,
+          backgroundColor: bgColor,
+          borderRadius: 2,
+          boxShadow: `0px 10px 20px ${shadowColor}`,
+          color: 'white',
+          mx: 'auto',
+          mb: 1
+        }}
+      >
+        {icon}
+      </Box>
+      <Typography variant="body2" color="textSecondary">
+        {title}
+      </Typography>
+      <Typography variant="h5" fontWeight="bold">
+        {value}
+      </Typography>
+      {title === 'Total Vaccines' && (
+        <Typography variant="body2" color="green">
+          ↑ Distributed
+        </Typography>
+      )}
+    </Card>
+  );
+};
+
+const DashboardCards = () => {
+  return (
+    <Grid container spacing={3}>
+      {cardData.map((card, index) => (
+        <Grid item xs={12} sm={6} md={3} key={index}>
+          <StyledCard {...card} />
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
+
+export default DashboardCards;

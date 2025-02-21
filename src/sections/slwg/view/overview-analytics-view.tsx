@@ -15,9 +15,8 @@ export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Hi, SLWG
+        {/* Hi, SLWG */}
       </Typography>
-      <VaccineCard />
       <br/>
       <WelcomeCard />
       <br/>
