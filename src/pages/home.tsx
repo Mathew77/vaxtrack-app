@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useLocation } from 'react-router-dom';
 
 import { CONFIG } from 'src/config-global';
 
@@ -7,6 +8,10 @@ import { CONFIG } from 'src/config-global';
 // ----------------------------------------------------------------------
 
 export default function Page() {
+
+  const location = useLocation();
+  console.log("loaction", location.state)
+
   return (
     <>
       <Helmet>

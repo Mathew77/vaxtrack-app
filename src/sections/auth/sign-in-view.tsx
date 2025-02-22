@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -13,19 +13,45 @@ import { HomePage } from 'src/routes/sections';
 import { useRouter } from 'src/routes/hooks';
 
 import { Iconify } from 'src/components/iconify';
+import { useNavigate } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
 export function SignInView() {
+  const navigate = useNavigate();
   const router = useRouter();
-
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = useCallback(() => {
-    // console.log("here")
-    router.push('/home');
-  }, [router]);
+  useEffect(() => {
+    const storedUsername = sessionStorage.getItem('username')
+    if(storedUsername){
+      setUsername(storedUsername)
+    }
+  })
 
+  // const handleSignIn = useCallback(() => {
+  const handleSignIn = () => {
+    const allowedRoles = ['admin', 'ehf', 'uhf', 'lcco', 'slwg', 'threepl'];
+    const isValidUser = allowedRoles.some(role => username.includes(role));
+
+    if (isValidUser) {
+    
+      sessionStorage.setItem('username', username);
+
+      navigate('/home');
+    } else {
+      navigate('/unauthorized');
+    }
+  // }, [router]);
+  }
+
+  const handleChange = (e: any) => {
+  // console.log("my e", e.target.value)
+  setUsername(e.target.value)
+  console.log("user", username);
+  
+  }
   const renderForm = (
     <Box display="flex" flexDirection="column" alignItems="flex-end">
       <TextField
@@ -35,6 +61,7 @@ export function SignInView() {
         defaultValue="hello@gmail.com"
         InputLabelProps={{ shrink: true }}
         sx={{ mb: 3 }}
+        onChange={(e) => handleChange(e)}
       />
 
       <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
