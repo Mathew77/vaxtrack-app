@@ -109,7 +109,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                 />
               <p ></p>
               <Typography variant="h4" >
-                 Welcome : EHF-Abuja General Hospital
+                 Welcome : Abuja General Hospital - {userRole.toUpperCase()}
               </Typography>
               </>
             ),

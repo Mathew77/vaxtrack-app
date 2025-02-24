@@ -9,9 +9,9 @@ import { SignInView } from 'src/sections/auth';
 export default function Page() {
   return (
     <>
-      <Helmet>
+      {/* <Helmet>
         <title> {`Sign in - ${CONFIG.appName}`}</title>
-      </Helmet>
+      </Helmet> */}
 
       <SignInView />
     </>
