@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { MeaslesVaccineProps, MeaslesVaccineData } from 'src/types/vaccines/measles';
 import { format } from 'date-fns'
+import { sectionBorderStyle } from 'src/utils/constants';
 
 export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) => {
 
@@ -31,7 +32,7 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
       closingBalance: '',
       postLmdDos: '',
     });
-    
+
 
     const handleInputChange = (field: keyof MeaslesVaccineData) => (
         event: React.ChangeEvent<HTMLInputElement | { value: string | number }>
@@ -81,11 +82,12 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
         Measles Vaccine
       </Typography>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Measles Vaccine</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Measles Vaccine</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField 
                 fullWidth 
                 variant="outlined" 
@@ -257,11 +259,12 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+         <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>2ml Syringe</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -347,11 +350,12 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Measles Diluent</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Measles Diluent</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -429,11 +433,12 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.05ml Syringe per Vaccine Dose</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>0.05ml syringe per vaccine dose</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -514,19 +519,19 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
       <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
           <Button 
             variant="contained" 
-            color="secondary" 
-            size="small"
+            color="inherit" 
+            size="medium"
             onClick={handleAddToLine}
           >
           Add to Line
         </Button>
       </Box> 
 
-      <Box sx={{ mt: 2 }}>
+      {/* <Box sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" size="large">
           Submit
         </Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

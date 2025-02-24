@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { BopvVaccineData, BopvVaccineProps } from "src/types/vaccines/bopv";
 import { format } from 'date-fns'
+import { sectionBorderStyle } from "src/utils/constants";
 
 
 
@@ -73,11 +74,12 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine }) => {
         BOPV Vaccine
       </Typography>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>BOPV Vaccine</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>BOPV Vaccine</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField 
                 fullWidth 
                 variant="outlined" 
@@ -113,7 +115,7 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine }) => {
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-                    </Grid>
+          </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -247,11 +249,12 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+      <Typography variant="subtitle1" sx={{ mb: 2 }}>Dropper per 20 doses/vial</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Dropper per 20 doses/vial</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -337,19 +340,19 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine }) => {
       <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
         <Button 
           variant="contained" 
-          color="secondary" 
-          size="small"
+          color="inherit" 
+          size="medium"
           onClick={handleAddToLine}
         >
           Add to Line
         </Button>
       </Box>
 
-      <Box sx={{ mt: 2 }}>
+      {/* <Box sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" size="large">
           Submit
         </Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

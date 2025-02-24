@@ -10,6 +10,7 @@ import {
   Box,
   Paper,
   Grid,
+  Button,
 } from '@mui/material';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -191,6 +192,15 @@ export function VaccinesView() {
             ))}
           </Box>
         )}
+        {vaccineLines.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Button 
+              variant="contained" color="primary" size="large">
+              Submit
+            </Button>
+          </Box>
+        )}
+       
       </Container>
     </DashboardContent>
   );

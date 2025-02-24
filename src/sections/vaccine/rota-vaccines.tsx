@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { RotaVaccineData, RotaVaccineProps } from "src/types/vaccines/rota";
 import { format } from 'date-fns'
+import { sectionBorderStyle } from "src/utils/constants";
 
 
 export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine }) => {
@@ -71,11 +72,12 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine }) => {
         Rota Vaccine
       </Typography>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Rota Vaccine</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Rota Vaccine</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField 
                 fullWidth 
                 variant="outlined" 
@@ -247,11 +249,12 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Dropper per 20 doses/vial</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Dropper per 20 doses/vial</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -340,19 +343,19 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine }) => {
       <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
         <Button 
           variant="contained" 
-          color="secondary" 
-          size="small"
+          color="inherit" 
+          size="medium"
           onClick={handleAddToLine}
         >
           Add to Line
         </Button>
       </Box>  
-
+{/* 
       <Box sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" size="large">
           Submit
         </Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 };
