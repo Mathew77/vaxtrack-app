@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { BcgVaccineData, BcgVaccinesProps } from '../../types/vaccines/bcg';
 import { format } from 'date-fns'
+import { sectionBorderStyle } from 'src/utils/constants';
 
 export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
 
@@ -31,7 +32,6 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
     closingBalance: '',
     postLmdDos: '',
   });
-
 
   const handleInputChange = (field: keyof BcgVaccineData) => (
     event: React.ChangeEvent<HTMLInputElement | { value: string }>
@@ -62,6 +62,15 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
       postLmdDos: '',
     });
   };
+
+  // Created a global border styling
+  // const sectionBorderStyle = {
+  //   border: '1px solid #e0e0e0',
+  //   borderRadius: '4px',
+  //   padding: '16px',
+  //   marginBottom: '24px',
+  //   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  // };
   
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -81,11 +90,12 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
         BCG Vaccine
       </Typography>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>BCG Vaccine</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>BCG Vaccine</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField 
                 fullWidth 
                 variant="outlined" 
@@ -254,11 +264,12 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>2ml Syringe</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField 
                 fullWidth 
                 variant="outlined"
@@ -348,11 +359,12 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>BCG Diluent</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>BCG Diluent</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -430,11 +442,12 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.05ml Syringe per Vaccine Dose</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>0.05ml syringe per vaccine dose</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -502,7 +515,6 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <TextField fullWidth variant="outlined"  />
             </Box>
           </Grid>
-
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -516,19 +528,19 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
       <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
         <Button 
           variant="contained" 
-          color="secondary" 
-          size="small"
+          color="inherit" 
+          size="medium"
           onClick={handleAddToLine}
         >
           Add to Line
         </Button>
       </Box>    
 
-      <Box sx={{ mt: 2 }}>
+      {/* <Box sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" size="large">
           Submit
         </Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

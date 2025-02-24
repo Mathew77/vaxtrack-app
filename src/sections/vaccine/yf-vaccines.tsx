@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { YFVaccineData, YFVaccineProps } from "src/types/vaccines/yf";
 import { format } from 'date-fns'
+import { sectionBorderStyle } from 'src/utils/constants';
 
 export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
 
@@ -70,11 +71,12 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
         YF Vaccine
       </Typography>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>YF Vaccine</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>YF Vaccine</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField 
                 fullWidth 
                 variant="outlined" 
@@ -256,11 +258,12 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>2ml Syringe</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -346,11 +349,12 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>YF Diluent</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>YF Diluent</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -428,11 +432,12 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
         </Grid>
       </Box>
 
-      <Box>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.05ml Syringe per Vaccine Dose</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>0.05ml syringe per vaccine dose</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
@@ -512,19 +517,19 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
       <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
         <Button 
           variant="contained" 
-          color="secondary" 
-          size="small"
+          color="inherit" 
+          size="medium"
           onClick={handleAddToLine}
         >
           Add to Line
         </Button>
       </Box>   
 
-      <Box sx={{ mt: 2 }}>
+      {/* <Box sx={{ mt: 2 }}>
         <Button variant="contained" color="primary" size="large">
           Submit
         </Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 };
