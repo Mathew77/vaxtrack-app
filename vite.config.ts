@@ -36,4 +36,5 @@ export default defineConfig({
   },
   server: { port: PORT, host: true , middlewareMode: false},
   preview: { port: PORT, host: true },
+  base: "/vaxtrack-app",
 });
