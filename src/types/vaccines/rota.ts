@@ -17,4 +17,5 @@ export interface RotaVaccineData {
   
   export interface RotaVaccineProps {
     onAddToLine: (data: RotaVaccineData) => void
+    initialData?: RotaVaccineData;
   }

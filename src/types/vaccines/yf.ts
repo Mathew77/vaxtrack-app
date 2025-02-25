@@ -17,4 +17,5 @@ export interface YFVaccineData {
   
   export interface YFVaccineProps {
     onAddToLine: (data: YFVaccineData) => void
+    initialData?: YFVaccineData;
   }

@@ -17,4 +17,5 @@ export interface HepBVaccineData {
   
   export interface HepBVaccineProps {
     onAddToLine: (data: HepBVaccineData) => void
+     initialData?: HepBVaccineData;
   }

@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  HepbVaccine: React.FC<HepBVaccineProps>  = ({ onAddToLine}) => {
+export const  HepbVaccine: React.FC<HepBVaccineProps>  = ({ onAddToLine, initialData}) => {
 
   const [formData, setFormData] = useState<HepBVaccineData>({
     physicalStock: '',
@@ -22,11 +22,12 @@ export const  HepbVaccine: React.FC<HepBVaccineProps>  = ({ onAddToLine}) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
 
   const handleInputChange = (field: keyof HepBVaccineData) => (
-      event: React.ChangeEvent<HTMLInputElement | { value: string | number }>
+      event: React.ChangeEvent<HTMLInputElement | { value: string }>
     ) => {
       setFormData((prev) => ({
         ...prev,

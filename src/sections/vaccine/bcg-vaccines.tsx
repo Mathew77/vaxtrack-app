@@ -11,15 +11,15 @@ import {
   MenuItem,
 } from '@mui/material';
 import { BcgVaccineData, BcgVaccinesProps } from '../../types/vaccines/bcg';
-import { format } from 'date-fns'
+import { format } from 'date-fns';
 import { sectionBorderStyle } from 'src/utils/constants';
 
-export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
+export const BcgVaccines: React.FC<BcgVaccinesProps  > = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<BcgVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"), 
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -31,6 +31,7 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}), 
   });
 
   const handleInputChange = (field: keyof BcgVaccineData) => (
@@ -44,7 +45,7 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
 
   const handleAddToLine = () => {
     onAddToLine(formData);
-
+    
     setFormData({
       physicalStock: '',
       avgDailyConsumption: '',
@@ -71,7 +72,7 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
   //   marginBottom: '24px',
   //   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
   // };
-  
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Typography
@@ -112,7 +113,7 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <TextField 
                 fullWidth 
                 variant="outlined" 
-                defaultValue=""
+                 defaultValue=""
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
               />
@@ -234,8 +235,8 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <InputLabel>Qty Received</InputLabel>
               <TextField 
                 fullWidth 
-                variant="outlined" 
-                // defaultValue="" 
+                variant="outlined"
+                // defaultValue=""  
               />
             </Box>
           </Grid>
@@ -246,8 +247,8 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <TextField 
                 fullWidth 
                 variant="outlined" 
-                // disabled value="" 
-            />
+                  // disabled value="" 
+              />
             </Box>
           </Grid>
 
@@ -284,7 +285,8 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <TextField 
                 fullWidth 
                 variant="outlined" 
-                disabled value="" 
+                disabled 
+                value="" 
               />
             </Box>
           </Grid>
@@ -295,7 +297,8 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <TextField 
                 fullWidth 
                 variant="outlined" 
-                disabled value="" 
+                disabled 
+                value="" 
               />
             </Box>
           </Grid>
@@ -323,7 +326,7 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
               <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="max-stock"
+                  id="max-stock" 
                   // defaultValue="max stock"
                   inputProps={{
                     name: 'max-stock',
@@ -535,12 +538,6 @@ export const BcgVaccines: React.FC<BcgVaccinesProps> = ({ onAddToLine }) => {
           Add to Line
         </Button>
       </Box>    
-
-      {/* <Box sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" size="large">
-          Submit
-        </Button>
-      </Box> */}
     </Box>
   );
 };

@@ -17,4 +17,5 @@ export interface PcvVaccineData {
   
   export interface PcvVaccineProps {
     onAddToLine: (data: PcvVaccineData) => void
+    initialData?: PcvVaccineData;
   }

@@ -17,4 +17,5 @@ export interface BopvVaccineData {
   
   export interface BopvVaccineProps {
     onAddToLine: (data: BopvVaccineData) => void
+    initialData?: BopvVaccineData;
   }

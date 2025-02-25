@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  MenAVaccine: React.FC<MenVaccinesProps>  = ({ onAddToLine }) => {
+export const  MenAVaccine: React.FC<MenVaccinesProps>  = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<MenAVaccineData>({
     physicalStock: '',
@@ -22,6 +22,7 @@ export const  MenAVaccine: React.FC<MenVaccinesProps>  = ({ onAddToLine }) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
 

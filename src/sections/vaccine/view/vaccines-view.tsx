@@ -12,6 +12,8 @@ import {
   Grid,
   Button,
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { BcgVaccines } from '../bcg-vaccines';
@@ -32,7 +34,13 @@ interface VaccineLine {
   data: any;
 }
 
-const vaccineOptions = [
+interface VaccineOption {
+  value: string;
+  label: string;
+  component: (props: any) => JSX.Element;
+}
+
+const vaccineOptions: VaccineOption[] = [
   { value: 'bcg', label: 'BCG Vaccine', component: (props: any) => <BcgVaccines {...props} /> },
   { value: 'measles', label: 'Measles Vaccine', component: (props: any) => <MeaslesVaccine {...props} /> },
   { value: 'yf', label: 'YF Vaccine', component: (props: any) => <YfVaccine {...props} /> },
@@ -49,20 +57,26 @@ const vaccineOptions = [
 
 export function VaccinesView() {
   const [selectedForm, setSelectedForm] = useState('');
-  const [availableVaccines, setAvailableVaccines] = useState(vaccineOptions);
+  const [availableVaccines, setAvailableVaccines] = useState<VaccineOption[]>(vaccineOptions);
   const [vaccineLines, setVaccineLines] = useState<VaccineLine[]>([]);
   const [currentForm, setCurrentForm] = useState<VaccineLine | null>(null);
 
+  const sortVaccinesByOriginalOrder = (vaccines: VaccineOption[]): VaccineOption[] => {
+    return [...vaccines].sort((a, b) => {
+      const indexA = vaccineOptions.findIndex(v => v.value === a.value);
+      const indexB = vaccineOptions.findIndex(v => v.value === b.value);
+      return indexA - indexB;
+    });
+  };
+
   const handleAddToLine = (data: any) => {
-    setVaccineLines([{
+    setVaccineLines((prev) => [{
       type: selectedForm,
       data: data
-    }, ...vaccineLines]);
+    }, ...prev]);
 
     setCurrentForm(null);
-
     setAvailableVaccines(availableVaccines.filter(v => v.value !== selectedForm));
-
     setSelectedForm('');
   };
 
@@ -72,6 +86,33 @@ export function VaccinesView() {
       type: value,
       data: {} 
     });
+  };
+
+  const handleDelete = (index: number) => {
+    const deletedVaccine = vaccineLines[index];
+    setVaccineLines((prev) => prev.filter((_, i) => i !== index));
+
+    const vaccineOption = vaccineOptions.find(v => v.value === deletedVaccine.type);
+    
+    if (vaccineOption && !availableVaccines.some(v => v.value === deletedVaccine.type)) {
+      setAvailableVaccines((prev) => sortVaccinesByOriginalOrder([...prev, vaccineOption]));
+    }
+  };
+
+  const handleEdit = (index: number) => {
+    const vaccineToEdit = vaccineLines[index];
+    
+    setVaccineLines((prev) => prev.filter((_, i) => i !== index));
+    
+    setSelectedForm(vaccineToEdit.type);
+    setCurrentForm(vaccineToEdit);
+    
+    if (!availableVaccines.some(v => v.value === vaccineToEdit.type)) {
+      const vaccineOption = vaccineOptions.find(v => v.value === vaccineToEdit.type);
+      if (vaccineOption) {
+        setAvailableVaccines((prev) => sortVaccinesByOriginalOrder([...prev, vaccineOption]));
+      }
+    }
   };
 
   return (
@@ -100,102 +141,115 @@ export function VaccinesView() {
         {currentForm && (
           <Box sx={{ mt: 4 }}>
             {availableVaccines.find((v) => v.value === currentForm.type)?.component({
-              onAddToLine: handleAddToLine
+              onAddToLine: handleAddToLine,
+              initialData: currentForm.data
             })}
           </Box>
         )}
 
         {vaccineLines.length > 0 && (
           <Box sx={{ mt: 4 }}>
-          
-            {vaccineLines.map((lines, index) => (
-              <Paper 
-                key={index} 
+            <Paper 
+              sx={{ 
+                p: 2, 
+                borderRadius: 1,
+                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              <Box 
                 sx={{ 
-                  p: 2, 
-                  mb: 2,
-                  borderRadius: 1
+                  backgroundColor: '#1976D2', 
+                  color: 'white', 
+                  py: 1, 
+                  px: 2,
+                  borderRadius: 1,
+                  mb: 2
                 }}
               >
-                <Box 
-                  sx={{ 
-                    p: 1,
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="subtitle1">
-                    {vaccineOptions.find(v => v.value === lines.type)?.label}
-                  </Typography>
-                </Box>
-
-                <Grid container>
-                  <Grid container item spacing={1}>
-                    <Box 
-                      sx={{ 
-                        border: '1px solid #1976D2',
-                        borderRadius: 1, 
-                        backgroundColor: '#1976D2', 
-                        color: 'white', 
-                        display: 'flex',
-                        width: '100%', 
-                        py: 1, 
-                        px: 2,
-                      }}
-                    >
-                      {lines.data.physicalStock !== "" && (
-                        <Grid item xs={3}>
-                          <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white' }}>
-                            Physical Stock
-                          </Typography>
-                        </Grid>
-                      )}
-                      {lines.data.avgDailyConsumption !== "" && (
-                        <Grid item xs={3}>
-                          <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white' }}>
-                            Average Daily Consumption
-                          </Typography>
-                        </Grid>
-                      )}
-                      {lines.data.dateCreated !== "" && (
-                        <Grid item xs={3}>
-                          <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white' }}>
-                            Date Created
-                          </Typography>
-                        </Grid>
-                      )}
-                      {/* {lines.data.daysOfStock !== "" && (
-                        <Grid item xs={3}>
-                          <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white' }}>
-                            Days of Stock
-                          </Typography>
-                        </Grid>
-                      )} */}
-                    </Box>
+                <Grid container spacing={2}>
+                  <Grid item xs={3}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Vaccine Products
+                    </Typography>
                   </Grid>
-
-                  <Grid container item spacing={2} sx={{ mt: 1 }}>
-                    <Grid item xs={3}>
-                      <Typography variant="body1">{lines.data.physicalStock}</Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Typography variant="body1">{lines.data.avgDailyConsumption}</Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Typography variant="body1">{lines.data.dateCreated}</Typography>
-                    </Grid>
-                    {/* <Grid item xs={3}>
-                      <Typography variant="body1">{lines.data.daysOfStock}</Typography>
-                    </Grid> */}
+                  <Grid item xs={3}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Physical Stock
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Avg Daily Consumption
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Date Created
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      Actions
+                    </Typography>
                   </Grid>
                 </Grid>
-              </Paper>
-            ))}
+              </Box>
+
+              {vaccineLines.map((lines, index) => (
+                <Box 
+                  key={index}
+                  sx={{
+                    borderBottom: index < vaccineLines.length - 1 ? '1px solid #e0e0e0' : 'none',
+                    py: 1,
+                    px: 2
+                  }}
+                >
+                  <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                    <Grid item xs={3}>
+                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {vaccineOptions.find(v => v.value === lines.type)?.label}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lines.data.physicalStock}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lines.data.avgDailyConsumption}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lines.data.dateCreated}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={1}>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <EditIcon 
+                          sx={{ color: '#1976D2', cursor: 'pointer' }}
+                          onClick={() => handleEdit(index)}
+                        />
+                        <DeleteIcon 
+                          sx={{ color: '#d32f2f', cursor: 'pointer' }}
+                          onClick={() => handleDelete(index)}
+                        />
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              ))}
+            </Paper>
           </Box>
         )}
         {vaccineLines.length > 0 && (
           <Box sx={{ mt: 2 }}>
             <Button 
-              variant="contained" color="primary" size="large">
+              variant="contained" 
+              color="primary" 
+              size="large"
+            >
               Submit
             </Button>
           </Box>
