@@ -17,4 +17,5 @@ export interface PentaVaccineData {
   
   export interface PentaVaccineProps {
     onAddToLine: (data: PentaVaccineData) => void
+    initialData?: PentaVaccineData;
   }

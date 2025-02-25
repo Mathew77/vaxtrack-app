@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  PentaVaccine: React.FC<PentaVaccineProps>  = ({ onAddToLine }) => {
+export const  PentaVaccine: React.FC<PentaVaccineProps>  = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<PentaVaccineData>({
     physicalStock: '',
@@ -22,6 +22,7 @@ export const  PentaVaccine: React.FC<PentaVaccineProps>  = ({ onAddToLine }) => 
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
 

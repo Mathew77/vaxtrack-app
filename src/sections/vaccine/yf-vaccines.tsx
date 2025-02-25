@@ -4,7 +4,7 @@ import { YFVaccineData, YFVaccineProps } from "src/types/vaccines/yf";
 import { format } from 'date-fns'
 import { sectionBorderStyle } from 'src/utils/constants';
 
-export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
+export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<YFVaccineData>({
     physicalStock: '',
@@ -21,6 +21,7 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine }) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
   const handleInputChange = (field: keyof YFVaccineData) => (

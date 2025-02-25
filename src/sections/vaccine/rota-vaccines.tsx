@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine }) => {
+export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<RotaVaccineData>({
     physicalStock: '',
@@ -22,6 +22,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine }) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
 

@@ -17,4 +17,5 @@ export interface HpvVaccineData {
   
   export interface HpvVaccineProps {
     onAddToLine: (data: HpvVaccineData) => void
+    initialData?: HpvVaccineData;
   }

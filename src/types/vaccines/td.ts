@@ -17,4 +17,5 @@ export interface TdVaccineData {
   
   export interface TdVaccineProps {
     onAddToLine: (data: TdVaccineData) => void
+    initialData?: TdVaccineData;
   }

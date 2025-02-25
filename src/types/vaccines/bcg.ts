@@ -17,4 +17,5 @@ export interface BcgVaccineData {
   
   export interface BcgVaccinesProps {
     onAddToLine: (data: BcgVaccineData) => void
+    initialData?: BcgVaccineData;
   }

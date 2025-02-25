@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine }) => {
+export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<PcvVaccineData>({
     physicalStock: '',
@@ -22,6 +22,7 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine }) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
 

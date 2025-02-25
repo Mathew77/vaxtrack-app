@@ -17,4 +17,5 @@ export interface MeaslesVaccineData {
   
   export interface MeaslesVaccineProps {
     onAddToLine: (data: MeaslesVaccineData) => void
+    initialData?: MeaslesVaccineData;
   }

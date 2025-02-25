@@ -6,7 +6,7 @@ import { sectionBorderStyle } from "src/utils/constants";
 
 
 
-export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine }) => {
+export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine, initialData }) => {
 
   const [formData, setFormData] = useState<BopvVaccineData>({
     physicalStock: '',
@@ -23,11 +23,12 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine }) => {
     qtyReceived: '',
     closingBalance: '',
     postLmdDos: '',
+    ...(initialData || {}),
   });
 
 
   const handleInputChange = (field: keyof BopvVaccineData) => (
-      event: React.ChangeEvent<HTMLInputElement | { value: string | number }>
+      event: React.ChangeEvent<HTMLInputElement | { value: string }>
     ) => {
       setFormData((prev) => ({
         ...prev,

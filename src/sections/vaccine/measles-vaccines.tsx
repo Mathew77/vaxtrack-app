@@ -14,7 +14,7 @@ import { MeaslesVaccineProps, MeaslesVaccineData } from 'src/types/vaccines/meas
 import { format } from 'date-fns'
 import { sectionBorderStyle } from 'src/utils/constants';
 
-export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) => {
+export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine , initialData}) => {
 
   const [formData, setFormData] = useState<MeaslesVaccineData>({
       physicalStock: '',
@@ -31,6 +31,7 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine }) =
       qtyReceived: '',
       closingBalance: '',
       postLmdDos: '',
+      ...(initialData || {}),
     });
 
 

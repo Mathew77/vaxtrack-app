@@ -17,4 +17,5 @@ export interface MenAVaccineData {
   
   export interface MenVaccinesProps {
     onAddToLine: (data: MenAVaccineData) => void
+    initialData?: MenAVaccineData;
   }
