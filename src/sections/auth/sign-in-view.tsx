@@ -8,18 +8,15 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { HomePage } from 'src/routes/sections';
 
-import { useRouter } from 'src/routes/hooks';
-
-import { Iconify } from 'src/components/iconify';
 import { useNavigate } from 'react-router-dom';
+import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
 export function SignInView() {
   const navigate = useNavigate();
-  const router = useRouter();
+
   const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
@@ -28,29 +25,28 @@ export function SignInView() {
     if(storedUsername){
       setUsername(storedUsername)
     }
-  })
+  }, []);
 
-  // const handleSignIn = useCallback(() => {
-  const handleSignIn = () => {
+  const handleSignIn = useCallback(() => {
     const allowedRoles = ['admin', 'ehf', 'uhf', 'lcco', 'slwg', 'threepl'];
-    const isValidUser = allowedRoles.some(role => username.includes(role));
+    const userRole = allowedRoles.find((role) => username.toLowerCase().includes(role));
 
-    if (isValidUser) {
-    
+
+    if (userRole) {
       sessionStorage.setItem('username', username);
-
-      navigate('/home');
+      const targetPath = `/${userRole}-home`;
+      // console.log('Navigating to:', targetPath); 
+      navigate(targetPath);
     } else {
-      navigate('/unauthorized');
+      navigate('/vaxtrack-app/unauthorized');
     }
-  // }, [router]);
-  }
+  }, [username, navigate]);
 
   const handleChange = (e: any) => {
-  // console.log("my e", e.target.value)
-  setUsername(e.target.value)
-  console.log("user", username);
-  
+    // console.log("my e", e.target.value)
+    setUsername(e.target.value)
+    console.log("user", username);
+
   }
   const renderForm = (
     <Box display="flex" flexDirection="column" alignItems="flex-end">
@@ -61,7 +57,7 @@ export function SignInView() {
         defaultValue="hello@gmail.com"
         InputLabelProps={{ shrink: true }}
         sx={{ mb: 3 }}
-        onChange={(e) => handleChange(e)}
+        onChange={handleChange}
       />
 
       <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
@@ -104,12 +100,12 @@ export function SignInView() {
     <>
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
         <Typography variant="h5">Sign in</Typography>
-        
+
       </Box>
 
       {renderForm}
-
-     
-    </>
+      
+      
+      </>
   );
 }
