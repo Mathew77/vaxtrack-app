@@ -38,7 +38,7 @@ export function SignInView() {
       // console.log('Navigating to:', targetPath); 
       navigate(targetPath);
     } else {
-      navigate('/vaxtrack-app/unauthorized');
+      navigate('/unauthorized');
     }
   }, [username, navigate]);
 
