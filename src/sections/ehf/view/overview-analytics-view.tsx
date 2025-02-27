@@ -6,7 +6,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import WelcomeCard  from '../welcome';
 import VaccineCard  from '../statistics';
-import TransactionHistory from '../transaction-history'
+import TransactionHistory from '../transaction-history';
+import DashboardCards from '../statistics2';
 
 
 // ----------------------------------------------------------------------
@@ -20,6 +21,8 @@ export function OverviewAnalyticsView() {
       <WelcomeCard />
       <br/>
       <VaccineCard />
+      <br/>
+      <DashboardCards />
       <br/>
       <b/>
       <br/>
