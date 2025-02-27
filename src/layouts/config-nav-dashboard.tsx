@@ -126,6 +126,12 @@ export const navData = [
     roles: ['ehf','uhf','lcco','slwg','threepl'],
   },
   {
+    title: 'Table Page',
+    path: '/table',
+    icon: icon('ic-lock'),
+    roles: ['ehf','uhf','lcco','slwg','threepl'],
+  },
+  {
     title: 'Report',
     path: '/report',
     icon: icon('ic-blog'),

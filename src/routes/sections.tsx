@@ -13,6 +13,7 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 export const HomePage = lazy(() => import('src/pages/home'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const VaccinePage = lazy(() => import('src/pages/vaccines'));
+export const TablePage = lazy(() => import('src/pages/table'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const UhfHome = lazy(() => import('src/pages/uhf/home'));
@@ -75,6 +76,7 @@ export function Router() {
         { path: 'user', element: <UserPage /> },
         // { path: 'products', element: <ProductsPage /> },
         { path: 'vaccines', element: <VaccinePage /> },
+        { path: 'table', element: <TablePage /> },
         // { path: 'blog', element: <BlogPage /> },
         { path: 'uhf-home', element: <UhfHome /> },
         { path: 'admin-home', element: <AdminHome /> },
