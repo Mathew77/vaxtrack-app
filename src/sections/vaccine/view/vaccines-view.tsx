@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import VaccinesIcon from '@mui/icons-material/Vaccines'; 
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { BcgVaccines } from '../bcg-vaccines';
@@ -28,6 +29,8 @@ import { PentaVaccine } from '../penta-vaccines';
 import { TdVaccine } from '../td-vaccines';
 import { IpvVaccine } from '../ipv-vaccines';
 import { PcvVaccine } from '../pcv-vaccines';
+import VaxTable, { type ActionMenuItem } from '../../../utils/VaxTablePage'; 
+import { MRT_ColumnDef, MRT_Cell } from 'material-react-table';
 
 interface VaccineLine {
   type: string;
@@ -115,6 +118,43 @@ export function VaccinesView() {
     }
   };
 
+  const columns: MRT_ColumnDef<VaccineLine>[] = [
+    {
+      accessorKey: 'type',
+      header: 'Vaccine Products',
+      Cell: ({ cell }: { cell: MRT_Cell<VaccineLine> }) => (
+        <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {vaccineOptions.find(v => v.value === cell.getValue<string>())?.label}
+        </Typography>
+      ),
+    },
+    {
+      accessorKey: 'data.physicalStock',
+      header: 'Physical Stock',
+    },
+    {
+      accessorKey: 'data.avgDailyConsumption',
+      header: 'Avg Daily Consumption',
+    },
+    {
+      accessorKey: 'data.dateCreated',
+      header: 'Date Created',
+    },
+  ];
+  
+  const actionMenuItems: ActionMenuItem<VaccineLine>[] = [
+    {
+      display: 'Edit',
+      icon: <EditIcon sx={{ color: '#1976D2' }} />,
+      handleClick: (row) => handleEdit(vaccineLines.indexOf(row)),
+    },
+    {
+      display: 'Delete',
+      icon: <DeleteIcon sx={{ color: '#d32f2f' }} />,
+      handleClick: (row) => handleDelete(vaccineLines.indexOf(row)),
+    },
+  ];
+
   return (
     <DashboardContent>
       <Container maxWidth="lg" sx={{ textAlign: 'left' }}>
@@ -147,100 +187,38 @@ export function VaccinesView() {
           </Box>
         )}
 
+        {!currentForm && vaccineLines.length === 0 && (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: 'calc(100vh - 250px)', 
+            flexGrow: 1 
+          }}>
+            <VaccinesIcon sx={{ fontSize: 60, color: '#1976D2', mb: 2 }} />
+            <Typography variant="h6" sx={{ color: '#666' }}>
+              Select a Vaccine to show data
+            </Typography>
+          </Box>
+        )}
+
         {vaccineLines.length > 0 && (
           <Box sx={{ mt: 4 }}>
-            <Paper 
-              sx={{ 
-                p: 2, 
-                borderRadius: 1,
-                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)'
+            <VaxTable
+              columns={columns}
+              data={vaccineLines}
+              tableHeader={''}
+              actionMenuItems={actionMenuItems}
+              headerStyles={{
+                backgroundColor: '#1976D2',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                py: 1,
+                px: 2,
               }}
-            >
-              <Box 
-                sx={{ 
-                  backgroundColor: '#1976D2', 
-                  color: 'white', 
-                  py: 1, 
-                  px: 2,
-                  borderRadius: 1,
-                  mb: 2
-                }}
-              >
-                <Grid container spacing={2}>
-                  <Grid item xs={3}>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Vaccine Products
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Physical Stock
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Avg Daily Consumption
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Date Created
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={1}>
-                    <Typography sx={{ fontSize: '1rem', fontWeight: 'bold', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      Actions
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-
-              {vaccineLines.map((lines, index) => (
-                <Box 
-                  key={index}
-                  sx={{
-                    borderBottom: index < vaccineLines.length - 1 ? '1px solid #e0e0e0' : 'none',
-                    py: 1,
-                    px: 2
-                  }}
-                >
-                  <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-                    <Grid item xs={3}>
-                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {vaccineOptions.find(v => v.value === lines.type)?.label}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {lines.data.physicalStock}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {lines.data.avgDailyConsumption}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {lines.data.dateCreated}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={1}>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <EditIcon 
-                          sx={{ color: '#1976D2', cursor: 'pointer' }}
-                          onClick={() => handleEdit(index)}
-                        />
-                        <DeleteIcon 
-                          sx={{ color: '#d32f2f', cursor: 'pointer' }}
-                          onClick={() => handleDelete(index)}
-                        />
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              ))}
-            </Paper>
+            />
           </Box>
         )}
         {vaccineLines.length > 0 && (
