@@ -90,19 +90,19 @@ export const navData = [
   },
   {
     title: 'LCCO & SLWG SETUP',
-    path: '/',
+    path: '/lcco-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
     title: '3PL & SCS SETUP',
-    path: '/',
+    path: '/threepl-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
     title: 'Roles & Permissions',
-    path: '/role',
+    path: '/role-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },

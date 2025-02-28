@@ -39,7 +39,7 @@ export default function CustomForm() {
   return (
     <Container maxWidth="md">
       <Typography variant="h4" gutterBottom align="center">
-        EHF SETUP
+        Role SETUP
       </Typography>
       <Formik
         initialValues={initialValues}
