@@ -84,7 +84,7 @@ export const navData = [
   
   {
     title: 'EHF & UHF Setup',
-    path: '/',
+    path: '/ehf-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
@@ -102,19 +102,19 @@ export const navData = [
   },
   {
     title: 'Roles & Permissions',
-    path: '/',
+    path: '/role',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
     title: 'User Management',
-    path: '/',
+    path: '/user-management',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
     title: 'Organisation Unit',
-    path: '/',
+    path: '/org-unit',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
