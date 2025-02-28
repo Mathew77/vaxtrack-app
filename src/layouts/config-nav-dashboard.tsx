@@ -83,19 +83,19 @@ export const navData = [
   },
   
   {
-    title: 'EHF & UHF Setup',
+    title: 'EHF Setup',
     path: '/ehf-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
-    title: 'LCCO & SLWG SETUP',
+    title: 'LCCO SETUP',
     path: '/lcco-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
-    title: '3PL & SCS SETUP',
+    title: '3PL SETUP',
     path: '/threepl-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
