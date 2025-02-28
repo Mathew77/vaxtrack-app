@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import VaccinesIcon from '@mui/icons-material/Vaccines'; 
 
 import { DashboardContent } from 'src/layouts/dashboard';
 import { BcgVaccines } from '../bcg-vaccines';
@@ -144,6 +145,22 @@ export function VaccinesView() {
               onAddToLine: handleAddToLine,
               initialData: currentForm.data
             })}
+          </Box>
+        )}
+
+        {!currentForm && vaccineLines.length === 0 && (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: 'calc(100vh - 250px)', 
+            flexGrow: 1 
+          }}>
+            <VaccinesIcon sx={{ fontSize: 60, color: '#1976D2', mb: 2 }} />
+            <Typography variant="h6" sx={{ color: '#666' }}>
+              Select a Vaccine to show data
+            </Typography>
           </Box>
         )}
 

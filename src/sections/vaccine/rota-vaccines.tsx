@@ -74,7 +74,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
       </Typography>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>Rota Vaccine</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Rota Antigen</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -262,35 +262,13 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                // disabled value=""
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                // disabled value=""
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="min-stock"
+                  id="mis-match"
                   // defaultValue="yes"
                   inputProps={{
-                    name: 'min-stock',
+                    name: 'mis-match',
                   }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -302,40 +280,26 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
+              <InputLabel>Mistmatch adjusted Value	</InputLabel>
+              <TextField fullWidth variant="outlined"   />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="max-stock"
-                  // defaultValue="max stock"
+                  id="recommendation"
+                  // defaultValue="yes"
                   inputProps={{
-                    name: 'max-stock',
+                    name: 'recommendation',
                   }}
                 >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="restock">Restock</MenuItem>
+                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
                 </Select>
               </FormControl>
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Closing Balance</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Post LMD DoS</InputLabel>
-              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
         </Grid>
