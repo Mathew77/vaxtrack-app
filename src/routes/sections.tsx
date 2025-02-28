@@ -23,7 +23,14 @@ export const EhfHome = lazy(() => import('src/pages/ehf/home'));
 export const LccoHome = lazy(() => import('src/pages/lcco/home'));
 export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
 export const ThreeplHome = lazy(() => import('src/pages/threepl/home'));
-export const Unauthorized = lazy(() => import('src/pages/unauthorized'))
+export const Unauthorized = lazy(() => import('src/pages/unauthorized'));
+//Admin conponents
+export const EhfSetup = lazy(() => import('src/pages/admin/ehf/ehf-setup'));
+export const UserManagement = lazy(() => import('src/pages/admin/users/user-setup'));
+export const RoleSetup = lazy(() => import('src/pages/admin/role/role-setup'));
+export const PermissionSetup = lazy(() => import('src/pages/admin/permission/permission-setup'));
+export const UhfSetup = lazy(() => import('src/pages/admin/uhf/uhf-setup'));
+export const LccoSetup = lazy(() => import('src/pages/admin/lcco/lcco-setup'));
 
 // ----------------------------------------------------------------------
 
@@ -84,6 +91,13 @@ export function Router() {
         { path: 'lcco-home', element: <LccoHome /> },
         { path: 'slwg-home', element: <SlwgHome /> },
         { path: 'threepl-home', element: <ThreeplHome /> },
+        //Admin route menu and components
+        { path: 'ehf-setup', element: <EhfSetup /> },
+        { path: 'uhf-setup', element: <UhfSetup /> },
+        { path: 'lcco-setup', element: <LccoSetup /> },
+        { path: 'user-management', element: <UserManagement /> },
+        { path: 'role-setup', element: <RoleSetup /> },
+        { path: 'permission-setup', element: <PermissionSetup /> },
       ],
     },
     {
