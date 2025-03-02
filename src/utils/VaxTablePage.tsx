@@ -84,7 +84,7 @@ import {
       renderTopToolbar: ({ table }: { table: MRT_TableInstance<TData> }) => (
         <Box >
           <Box sx={{ marginX: '20px', marginY: '10px' }} className="header-title">
-            <h4 className="card-title">{tableHeader}</h4>
+            <h3 className="card-title">{tableHeader}</h3>
           </Box>
           {extraComponents}
           <Box

@@ -17,10 +17,10 @@ interface FormData {
   ward_id: string;
   org_unit_id: string;
   ehf_name: string;
-  uhf_name: string;
+  threepl: string;
 }
 
-export default function EhfSetup() {
+export default function ThreePlSetup() {
 
   const initialValues: FormData = {
     State_id: '',
@@ -28,7 +28,7 @@ export default function EhfSetup() {
     ward_id: '',
     org_unit_id: '',
     ehf_name: '',
-    uhf_name: '',
+    threepl: ''
   };
 
   const [data, setData] = useState<FormData>(initialValues);
@@ -51,9 +51,9 @@ export default function EhfSetup() {
     temp.ehf_name = data.ehf_name 
         ? '' 
         : 'ehf name required';
-    temp.uhf_name = data.uhf_name 
+    temp.threepl = data.threepl 
         ? '' 
-        : 'uhf name required';
+        : '3pl required';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -70,18 +70,17 @@ export default function EhfSetup() {
   const handleSubmit = () => {
     if (validate()) {
       console.log('Form Data:', data);
-
     }
   };
 
   return (
     <Container sx={{ mt:2 }}>
       <Typography variant="h5" sx={{ mb: 4 }}>
-        UHF Setup
+        3PL Setup
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid item xs={6}>
+      <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="State_id" sx={{ mb: 1 }}>
               State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -207,25 +206,25 @@ export default function EhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="uhf_name" >
-              UHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            <Typography component="label" htmlFor="threepl" >
+              3PL Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="uhf_name"
-              name="uhf_name"
-              value={data.uhf_name}
+              id="threepl"
+              name="threepl"
+              value={data.threepl}
               onChange={handleChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
             >
               <MenuItem value="" disabled>
-                UHF name
+                Select 3pl Name
               </MenuItem>
             </Select>
-            {errors?.uhf_name !== '' && (
+            {errors?.threepl !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.uhf_name}
+                {errors?.threepl}
               </Typography>
             )}
           </FormControl>
