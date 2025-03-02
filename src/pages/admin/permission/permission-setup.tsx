@@ -1,82 +1,112 @@
-import React from "react";
-import { TextField, Button, Grid, Container, Typography } from "@mui/material";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+import { useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Grid,
+  Container,
+  MenuItem,
+  Select,
+  FormControl,
+} from '@mui/material';
 
-// Validation Schema
-const validationSchema = Yup.object({
-  State_id: Yup.string().required("Required"),
-  lga_id: Yup.string().required("Required"),
-  ward_id: Yup.string().required("Required"),
-  org_unit_id: Yup.string().required("Required"),
-  ehf_name: Yup.string().required("Required"),
-  uhf_ids: Yup.string().required("Required"),
-  Created_by: Yup.string().required("Required"),
-  Date_created: Yup.date().required("Required"),
-  Modified_by: Yup.string().required("Required"),
-  date_modified: Yup.date().required("Required"),
-});
+interface FormData {
+  name: string; 
+  description: string; 
+}
 
-// Initial Form Values
-const initialValues = {
-  State_id: "",
-  lga_id: "",
-  ward_id: "",
-  org_unit_id: "",
-  ehf_name: "",
-  uhf_ids: "",
-  Created_by: "",
-  Date_created: "",
-  Modified_by: "",
-  date_modified: "",
-};
+export default function PermissionSetup() {
+  const initialValues: FormData = {
+    name: '',
+    description: '',
+  };
 
-export default function CustomForm() {
-  const handleSubmit = (values: typeof initialValues) => {
-    console.log("Form Data:", values);
+  const [data, setData] = useState<FormData>(initialValues);
+  const [errors, setErrors] = useState<Partial<FormData>>({});
+
+  const validate = () => {
+    let temp = { ...errors };
+    temp.name = data.name 
+        ? '' 
+        : 'Name is required';
+    temp.description = data.description 
+        ? '' 
+        : 'Description is required';
+    
+    setErrors({ ...temp });
+    return Object.values(temp).every((x) => x === '');
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    if (validate()) {
+      console.log('Form Data:', data);
+      setData(initialValues);
+      setErrors({});
+    }
   };
 
   return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom align="center">
-        EHF SETUP
+    <Container sx={{ mt: 2 }}>
+      <Typography variant="h5" sx={{ mb: 4 }}>
+        Permission Setup
       </Typography>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ errors, touched }) => (
-          <Form>
-            <Grid container spacing={2}>
-              {Object.keys(initialValues).map((key, index) => (
-                <Grid item xs={12} sm={6} key={key}>
-                  <Field
-                    as={TextField}
-                    name={key}
-                    label={key.replace(/_/g, " ")}
-                    fullWidth
-                    variant="outlined"
-                    error={
-                      touched[key as keyof typeof initialValues] &&
-                      Boolean(errors[key as keyof typeof initialValues])
-                    }
-                    helperText={
-                      touched[key as keyof typeof initialValues] &&
-                      errors[key as keyof typeof initialValues]
-                    }
-                  />
-                </Grid>
-              ))}
-              <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary" fullWidth>
-                  Submit
-                </Button>
-              </Grid>
-            </Grid>
-          </Form>
-        )}
-      </Formik>
+
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Typography component="label" htmlFor="name">
+            Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="name"
+            name="name"
+            placeholder="Enter Name"
+            value={data.name}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.name && (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.name}</span>
+              )
+            }
+          />
+        </Grid>
+
+        <Grid item xs={6}>
+          <Typography component="label" htmlFor="description">
+            Description <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="description"
+            name="description"
+            placeholder="Enter Description"
+            value={data.description}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.description && (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.description}</span>
+              )
+            }
+          />
+        </Grid>
+      </Grid>
+
+      <Box sx={{ mt: 2 }}>
+        <Button variant="contained" color="primary" size="large" onChange={handleSubmit}>
+          Submit
+        </Button>
+      </Box>
     </Container>
   );
 }

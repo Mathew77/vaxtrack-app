@@ -30,12 +30,12 @@ export const TableView = () => (
       customRightButton
       customRightButtonText="Add Task"
       customRightButtonIcon={<AddIcon />}
-      customRightButtonCallBackFunction={() => alert('I just clicked the button')}
+      customRightButtonCallBackFunction={() => alert('I just clicked the buttonss')}
       actionMenuItems={actionMenuItems}
       buttonStyles={{ backgroundColor: 'black' }}
       customRightButtonStyles={{ backgroundColor: 'black', borderRadius: 4, padding: '5px'}}
       headerStyles={{
-        backgroundColor: 'blue', 
+        backgroundColor: '#1976D2', 
         color: 'white',
         fontSize: '16px', 
       }}

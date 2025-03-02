@@ -10,7 +10,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
   const [formData, setFormData] = useState<RotaVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -41,7 +41,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
     setFormData({
       physicalStock: '',
       avgDailyConsumption: '',
-      dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+      // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       expiryDate: '',
       batchNo: '',
       vvm2: '',
@@ -102,7 +102,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Date Created</InputLabel>
               <TextField
@@ -114,7 +114,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

@@ -11,7 +11,7 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine, initial
   const [formData, setFormData] = useState<BopvVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -42,7 +42,7 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine, initial
     setFormData({
       physicalStock: '',
       avgDailyConsumption: '',
-      dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+      // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       expiryDate: '',
       batchNo: '',
       vvm2: '',
@@ -104,7 +104,7 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine, initial
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Date Created</InputLabel>
               <TextField
@@ -116,7 +116,7 @@ export const  BopvVaccine: React.FC<BopvVaccineProps>  = ({ onAddToLine, initial
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

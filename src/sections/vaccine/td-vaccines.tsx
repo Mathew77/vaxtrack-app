@@ -10,7 +10,7 @@ export const  TdVaccine: React.FC<TdVaccineProps>  = ({ onAddToLine, initialData
   const [formData, setFormData] = useState<TdVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+    // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -41,7 +41,7 @@ export const  TdVaccine: React.FC<TdVaccineProps>  = ({ onAddToLine, initialData
     setFormData({
       physicalStock: '',
       avgDailyConsumption: '',
-      dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+      // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       expiryDate: '',
       batchNo: '',
       vvm2: '',
@@ -103,7 +103,7 @@ export const  TdVaccine: React.FC<TdVaccineProps>  = ({ onAddToLine, initialData
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Date Created</InputLabel>
               <TextField
@@ -115,7 +115,7 @@ export const  TdVaccine: React.FC<TdVaccineProps>  = ({ onAddToLine, initialData
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -252,58 +252,58 @@ export const  TdVaccine: React.FC<TdVaccineProps>  = ({ onAddToLine, initialData
       </Box>
 
       <Box sx={sectionBorderStyle}>
-              <Typography variant="subtitle1" sx={{ mb: 2 }}>Td Diluent</Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={6}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <InputLabel>Physical Stock Balance</InputLabel>
-                    <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
-                  </Box>
-                </Grid>
-      
-                <Grid item xs={6}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
-                    <FormControl fullWidth>
-                      <Select
-                        id="mis-match"
-                        // defaultValue="yes"
-                        inputProps={{
-                          name: 'mis-match',
-                        }}
-                      >
-                        <MenuItem value="yes">Yes</MenuItem>
-                        <MenuItem value="no">No</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Grid>
-      
-                <Grid item xs={6}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <InputLabel>Mistmatch adjusted Value	</InputLabel>
-                    <TextField fullWidth variant="outlined"   />
-                  </Box>
-                </Grid>
-      
-                <Grid item xs={6}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-                    <FormControl fullWidth>
-                      <Select
-                        id="recommendation"
-                        // defaultValue="yes"
-                        inputProps={{
-                          name: 'recommendation',
-                        }}
-                      >
-                        <MenuItem value="restock">Restock</MenuItem>
-                        <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Grid>
-              </Grid>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Td Diluent</Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Physical Stock Balance</InputLabel>
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="mis-match"
+                  // defaultValue="yes"
+                  inputProps={{
+                    name: 'mis-match',
+                  }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Mistmatch adjusted Value	</InputLabel>
+              <TextField fullWidth variant="outlined"   />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="recommendation"
+                  // defaultValue="yes"
+                  inputProps={{
+                    name: 'recommendation',
+                  }}
+                >
+                  <MenuItem value="restock">Restock</MenuItem>
+                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Grid>
+        </Grid>
       </Box>
 
       <Box sx={sectionBorderStyle}>

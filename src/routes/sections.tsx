@@ -31,6 +31,12 @@ export const RoleSetup = lazy(() => import('src/pages/admin/role/role-setup'));
 export const PermissionSetup = lazy(() => import('src/pages/admin/permission/permission-setup'));
 export const UhfSetup = lazy(() => import('src/pages/admin/uhf/uhf-setup'));
 export const LccoSetup = lazy(() => import('src/pages/admin/lcco/lcco-setup'));
+export const ThreePlSetup = lazy(() => import('src/pages/admin/threepl/threepl-setup'));
+export const ScsSetup = lazy(() => import('src/pages/admin/scs/scs-setup'));
+export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
+export const OrgUnitSetup = lazy(() => import('src/pages/admin/orgUnit/orgUnit-setup'));
+
+
 
 // ----------------------------------------------------------------------
 
@@ -95,9 +101,13 @@ export function Router() {
         { path: 'ehf-setup', element: <EhfSetup /> },
         { path: 'uhf-setup', element: <UhfSetup /> },
         { path: 'lcco-setup', element: <LccoSetup /> },
+        { path: 'threepl-setup', element: <ThreePlSetup /> },
         { path: 'user-management', element: <UserManagement /> },
         { path: 'role-setup', element: <RoleSetup /> },
         { path: 'permission-setup', element: <PermissionSetup /> },
+        { path: 'scs-setup', element: <ScsSetup /> },
+        { path: 'community-setup', element: <CommunityVaccine /> },
+        { path: 'org-unit', element: <OrgUnitSetup /> },
       ],
     },
     {

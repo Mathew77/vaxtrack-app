@@ -19,7 +19,7 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine , in
   const [formData, setFormData] = useState<MeaslesVaccineData>({
       physicalStock: '',
       avgDailyConsumption: '',
-      dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+      // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       expiryDate: '',
       batchNo: '',
       vvm2: '',
@@ -50,7 +50,7 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine , in
       setFormData({
         physicalStock: '',
         avgDailyConsumption: '',
-        dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+        // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
         expiryDate: '',
         batchNo: '',
         vvm2: '',
@@ -112,7 +112,7 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine , in
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Date Created</InputLabel>
               <TextField
@@ -124,7 +124,7 @@ export const MeaslesVaccine: React.FC<MeaslesVaccineProps> = ({ onAddToLine , in
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

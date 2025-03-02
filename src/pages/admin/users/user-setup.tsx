@@ -1,196 +1,405 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
-  TextField,
-  Button,
-  Grid,
-  Container,
-  Typography,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Chip,
-} from "@mui/material";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
-import axios, { AxiosResponse } from "axios";
+ Box,
+ Button,
+ TextField,
+ Typography,
+ Grid,
+ Container,
+ MenuItem,
+ Select,
+ FormControl,
+} from '@mui/material';
+import DualListBox from 'react-dual-listbox';
+import 'react-dual-listbox/lib/react-dual-listbox.css';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+
+interface FormData {
+  firstName: string;
+  lastName: string;
+  userName: string;
+  passWord: string;
+  confirmPassword: string;
+  roleId: string;
+  phoneNumber: string;
+  email: string;
+  permission: string[]
+}
+
+interface Role {
+  id: string | number; 
+  name: string;
+}
 
 
-// Validation Schema
-const validationSchema = Yup.object({
-  first_name: Yup.string().required("Required"),
-  last_name: Yup.string().required("Required"),
-  username: Yup.string().required("Required"),
-  password: Yup.string().min(6, "Password too short").required("Required"),
-  role_id: Yup.string().required("Required"),
-  permissions_ids: Yup.array().min(1, "At least one permission is required"),
-  org_unit_id: Yup.string().required("Required"),
-  phone_number: Yup.string()
-    .matches(/^[0-9]+$/, "Only numbers allowed")
-    .min(10, "Must be at least 10 digits")
-    .required("Required"),
-  email_address: Yup.string().email("Invalid email").required("Required"),
-  created_by: Yup.string().required("Required"),
-  date_created: Yup.date().required("Required"),
-  modified_by: Yup.string().required("Required"),
-  date_modified: Yup.date().required("Required"),
-});
+export default function UserSetup() {
 
-// Initial Form Values
-const initialValues = {
-  first_name: "",
-  last_name: "",
-  username: "",
-  password: "",
-  role_id: "",
-  permissions_ids: [], // Changed to array for multi-select
-  org_unit_id: "",
-  phone_number: "",
-  email_address: "",
-  created_by: "",
-  date_created: "",
-  modified_by: "",
-  date_modified: "",
+
+ const initialValues: FormData = {
+   firstName: '',
+   lastName: '',
+   userName: '',
+   passWord: '',
+   confirmPassword: '',
+   roleId: '',
+   phoneNumber: '',
+  email: '',
+  permission: []
+  //  roleId: '',
+ };
+
+
+
+
+ const [data, setData] = useState<FormData>(initialValues);
+ const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+ const [roles, setRoles] = useState<Role[]>([]);
+ const [permission, setPermission] = useState([]);
+
+
+ const permisionOptions = [
+  { value: '1', label: 'Permission 1' },
+  { value: '2', label: 'Permission 2' },
+  { value: '3', label: 'Permission 3' },
+];
+
+const handlePermission = (selected: string[]) => {
+  setData((prev) => ({
+    ...prev,
+    permission: selected,
+  }));
 };
 
-export default function CustomForm() {
-  const [roles, setRoles] = useState<{ value: string; label: string }[]>([]);
-  const [permissions, setPermissions] = useState<{ value: string; label: string }[]>([]);
 
-  // Fetch data from API
-  useEffect(() => {
-    axios
-      .get<{ id: string; name: string }[]>("https://api.example.com/roles")
-      .then((response: AxiosResponse<{ id: string; name: string }[]>) => {
-        setRoles(
-          response.data.map((role: { id: string; name: string }) => ({
-            value: role.id,
-            label: role.name,
-          }))
-        );
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error) {
-          console.error("Error fetching roles:", error.message);
-        } else {
-          console.error("Unknown error fetching roles:", error);
-        }
-      });
-  
-    axios
-      .get<{ id: string; name: string }[]>("https://api.example.com/permissions")
-      .then((response: AxiosResponse<{ id: string; name: string }[]>) => {
-        setPermissions(
-          response.data.map((perm: { id: string; name: string }) => ({
-            value: perm.id,
-            label: perm.name,
-          }))
-        );
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error) {
-          console.error("Error fetching permissions:", error.message);
-        } else {
-          console.error("Unknown error fetching permissions:", error);
-        }
-      });
-  }, []);
-    
+ const validate = () => {
+   let temp = { ...errors };
+   temp.firstName = data.firstName
+       ? ''
+       : 'First name is required';
+   temp.lastName = data.lastName
+       ? ''
+       : 'Last name is required';
+   temp.userName = data.userName
+       ? ''
+       : 'Username is required';
+   temp.passWord = data.passWord
+       ? ''
+       : 'Password required';
+  temp.confirmPassword = data.confirmPassword
+       ? ''
+       : 'Confirm password required';
+   temp.roleId = data.roleId
+       ? ''
+       : 'Role required';
+  temp.phoneNumber = data.phoneNumber
+       ? ''
+       : 'Phone Number is required';
+  temp.email = data.email
+       ? ''
+       : 'Email required';
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  temp.permission = data.permission.length > 0 ? '' : 'UHF required';
+      
+   setErrors({ ...temp });
+   return Object.values(temp).every((x) => x === '');
+ };
+
+
+ const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+   const { name, value } = event.target;
+   setData((prev) => ({
+     ...prev,
+     [name]: value,
+   }));
+ };
+
+
+ useEffect(() => {
+  FetchRoles();
+}, []);
+
+  const FetchRoles = async () => {
     try {
-      const response = await axios.post("https://api.example.com/register", values);
-      console.log("Form Submitted Successfully:", response.data);
+      const response = await fetch('your-api-endpoint/permission');
+      const roleData = await response.json();
+      setRoles(roleData); 
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error('Error fetching roles:', error);
     }
   };
 
-  return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom align="center">
-        User Registration Form
-      </Typography>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ errors, touched, values, setFieldValue }) => (
-          <Form>
-            <Grid container spacing={2}>
-              {Object.keys(initialValues).map((key) => (
-                <Grid item xs={12} sm={6} key={key}>
-                  {key === "role_id" ? (
-                    // Single Select Dropdown for Role
-                    <Field
-                      as={TextField}
-                      name={key}
-                      label="Role"
-                      select
-                      fullWidth
-                      variant="outlined"
-                      error={touched.role_id && Boolean(errors.role_id)}
-                      helperText={touched.role_id && errors.role_id}
-                    >
-                      {roles.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Field>
-                  ) : key === "permissions_ids" ? (
-                    // Multi-Select Dropdown for Permissions
-                    <FormControl fullWidth>
-                      <InputLabel>Permissions</InputLabel>
-                      <Select
-                        multiple
-                        value={values.permissions_ids}
-                        onChange={(event) => setFieldValue("permissions_ids", event.target.value)}
-                        renderValue={(selected) => (
-                          <div>
-                            {(selected as string[]).map((value) => (
-                              <Chip key={value} label={permissions.find((perm) => perm.value === value)?.label} style={{ margin: 2 }} />
-                            ))}
-                          </div>
-                        )}
-                      >
-                        {permissions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {touched.permissions_ids && errors.permissions_ids && (
-                        <Typography color="error" variant="caption">
-                          {errors.permissions_ids}
-                        </Typography>
-                      )}
-                    </FormControl>
-                  ) : (
-                    // Text Input Fields
-                    <Field
-                      as={TextField}
-                      name={key}
-                      label={key.replace(/_/g, " ")}
-                      type={key.includes("password") ? "password" : "text"}
-                      fullWidth
-                      variant="outlined"
-                      error={touched[key as keyof typeof initialValues] && Boolean(errors[key as keyof typeof initialValues])}
-                      helperText={touched[key as keyof typeof initialValues] && errors[key as keyof typeof initialValues]}
-                    />
-                  )}
-                </Grid>
-              ))}
-              <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary" fullWidth>
-                  Submit
-                </Button>
-              </Grid>
-            </Grid>
-          </Form>
-        )}
-      </Formik>
-    </Container>
-  );
+  const handleChangePermission = (e: any) => {
+    const value = e.target.value
+    setPermission(typeof value === 'string' ? value.split(',') : value)
+    // setData()
+}
+
+  const GetPermission = (e: any) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+    const stateId = e.target.value;
+    async function getCharacters() {
+                console.log("response");
+         
+    }
+    getCharacters();
+
+}
+
+ const handleSubmit = () => {
+   if (validate()) {
+     console.log('Form Data:', data);
+     setData(initialValues);
+     setErrors({});
+   }
+ };
+
+
+ return (
+   <Container sx={{ mt:2 }}>
+     <Typography variant="h5" sx={{ mb: 4 }}>
+       User Management Setup
+     </Typography>
+
+
+     <Grid container spacing={2}>
+       <Grid item xs={6}>
+         <Typography component="label" htmlFor="firstName" >
+           First Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+           fullWidth
+           id="firstName"
+           name="firstName"
+           placeholder="First Name"
+           value={data.firstName}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.firstName !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.firstName}</span>
+             ) : ''
+           }
+         />
+       </Grid>
+
+
+       <Grid item xs={6}>
+         <Typography component="label" htmlFor="lastName" >
+           Last Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+           fullWidth
+           id="lastName"
+           name="lastName"
+           placeholder="Last Name"
+           value={data.lastName}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.lastName !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lastName}</span>
+             ) : ''
+           }
+         />
+       </Grid>
+
+
+       <Grid item xs={6}>
+         <Typography component="label" htmlFor="userName" >
+           Username <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+           fullWidth
+           id="lccouserName_name"
+           name="userName"
+           placeholder="Userame"
+           value={data.userName}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.userName !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.userName}</span>
+             ) : ''
+           }
+         />
+       </Grid>
+
+       <Grid item xs={6}>
+         <Typography component="label" htmlFor="passWord" >
+           Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+            type='password'
+           fullWidth
+           id="passWord"
+           name="passWord"
+           placeholder="Password"
+           value={data.passWord}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.passWord !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.passWord}</span>
+             ) : ''
+           }
+         />
+        </Grid>
+
+        <Grid item xs={6}>
+         <Typography component="label" htmlFor="confirmPassword" >
+           Confirm Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+            type='password'
+           fullWidth
+           id="confirmPassword"
+           name="confirmPassword"
+           placeholder="confirm Password"
+           value={data.confirmPassword}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.confirmPassword !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.confirmPassword}</span>
+             ) : ''
+           }
+         />
+        </Grid>
+
+
+        <Grid item xs={6}>
+          <Typography component="label" htmlFor="roleId" >
+            Role <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <Select
+            fullWidth
+            id="roleId"
+            name="roleId"
+            value={data.roleId}
+            onChange={GetPermission}
+            variant="outlined"
+            displayEmpty
+          >
+            <MenuItem value="">Select Role</MenuItem>
+            {roles.map((role) => (
+              <MenuItem key={`${role.name}-${role.id}`} value={role.id}>
+                {role.name}
+              </MenuItem>
+            ))}
+          </Select>
+          {errors?.roleId !== '' && (
+            <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+              {errors?.roleId}
+            </Typography>
+          )}
+        </Grid>
+
+        <Grid item xs={6}>
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="orgUnit" >
+              Org Unit ID <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="orgUnit"
+              name="orgUnit"
+              // value={data.orgUnit} 
+              onChange={handleChangePermission}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined" 
+            >
+              <MenuItem value="">Select Org Unit</MenuItem>
+              {/* {orgUnit.map((each) => (
+                <MenuItem key={`${each.name}-${each.id}`} value={each.id}>
+                  {each.name} // Fixed from role.name to each.name
+                </MenuItem>
+              ))} */}
+            </Select>
+            {errors?.roleId !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.roleId}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={6}>
+         <Typography component="label" htmlFor="phoneNumber" >
+           Phone Number <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+           fullWidth
+           id="phoneNumber"
+           name="phoneNumber"
+           placeholder="Phone Number"
+           value={data.phoneNumber}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.phoneNumber !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.phoneNumber}</span>
+             ) : ''
+           }
+         />
+       </Grid>
+
+       <Grid item xs={6}>
+         <Typography component="label" htmlFor="email" >
+           Email Address <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+         </Typography>
+         <TextField
+           fullWidth
+           id="email"
+           name="email"
+           placeholder="Email Adress"
+           value={data.email}
+           onChange={handleChange}
+           variant="outlined"
+           helperText={
+             errors?.email !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.email}</span>
+             ) : ''
+           }
+         />
+       </Grid>
+
+        <Grid item xs={12}> 
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" sx={{ mb: 1 }}>
+              Permissions <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <DualListBox
+              canFilter
+              options={permisionOptions}
+              onChange={handlePermission}
+              selected={data.permission}
+              className="dual-listbox-custom"
+              alignActions="middle" 
+              icons={{
+                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
+                moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
+              }}
+            />
+            {errors?.permission !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.permission}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+            
+      </Grid>
+
+     <Box sx={{ mt: 2, mb: 2 }}>
+       <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+         Submit
+       </Button>
+     </Box>
+   </Container>
+ );
 }

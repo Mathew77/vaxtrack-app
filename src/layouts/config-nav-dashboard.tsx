@@ -95,14 +95,32 @@ export const navData = [
     roles: ['admin'],
   },
   {
+    title: 'UHF SETUP',
+    path: '/uhf-setup',
+    icon: icon('ic-user'),
+    roles: ['admin'],
+  },
+  {
     title: '3PL SETUP',
     path: '/threepl-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
-    title: 'Roles & Permissions',
+    title: 'Role',
     path: '/role-setup',
+    icon: icon('ic-user'),
+    roles: ['admin'],
+  },
+  {
+    title: 'Permission',
+    path: '/permission-setup',
+    icon: icon('ic-user'),
+    roles: ['admin'],
+  },
+  {
+    title: 'SCS',
+    path: '/scs-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
@@ -124,6 +142,12 @@ export const navData = [
     path: '/vaccines',
     icon: icon('ic-lock'),
     roles: ['ehf','uhf','lcco','slwg','threepl'],
+  },
+  {
+    title: 'Community Vaccine Conveyor',
+    path: '/community-setup',
+    icon: icon('ic-user'),
+    roles: ['ehf', 'uhf'],
   },
   {
     title: 'Table Page',
