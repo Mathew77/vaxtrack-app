@@ -11,6 +11,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   stateId: string;
@@ -20,6 +21,8 @@ interface FormData {
 
 
 export default function ScsSetup() {
+
+  const navigate = useNavigate()
 
     const initialValues: FormData = {
         stateId: '',
@@ -138,13 +141,12 @@ export default function ScsSetup() {
 
       </Grid>
 
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-start' }}>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          sx={{ backgroundColor: '#1976d2', color: '#fff' }} 
-        >
+      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
+        </Button>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcco-scs-setup')}>
+          Back
         </Button>
       </Box>
     </Container>

@@ -10,6 +10,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   State_id: string;
@@ -20,7 +21,9 @@ interface FormData {
   uhf_name: string;
 }
 
-export default function EhfSetup() {
+export default function UhfSetup() {
+
+  const navigate = useNavigate()
 
   const initialValues: FormData = {
     State_id: '',
@@ -186,23 +189,29 @@ export default function EhfSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="ehf_name">
-            EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C'}}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="ehf_name"
-            name="ehf_name"
-            placeholder="EHF Name"
-            value={data.ehf_name}
-            onChange={handleChange}
-            variant="outlined"
-            helperText={
-              errors?.ehf_name !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.ehf_name}</span>
-              ) : ''
-            }
-          />
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="ehf_name" >
+              EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="ehf_name"
+              name="ehf_name"
+              value={data.ehf_name}
+              onChange={handleChange}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined"
+            >
+              <MenuItem value="" disabled>
+                EHF name
+              </MenuItem>
+            </Select>
+            {errors?.ehf_name !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.ehf_name}
+              </Typography>
+            )}
+          </FormControl>
         </Grid>
 
         <Grid item xs={6}>
@@ -233,9 +242,12 @@ export default function EhfSetup() {
 
       </Grid>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
+        </Button>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-setup')}>
+          Back
         </Button>
       </Box>
     </Container>
