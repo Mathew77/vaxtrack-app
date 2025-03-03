@@ -73,6 +73,7 @@ export const navData = [
       { title: '3PL Dashboard 2', path: '/threepl-home/dashboard2', roles: ['threepl', 'admin'] },
     ],
   },
+  
  
   //Adminsitratve  Menu
   {
@@ -81,55 +82,66 @@ export const navData = [
     icon: icon('ic-analytics'),
     roles: ['admin'],
   },
-  
-  {
-    title: 'EHF Setup',
-    path: '/ehf-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'LCCO SETUP',
-    path: '/lcco-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'UHF SETUP',
-    path: '/uhf-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: '3PL SETUP',
-    path: '/threepl-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'Role',
-    path: '/role-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'Permission',
-    path: '/permission-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'SCS',
-    path: '/scs-setup',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
   {
     title: 'User Management',
     path: '/user-management',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
+  {
+    title: 'EHF & UHF Setup',
+    path: '/ehf-uhf-setup',
+    icon: icon('ic-health'),
+    roles: ['admin', 'lcco', 'slwg'],
+  },
+  {
+    title: 'LCCO & SCS Setup',
+    path: '/lcco-scs-setup',
+    icon: icon('ic-user'),
+    roles: ['admin', 'slwg'],
+  },
+  {
+    title: 'Roles & Permissions Setup',
+    path: '/roles-permissions-setup',
+    icon: icon('ic-user'),
+    roles: ['admin'],
+  },
+  // {
+  //   title: 'LCCO SETUP',
+  //   path: '/lcco-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'UHF SETUP',
+  //   path: '/uhf-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  {
+    title: '3PL SETUP',
+    path: '/threepl-setup',
+    icon: icon('ic-logistic'),
+    roles: ['slwg'],
+  },
+  // {
+  //   title: 'Role',
+  //   path: '/role-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'Permission',
+  //   path: '/permission-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'SCS',
+  //   path: '/scs-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
   {
     title: 'Organisation Unit',
     path: '/org-unit',
@@ -141,7 +153,7 @@ export const navData = [
     title: 'Vaccine Request Form',
     path: '/vaccines',
     icon: icon('ic-lock'),
-    roles: ['ehf','uhf','lcco','slwg','threepl'],
+    roles: ['ehf','uhf','lcco','threepl'],
   },
   {
     title: 'Community Vaccine Conveyor',
@@ -149,16 +161,16 @@ export const navData = [
     icon: icon('ic-user'),
     roles: ['ehf', 'uhf'],
   },
-  {
-    title: 'Table Page',
-    path: '/table',
-    icon: icon('ic-lock'),
-    roles: ['ehf','uhf','lcco','slwg','threepl'],
-  },
+  // {
+  //   title: 'Table Page',
+  //   path: '/table',
+  //   icon: icon('ic-lock'),
+  //   roles: ['ehf','uhf','lcco','slwg','threepl'],
+  // },
   {
     title: 'Report',
     path: '/report',
     icon: icon('ic-blog'),
-    roles: ['ehf','uhf','lcco','slwg','threepl'],
+    roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
   },
 ];

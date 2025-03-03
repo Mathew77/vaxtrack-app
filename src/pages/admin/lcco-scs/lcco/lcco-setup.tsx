@@ -10,6 +10,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   State_id: string;
@@ -20,6 +21,8 @@ interface FormData {
 }
 
 export default function LccoSetup() {
+
+  const navigate = useNavigate()
 
   const initialValues: FormData = {
     State_id: '',
@@ -188,9 +191,12 @@ export default function LccoSetup() {
         </Grid>
       </Grid>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
+        </Button>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcco-scs-setup')}>
+          Back
         </Button>
       </Box>
     </Container>

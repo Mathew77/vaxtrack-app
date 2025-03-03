@@ -25,16 +25,19 @@ export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
 export const ThreeplHome = lazy(() => import('src/pages/threepl/home'));
 export const Unauthorized = lazy(() => import('src/pages/unauthorized'));
 //Admin conponents
-export const EhfSetup = lazy(() => import('src/pages/admin/ehf/ehf-setup'));
+export const EhfSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf/ehf-setup'));
 export const UserManagement = lazy(() => import('src/pages/admin/users/user-setup'));
-export const RoleSetup = lazy(() => import('src/pages/admin/role/role-setup'));
-export const PermissionSetup = lazy(() => import('src/pages/admin/permission/permission-setup'));
-export const UhfSetup = lazy(() => import('src/pages/admin/uhf/uhf-setup'));
-export const LccoSetup = lazy(() => import('src/pages/admin/lcco/lcco-setup'));
+export const RoleSetup = lazy(() => import('src/pages/admin/roles-permissions/role/role-setup'));
+export const PermissionSetup = lazy(() => import('src/pages/admin/roles-permissions/permission/permission-setup'));
+export const UhfSetup = lazy(() => import('src/pages/admin/ehf-uhf/uhf/uhf-setup'));
+export const LccoSetup = lazy(() => import('src/pages/admin/lcco-scs/lcco/lcco-setup'));
 export const ThreePlSetup = lazy(() => import('src/pages/admin/threepl/threepl-setup'));
-export const ScsSetup = lazy(() => import('src/pages/admin/scs/scs-setup'));
+export const ScsSetup = lazy(() => import('src/pages/admin/lcco-scs/scs/scs-setup'));
 export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
 export const OrgUnitSetup = lazy(() => import('src/pages/admin/orgUnit/orgUnit-setup'));
+export const EhfUHFSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf-uhf-setup'));
+export const LccoScsSetup = lazy(() => import('src/pages/admin/lcco-scs/lcco-scs-setup'));
+export const RolesPermissionsSetup = lazy(() => import('src/pages/admin/roles-permissions/roles-permissions-setup'));
 
 
 
@@ -108,6 +111,9 @@ export function Router() {
         { path: 'scs-setup', element: <ScsSetup /> },
         { path: 'community-setup', element: <CommunityVaccine /> },
         { path: 'org-unit', element: <OrgUnitSetup /> },
+        { path: 'ehf-uhf-setup', element: <EhfUHFSetup /> },
+        { path: 'lcco-scs-setup', element: <LccoScsSetup /> },
+        { path: 'roles-permissions-setup', element: <RolesPermissionsSetup /> },
       ],
     },
     {

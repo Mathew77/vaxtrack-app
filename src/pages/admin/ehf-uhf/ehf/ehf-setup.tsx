@@ -13,11 +13,11 @@ import {
 } from '@mui/material';
 import DualListBox from 'react-dual-listbox';
 import 'react-dual-listbox/lib/react-dual-listbox.css';
-// import '@fortawesome/fontawesome-free/css/all.min.css'; 
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import { useNavigate } from 'react-router-dom';
 interface FormData {
   State_id: string;
   lga_id: string;
@@ -28,6 +28,8 @@ interface FormData {
 }
 
 export default function EhfSetup() {
+
+  const navigate = useNavigate()
 
   const initialValues: FormData = {
     State_id: '',
@@ -250,9 +252,12 @@ export default function EhfSetup() {
         </Grid>
       </Grid>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
+        </Button>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-setup')}>
+          Back
         </Button>
       </Box>
     </Container>

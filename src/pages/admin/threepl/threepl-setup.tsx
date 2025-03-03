@@ -10,14 +10,20 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
+import DualListBox from 'react-dual-listbox';
+import 'react-dual-listbox/lib/react-dual-listbox.css';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
 interface FormData {
   State_id: string;
   lga_id: string;
   ward_id: string;
   org_unit_id: string;
-  ehf_name: string;
   threepl: string;
+  ehf_name: string[];
 }
 
 export default function ThreePlSetup() {
@@ -27,12 +33,12 @@ export default function ThreePlSetup() {
     lga_id: '',
     ward_id: '',
     org_unit_id: '',
-    ehf_name: '',
-    threepl: ''
+    threepl: '',
+    ehf_name: [],
   };
 
   const [data, setData] = useState<FormData>(initialValues);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
   const validate = () => {
     let temp = { ...errors };
@@ -48,16 +54,20 @@ export default function ThreePlSetup() {
     temp.org_unit_id = data.org_unit_id 
         ? '' 
         : 'Org unit required';
-    temp.ehf_name = data.ehf_name 
-        ? '' 
-        : 'ehf name required';
     temp.threepl = data.threepl 
         ? '' 
         : '3pl required';
+    temp.ehf_name = data.ehf_name.length > 0 ? '' : 'EHF required';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
   };
+
+  const ehfOptions = [
+    { value: '1', label: 'EHF 1' },
+    { value: '2', label: 'EHF 2' },
+    { value: '3', label: 'EHF 3' },
+  ];
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
@@ -67,6 +77,12 @@ export default function ThreePlSetup() {
     }));
   };
 
+  const handleChangeEHF = (selected: string[]) => {
+    setData((prev) => ({
+      ...prev,
+      ehf_name: selected,
+    }));
+  };
   const handleSubmit = () => {
     if (validate()) {
       console.log('Form Data:', data);
@@ -185,26 +201,6 @@ export default function ThreePlSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="ehf_name">
-            EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C'}}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="ehf_name"
-            name="ehf_name"
-            placeholder="EHF Name"
-            value={data.ehf_name}
-            onChange={handleChange}
-            variant="outlined"
-            helperText={
-              errors?.ehf_name !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.ehf_name}</span>
-              ) : ''
-            }
-          />
-        </Grid>
-
-        <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="threepl" >
               3PL Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -225,6 +221,33 @@ export default function ThreePlSetup() {
             {errors?.threepl !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
                 {errors?.threepl}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}> 
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" sx={{ mb: 1 }}>
+              EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+              <DualListBox
+                canFilter
+                options={ehfOptions}
+                onChange={handleChangeEHF}
+                selected={data.ehf_name}
+                className="dual-listbox-custom"
+                alignActions="middle" 
+                icons={{
+                  moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
+                  moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                  moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                  moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
+                }}
+              />
+            {errors?.ehf_name !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.ehf_name}
               </Typography>
             )}
           </FormControl>
