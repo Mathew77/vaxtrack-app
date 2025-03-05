@@ -1,11 +1,12 @@
 // user-api.ts
-import api from '../../api';
+import http from 'src/utils/interceptor';
+import {url} from '../../api'
 import { User } from './user-types';
 import axios from 'axios';
 
 // Fetch all users
 export const fetchUsers = async (): Promise<User[]> => {
-  const response = await api.get('/user/');
+  const response = await http.get('/user/');
   console.log(response.data.data)
   return response.data;
 };
