@@ -39,7 +39,8 @@ export const EhfUHFSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf-uhf-se
 export const LccoScsSetup = lazy(() => import('src/pages/admin/lcco-scs/lcco-scs-setup'));
 export const RolesPermissionsSetup = lazy(() => import('src/pages/admin/roles-permissions/roles-permissions-setup'));
 
-
+//Test page
+//export const TestPage = lazy(() => import('src/pages/test-page'));
 
 // ----------------------------------------------------------------------
 
@@ -114,6 +115,8 @@ export function Router() {
         { path: 'ehf-uhf-setup', element: <EhfUHFSetup /> },
         { path: 'lcco-scs-setup', element: <LccoScsSetup /> },
         { path: 'roles-permissions-setup', element: <RolesPermissionsSetup /> },
+        //TestPage
+        //{ path: 'test-page', element: <TestPage /> },
       ],
     },
     {
