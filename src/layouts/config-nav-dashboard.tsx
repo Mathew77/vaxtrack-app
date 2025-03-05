@@ -103,7 +103,7 @@ export const navData = [
   {
     title: 'Roles & Permissions Setup',
     path: '/roles-permissions-setup',
-    icon: icon('ic-user'),
+    icon: icon('ic-access'),
     roles: ['admin'],
   },
   // {
@@ -145,7 +145,7 @@ export const navData = [
   {
     title: 'Organisation Unit',
     path: '/org-unit',
-    icon: icon('ic-user'),
+    icon: icon('ic-org'),
     roles: ['admin'],
   },
   //Generic Menu 
@@ -158,7 +158,7 @@ export const navData = [
   {
     title: 'Community Vaccine Conveyor',
     path: '/community-setup',
-    icon: icon('ic-user'),
+    icon: icon('ic-community'),
     roles: ['ehf', 'uhf'],
   },
   // {
