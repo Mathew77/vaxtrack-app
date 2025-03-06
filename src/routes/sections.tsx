@@ -41,7 +41,7 @@ export const RolesPermissionsSetup = lazy(() => import('src/pages/admin/roles-pe
 export const UserSetup = lazy(() => import('src/pages/admin/users/user-setup'));
 
 //Test page
-//export const TestPage = lazy(() => import('src/pages/test-page'));
+export const TestPage = lazy(() => import('src/pages/test-page'));
 
 // ----------------------------------------------------------------------
 
@@ -118,7 +118,7 @@ export function Router() {
         { path: 'roles-permissions-setup', element: <RolesPermissionsSetup /> },
         { path: 'user-setup', element: <UserSetup /> },
         //TestPage
-        //{ path: 'test-page', element: <TestPage /> },
+        { path: 'test-page', element: <TestPage /> },
       ],
     },
     {
