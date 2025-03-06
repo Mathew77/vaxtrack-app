@@ -10,8 +10,13 @@ import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined
 import { useNavigate } from 'react-router-dom';
 
 interface TableRow {
-  name: string;
-  description: string;
+  username: string;
+  full_name: string;
+  email: string;
+  address: string;
+  phone_number: string;
+  role: string;
+  org_unit: string;
 }
 
 interface TabPanelProps {
@@ -50,7 +55,7 @@ function a11yProps(index: number) {
   };
 }
 
-const RolesPermissionsSetup: React.FC = () => {
+const UserManagement: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -65,13 +70,38 @@ const RolesPermissionsSetup: React.FC = () => {
   const columns = useMemo(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'username',
+        header: 'User Name',
         size: 100,
       },
       {
-        accessorKey: 'description',
-        header: 'Description',
+        accessorKey: 'full_name',
+        header: 'Full Name',
+        size: 200,
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email',
+        size: 200,
+      },
+      {
+        accessorKey: 'address',
+        header: 'Address',
+        size: 200,
+      },
+      {
+        accessorKey: 'phone_number',
+        header: 'Phone Number',
+        size: 200,
+      },
+      {
+        accessorKey: 'role',
+        header: 'Role',
+        size: 200,
+      },
+      {
+        accessorKey: 'org_unit',
+        header: 'Org. Unit',
         size: 200,
       },
     ],
@@ -105,8 +135,8 @@ const RolesPermissionsSetup: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="Roles " {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="Permissions " {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="User Management" {...a11yProps(0)} />
+        
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -114,12 +144,12 @@ const RolesPermissionsSetup: React.FC = () => {
           <VaxTable
             columns={columns}
             data={rolesList}
-            tableHeader="Roles List"
+            tableHeader="User List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Roles"
-            customRightButtonCallBackFunction={() => navigate('/role-setup')}
+            customRightButtonText="Add User"
+            customRightButtonCallBackFunction={() => navigate('/user-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -130,28 +160,8 @@ const RolesPermissionsSetup: React.FC = () => {
         </Box>
       </TabPanel>
 
-      <TabPanel value={value} index={1}>
-        <Box>
-          <VaxTable
-            columns={columns}
-            data={permissionsList}
-            tableHeader="Permissions List"
-            customRightButton
-            customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Permissions"
-            customRightButtonCallBackFunction={() => navigate('/permission-setup')}
-            actionMenuItems={actionMenuItems}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
-          />
-        </Box>
-      </TabPanel>
     </>
   );
 };
 
-export default RolesPermissionsSetup;
+export default UserManagement;

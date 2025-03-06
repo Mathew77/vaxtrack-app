@@ -26,7 +26,7 @@ export const ThreeplHome = lazy(() => import('src/pages/threepl/home'));
 export const Unauthorized = lazy(() => import('src/pages/unauthorized'));
 //Admin conponents
 export const EhfSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf/ehf-setup'));
-export const UserManagement = lazy(() => import('src/pages/admin/users/user-setup'));
+export const UserManagement = lazy(() => import('src/pages/admin/users/index'));
 export const RoleSetup = lazy(() => import('src/pages/admin/roles-permissions/role/role-setup'));
 export const PermissionSetup = lazy(() => import('src/pages/admin/roles-permissions/permission/permission-setup'));
 export const UhfSetup = lazy(() => import('src/pages/admin/ehf-uhf/uhf/uhf-setup'));
@@ -38,6 +38,7 @@ export const OrgUnitSetup = lazy(() => import('src/pages/admin/orgUnit/orgUnit-s
 export const EhfUHFSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf-uhf-setup'));
 export const LccoScsSetup = lazy(() => import('src/pages/admin/lcco-scs/lcco-scs-setup'));
 export const RolesPermissionsSetup = lazy(() => import('src/pages/admin/roles-permissions/roles-permissions-setup'));
+export const UserSetup = lazy(() => import('src/pages/admin/users/user-setup'));
 
 //Test page
 //export const TestPage = lazy(() => import('src/pages/test-page'));
@@ -115,6 +116,7 @@ export function Router() {
         { path: 'ehf-uhf-setup', element: <EhfUHFSetup /> },
         { path: 'lcco-scs-setup', element: <LccoScsSetup /> },
         { path: 'roles-permissions-setup', element: <RolesPermissionsSetup /> },
+        { path: 'user-setup', element: <UserSetup /> },
         //TestPage
         //{ path: 'test-page', element: <TestPage /> },
       ],
