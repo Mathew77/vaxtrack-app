@@ -1,19 +1,30 @@
-// CreateUserForm.tsx
 import React, { useState } from 'react';
-import { useCreateUser } from './../../hooks/apis/user/user-hook';
+import { useCreateUser } from './../../hooks/apis/user/user-hooks';
 
 const CreateUserForm: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const createUserMutation = useCreateUser();
+  const { mutate: createUser, isPending, error, isSuccess } = useCreateUser();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createUserMutation.mutate({ name, email });
+    createUser(
+      { name, email },
+      {
+        onSuccess: () => {
+          setName('');
+          setEmail('');
+        },
+        onError: (err) => {
+          console.error('Create user failed:', err);
+        },
+      }
+    );
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <h2>Create User</h2>
       <input
         type="text"
         value={name}
@@ -28,10 +39,11 @@ const CreateUserForm: React.FC = () => {
         placeholder="Email"
         required
       />
-      <button type="submit" disabled={createUserMutation.isPending}>
-        {createUserMutation.isPending ? 'Creating...' : 'Create User'}
+      <button type="submit" disabled={isPending}>
+        {isPending ? 'Creating...' : 'Create User'}
       </button>
-      {createUserMutation.error && <div>Error: {createUserMutation.error.message}</div>}
+      {isSuccess && <div style={{ color: 'green' }}>User creation Succesful!</div>}
+      {error && <div style={{ color: 'red' }}>Error: {error.message}</div>}
     </form>
   );
 };
