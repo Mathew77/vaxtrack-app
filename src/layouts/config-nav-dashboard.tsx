@@ -1,5 +1,7 @@
 //import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
+import StackedLineChartIcon from '@mui/icons-material/StackedLineChart';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 // ----------------------------------------------------------------------
 
@@ -91,13 +93,13 @@ export const navData = [
   {
     title: 'EHF & UHF Setup',
     path: '/ehf-uhf-setup',
-    icon: icon('ic-health'),
+    icon: icon('ic-facility'),
     roles: ['admin', 'lcco', 'slwg'],
   },
   {
     title: 'LCCO & SCS Setup',
     path: '/lcco-scs-setup',
-    icon: icon('ic-user'),
+    icon: icon('ic-local'),
     roles: ['admin', 'slwg'],
   },
   {
@@ -152,7 +154,7 @@ export const navData = [
   {
     title: 'Vaccine Request Form',
     path: '/vaccines',
-    icon: icon('ic-lock'),
+    icon: <MenuBookIcon />,
     roles: ['ehf','uhf','lcco','threepl'],
   },
   {
@@ -170,7 +172,7 @@ export const navData = [
   {
     title: 'Report',
     path: '/report',
-    icon: icon('ic-blog'),
+    icon: <StackedLineChartIcon />,
     roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
   },
   //test-page
@@ -178,6 +180,6 @@ export const navData = [
     title: 'Test-Page',
     path: '/test-page',
     icon: icon('ic-blog'),
-    roles: ['ehf','uhf','lcco','slwg','threepl'],
+    roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
   },
 ];
