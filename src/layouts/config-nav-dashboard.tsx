@@ -97,7 +97,7 @@ export const navData = [
     roles: ['admin', 'lcco', 'slwg'],
   },
   {
-    title: 'LCCO & SCS Setup',
+    title: 'LCS & SCS Setup',
     path: '/lcco-scs-setup',
     icon: icon('ic-local'),
     roles: ['admin', 'slwg'],
@@ -152,16 +152,16 @@ export const navData = [
   },
   //Generic Menu 
   {
-    title: 'Vaccine Request Form',
+    title: 'Vaccine Request ',
     path: '/vaccines',
     icon: <MenuBookIcon />,
-    roles: ['ehf','uhf','lcco','threepl'],
+    roles: ['ehf','scs','lcs','threepl', 'slwg'],
   },
   {
-    title: 'Community Vaccine Conveyor',
+    title: 'Vaccine Allocation',
     path: '/community-setup',
     icon: icon('ic-community'),
-    roles: ['ehf', 'uhf'],
+    roles: ['ehf', 'uhf','conveyor'],
   },
   // {
   //   title: 'Table Page',
@@ -176,10 +176,10 @@ export const navData = [
     roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
   },
   //test-page
-  {
-    title: 'Test-Page',
-    path: '/test-page',
-    icon: icon('ic-blog'),
-    roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
-  },
+  // {
+  //   title: 'Test-Page',
+  //   path: '/test-page',
+  //   icon: icon('ic-blog'),
+  //   roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
+  // },
 ];

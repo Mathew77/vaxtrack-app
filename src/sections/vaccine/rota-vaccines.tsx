@@ -142,7 +142,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">VVM 2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2?</InputLabel>
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
@@ -251,7 +251,7 @@ export const  RotaVaccine: React.FC<RotaVaccineProps>  = ({ onAddToLine, initial
       </Box>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>Dropper per 20 doses/vial</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Dropper</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

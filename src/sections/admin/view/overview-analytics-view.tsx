@@ -15,7 +15,7 @@ export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-       
+       <p>We have a filter here</p>
       </Typography>
 
       <Grid container spacing={3}>
@@ -41,7 +41,7 @@ export function OverviewAnalyticsView() {
 
           <Grid item xs={12} sm={6} md={2.4}>
             <AnalyticsWidgetSummary
-              title="Total LCCO"
+              title="Total LCS"
               percent={1.2}
               total={982312}
               color="primary"
@@ -51,7 +51,7 @@ export function OverviewAnalyticsView() {
 
           <Grid item xs={12} sm={6} md={2.4}>
             <AnalyticsWidgetSummary
-              title="Total SLWG"
+              title="Total SCS"
               percent={2.8}
               total={1723315}
               color="warning"
@@ -61,7 +61,7 @@ export function OverviewAnalyticsView() {
 
           <Grid item xs={12} sm={6} md={2.4}>
             <AnalyticsWidgetSummary
-              title="Total 3PL & SCS"
+              title="Total 3PL"
               percent={3.6}
               total={234}
               color="error"

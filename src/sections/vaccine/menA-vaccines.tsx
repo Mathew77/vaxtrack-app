@@ -143,7 +143,7 @@ export const  MenAVaccine: React.FC<MenVaccinesProps>  = ({ onAddToLine, initial
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">VVM 2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2?</InputLabel>
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
@@ -356,7 +356,7 @@ export const  MenAVaccine: React.FC<MenVaccinesProps>  = ({ onAddToLine, initial
       </Box>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe per Vaccine Dose</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

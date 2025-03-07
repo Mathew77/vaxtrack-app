@@ -9,7 +9,7 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
   export const useFetchUsers = () => {
     return useQuery<User[], Error>({
       queryKey: ['users'],
-      queryFn: () => apiHelper.getResource<User[]>(`${BASE_URL}/users`),
+      queryFn: () => apiHelper.getResource<User[]>(`${url}/user/`),
       // enabled: false, 
     });
   };

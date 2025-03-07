@@ -30,14 +30,14 @@ export const UserManagement = lazy(() => import('src/pages/admin/users/index'));
 export const RoleSetup = lazy(() => import('src/pages/admin/roles-permissions/role/role-setup'));
 export const PermissionSetup = lazy(() => import('src/pages/admin/roles-permissions/permission/permission-setup'));
 export const UhfSetup = lazy(() => import('src/pages/admin/ehf-uhf/uhf/uhf-setup'));
-export const LccoSetup = lazy(() => import('src/pages/admin/lcco-scs/lcco/lcco-setup'));
+export const LccoSetup = lazy(() => import('src/pages/admin/lcs-scs/lcs/lcco-setup'));
 export const ThreePlSetup = lazy(() => import('src/pages/admin/threepl/threepl-setup'));
-export const ScsSetup = lazy(() => import('src/pages/admin/lcco-scs/scs/scs-setup'));
+export const ScsSetup = lazy(() => import('src/pages/admin/lcs-scs/scs/scs-setup'));
 export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
 export const OrgUnitSetup = lazy(() => import('src/pages/admin/orgUnit/orgUnit-setup'));
-export const EhfUHFSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf-uhf-setup'));
-export const LccoScsSetup = lazy(() => import('src/pages/admin/lcco-scs/lcco-scs-setup'));
-export const RolesPermissionsSetup = lazy(() => import('src/pages/admin/roles-permissions/roles-permissions-setup'));
+export const EhfUHFSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf-uhf-page'));
+export const LccoScsSetup = lazy(() => import('src/pages/admin/lcs-scs/lcco-scs-page'));
+export const RolesPermissionsSetup = lazy(() => import('src/pages/admin/roles-permissions/roles-permissions-page'));
 export const UserSetup = lazy(() => import('src/pages/admin/users/user-setup'));
 
 //Test page

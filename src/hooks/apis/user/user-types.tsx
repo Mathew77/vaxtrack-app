@@ -4,5 +4,6 @@ export interface User {
     name: string;
     email: string;
     // Add other relevant properties
+
   }
   

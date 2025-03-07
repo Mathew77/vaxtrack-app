@@ -74,7 +74,7 @@ export default function LccoSetup() {
   return (
     <Container sx={{ mt:2 }}>
       <Typography variant="h5" sx={{ mb: 4 }}>
-        LCCO Setup
+        LCS Setup
       </Typography>
 
       <Grid container spacing={2}>

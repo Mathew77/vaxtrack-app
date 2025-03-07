@@ -18,7 +18,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}
+}  
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -50,7 +50,7 @@ function a11yProps(index: number) {
   };
 }
 
-const EhfUHFSetup: React.FC = () => {
+const LccoScsSetup: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -59,8 +59,8 @@ const EhfUHFSetup: React.FC = () => {
     setValue(newValue);
   };
 
-  const ehfList: TableRow[] = [];
-  const uhfList: TableRow[] = [];
+  const lccoList: TableRow[] = [];
+  const scsList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
@@ -105,21 +105,21 @@ const EhfUHFSetup: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="EHF Setup" {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="UHF Setup" {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="LCS " {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="SCS " {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
             columns={columns}
-            data={ehfList}
-            tableHeader="EHF Setup"
+            data={lccoList}
+            tableHeader="LCS LIST"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add EHF"
-            customRightButtonCallBackFunction={() => navigate('/ehf-setup')}
+            customRightButtonText="Add LCCO"
+            customRightButtonCallBackFunction={() => navigate('/lcco-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -134,13 +134,13 @@ const EhfUHFSetup: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={uhfList}
-            tableHeader="UHF Setup"
+            data={scsList}
+            tableHeader="SCS LIST"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add UHF"
-            customRightButtonCallBackFunction={() => navigate('/uhf-setup')}
+            customRightButtonText="Add SCS"
+            customRightButtonCallBackFunction={() => navigate('/scs-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -154,4 +154,4 @@ const EhfUHFSetup: React.FC = () => {
   );
 };
 
-export default EhfUHFSetup;
+export default LccoScsSetup;
