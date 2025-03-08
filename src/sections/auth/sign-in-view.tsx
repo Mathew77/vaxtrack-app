@@ -28,7 +28,7 @@ export function SignInView() {
   }, []);
 
   const handleSignIn = useCallback(() => {
-    const allowedRoles = ['admin', 'ehf', 'uhf', 'lcco', 'slwg', 'threepl'];
+    const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'slwg', 'threepl', 'conveyor'];
     const userRole = allowedRoles.find((role) => username.toLowerCase().includes(role));
 
 

@@ -8,6 +8,7 @@ import WelcomeCard  from '../welcome';
 import VaccineCard  from '../statistics';
 import TransactionHistory from '../transaction-history';
 import Statistics2  from '../statistics2';
+import Filter from 'src/utils/Filter';
 
 
 // ----------------------------------------------------------------------
@@ -15,6 +16,7 @@ import Statistics2  from '../statistics2';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
+      <Filter />
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         {/* Hi, SLWG */}
       </Typography>

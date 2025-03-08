@@ -14,33 +14,46 @@ import EditIcon from '@mui/icons-material/Edit';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { format } from 'date-fns';
+import { BcgVaccines } from 'src/sections/vaccine/bcg-vaccines';
+import { BopvVaccine } from 'src/sections/vaccine/bopv-vaccines';
+import { ColdChainStatus } from 'src/sections/vaccine/cold-chain';
+import { HepbVaccine } from 'src/sections/vaccine/hepb-vaccines';
+import { HpvVaccine } from 'src/sections/vaccine/hpv-vaccines';
+import { IpvVaccine } from 'src/sections/vaccine/ipv-vaccines';
+import { MeaslesVaccine } from 'src/sections/vaccine/measles-vaccines';
+import { MenAVaccine } from 'src/sections/vaccine/menA-vaccines';
+import { PcvVaccine } from 'src/sections/vaccine/pcv-vaccines';
+import { PentaVaccine } from 'src/sections/vaccine/penta-vaccines';
+import { RotaVaccine } from 'src/sections/vaccine/rota-vaccines';
+import { TdVaccine } from 'src/sections/vaccine/td-vaccines';
+import { YfVaccine } from 'src/sections/vaccine/yf-vaccines';
 
-import { BcgVaccines } from '../bcg-vaccines';
-import { MeaslesVaccine } from '../measles-vaccines';
-import { YfVaccine } from '../yf-vaccines';
-import { MenAVaccine } from '../menA-vaccines';
-import { RotaVaccine } from '../rota-vaccines';
-import { HpvVaccine } from '../hpv-vaccines';
-import { HepbVaccine } from '../hepb-vaccines';
-import { BopvVaccine } from '../bopv-vaccines';
-import { PentaVaccine } from '../penta-vaccines';
-import { TdVaccine } from '../td-vaccines';
-import { IpvVaccine } from '../ipv-vaccines';
-import { PcvVaccine } from '../pcv-vaccines';
-import { ColdChainStatus } from '../cold-chain';
+// import { BcgVaccines } from '../bcg-vaccines';
+// import { MeaslesVaccine } from '../measles-vaccines';
+// import { YfVaccine } from '../yf-vaccines';
+// import { MenAVaccine } from '../menA-vaccines';
+// import { RotaVaccine } from '../rota-vaccines';
+// import { HpvVaccine } from '../hpv-vaccines';
+// import { HepbVaccine } from '../hepb-vaccines';
+// import { BopvVaccine } from '../bopv-vaccines';
+// import { PentaVaccine } from '../penta-vaccines';
+// import { TdVaccine } from '../td-vaccines';
+// import { IpvVaccine } from '../ipv-vaccines';
+// import { PcvVaccine } from '../pcv-vaccines';
+// import { ColdChainStatus } from '../cold-chain';
 
-interface VaccineLine {
+interface ConveyorLine {
   type: string;
   data: any;
 }
 
-interface VaccineOption {
+interface ConveyorOption {
   value: string;
   label: string;
   component: (props: any) => JSX.Element;
 }
 
-const vaccineOptions: VaccineOption[] = [
+const vaccineOptions: ConveyorOption[] = [
   { value: 'bcg', label: 'BCG Vaccine', component: (props: any) => <BcgVaccines {...props} /> },
   { value: 'measles', label: 'Measles Vaccine', component: (props: any) => <MeaslesVaccine {...props} /> },
   { value: 'yf', label: 'YF Vaccine', component: (props: any) => <YfVaccine {...props} /> },
@@ -58,11 +71,11 @@ const vaccineOptions: VaccineOption[] = [
 
 export function VaccinesView() {
   const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
-  const [availableVaccines, setAvailableVaccines] = useState<VaccineOption[]>(vaccineOptions);
-  const [vaccineLines, setVaccineLines] = useState<VaccineLine[]>([]);
+  const [availableVaccines, setAvailableVaccines] = useState<ConveyorOption[]>(vaccineOptions);
+  const [vaccineLines, setVaccineLines] = useState<ConveyorLine[]>([]);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
 
-  const sortVaccinesByOriginalOrder = (vaccines: VaccineOption[]): VaccineOption[] => {
+  const sortVaccinesByOriginalOrder = (vaccines: ConveyorOption[]): ConveyorOption[] => {
     return [...vaccines].sort((a, b) => {
       const indexA = vaccineOptions.findIndex((v) => v.value === a.value);
       const indexB = vaccineOptions.findIndex((v) => v.value === b.value);
@@ -117,16 +130,16 @@ export function VaccinesView() {
     }
   };
 
-  // const handleSubmit = () => {
-  //   const currentDate = format(new Date(), "dd/MM/yyyy");
-  //   const newVaccineLines = Object.entries(formDataCollection).map(([type, data]) => ({
-  //     type,
-  //     data: { ...data, dateCreated: currentDate },
-  //   }));
-  //   setVaccineLines((prev) => [...newVaccineLines, ...prev]);
-  //   setFormDataCollection({});
-  //   setAvailableVaccines([]);
-  // };
+  const handleSubmit = () => {
+    const currentDate = format(new Date(), "dd/MM/yyyy");
+    const newVaccineLines = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      data: { ...data, dateCreated: currentDate },
+    }));
+    setVaccineLines((prev) => [...newVaccineLines, ...prev]);
+    setFormDataCollection({});
+    setAvailableVaccines([]);
+  };
 
   const isLastTab = selectedTab === availableVaccines[availableVaccines.length - 1]?.value;
 
@@ -270,13 +283,13 @@ export function VaccinesView() {
               </Box>
             )}
 
-            {/* {isLastTab && Object.keys(formDataCollection).length > 0 && (
+            {isLastTab && Object.keys(formDataCollection).length > 0 && (
               <Box sx={{ mt: 2 }}>
                 <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
                   Submit
                 </Button>
               </Box>
-            )} */}
+            )}
           </Grid>
         </Grid>
       </Container>

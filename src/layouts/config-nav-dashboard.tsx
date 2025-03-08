@@ -14,7 +14,7 @@ export const navData = [
   //   title: 'Dashboard',
   //   path: '/home',
   //   icon: icon('ic-analytics'),
-  //   roles: ['admin', 'ehf', 'uhf', 'lcco', 'slwg', 'threepl'],
+  //   roles: ['admin', 'ehf', 'uhf', 'lcs', 'slwg', 'threepl'],
   // },
 //EHF Menu
   {
@@ -40,15 +40,15 @@ export const navData = [
     ],
   },
   
-  //LCCO Menu
+  //LCS Menu
   {
     title: 'Dashboard',
-    path: '/lcco-home',
+    path: '/lcs-home',
     icon: icon('ic-analytics'),
-    roles: ['lcco'],
+    roles: ['lcs'],
     children: [
-      { title: 'LCCO Dashboard 1', path: '/lcco-home/dashboard1', roles: ['lcco', 'admin'] },
-      { title: 'LCCO Dashboard 2', path: '/lcco-home/dashboard2', roles: ['lcco', 'admin'] },
+      { title: 'LCS Dashboard 1', path: '/lcs-home/dashboard1', roles: ['lcs', 'admin'] },
+      { title: 'LCS Dashboard 2', path: '/lcs-home/dashboard2', roles: ['lcs', 'admin'] },
     ],
   },
   
@@ -75,6 +75,18 @@ export const navData = [
       { title: '3PL Dashboard 2', path: '/threepl-home/dashboard2', roles: ['threepl', 'admin'] },
     ],
   },
+
+  //Conveyor Menu
+  {
+    title: 'Dashboard',
+    path: '/conveyor-home',
+    icon: icon('ic-user'),
+    roles: ['conveyor'],
+    children: [
+      { title: 'Conveyor Dashboard 1', path: '/conveyor-home/dashboard1', roles: ['conveyor', 'admin'] },
+      { title: 'Conveyor Dashboard 2', path: '/conveyor-home/dashboard2', roles: ['conveyor', 'admin'] },
+    ],
+  },
   
  
   //Adminsitratve  Menu
@@ -86,7 +98,7 @@ export const navData = [
   },
   {
     title: 'User Management',
-    path: '/user-management',
+    path: '/user-management-setup',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
@@ -94,11 +106,11 @@ export const navData = [
     title: 'EHF & UHF Setup',
     path: '/ehf-uhf-setup',
     icon: icon('ic-facility'),
-    roles: ['admin', 'lcco', 'slwg'],
+    roles: ['admin', 'lcs', 'slwg'],
   },
   {
-    title: 'LCCO & SCS Setup',
-    path: '/lcco-scs-setup',
+    title: 'LCS & SCS Setup',
+    path: '/lcs-scs-setup',
     icon: icon('ic-local'),
     roles: ['admin', 'slwg'],
   },
@@ -109,8 +121,8 @@ export const navData = [
     roles: ['admin'],
   },
   // {
-  //   title: 'LCCO SETUP',
-  //   path: '/lcco-setup',
+  //   title: 'LCS SETUP',
+  //   path: '/lcs-setup',
   //   icon: icon('ic-user'),
   //   roles: ['admin'],
   // },
@@ -152,10 +164,16 @@ export const navData = [
   },
   //Generic Menu 
   {
-    title: 'Vaccine Request Form',
+    title: 'Vaccine Request',
     path: '/vaccines',
     icon: <MenuBookIcon />,
-    roles: ['ehf','uhf','lcco','threepl'],
+    roles: ['ehf'],
+  },
+  {
+    title: 'Vaccine Allocation',
+    path: '/conveyor',
+    icon: <MenuBookIcon />,
+    roles: ['conveyor', 'ehf', 'uhf'],
   },
   {
     title: 'Community Vaccine Conveyor',
@@ -167,19 +185,19 @@ export const navData = [
   //   title: 'Table Page',
   //   path: '/table',
   //   icon: icon('ic-lock'),
-  //   roles: ['ehf','uhf','lcco','slwg','threepl'],
+  //   roles: ['ehf','uhf','lcs','slwg','threepl'],
   // },
   {
     title: 'Report',
     path: '/report',
     icon: <StackedLineChartIcon />,
-    roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
+    roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
   },
   //test-page
   {
     title: 'Test-Page',
     path: '/test-page',
     icon: icon('ic-blog'),
-    roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
+    roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
   },
 ];

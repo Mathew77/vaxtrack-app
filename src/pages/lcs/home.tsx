@@ -1,5 +1,5 @@
 
-import { OverviewAnalyticsView } from 'src/sections/lcco/view';
+import { OverviewAnalyticsView } from 'src/sections/lcs/view';
 
 // ----------------------------------------------------------------------
 

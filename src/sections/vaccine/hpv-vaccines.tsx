@@ -1,16 +1,26 @@
 import React, { useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { HpvVaccineData, HpvVaccineProps } from "src/types/vaccines/hpv";
-import { format } from 'date-fns'
+import { HpvVaccineData } from "src/types/vaccines/hpv"; 
 import { sectionBorderStyle } from "src/utils/constants";
 
+interface ExtendedHpvVaccineProps {
+  initialData?: HpvVaccineData;
+  vaccineOptions: { value: string; label: string; component: (props: any) => JSX.Element }[];
+  currentIndex: number;
+  onNext: (data: HpvVaccineData, currentIndex: number) => void;
+  onBack?: (currentIndex: number) => void;
+}
 
-export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialData }) => {
-
+export const HpvVaccine: React.FC<ExtendedHpvVaccineProps> = ({
+  initialData,
+  vaccineOptions,
+  currentIndex,
+  onNext,
+  onBack,
+}) => {
   const [formData, setFormData] = useState<HpvVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -25,23 +35,20 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
     ...(initialData || {}),
   });
 
-
   const handleInputChange = (field: keyof HpvVaccineData) => (
-      event: React.ChangeEvent<HTMLInputElement | { value: string | number }>
-    ) => {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: event.target.value,
-      }));
-    };
+    event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: event.target.value as string,
+    }));
+  };
 
-  const handleAddToLine = () => {
-    onAddToLine(formData);
-
+  const handleNextClick = () => {
+    onNext(formData, currentIndex);
     setFormData({
       physicalStock: '',
       avgDailyConsumption: '',
-      // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
       expiryDate: '',
       batchNo: '',
       vvm2: '',
@@ -55,6 +62,16 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
       postLmdDos: '',
     });
   };
+
+  const handleBackClick = () => {
+    if (onBack && currentIndex > 0) {
+      onBack(currentIndex); 
+    }
+  };
+
+  const isLastVaccine = currentIndex === vaccineOptions.length - 1;
+  const isFirstVaccine = currentIndex === 0;
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Typography
@@ -79,42 +96,27 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                variant="outlined"
                 placeholder="Physical Stock Balance"
                 value={formData.physicalStock}
-                onChange={handleInputChange('physicalStock')}     
-                />
+                onChange={handleInputChange('physicalStock')}
+              />
             </Box>
           </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Average Daily Consumption</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
-                defaultValue="" 
-                value={formData.avgDailyConsumption}
-                onChange={handleInputChange('avgDailyConsumption')}
-                />
-            </Box>
-          </Grid>
-
-          {/* <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Date Created</InputLabel>
               <TextField
                 fullWidth
-                type="datetime-local"
                 variant="outlined"
-                value={formData.dateCreated}
-                disabled
-                InputLabelProps={{ shrink: true }}
+                value={formData.avgDailyConsumption}
+                onChange={handleInputChange('avgDailyConsumption')}
               />
             </Box>
-          </Grid> */}
+          </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -123,6 +125,8 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
                 fullWidth
                 type="date"
                 variant="outlined"
+                value={formData.expiryDate}
+                onChange={handleInputChange('expiryDate')}
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
@@ -133,20 +137,21 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <InputLabel>Batch No for Earliest Expiry Dates</InputLabel>
               <TextField
                 fullWidth
-                type="date"
                 variant="outlined"
-                InputLabelProps={{ shrink: true }}
+                value={formData.batchNo}
+                onChange={handleInputChange('batchNo')}
               />
             </Box>
           </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">VVM 2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
-                  // defaultValue="yes"
+                  value={formData.vvm2}
+                  // onChange={handleInputChange('vvm2')}
                   inputProps={{
                     name: 'vvm2',
                   }}
@@ -161,21 +166,24 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Number Immunized</InputLabel>
-              <TextField fullWidth variant="outlined" />
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.numberImmunized}
+                onChange={handleInputChange('numberImmunized')}
+              />
             </Box>
           </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Days of Stock</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField fullWidth variant="outlined" />
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.daysOfStock}
+                onChange={handleInputChange('daysOfStock')}
+              />
             </Box>
           </Grid>
 
@@ -185,7 +193,8 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <FormControl fullWidth>
                 <Select
                   id="min-stock"
-                  // defaultValue="yes"
+                  value={formData.belowMinStock}
+                  // onChange={handleInputChange('belowMinStock')}
                   inputProps={{
                     name: 'min-stock',
                   }}
@@ -203,7 +212,8 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <FormControl fullWidth>
                 <Select
                   id="max-stock"
-                  // defaultValue="max stock"
+                  value={formData.aboveMaxStock}
+                  // onChange={handleInputChange('aboveMaxStock')}
                   inputProps={{
                     name: 'max-stock',
                   }}
@@ -221,7 +231,8 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <TextField
                 fullWidth
                 variant="outlined"
-                // defaultValue=""
+                value={formData.qtyReceived}
+                onChange={handleInputChange('qtyReceived')}
               />
             </Box>
           </Grid>
@@ -232,7 +243,8 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <TextField
                 fullWidth
                 variant="outlined"
-                // disabled value=""
+                value={formData.closingBalance}
+                onChange={handleInputChange('closingBalance')}
               />
             </Box>
           </Grid>
@@ -243,184 +255,14 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <TextField
                 fullWidth
                 variant="outlined"
-                // disabled value=""
+                value={formData.postLmdDos}
+                onChange={handleInputChange('postLmdDos')}
               />
             </Box>
           </Grid>
         </Grid>
       </Box>
 
-        {/* <Box sx={sectionBorderStyle}>
-              <Typography variant="subtitle1" sx={{ mb: 2 }}>MenA Antigen</Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Physical Stock Balance</InputLabel>
-                  <TextField 
-                    fullWidth 
-                    variant="outlined" 
-                    placeholder="Physical Stock Balance"
-                    value={formData.physicalStock}
-                    onChange={handleInputChange('physicalStock')}
-                    />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Average Daily Consumption</InputLabel>
-                  <TextField 
-                    fullWidth 
-                    variant="outlined" 
-                    defaultValue="" 
-                    value={formData.avgDailyConsumption}
-                    onChange={handleInputChange('avgDailyConsumption')}
-                    />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Date Created</InputLabel>
-                  <TextField
-                    fullWidth
-                    type="datetime-local"
-                    variant="outlined"
-                    value={formData.dateCreated}
-                    disabled
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Earliest Expiry Dates</InputLabel>
-                  <TextField
-                    fullWidth
-                    type="date"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Batch No for Earliest Expiry Dates</InputLabel>
-                  <TextField
-                    fullWidth
-                    type="date"
-                    variant="outlined"
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel htmlFor="vvm2">VVM 2</InputLabel>
-                  <FormControl fullWidth>
-                    <Select
-                      id="vvm2"
-                      inputProps={{
-                        name: 'vvm2',
-                      }}
-                    >
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Number Immunized</InputLabel>
-                  <TextField fullWidth variant="outlined" />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Days of Stock</InputLabel>
-                  <TextField fullWidth variant="outlined" />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Adj for ADD</InputLabel>
-                  <TextField fullWidth variant="outlined" />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
-                  <FormControl fullWidth>
-                    <Select
-                      id="min-stock"
-                      inputProps={{
-                        name: 'min-stock',
-                      }}
-                    >
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
-                  <FormControl fullWidth>
-                    <Select
-                      id="max-stock"
-                      inputProps={{
-                        name: 'max-stock',
-                      }}
-                    >
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Qty Received</InputLabel>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                  />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Closing Balance</InputLabel>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                  />
-                </Box>
-              </Grid>
-    
-              <Grid item xs={6}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <InputLabel>Post LMD DoS</InputLabel>
-                  <TextField
-                    fullWidth
-                    variant="outlined"
-                  />
-                </Box>
-              </Grid>
-            </Grid>
-          </Box> */}
-      
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>HPV Diluent</Typography>
         <Grid container spacing={3}>
@@ -437,7 +279,6 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <FormControl fullWidth>
                 <Select
                   id="mis-match"
-                  // defaultValue="yes"
                   inputProps={{
                     name: 'mis-match',
                   }}
@@ -451,28 +292,11 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Mistmatch adjusted Value	</InputLabel>
-              <TextField fullWidth variant="outlined"   />
+              <InputLabel>Mistmatch adjusted Value</InputLabel>
+              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="recommendation"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'recommendation',
-                  }}
-                >
-                  <MenuItem value="restock">Restock</MenuItem>
-                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
@@ -492,7 +316,6 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <FormControl fullWidth>
                 <Select
                   id="mis-match"
-                  // defaultValue="yes"
                   inputProps={{
                     name: 'mis-match',
                   }}
@@ -506,33 +329,16 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Mistmatch adjusted Value	</InputLabel>
-              <TextField fullWidth variant="outlined"   />
+              <InputLabel>Mistmatch adjusted Value</InputLabel>
+              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="recommendation"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'recommendation',
-                  }}
-                >
-                  <MenuItem value="restock">Restock</MenuItem>
-                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe per Vaccine Dose</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -547,7 +353,6 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
               <FormControl fullWidth>
                 <Select
                   id="mis-match"
-                  // defaultValue="yes"
                   inputProps={{
                     name: 'mis-match',
                   }}
@@ -561,47 +366,33 @@ export const  HpvVaccine: React.FC<HpvVaccineProps>  = ({ onAddToLine, initialDa
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Mistmatch adjusted Value	</InputLabel>
-              <TextField fullWidth variant="outlined"   />
+              <InputLabel>Mistmatch adjusted Value</InputLabel>
+              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="recommendation"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'recommendation',
-                  }}
-                >
-                  <MenuItem value="restock">Restock</MenuItem>
-                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
-      <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-        <Button 
-          variant="contained" 
-          color="inherit" 
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Button
+          variant="contained"
+          color="primary"
           size="medium"
-          onClick={handleAddToLine}
+          onClick={handleNextClick}
         >
-          Add to Line
+          {isLastVaccine ? 'Save' : 'Next'}
+        </Button>   
+        <Button
+          variant="contained"
+          color="inherit"
+          size="medium"
+          onClick={handleBackClick}
+          disabled={isFirstVaccine} 
+        >
+          Back
         </Button>
-      </Box> 
-
-      {/* <Box sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" size="large">
-          Submit
-        </Button>
-      </Box> */}
+      </Box>
     </Box>
   );
 };

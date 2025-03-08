@@ -16,6 +16,8 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   firstName: string;
@@ -37,6 +39,7 @@ interface Role {
 
 export default function UserSetup() {
 
+  const navigate = useNavigate()
 
  const initialValues: FormData = {
    firstName: '',
@@ -159,9 +162,13 @@ const handlePermission = (selected: string[]) => {
 
  return (
    <Container sx={{ mt:2 }}>
-     <Typography variant="h5" sx={{ mb: 4 }}>
-       User Management Setup
-     </Typography>
+    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
+      <Typography variant="h5">User Management Setup</Typography>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/user-management-setup')}>
+        Back
+      </Button>
+     
+    </Box>
 
 
      <Grid container spacing={2}>
@@ -395,9 +402,12 @@ const handlePermission = (selected: string[]) => {
             
       </Grid>
 
-     <Box sx={{ mt: 2, mb: 2 }}>
+     <Box sx={{ display:'flex', justifyContent:'space-between', mt: 2, mb: 2 }}>
        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
          Submit
+       </Button>
+       <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/user-management-setup')}>
+         Cancel
        </Button>
      </Box>
    </Container>
