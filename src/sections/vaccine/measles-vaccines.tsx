@@ -156,7 +156,9 @@ export const MeaslesVaccine: React.FC<ExtendedMeaslesVaccineProps> = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+
               <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+
               <FormControl fullWidth>
                 <Select
                   id="vvm2"

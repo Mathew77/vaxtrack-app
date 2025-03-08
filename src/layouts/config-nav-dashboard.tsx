@@ -110,7 +110,9 @@ export const navData = [
   },
   {
     title: 'LCS & SCS Setup',
+
     path: '/lcs-scs-setup',
+
     icon: icon('ic-local'),
     roles: ['admin', 'slwg'],
   },
@@ -164,6 +166,7 @@ export const navData = [
   },
   //Generic Menu 
   {
+
     title: 'Vaccine Request',
     path: '/vaccines',
     icon: <MenuBookIcon />,
@@ -174,12 +177,13 @@ export const navData = [
     path: '/conveyor',
     icon: <MenuBookIcon />,
     roles: ['conveyor', 'ehf', 'uhf'],
+
   },
   {
-    title: 'Community Vaccine Conveyor',
+    title: 'Vaccine Allocation',
     path: '/community-setup',
     icon: icon('ic-community'),
-    roles: ['ehf', 'uhf'],
+    roles: ['ehf', 'uhf','conveyor'],
   },
   // {
   //   title: 'Table Page',

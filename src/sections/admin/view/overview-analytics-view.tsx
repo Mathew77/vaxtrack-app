@@ -17,7 +17,7 @@ export function OverviewAnalyticsView() {
     <DashboardContent maxWidth="xl">
        <Filter />
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-       
+       <p>We have a filter here</p>
       </Typography>
 
       <Grid container spacing={3}>

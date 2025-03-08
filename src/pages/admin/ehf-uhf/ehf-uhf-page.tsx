@@ -18,7 +18,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -50,7 +50,7 @@ function a11yProps(index: number) {
   };
 }
 
-const RolesPermissionsSetup: React.FC = () => {
+const EhfUHFSetup: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -59,8 +59,8 @@ const RolesPermissionsSetup: React.FC = () => {
     setValue(newValue);
   };
 
-  const rolesList: TableRow[] = [];
-  const permissionsList: TableRow[] = [];
+  const ehfList: TableRow[] = [];
+  const uhfList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
@@ -105,21 +105,21 @@ const RolesPermissionsSetup: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="Roles Setup" {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="Permissions Setup" {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="EHF " {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="UHF " {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
             columns={columns}
-            data={rolesList}
-            tableHeader="Roles Setup"
+            data={ehfList}
+            tableHeader="EHF LIST"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Roles"
-            customRightButtonCallBackFunction={() => navigate('/role-setup')}
+            customRightButtonText="Add EHF"
+            customRightButtonCallBackFunction={() => navigate('/ehf-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -134,13 +134,13 @@ const RolesPermissionsSetup: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={permissionsList}
-            tableHeader="Permissions Setup"
+            data={uhfList}
+            tableHeader="UHF LIST"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Permissions"
-            customRightButtonCallBackFunction={() => navigate('/permission-setup')}
+            customRightButtonText="Add UHF"
+            customRightButtonCallBackFunction={() => navigate('/uhf-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -154,4 +154,4 @@ const RolesPermissionsSetup: React.FC = () => {
   );
 };
 
-export default RolesPermissionsSetup;
+export default EhfUHFSetup;

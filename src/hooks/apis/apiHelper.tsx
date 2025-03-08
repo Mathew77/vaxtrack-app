@@ -1,18 +1,24 @@
 import http from 'src/utils/interceptor';
+import { useAuth } from '../../contexts/AuthContext';
+let token: string | null = null;
 
+export function setToken(newToken: string | null) {
+  token = newToken;
+  console.log('Token set:', token); // Debugging line to check if the token is set
+}
 
-//No token yet
-const defaultConfig = {
-  headers: {
-    'Content-Type': 'application/json',
-  },
-};
+function getDefaultConfig() {
+  return {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  };
+}
 
 export async function getResource<T>(url: string): Promise<T> {
   try {
-    const response = await http.get<T>(url, { 
-      ...defaultConfig, 
-    });
+    const response = await http.get<T>(url, getDefaultConfig());
     return response.data;
   } catch (error) {
     console.error('Failed to Get:', error);
@@ -23,7 +29,7 @@ export async function getResource<T>(url: string): Promise<T> {
 export async function postResource<T>(url: string, body: any, extraOptions: any = {}): Promise<T> {
   try {
     const response = await http.post<T>(url, body, { 
-      ...defaultConfig, 
+      ...getDefaultConfig(), 
       ...extraOptions 
     });
     return response.data;
@@ -36,7 +42,7 @@ export async function postResource<T>(url: string, body: any, extraOptions: any 
 export async function putResource<T>(url: string, body: any, extraOptions: any = {}): Promise<T> {
   try {
     const response = await http.put<T>(url, body, { 
-      ...defaultConfig, 
+      ...getDefaultConfig(), 
       ...extraOptions 
     });
     return response.data;
@@ -49,7 +55,7 @@ export async function putResource<T>(url: string, body: any, extraOptions: any =
 export async function deleteResource<T>(url: string, extraOptions: any = {}): Promise<T | undefined> {
   try {
     const response = await http.delete<T>(url, { 
-      ...defaultConfig, 
+      ...getDefaultConfig(), 
       ...extraOptions 
     });
     return response.data;
@@ -64,4 +70,5 @@ export const apiHelper = {
   postResource,
   putResource,
   deleteResource,
+  setToken,
 };

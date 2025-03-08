@@ -146,7 +146,9 @@ export const HpvVaccine: React.FC<ExtendedHpvVaccineProps> = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+
               <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
@@ -262,6 +264,7 @@ export const HpvVaccine: React.FC<ExtendedHpvVaccineProps> = ({
           </Grid>
         </Grid>
       </Box>
+
 
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>HPV Diluent</Typography>

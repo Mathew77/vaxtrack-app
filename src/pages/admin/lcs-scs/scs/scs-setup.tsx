@@ -17,9 +17,11 @@ interface FormData {
   stateId: string;
   orgUnitId: string;
   scsName: string;
+
   contactPersonName: string;
   contactPersonPhone: string;
   contactPersonEmail: string;
+
 }
 
 
@@ -34,6 +36,7 @@ export default function ScsSetup() {
         contactPersonName: '',
         contactPersonPhone: '',
         contactPersonEmail: '',
+
     };
 
     const [data, setData] = useState<FormData>(initialValues);
@@ -54,6 +57,7 @@ export default function ScsSetup() {
   temp.contactPersonEmail = data.contactPersonEmail 
       ? '' 
       : 'Contact person email required';
+
     
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -231,11 +235,14 @@ export default function ScsSetup() {
         </Box>
       </Box>
 
+
       <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
+
         <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcs-scs-setup')}>
+
           Back
         </Button>
       </Box>
