@@ -7,6 +7,7 @@ import LMDOrderCard  from '../lmdorder-card';
 import VaccineCard  from '../statistics';
 import TransactionHistory from '../transaction-history';
 import LMDOrderPaymentStatus from '../payment-approval';
+import Filter from 'src/utils/Filter';
 
 
 // ----------------------------------------------------------------------
@@ -14,6 +15,7 @@ import LMDOrderPaymentStatus from '../payment-approval';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
+      <Filter />
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         {/* Hi, 3PL & SCS */}
       </Typography>

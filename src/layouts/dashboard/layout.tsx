@@ -54,12 +54,14 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         setUserRole('ehf');
       } else if (storedUsername.includes('uhf')) {
         setUserRole('uhf');
-      } else if (storedUsername.includes('lcco')) {
-        setUserRole('lcco');
+      } else if (storedUsername.includes('lcs')) {
+        setUserRole('lcs');
       } else if (storedUsername.includes('slwg')) {
         setUserRole('slwg');
       } else if (storedUsername.includes('threepl')) {
         setUserRole('threepl');
+      } else if (storedUsername.includes('conveyor')){
+        setUserRole('conveyor');
       } else {
         setUserRole('guest');
       }

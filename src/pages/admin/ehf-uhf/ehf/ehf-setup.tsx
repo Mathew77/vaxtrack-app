@@ -25,6 +25,9 @@ interface FormData {
   org_unit_id: string;
   ehf_name: string;
   uhf_ids: string[];
+  contactPersonName: string;
+  contactPersonPhone: string;
+  contactPersonEmail: string;
 }
 
 export default function EhfSetup() {
@@ -38,6 +41,9 @@ export default function EhfSetup() {
     org_unit_id: '',
     ehf_name: '',
     uhf_ids: [],
+    contactPersonName: '',
+    contactPersonPhone: '',
+    contactPersonEmail: ''
   };
 
   const [data, setData] = useState<FormData>(initialValues);
@@ -61,6 +67,16 @@ export default function EhfSetup() {
         ? '' 
         : 'EHF name required';
     temp.uhf_ids = data.uhf_ids.length > 0 ? '' : 'UHF required';
+
+    temp.contactPersonName = data.contactPersonName 
+        ? '' 
+        : 'Contact person name required';
+    temp.contactPersonPhone = data.contactPersonPhone 
+        ? '' 
+        : 'Contact person phone required';
+    temp.contactPersonEmail = data.contactPersonEmail 
+        ? '' 
+        : 'Contact person email required';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -206,7 +222,7 @@ export default function EhfSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="ehf_name">
-            EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            EHF Name (Apex / HUB) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
@@ -227,7 +243,7 @@ export default function EhfSetup() {
         <Grid item xs={12}> 
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" sx={{ mb: 1 }}>
-              UHF <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              UHF (Cascade / Spoke)<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
               <DualListBox
                 canFilter
@@ -252,7 +268,82 @@ export default function EhfSetup() {
         </Grid>
       </Grid>
 
-      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+      <Typography
+        variant="h5"
+
+      >
+        Contact Information
+      </Typography>
+
+      <Box >
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Typography component="label" htmlFor="contact_person_name">
+              Contact Person Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              id="contact_person_name"
+              name="contact_person_name"
+              placeholder="Contact Person Name"
+              value={data.contactPersonName}
+              onChange={handleChange}
+              variant="outlined"
+              helperText={
+                errors?.contactPersonName ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonName}</span>
+                ) : ''
+              }
+            />
+          </Grid>
+
+          <Grid item xs={6}>
+            <Typography component="label" htmlFor="contact_person_phone">
+              Phone Number <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              id="contact_person_phone"
+              name="contact_person_phone"
+              placeholder="Phone Number "
+              value={data.contactPersonPhone}
+              onChange={handleChange}
+              variant="outlined"
+              type="tel"
+              helperText={
+                errors?.contactPersonPhone ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonPhone}</span>
+                ) : ''
+              }
+            />
+          </Grid>
+
+          <Grid item xs={6}>
+            <Typography component="label" htmlFor="contact_person_email">
+              Email <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              id="contact_person_email"
+              name="contact_person_email"
+              placeholder="Email Address"
+              value={data.contactPersonEmail}
+              onChange={handleChange}
+              variant="outlined"
+              type="email"
+              helperText={
+                errors?.contactPersonEmail ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonEmail}</span>
+                ) : ''
+              }
+            />
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
+
+      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>

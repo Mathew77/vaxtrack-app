@@ -7,6 +7,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import WelcomeCard  from '../welcome';
 import VaccineCard  from '../statistics';
 import TransactionHistory from '../transaction-history'
+import Filter from 'src/utils/Filter';
 
 
 // ----------------------------------------------------------------------
@@ -14,6 +15,7 @@ import TransactionHistory from '../transaction-history'
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
+      <Filter />
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         {/* Hi, UHF */}
       </Typography>

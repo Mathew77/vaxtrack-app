@@ -5,12 +5,25 @@ import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialData }) => {
+interface ExtendedPcvVaccineProps {
+  initialData?: PcvVaccineData;
+  vaccineOptions: { value: string; label: string; component: (props: any) => JSX.Element }[];
+  currentIndex: number;
+  onNext: (data: PcvVaccineData, currentIndex: number) => void;
+  onBack?: (currentIndex: number) => void;
+}
+
+export const  PcvVaccine: React.FC<ExtendedPcvVaccineProps>  = ({ 
+  initialData,
+  vaccineOptions,
+  currentIndex,
+  onNext,
+  onBack,
+}) => {
 
   const [formData, setFormData] = useState<PcvVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -35,26 +48,33 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
       }));
     };
 
-  const handleAddToLine = () => {
-    onAddToLine(formData);
+    const handleNextClick = () => {
+      onNext(formData, currentIndex);
+      setFormData({
+        physicalStock: '',
+        avgDailyConsumption: '',
+        expiryDate: '',
+        batchNo: '',
+        vvm2: '',
+        numberImmunized: '',
+        daysOfStock: '',
+        adjForAdd: '',
+        belowMinStock: '',
+        aboveMaxStock: '',
+        qtyReceived: '',
+        closingBalance: '',
+        postLmdDos: '',
+      });
+    };
 
-    setFormData({
-      physicalStock: '',
-      avgDailyConsumption: '',
-      // dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      expiryDate: '',
-      batchNo: '',
-      vvm2: '',
-      numberImmunized: '',
-      daysOfStock: '',
-      adjForAdd: '',
-      belowMinStock: '',
-      aboveMaxStock: '',
-      qtyReceived: '',
-      closingBalance: '',
-      postLmdDos: '',
-    });
-  };
+    const handleBackClick = () => {
+      if (onBack && currentIndex > 0) {
+        onBack(currentIndex); 
+      }
+    };
+  
+    const isLastVaccine = currentIndex === vaccineOptions.length - 1;
+    const isFirstVaccine = currentIndex === 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -143,7 +163,9 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2?</InputLabel>
+
+              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
@@ -169,13 +191,6 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Days of Stock</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
               <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
@@ -286,23 +301,6 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="recommendation"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'recommendation',
-                  }}
-                >
-                  <MenuItem value="restock">Restock</MenuItem>
-                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
@@ -341,23 +339,6 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="recommendation"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'recommendation',
-                  }}
-                >
-                  <MenuItem value="restock">Restock</MenuItem>
-                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
@@ -396,41 +377,27 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="recommendation">Recommendation</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="recommendation"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'recommendation',
-                  }}
-                >
-                  <MenuItem value="restock">Restock</MenuItem>
-                  <MenuItem value="redistrubute">Redsitribute</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
         </Grid>
       </Box>
-      <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-        <Button 
-          variant="contained" 
-          color="inherit" 
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Button
+          variant="contained"
+          color="primary"
           size="medium"
-          onClick={handleAddToLine}
+          onClick={handleNextClick}
         >
-          Add to Line
+          {isLastVaccine ? 'Save' : 'Next'}
+        </Button>   
+        <Button
+          variant="contained"
+          color="inherit"
+          size="medium"
+          onClick={handleBackClick}
+          disabled={isFirstVaccine} 
+        >
+          Back
         </Button>
       </Box>
-
-      {/* <Box sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" size="large">
-          Submit
-        </Button>
-      </Box> */}
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -15,26 +15,24 @@ import { useNavigate } from 'react-router-dom';
 interface FormData {
   State_id: string;
   lga_id: string;
-  ward_id: string;
-  org_unit_id: string;
-  ehf_name: string;
-  uhf_name: string;
+  lcco_name: string;
+  longitude: string;
+  latitude: string;
   contactPersonName: string;
   contactPersonPhone: string;
   contactPersonEmail: string;
 }
 
-export default function UhfSetup() {
+export default function LccoSetup() {
 
   const navigate = useNavigate()
 
   const initialValues: FormData = {
     State_id: '',
     lga_id: '',
-    ward_id: '',
-    org_unit_id: '',
-    ehf_name: '',
-    uhf_name: '',
+    lcco_name: '',
+    longitude: '',
+    latitude: '',
     contactPersonName: '',
     contactPersonPhone: '',
     contactPersonEmail: '',
@@ -51,18 +49,15 @@ export default function UhfSetup() {
     temp.lga_id = data.lga_id 
         ? '' 
         : 'Lga is required';
-    temp.ward_id = data.ward_id 
+    temp.lcco_name = data.lcco_name 
         ? '' 
-        : 'Ward is required';
-    temp.org_unit_id = data.org_unit_id 
+        : 'Lcco name required';
+    temp.longitude = data.longitude 
         ? '' 
-        : 'Org unit required';
-    temp.ehf_name = data.ehf_name 
+        : 'Longitude required';
+    temp.latitude = data.latitude 
         ? '' 
-        : 'ehf name required';
-    temp.uhf_name = data.uhf_name 
-        ? '' 
-        : 'uhf name required';
+        : 'Latitude required';
     temp.contactPersonName = data.contactPersonName 
         ? '' 
         : 'Contact person naame required';
@@ -88,14 +83,13 @@ export default function UhfSetup() {
   const handleSubmit = () => {
     if (validate()) {
       console.log('Form Data:', data);
-
     }
   };
 
   return (
     <Container sx={{ mt:2 }}>
       <Typography variant="h5" sx={{ mb: 4 }}>
-        UHF Setup
+        LCS Setup
       </Typography>
 
       <Grid container spacing={2}>
@@ -152,112 +146,67 @@ export default function UhfSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="ward_id" sx={{ mb: 1 }}>
-              Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="ward_id"
-              name="ward_id"
-              value={data.ward_id}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                Select Ward
-              </MenuItem>
-            </Select>
-            {errors?.ward_id !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.ward_id}
-              </Typography>
-            )}
-          </FormControl>
+          <Typography component="label" htmlFor="lcco_name" >
+            Lcco Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="lcco_name"
+            name="lcco_name"
+            placeholder="Lcco Name"
+            value={data.lcco_name}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.lcco_name !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lcco_name}</span>
+              ) : ''
+            }
+          />
         </Grid>
 
         <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="org_unit_id" sx={{ mb: 1 }}>
-              Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="org_unit_id"
-              name="org_unit_id"
-              value={data.org_unit_id}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                Select Org Unit
-              </MenuItem>
-            </Select>
-            {errors?.org_unit_id !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.org_unit_id}
-              </Typography>
-            )}
-          </FormControl>
+          <Typography component="label" htmlFor="longitude" >
+            Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="longitude"
+            name="longitude"
+            placeholder="Longitude"
+            value={data.longitude}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.longitude !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longitude}</span>
+              ) : ''
+            }
+          />
         </Grid>
 
         <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="ehf_name" >
-              EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="ehf_name"
-              name="ehf_name"
-              value={data.ehf_name}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                EHF name
-              </MenuItem>
-            </Select>
-            {errors?.ehf_name !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.ehf_name}
-              </Typography>
-            )}
-          </FormControl>
+          <Typography component="label" htmlFor="latitude" >
+            Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="latitude"
+            name="latitude"
+            placeholder="Latitude"
+            value={data.latitude}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.latitude !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.latitude}</span>
+              ) : ''
+            }
+          />
         </Grid>
-
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="uhf_name" >
-              UHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="uhf_name"
-              name="uhf_name"
-              value={data.uhf_name}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                UHF name
-              </MenuItem>
-            </Select>
-            {errors?.uhf_name !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.uhf_name}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-
       </Grid>
 
-       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
           <Typography
             variant="h5"
     
@@ -332,11 +281,11 @@ export default function UhfSetup() {
           </Box>
         </Box>
 
-      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-setup')}>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcs-scs-setup')}>
           Back
         </Button>
       </Box>

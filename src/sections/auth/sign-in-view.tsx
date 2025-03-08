@@ -29,11 +29,13 @@ export function SignInView() {
     }
   }, []);
 
+
   const { mutate: loginUser, status, error } = useMutation<LoginResponse, Error, LoginVariables>({
     mutationFn: login,
     onSuccess: (data: LoginResponse) => {
       setToken(data.access);
       apiHelper.setToken(data.access); // Set the token in apiHelper
+
       sessionStorage.setItem('username', username);
       navigate('/admin-home'); // Navigate to the dashboard or home page
     },

@@ -7,6 +7,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
 import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
+import Filter from 'src/utils/Filter';
 
 
 // ----------------------------------------------------------------------
@@ -14,6 +15,7 @@ import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
+       <Filter />
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
        <p>We have a filter here</p>
       </Typography>
