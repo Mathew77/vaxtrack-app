@@ -9,7 +9,7 @@ import { useScrollToTop } from 'src/hooks/use-scroll-to-top';
 import { ThemeProvider } from 'src/theme/theme-provider';
 
 import { Iconify } from 'src/components/iconify';
-
+import { AuthProvider } from './contexts/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
@@ -42,8 +42,10 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+      <AuthProvider>
         <Router />
         {/* {githubButton} */}
+        </AuthProvider>
       </ThemeProvider>
       </QueryClientProvider>
   );

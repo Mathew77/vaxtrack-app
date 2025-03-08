@@ -3,7 +3,7 @@ import { useFetchUsers, useDeleteUser } from './../../hooks/apis/user/user-hooks
 import { User } from './../../hooks/apis/user/user-types';
 
 const UserList: React.FC = () => {
-  const { data: users, error, isLoading, refetch } = useFetchUsers();
+  const { data: users, error, isLoading, refetch } = useFetchUsers(); 
   const { 
     mutate: deleteUser, 
     isPending, 
@@ -28,7 +28,7 @@ const UserList: React.FC = () => {
         <ul>
           {users?.map((user: User) => (
             <li key={user.id}>
-              {user.name} ({user.email})
+              {user.username} ({user.email})
               <button
                 onClick={() => deleteUser(user.id)}
                 disabled={isPending}

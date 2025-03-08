@@ -176,10 +176,10 @@ export const navData = [
     roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
   },
   //test-page
-  // {
-  //   title: 'Test-Page',
-  //   path: '/test-page',
-  //   icon: icon('ic-blog'),
-  //   roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
-  // },
+  {
+    title: 'Test-Page',
+    path: '/test-page',
+    icon: icon('ic-blog'),
+    roles: ['ehf','uhf','lcco','slwg','threepl', 'admin'],
+  },
 ];
