@@ -50,7 +50,7 @@ function a11yProps(index: number) {
   };
 }
 
-const LccoScsSetup: React.FC = () => {
+const LcsScsList: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -105,8 +105,8 @@ const LccoScsSetup: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="LCS Setup" {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="SCS Setup" {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="LCS " {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="SCS " {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -114,7 +114,7 @@ const LccoScsSetup: React.FC = () => {
           <VaxTable
             columns={columns}
             data={lccoList}
-            tableHeader="LCS Setup"
+            tableHeader="LCS LIST"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
@@ -135,7 +135,7 @@ const LccoScsSetup: React.FC = () => {
           <VaxTable
             columns={columns}
             data={scsList}
-            tableHeader="SCS Setup"
+            tableHeader="SCS LIST"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
@@ -154,4 +154,4 @@ const LccoScsSetup: React.FC = () => {
   );
 };
 
-export default LccoScsSetup;
+export default LcsScsList;

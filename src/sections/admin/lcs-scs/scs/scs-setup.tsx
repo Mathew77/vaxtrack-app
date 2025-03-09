@@ -241,7 +241,7 @@ export default function ScsSetup() {
           Submit
         </Button>
 
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcs-scs-setup')}>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcs-scs-page')}>
 
           Back
         </Button>

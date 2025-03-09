@@ -164,7 +164,7 @@ const handlePermission = (selected: string[]) => {
    <Container sx={{ mt:2 }}>
     <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
       <Typography variant="h5">User Management Setup</Typography>
-      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/user-management-setup')}>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/user-management')}>
         Back
       </Button>
      
@@ -406,7 +406,7 @@ const handlePermission = (selected: string[]) => {
        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
          Submit
        </Button>
-       <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/user-management-setup')}>
+       <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/user-management')}>
          Cancel
        </Button>
      </Box>

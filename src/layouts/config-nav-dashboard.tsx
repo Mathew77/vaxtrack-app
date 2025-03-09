@@ -100,27 +100,25 @@ export const navData = [
   },
   {
     title: 'User Management',
-    path: '/user-management-setup',
+    path: '/user-management',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
     title: 'EHF & UHF Setup',
-    path: '/ehf-uhf-setup',
+    path: '/ehf-uhf-page',
     icon: icon('ic-facility'),
     roles: ['admin', 'lcs', 'slwg'],
   },
   {
     title: 'LCS & SCS Setup',
-
-    path: '/lcs-scs-setup',
-
+    path: '/lcs-scs-page',
     icon: icon('ic-local'),
     roles: ['admin', 'slwg'],
   },
   {
     title: 'Roles & Permissions Setup',
-    path: '/roles-permissions-setup',
+    path: '/roles-permissions-page',
     icon: icon('ic-access'),
     roles: ['admin'],
   },
@@ -162,7 +160,7 @@ export const navData = [
   // },
   {
     title: 'Organisation Unit',
-    path: '/org-unit',
+    path: '/org-unit-page',
     icon: icon('ic-org'),
     roles: ['admin'],
   },
@@ -170,22 +168,22 @@ export const navData = [
   {
 
     title: 'Vaccine Request',
-    path: '/vaccines',
+    path: '/vaccine-page',
     icon: <MenuBookIcon />,
     roles: ['ehf'],
   },
-  {
-    title: 'Vaccine Allocation',
-    path: '/conveyor',
-    icon: <MenuBookIcon />,
-    roles: ['conveyor', 'ehf', 'uhf'],
+  // {
+  //   title: 'Vaccine Allocation',
+  //   path: '/conveyor',
+  //   icon: <MenuBookIcon />,
+  //   roles: ['conveyor', 'ehf', 'uhf'],
 
-  },
+  // },
   {
     title: 'Vaccine Allocation',
-    path: '/community-setup',
+    path: '/vaccine-conveyor-page',
     icon: icon('ic-community'),
-    roles: ['ehf', 'uhf','conveyor'],
+    roles: ['conveyor'],
   },
   // {
   //   title: 'Table Page',

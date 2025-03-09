@@ -50,7 +50,7 @@ function a11yProps(index: number) {
   };
 }
 
-const EhfUHFSetup: React.FC = () => {
+const EhfUHFList: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -154,4 +154,4 @@ const EhfUHFSetup: React.FC = () => {
   );
 };
 
-export default EhfUHFSetup;
+export default EhfUHFList;

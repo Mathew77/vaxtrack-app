@@ -50,7 +50,7 @@ function a11yProps(index: number) {
   };
 }
 
-const LccoScsSetup: React.FC = () => {
+const RolesPermissionsList: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -59,8 +59,8 @@ const LccoScsSetup: React.FC = () => {
     setValue(newValue);
   };
 
-  const lccoList: TableRow[] = [];
-  const scsList: TableRow[] = [];
+  const rolesList: TableRow[] = [];
+  const permissionsList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
@@ -105,21 +105,21 @@ const LccoScsSetup: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="LCS " {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="SCS " {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="Roles " {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="Permissions " {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
             columns={columns}
-            data={lccoList}
-            tableHeader="LCS LIST"
+            data={rolesList}
+            tableHeader="Roles List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add LCCO"
-            customRightButtonCallBackFunction={() => navigate('/lcco-setup')}
+            customRightButtonText="Add Roles"
+            customRightButtonCallBackFunction={() => navigate('/role-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -134,13 +134,13 @@ const LccoScsSetup: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={scsList}
-            tableHeader="SCS LIST"
+            data={permissionsList}
+            tableHeader="Permissions List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add SCS"
-            customRightButtonCallBackFunction={() => navigate('/scs-setup')}
+            customRightButtonText="Add Permissions"
+            customRightButtonCallBackFunction={() => navigate('/permission-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -154,4 +154,4 @@ const LccoScsSetup: React.FC = () => {
   );
 };
 
-export default LccoScsSetup;
+export default RolesPermissionsList;

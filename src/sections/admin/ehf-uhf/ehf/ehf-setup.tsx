@@ -347,7 +347,7 @@ export default function EhfSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-setup')}>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-page')}>
           Back
         </Button>
       </Box>

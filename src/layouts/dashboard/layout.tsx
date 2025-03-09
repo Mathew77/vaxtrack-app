@@ -48,7 +48,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     if (storedUsername) {
       setUserName(storedUsername);
       
-      if (storedUsername.includes('dapo')) {
+      if (storedUsername.includes('admin')) {
         setUserRole('admin');
       } else if (storedUsername.includes('ehf')) {
         setUserRole('ehf');

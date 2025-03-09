@@ -24,7 +24,7 @@ const actionMenuItems: ActionMenuItem<Testing>[] = [
   { display: 'Delete', icon: <DeleteIcon />, handleClick: (row) => console.log(row)},
 ];
 
-export default function OrgUnitSetup() {
+export default function OrgUnitList() {
     return (
         <VaxTable<Testing>
             columns={columns}

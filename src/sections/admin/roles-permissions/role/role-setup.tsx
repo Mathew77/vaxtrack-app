@@ -161,7 +161,7 @@ export default function ScsSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/roles-permissions-setup')}>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/roles-permissions-page')}>
           Back
         </Button>
       </Box>

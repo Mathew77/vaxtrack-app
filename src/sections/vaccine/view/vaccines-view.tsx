@@ -56,7 +56,7 @@ const vaccineOptions: VaccineOption[] = [
   { value: 'cold-chain', label: 'Cold Chain Status', component: (props: any) => <ColdChainStatus {...props} /> },
 ];
 
-export function VaccinesView() {
+export function VaccineRequestList() {
   const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
   const [availableVaccines, setAvailableVaccines] = useState<VaccineOption[]>(vaccineOptions);
   const [vaccineLines, setVaccineLines] = useState<VaccineLine[]>([]);
