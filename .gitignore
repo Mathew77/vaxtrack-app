@@ -1,2 +1,4 @@
 node_modules
 DS_Store
+src/layouts/dashboard/layout.tsx
+src/sections/auth/sign-in-view.tsx
