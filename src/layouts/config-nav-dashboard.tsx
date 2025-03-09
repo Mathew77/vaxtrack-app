@@ -23,8 +23,10 @@ export const navData = [
     icon: icon('ic-user'),
     roles: ['ehf'],
     children: [
-      { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['ehf', 'admin'] },
-      { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['ehf', 'admin'] },
+      // { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['ehf', 'admin'] },
+      // { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['ehf', 'admin'] },
+      { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['', ] },
+      { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['', ''] },
     ],
   },
   
@@ -138,7 +140,7 @@ export const navData = [
     title: '3PL SETUP',
     path: '/threepl-setup',
     icon: icon('ic-logistic'),
-    roles: ['slwg'],
+    roles: [''],
   },
   // {
   //   title: 'Role',

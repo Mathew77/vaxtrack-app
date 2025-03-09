@@ -1,5 +1,5 @@
 import http from 'src/utils/interceptor';
-import { useAuth } from '../../contexts/AuthContext';
+//import { useAuth } from '../../contexts/AuthContext';
 let token: string | null = null;
 
 export function setToken(newToken: string | null) {
