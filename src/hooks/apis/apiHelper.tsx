@@ -1,13 +1,7 @@
 import http from 'src/utils/interceptor';
-//import { useAuth } from '../../contexts/AuthContext';
-let token: string | null = null;
-
-export function setToken(newToken: string | null) {
-  token = newToken;
-  console.log('Token set:', token); // Debugging line to check if the token is set
-}
 
 function getDefaultConfig() {
+  const token = localStorage.getItem('token');
   return {
     headers: {
       'Content-Type': 'application/json',
@@ -70,5 +64,5 @@ export const apiHelper = {
   postResource,
   putResource,
   deleteResource,
-  setToken,
+  //setToken,
 };
