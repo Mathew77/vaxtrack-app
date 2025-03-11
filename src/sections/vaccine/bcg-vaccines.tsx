@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TextField,
   FormControl,
   Grid,
-  Button,
   Typography,
   Box,
   InputLabel,
@@ -15,19 +14,13 @@ import { sectionBorderStyle } from 'src/utils/constants';
 
 interface ExtendedBcgVaccinesProps {
   initialData?: any;
-  vaccineOptions: { value: string; label: string; component: (props: any) => JSX.Element }[];
-  currentIndex: number;
-  onNext: (data: any, currentIndex: number) => void;
-  onBack?: (currentIndex: number) => void;
+  onDataChange: (data: any) => void;
 }
 
-export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
+export const BcgVaccines = ({
   initialData,
-  vaccineOptions,
-  currentIndex,
-  onNext,
-  onBack,
-}) => {
+  onDataChange,
+}: ExtendedBcgVaccinesProps): JSX.Element => {
   const [formData, setFormData] = useState<BcgVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
@@ -48,39 +41,16 @@ export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
   const handleInputChange = (field: keyof BcgVaccineData) => (
     event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
   ) => {
+    const value = event.target.value as string;
     setFormData((prev) => ({
       ...prev,
-      [field]: event.target.value as string,
+      [field]: value,
     }));
   };
 
-  const handleNextClick = () => {
-    onNext(formData, currentIndex);
-    setFormData({
-      physicalStock: '',
-      avgDailyConsumption: '',
-      expiryDate: '',
-      batchNo: '',
-      vvm2: '',
-      numberImmunized: '',
-      daysOfStock: '',
-      adjForAdd: '',
-      belowMinStock: '',
-      aboveMaxStock: '',
-      qtyReceived: '',
-      closingBalance: '',
-      postLmdDos: '',
-    });
-  };
-
-  const handleBackClick = () => {
-    if (onBack && currentIndex > 0) {
-      onBack(currentIndex); 
-    }
-  };
-
-  const isLastVaccine = currentIndex === vaccineOptions.length - 1;
-  const isFirstVaccine = currentIndex === 0;
+  useEffect(() => {
+    onDataChange(formData);
+  }, [formData, onDataChange]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -156,14 +126,12 @@ export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-
               <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
-
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
                   value={formData.vvm2}
-                  // onChange={handleInputChange('vvm2')}
+                  // onChange={handleInputChange('vvm2')} 
                   inputProps={{ name: 'vvm2' }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -204,7 +172,7 @@ export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
                 <Select
                   id="min-stock"
                   value={formData.belowMinStock}
-                  // onChange={handleInputChange('belowMinStock')}
+                  // onChange={handleInputChange('belowMinStock')} 
                   inputProps={{ name: 'min-stock' }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -221,7 +189,7 @@ export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
                 <Select
                   id="max-stock"
                   value={formData.aboveMaxStock}
-                  // onChange={handleInputChange('aboveMaxStock')}
+                  // onChange={handleInputChange('aboveMaxStock')} 
                   inputProps={{ name: 'max-stock' }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -275,36 +243,24 @@ export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Physical Stock Balance"
-              />
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
-                <Select
-                  id="mis-match"
-                  inputProps={{ name: 'mis-match' }}
-                >
+                <Select id="mis-match" inputProps={{ name: 'mis-match' }}>
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
                 </Select>
               </FormControl>
             </Box>
           </Grid>
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Mismatch adjusted Value</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-              />
+              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
         </Grid>
@@ -316,104 +272,56 @@ export const BcgVaccines: React.FC<ExtendedBcgVaccinesProps> = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Physical Stock Balance"
-              />
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
-                <Select
-                  id="mis-match"
-                  inputProps={{ name: 'mis-match' }}
-                >
+                <Select id="mis-match" inputProps={{ name: 'mis-match' }}>
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
                 </Select>
               </FormControl>
             </Box>
           </Grid>
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Mismatch adjusted Value</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-              />
+              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
         </Grid>
       </Box>
 
       <Box sx={sectionBorderStyle}>
-
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe </Typography>
-
-
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Physical Stock Balance"
-              />
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
-                <Select
-                  id="mis-match"
-                  inputProps={{ name: 'mis-match' }}
-                >
+                <Select id="mis-match" inputProps={{ name: 'mis-match' }}>
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
                 </Select>
               </FormControl>
             </Box>
           </Grid>
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Mismatch adjusted Value</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-              />
+              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
-
         </Grid>
-      </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="medium"
-          onClick={handleNextClick}
-        >
-          {isLastVaccine ? 'Save' : 'Next'}
-        </Button>   
-        <Button
-          variant="contained"
-          color="secondary"
-          size="medium"
-          onClick={handleBackClick}
-          disabled={isFirstVaccine} 
-        >
-          Back
-        </Button>
       </Box>
     </Box>
   );

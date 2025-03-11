@@ -11,6 +11,7 @@ import {
   Select,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface FormData {
   State_id: string;
@@ -94,9 +95,14 @@ export default function UhfSetup() {
 
   return (
     <Container sx={{ mt:2 }}>
-      <Typography variant="h5" sx={{ mb: 4 }}>
-        UHF Setup
-      </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
+        <Typography variant="h5">UHF Setup</Typography>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page')}>
+          Back
+        </Button>
+     
+      </Box>
+
 
       <Grid container spacing={2}>
         <Grid item xs={6}>
@@ -332,12 +338,12 @@ export default function UhfSetup() {
           </Box>
         </Box>
 
-      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
+      <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
         <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-page')}>
-          Back
+          Cancel
         </Button>
       </Box>
     </Container>

@@ -23,10 +23,11 @@ export const ConveyorHome = lazy(() => import('src/pages/conveyor/home'));
 // export const ConveyorAllocation = lazy(() => import('src/pages/conveyor-allocation'));
 export const VaccineConveyorPage = lazy(() => import('src/pages/vaccine-conveyor/index'));
 
-export const LccoHome = lazy(() => import('src/pages/lcs/home'));
+export const LcsHome = lazy(() => import('src/pages/lcs/home'));
 export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
 export const ThreeplHome = lazy(() => import('src/pages/threepl/home'));
 export const Unauthorized = lazy(() => import('src/pages/unauthorized/index'));
+export const ScsHome = lazy(() => import('src/pages/scs/home'));
 
 //Admin conponents
 // export const EhfSetup = lazy(() => import('src/pages/admin/ehf-uhf/ehf/ehf-setup'));
@@ -41,8 +42,8 @@ export const EhfUHFPage = lazy(() => import('src/pages/admin/ehf-uhf/index'));
 export const LcsSCSPage = lazy(() => import('src/pages/admin/lcs-scs/index'));
 export const RolesPermissionsPage = lazy(() => import('src/pages/admin/roles-permissions/index'));
 export const OrgUnitPage = lazy(() => import('src/pages/admin/org-unit/index'));
+export const ThreePlPage = lazy(() => import('src/pages/admin/threepl/index'));
 
-export const ThreePlSetup = lazy(() => import('src/pages/admin/threepl/threepl-setup'));
 // export const ScsSetup = lazy(() => import('src/pages/admin/lcs-scs/scs/scs-setup'));
 export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
 // export const OrgUnitSetup = lazy(() => import('src/pages/admin/org-unit/orgUnit-setup'));
@@ -58,6 +59,7 @@ export const LcsSetup = lazy(() => import('src/sections/admin/lcs-scs/lcs/lcs-se
 export const ScsSetup = lazy(() => import('src/sections/admin/lcs-scs/scs/scs-setup'));
 export const RolesSetup = lazy(() => import('src/sections/admin/roles-permissions/role/role-setup'));
 export const PermissionsSetup = lazy(() => import('src/sections/admin/roles-permissions/permission/permission-setup'));
+export const ThreePlSetup = lazy(() => import('src/sections/admin/threepl/threepl-setup'));
 
 
 //Test page
@@ -120,11 +122,12 @@ export function Router() {
         { path: 'uhf-home', element: <UhfHome /> },
         { path: 'admin-home', element: <AdminHome /> },
         { path: 'ehf-home', element: <EhfHome /> },
-        { path: 'lcs-home', element: <LccoHome /> },
+        { path: 'lcs-home', element: <LcsHome /> },
         { path: 'slwg-home', element: <SlwgHome /> },
         { path: 'threepl-home', element: <ThreeplHome /> },
         { path: 'conveyor-home', element: <ConveyorHome /> },
         { path: 'vaccine-conveyor-page', element: <VaccineConveyorPage /> },
+        { path: 'scs-home', element: <ScsHome /> },
         //Admin route menu and components
         { path: 'ehf-setup', element: <EhfSetup /> },
         { path: 'uhf-setup', element: <UhfSetup /> },
@@ -145,6 +148,7 @@ export function Router() {
         { path: 'ehf-uhf-page', element: <EhfUHFPage /> },
 
         { path: 'lcs-scs-page', element: <LcsSCSPage /> },
+        { path: 'threepl-page', element: <ThreePlPage /> },
 
 
         //TestPage

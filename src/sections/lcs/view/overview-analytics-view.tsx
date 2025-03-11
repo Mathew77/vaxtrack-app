@@ -14,7 +14,11 @@ import Filter from 'src/utils/Filter';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      <Filter />
+       <Filter
+        showState={false}
+        showLga={false}
+        showWard={true}
+         />
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
         {/* Hi, LCS */}
       </Typography>

@@ -16,6 +16,8 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
 
 interface FormData {
   State_id: string;
@@ -27,6 +29,8 @@ interface FormData {
 }
 
 export default function ThreePlSetup() {
+
+  const navigate = useNavigate()
 
   const initialValues: FormData = {
     State_id: '',
@@ -91,12 +95,16 @@ export default function ThreePlSetup() {
 
   return (
     <Container sx={{ mt:2 }}>
-      <Typography variant="h5" sx={{ mb: 4 }}>
-        3PL Setup
-      </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
+        <Typography variant="h5">3PL Setup</Typography>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/threepl-page')}>
+          Back
+        </Button>
+     
+      </Box>
 
       <Grid container spacing={2}>
-      <Grid item xs={6}>
+       <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="State_id" sx={{ mb: 1 }}>
               State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -255,9 +263,12 @@ export default function ThreePlSetup() {
 
       </Grid>
 
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{display: 'flex', gap:4, mt: 4, mb: 4 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
+        </Button>
+        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/threepl-page')}>
+          Cancel
         </Button>
       </Box>
     </Container>

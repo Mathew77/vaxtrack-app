@@ -402,7 +402,7 @@ const handlePermission = (selected: string[]) => {
             
       </Grid>
 
-     <Box sx={{ display:'flex', justifyContent:'space-between', mt: 2, mb: 2 }}>
+     <Box sx={{ display:'flex', gap: 2, mt: 4, mb: 2 }}>
        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
          Submit
        </Button>

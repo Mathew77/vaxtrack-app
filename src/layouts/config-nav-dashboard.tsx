@@ -53,6 +53,17 @@ export const navData = [
       { title: 'LCS Dashboard 2', path: '/lcs-home/dashboard2', roles: ['lcs', 'admin'] },
     ],
   },
+
+  {
+    title: 'Dashboard',
+    path: '/scs-home',
+    icon: icon('ic-analytics'),
+    roles: ['scs'],
+    children: [
+      { title: 'SCS Dashboard 1', path: '/scs-home/dashboard1', roles: ['scs', 'admin'] },
+      { title: 'SCS Dashboard 2', path: '/scs-home/dashboard2', roles: ['scs', 'admin'] },
+    ],
+  },
   
   //SLWG Menu
   {
@@ -136,9 +147,9 @@ export const navData = [
   // },
   {
     title: '3PL SETUP',
-    path: '/threepl-setup',
+    path: '/threepl-page',
     icon: icon('ic-logistic'),
-    roles: [''],
+    roles: ['admin'],
   },
   // {
   //   title: 'Role',
@@ -170,7 +181,7 @@ export const navData = [
     title: 'Vaccine Request',
     path: '/vaccine-page',
     icon: <MenuBookIcon />,
-    roles: ['ehf'],
+    roles: ['ehf', 'lcs', 'scs', 'threepl'],
   },
   // {
   //   title: 'Vaccine Allocation',
@@ -183,7 +194,7 @@ export const navData = [
     title: 'Vaccine Allocation',
     path: '/vaccine-conveyor-page',
     icon: icon('ic-community'),
-    roles: ['conveyor'],
+    roles: ['conveyor', 'ehf', 'uhf'],
   },
   // {
   //   title: 'Table Page',

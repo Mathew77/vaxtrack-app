@@ -1,23 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { PentaVaccineData } from "src/types/vaccines/penta";
 import { sectionBorderStyle } from "src/utils/constants";
 
 interface ExtendedPentaVaccineProps {
-  initialData?: PentaVaccineData;
-  vaccineOptions: { value: string; label: string; component: (props: any) => JSX.Element }[];
-  currentIndex: number;
-  onNext: (data: PentaVaccineData, currentIndex: number) => void;
-  onBack?: (currentIndex: number) => void;
+  initialData?: any;
+  onDataChange: (data: any) => void;
 }
 
-export const PentaVaccine: React.FC<ExtendedPentaVaccineProps> = ({
+export const PentaVaccine = ({
   initialData,
-  vaccineOptions,
-  currentIndex,
-  onNext,
-  onBack,
-}) => {
+  onDataChange,
+}: ExtendedPentaVaccineProps): JSX.Element => {
   const [formData, setFormData] = useState<PentaVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
@@ -44,33 +38,9 @@ export const PentaVaccine: React.FC<ExtendedPentaVaccineProps> = ({
     }));
   };
 
-  const handleNextClick = () => {
-    onNext(formData, currentIndex);
-    setFormData({
-      physicalStock: '',
-      avgDailyConsumption: '',
-      expiryDate: '',
-      batchNo: '',
-      vvm2: '',
-      numberImmunized: '',
-      daysOfStock: '',
-      adjForAdd: '',
-      belowMinStock: '',
-      aboveMaxStock: '',
-      qtyReceived: '',
-      closingBalance: '',
-      postLmdDos: '',
-    });
-  };
-
-  const handleBackClick = () => {
-    if (onBack && currentIndex > 0) {
-      onBack(currentIndex); 
-    }
-  };
-
-  const isLastVaccine = currentIndex === vaccineOptions.length - 1;
-  const isFirstVaccine = currentIndex === 0;
+   useEffect(() => {
+      onDataChange(formData);
+    }, [formData, onDataChange])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -375,26 +345,6 @@ export const PentaVaccine: React.FC<ExtendedPentaVaccineProps> = ({
 
         </Grid>
       </Box>
-
-       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="medium"
-            onClick={handleNextClick}
-          >
-            {isLastVaccine ? 'Save' : 'Next'}
-          </Button>   
-          <Button
-            variant="contained"
-            color="inherit"
-            size="medium"
-            onClick={handleBackClick}
-            disabled={isFirstVaccine} 
-          >
-            Back
-          </Button>
-        </Box>
     </Box>
   );
 };

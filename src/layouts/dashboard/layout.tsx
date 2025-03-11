@@ -48,7 +48,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     if (storedUsername) {
       setUserName(storedUsername);
       
-      if (storedUsername.includes('dapo')) {
+      if (storedUsername.includes('admin')) {
         setUserRole('admin');
       } else if (storedUsername.includes('ehf')) {
         setUserRole('ehf');
@@ -56,6 +56,8 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
         setUserRole('uhf');
       } else if (storedUsername.includes('lcs')) {
         setUserRole('lcs');
+      } else if (storedUsername.includes('scs')) {
+        setUserRole('scs');
       } else if (storedUsername.includes('slwg')) {
         setUserRole('slwg');
       } else if (storedUsername.includes('threepl')) {

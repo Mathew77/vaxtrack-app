@@ -16,6 +16,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 
 interface FormData {
@@ -83,9 +84,13 @@ export default function ScsSetup() {
 
   return (
     <Container sx={{ mt: 2 }}>
-      <Typography variant="h5" sx={{ mb: 4 }}>
-        Role Setup
-      </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
+        <Typography variant="h5">Role Setup</Typography>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/roles-permissions-page')}>
+          Back
+        </Button>
+     
+      </Box>
 
       <Grid container spacing={2}>
         <Grid item xs={6}>
@@ -157,12 +162,12 @@ export default function ScsSetup() {
 
       </Grid>
 
-      <Box sx={{display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+      <Box sx={{display: 'flex', gap:4, mt: 4, mb: 4 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
         <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/roles-permissions-page')}>
-          Back
+          Cancel
         </Button>
       </Box>
     </Container>

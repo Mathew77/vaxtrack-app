@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -24,9 +24,9 @@ import { HpvVaccine } from '../hpv-vaccines';
 import { HepbVaccine } from '../hepb-vaccines';
 import { BopvVaccine } from '../bopv-vaccines';
 import { PentaVaccine } from '../penta-vaccines';
-import { TdVaccine } from '../td-vaccines';
 import { IpvVaccine } from '../ipv-vaccines';
 import { PcvVaccine } from '../pcv-vaccines';
+import { TdVaccine } from '../td-vaccines';
 import { ColdChainStatus } from '../cold-chain';
 
 interface VaccineLine {
@@ -41,19 +41,19 @@ interface VaccineOption {
 }
 
 const vaccineOptions: VaccineOption[] = [
-  { value: 'bcg', label: 'BCG Vaccine', component: (props: any) => <BcgVaccines {...props} /> },
-  { value: 'measles', label: 'Measles Vaccine', component: (props: any) => <MeaslesVaccine {...props} /> },
-  { value: 'yf', label: 'YF Vaccine', component: (props: any) => <YfVaccine {...props} /> },
-  { value: 'menA', label: 'MenA Vaccine', component: (props: any) => <MenAVaccine {...props} /> },
-  { value: 'rotaa', label: 'Rota Vaccine', component: (props: any) => <RotaVaccine {...props} /> },
-  { value: 'hpv', label: 'HPV Vaccine', component: (props: any) => <HpvVaccine {...props} /> },
-  { value: 'hepB', label: 'HepB Vaccine', component: (props: any) => <HepbVaccine {...props} /> },
-  { value: 'bopv', label: 'BOPV Vaccine', component: (props: any) => <BopvVaccine {...props} /> },
-  { value: 'penta', label: 'Penta Vaccine', component: (props: any) => <PentaVaccine {...props} /> },
-  { value: 'ipv', label: 'IPV Vaccine', component: (props: any) => <IpvVaccine {...props} /> },
-  { value: 'pcv', label: 'PCV Vaccine', component: (props: any) => <PcvVaccine {...props} /> },
-  { value: 'td', label: 'Td Vaccine', component: (props: any) => <TdVaccine {...props} /> },
-  { value: 'cold-chain', label: 'Cold Chain Status', component: (props: any) => <ColdChainStatus {...props} /> },
+  { value: 'bcg', label: 'BCG Vaccine', component: BcgVaccines },
+  { value: 'measles', label: 'Measles Vaccine', component: MeaslesVaccine },
+  { value: 'yf', label: 'YF Vaccine', component: YfVaccine },
+  { value: 'menA', label: 'MenA Vaccine', component: MenAVaccine },
+  { value: 'rota', label: 'Rota Vaccine', component: RotaVaccine },
+  { value: 'hpv', label: 'HPV Vaccine', component: HpvVaccine },
+  { value: 'hepB', label: 'HepB Vaccine', component: HepbVaccine },
+  { value: 'bopv', label: 'BOPV Vaccine', component: BopvVaccine },
+  { value: 'penta', label: 'Penta Vaccine', component: PentaVaccine },
+  { value: 'ipv', label: 'IPV Vaccine', component: IpvVaccine },
+  { value: 'pcv', label: 'PCV Vaccine', component: PcvVaccine },
+  { value: 'td', label: 'Td Vaccine', component: TdVaccine  },
+  { value: 'cold-chain', label: 'Cold Chain Status', component: ColdChainStatus },
 ];
 
 export function VaccineRequestList() {
@@ -61,6 +61,10 @@ export function VaccineRequestList() {
   const [availableVaccines, setAvailableVaccines] = useState<VaccineOption[]>(vaccineOptions);
   const [vaccineLines, setVaccineLines] = useState<VaccineLine[]>([]);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    console.log('Selected Tab:', selectedTab);
+  }, [selectedTab]);
 
   const sortVaccinesByOriginalOrder = (vaccines: VaccineOption[]): VaccineOption[] => {
     return [...vaccines].sort((a, b) => {
@@ -72,6 +76,40 @@ export function VaccineRequestList() {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setSelectedTab(newValue);
+  };
+
+  const handleDataChange = (data: any) => {
+    setFormDataCollection((prev) => ({
+      ...prev,
+      [selectedTab]: data,
+    }));
+  };
+
+  const handleNext = () => {
+    const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < vaccineOptions.length) {
+      setSelectedTab(vaccineOptions[nextIndex].value);
+    }
+  };
+
+  const handleBack = () => {
+    const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
+    const prevIndex = currentIndex - 1;
+    if (prevIndex >= 0) {
+      setSelectedTab(vaccineOptions[prevIndex].value);
+    }
+  };
+
+  const handleDone = () => {
+    const newVaccineLines = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      data,
+    }));
+    setVaccineLines((prev) => [...newVaccineLines, ...prev]);
+    setFormDataCollection({});
+    setAvailableVaccines(vaccineOptions);
+    setSelectedTab(vaccineOptions[0].value);
   };
 
   const handleDelete = (index: number) => {
@@ -99,36 +137,9 @@ export function VaccineRequestList() {
     }
   };
 
-  const handleNext = (data: any, currentIndex: number) => {
-    setFormDataCollection((prev) => ({
-      ...prev,
-      [vaccineOptions[currentIndex].value]: data,
-    }));
-    const nextIndex = currentIndex + 1;
-    if (nextIndex < vaccineOptions.length) {
-      setSelectedTab(vaccineOptions[nextIndex].value);
-    }
-  };
-
-  const handleBack = (currentIndex: number) => {
-    const prevIndex = currentIndex - 1;
-    if (prevIndex >= 0) {
-      setSelectedTab(vaccineOptions[prevIndex].value);
-    }
-  };
-
-  // const handleSubmit = () => {
-  //   const currentDate = format(new Date(), "dd/MM/yyyy");
-  //   const newVaccineLines = Object.entries(formDataCollection).map(([type, data]) => ({
-  //     type,
-  //     data: { ...data, dateCreated: currentDate },
-  //   }));
-  //   setVaccineLines((prev) => [...newVaccineLines, ...prev]);
-  //   setFormDataCollection({});
-  //   setAvailableVaccines([]);
-  // };
-
-  const isLastTab = selectedTab === availableVaccines[availableVaccines.length - 1]?.value;
+  const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
+  const isLastTab = currentIndex === vaccineOptions.length - 1;
+  const isFirstTab = currentIndex === 0;
 
   return (
     <DashboardContent>
@@ -155,9 +166,7 @@ export function VaccineRequestList() {
                 variant="scrollable"
                 value={selectedTab}
                 onChange={handleTabChange}
-                sx={{
-                  '& .MuiTabs-indicator': { backgroundColor: '#1976D2' },
-                }}
+                sx={{ '& .MuiTabs-indicator': { backgroundColor: '#1976D2' } }}
               >
                 {availableVaccines.map((vaccine) => (
                   <Tab
@@ -174,9 +183,7 @@ export function VaccineRequestList() {
                         color: 'white',
                         borderRadius: 1,
                       },
-                      '&:hover': {
-                        backgroundColor: '#1565C0',
-                      },
+                      '&:hover': { backgroundColor: '#1565C0' },
                       borderRadius: 0,
                       minHeight: 36,
                     }}
@@ -193,10 +200,7 @@ export function VaccineRequestList() {
                   .find((v) => v.value === selectedTab)
                   ?.component({
                     initialData: formDataCollection[selectedTab] || {},
-                    vaccineOptions,
-                    currentIndex: vaccineOptions.findIndex((v) => v.value === selectedTab),
-                    onNext: handleNext,
-                    onBack: handleBack,
+                    onDataChange: handleDataChange, // Use handleDataChange instead of handleNext
                   })}
               </Box>
             )}
@@ -270,13 +274,37 @@ export function VaccineRequestList() {
               </Box>
             )}
 
-            {/* {isLastTab && Object.keys(formDataCollection).length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-                  Submit
+            {selectedTab && (
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  onClick={isLastTab ? handleDone : handleNext}
+                >
+                  {isLastTab ? 'Save' : 'Next'}
                 </Button>
+                <Button
+                  variant="contained"
+                  color="inherit"
+                  size="large"
+                  onClick={handleBack}
+                  disabled={isFirstTab}
+                >
+                  Back
+                </Button>
+                {/* {isLastTab && (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    size="large"
+                    onClick={handleDone}
+                  >
+                    Save All
+                  </Button>
+                )} */}
               </Box>
-            )} */}
+            )}
           </Grid>
         </Grid>
       </Container>

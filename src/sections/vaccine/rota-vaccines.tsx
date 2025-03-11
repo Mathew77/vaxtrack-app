@@ -1,23 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { RotaVaccineData } from "src/types/vaccines/rota"; 
 import { sectionBorderStyle } from "src/utils/constants";
 
 interface ExtendedRotaVaccineProps {
-  initialData?: RotaVaccineData;
-  vaccineOptions: { value: string; label: string; component: (props: any) => JSX.Element }[];
-  currentIndex: number;
-  onNext: (data: RotaVaccineData, currentIndex: number) => void;
-  onBack?: (currentIndex: number) => void;
+  initialData?: any;
+  onDataChange: (data: any) => void;
 }
 
-export const RotaVaccine: React.FC<ExtendedRotaVaccineProps> = ({
+export const RotaVaccine = ({
   initialData,
-  vaccineOptions,
-  currentIndex,
-  onNext,
-  onBack,
-}) => {
+  onDataChange,
+}: ExtendedRotaVaccineProps): JSX.Element => {
   const [formData, setFormData] = useState<RotaVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
@@ -44,33 +38,9 @@ export const RotaVaccine: React.FC<ExtendedRotaVaccineProps> = ({
     }));
   };
 
-  const handleNextClick = () => {
-    onNext(formData, currentIndex);
-    setFormData({
-      physicalStock: '',
-      avgDailyConsumption: '',
-      expiryDate: '',
-      batchNo: '',
-      vvm2: '',
-      numberImmunized: '',
-      daysOfStock: '',
-      adjForAdd: '',
-      belowMinStock: '',
-      aboveMaxStock: '',
-      qtyReceived: '',
-      closingBalance: '',
-      postLmdDos: '',
-    });
-  };
-
-  const handleBackClick = () => {
-    if (onBack && currentIndex > 0) {
-      onBack(currentIndex); 
-    }
-  };
-
-  const isLastVaccine = currentIndex === vaccineOptions.length - 1;
-  const isFirstVaccine = currentIndex === 0;
+  useEffect(() => {
+    onDataChange(formData)
+  }, [formData, onDataChange])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -300,26 +270,6 @@ export const RotaVaccine: React.FC<ExtendedRotaVaccineProps> = ({
           </Grid>
 
         </Grid>
-      </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="medium"
-          onClick={handleNextClick}
-        >
-          {isLastVaccine ? 'Save' : 'Next'}
-        </Button>   
-        <Button
-          variant="contained"
-          color="inherit"
-          size="medium"
-          onClick={handleBackClick}
-          disabled={isFirstVaccine} 
-        >
-          Back
-        </Button>
       </Box>
     </Box>
   );

@@ -5,37 +5,22 @@ import { format } from 'date-fns';
 import { sectionBorderStyle } from "src/utils/constants";
 
 interface ExtendedColdChainProps {
-  initialData?: ColdChainVaccineData;
-  vaccineOptions: { value: string; label: string; component: (props: any) => JSX.Element }[];
-  currentIndex: number;
-  onNext: (data: ColdChainVaccineData, currentIndex: number) => void;
-  onBack?: (currentIndex: number) => void;
+  initialData?: any;
+  onDataChange: (data: any) => void;
 }
 
-export const ColdChainStatus: React.FC<ExtendedColdChainProps> = ({ 
+export const ColdChainStatus = ({ 
   initialData,
-  vaccineOptions,
-  currentIndex,
-  onNext,
-  onBack,
-}) => {
-  const currentDate = format(new Date(), "yyyy-MM-dd"); 
+  onDataChange,
+}: ExtendedColdChainProps): JSX.Element => {
+  // const currentDate = format(new Date(), "yyyy-MM-dd"); 
 
   const [formData, setFormData] = useState<ColdChainVaccineData>({
-    dateCreated: initialData?.dateCreated || currentDate, 
+    dateCreated: format(new Date(), "yyyy-MM-dd"), 
     equipStatus: '',
     requestType: '',
     ...(initialData || {}),
   });
-
-  useEffect(() => {
-    if (!initialData?.dateCreated) {
-      setFormData((prev) => ({
-        ...prev,
-        dateCreated: currentDate,
-      }));
-    }
-  }, [currentDate, initialData]);
 
   const handleInputChange = (field: keyof ColdChainVaccineData) => (
     event: React.ChangeEvent<HTMLInputElement | { value: string | number }>
@@ -46,24 +31,10 @@ export const ColdChainStatus: React.FC<ExtendedColdChainProps> = ({
     }));
   };
 
-  const handleNextClick = () => {
-    onNext(formData, currentIndex);
-    setFormData({
-      dateCreated: currentDate, 
-      equipStatus: '',
-      requestType: '',
-    });
+  useEffect(() => {
+      onDataChange(formData);
+    }, [formData, onDataChange])
 
-  };
-
-  const handleBackClick = () => {
-    if (onBack && currentIndex > 0) {
-      onBack(currentIndex); 
-    }
-  };
-  
-  const isLastVaccine = currentIndex === vaccineOptions.length - 1;
-  const isFirstVaccine = currentIndex === 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -133,26 +104,6 @@ export const ColdChainStatus: React.FC<ExtendedColdChainProps> = ({
             </Box>
           </Grid>
         </Grid>
-      </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="medium"
-          onClick={handleNextClick}
-        >
-          {isLastVaccine ? 'Save' : 'Next'}
-        </Button>  
-        <Button
-          variant="contained"
-          color="inherit"
-          size="medium"
-          onClick={handleBackClick}
-          disabled={isFirstVaccine} 
-        >
-          Back
-        </Button> 
       </Box>
     </Box>
   );

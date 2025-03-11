@@ -1,11 +1,11 @@
-import { VaccineRequestList } from "src/sections/vaccine/view";
+import { VaccineAllocationList } from "src/sections/vaccine-allocation/view";
 
 
 
 const VaccineConveyorPage: React.FC = () => {
     return (
         <>
-         <VaccineRequestList />
+         <VaccineAllocationList />
         </>
     )
 };
