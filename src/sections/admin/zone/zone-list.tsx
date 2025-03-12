@@ -10,8 +10,13 @@ import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined
 import { useNavigate } from 'react-router-dom';
 
 interface TableRow {
-  name: string;
-  description: string;
+  username: string;
+  full_name: string;
+  email: string;
+  address: string;
+  phone_number: string;
+  role: string;
+  org_unit: string;
 }
 
 interface TabPanelProps {
@@ -50,7 +55,7 @@ function a11yProps(index: number) {
   };
 }
 
-const LcsScsList: React.FC = () => {
+const ZoneList: React.FC = () => {
     const navigate = useNavigate();
 
   const [value, setValue] = useState<number>(0);
@@ -59,19 +64,24 @@ const LcsScsList: React.FC = () => {
     setValue(newValue);
   };
 
-  const lccoList: TableRow[] = [];
-  const scsList: TableRow[] = [];
+  const zoneList: TableRow[] = [];
+  const permissionsList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'zone_name',
+        header: 'Zone Name',
         size: 100,
       },
       {
-        accessorKey: 'description',
-        header: 'Description',
+        accessorKey: 'state',
+        header: 'State',
+        size: 200,
+      },
+      {
+        accessorKey: 'lga',
+        header: 'LGA',
         size: 200,
       },
     ],
@@ -105,21 +115,21 @@ const LcsScsList: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="LCS " {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="SCS " {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="Zone Management" {...a11yProps(0)} />
+        
       </Tabs>
 
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
             columns={columns}
-            data={lccoList}
-            tableHeader="LCS List"
+            data={zoneList}
+            tableHeader="Zone Management List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add LCS"
-            customRightButtonCallBackFunction={() => navigate('/lcs-setup')}
+            customRightButtonText="Add Zone"
+            customRightButtonCallBackFunction={() => navigate('/zone-setup')}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',
@@ -130,28 +140,8 @@ const LcsScsList: React.FC = () => {
         </Box>
       </TabPanel>
 
-      <TabPanel value={value} index={1}>
-        <Box>
-          <VaxTable
-            columns={columns}
-            data={scsList}
-            tableHeader="SCS List"
-            customRightButton
-            customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add SCS"
-            customRightButtonCallBackFunction={() => navigate('/scs-setup')}
-            actionMenuItems={actionMenuItems}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
-          />
-        </Box>
-      </TabPanel>
     </>
   );
 };
 
-export default LcsScsList;
+export default ZoneList;

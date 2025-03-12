@@ -175,6 +175,12 @@ export const navData = [
     icon: icon('ic-org'),
     roles: ['admin'],
   },
+  {
+    title: 'Zone Management',
+    path: '/zone-page',
+    icon: icon('ic-zone'),
+    roles: ['admin'],
+  },
   //Generic Menu 
   {
 

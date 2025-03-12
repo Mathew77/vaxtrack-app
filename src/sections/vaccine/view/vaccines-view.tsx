@@ -200,7 +200,7 @@ export function VaccineRequestList() {
                   .find((v) => v.value === selectedTab)
                   ?.component({
                     initialData: formDataCollection[selectedTab] || {},
-                    onDataChange: handleDataChange, // Use handleDataChange instead of handleNext
+                    onDataChange: handleDataChange, 
                   })}
               </Box>
             )}

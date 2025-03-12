@@ -16,7 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 interface FormData {
   State_id: string;
   lga_id: string;
-  lcco_name: string;
+  lcs_name: string;
   longitude: string;
   latitude: string;
   contactPersonName: string;
@@ -24,14 +24,14 @@ interface FormData {
   contactPersonEmail: string;
 }
 
-export default function LccoSetup() {
+export default function LcsSetup() {
 
   const navigate = useNavigate()
 
   const initialValues: FormData = {
     State_id: '',
     lga_id: '',
-    lcco_name: '',
+    lcs_name: '',
     longitude: '',
     latitude: '',
     contactPersonName: '',
@@ -50,9 +50,9 @@ export default function LccoSetup() {
     temp.lga_id = data.lga_id 
         ? '' 
         : 'Lga is required';
-    temp.lcco_name = data.lcco_name 
+    temp.lcs_name = data.lcs_name 
         ? '' 
-        : 'Lcco name required';
+        : 'Lcs name required';
     temp.longitude = data.longitude 
         ? '' 
         : 'Longitude required';
@@ -151,20 +151,20 @@ export default function LccoSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="lcco_name" >
-            Lcco Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          <Typography component="label" htmlFor="lcs_name" >
+            Lcs Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
-            id="lcco_name"
-            name="lcco_name"
-            placeholder="Lcco Name"
-            value={data.lcco_name}
+            id="lcs_name"
+            name="lcs_name"
+            placeholder="Lcs Name"
+            value={data.lcs_name}
             onChange={handleChange}
             variant="outlined"
             helperText={
-              errors?.lcco_name !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lcco_name}</span>
+              errors?.lcs_name !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lcs_name}</span>
               ) : ''
             }
           />

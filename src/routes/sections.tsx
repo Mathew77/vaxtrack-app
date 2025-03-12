@@ -43,6 +43,7 @@ export const LcsSCSPage = lazy(() => import('src/pages/admin/lcs-scs/index'));
 export const RolesPermissionsPage = lazy(() => import('src/pages/admin/roles-permissions/index'));
 export const OrgUnitPage = lazy(() => import('src/pages/admin/org-unit/index'));
 export const ThreePlPage = lazy(() => import('src/pages/admin/threepl/index'));
+export const ZonePage = lazy(() => import('src/pages/admin/zone/index'));
 
 // export const ScsSetup = lazy(() => import('src/pages/admin/lcs-scs/scs/scs-setup'));
 export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
@@ -60,6 +61,7 @@ export const ScsSetup = lazy(() => import('src/sections/admin/lcs-scs/scs/scs-se
 export const RolesSetup = lazy(() => import('src/sections/admin/roles-permissions/role/role-setup'));
 export const PermissionsSetup = lazy(() => import('src/sections/admin/roles-permissions/permission/permission-setup'));
 export const ThreePlSetup = lazy(() => import('src/sections/admin/threepl/threepl-setup'));
+export const ZoneSetup = lazy(() => import('src/sections/admin/zone/zone-setup'));
 
 
 //Test page
@@ -94,7 +96,7 @@ export function Router() {
       index: true
     },
     {
-      path: 'sign-in',
+      path: '/sign-in',
       element: (
         <AuthLayout>
           <Suspense fallback={renderFallback}>
@@ -149,6 +151,8 @@ export function Router() {
 
         { path: 'lcs-scs-page', element: <LcsSCSPage /> },
         { path: 'threepl-page', element: <ThreePlPage /> },
+        { path: 'zone-page', element: <ZonePage /> },
+        { path: 'zone-setup', element: <ZoneSetup /> },
 
 
         //TestPage

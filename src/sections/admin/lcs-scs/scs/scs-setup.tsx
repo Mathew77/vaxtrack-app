@@ -151,7 +151,7 @@ export default function ScsSetup() {
             fullWidth
             id="scsName"
             name="scsName"
-            placeholder="Enter School Name"
+            placeholder="Enter Scs Name"
             value={data.scsName}
             onChange={handleChange}
             variant="outlined"

@@ -114,7 +114,7 @@ const EhfUHFList: React.FC = () => {
           <VaxTable
             columns={columns}
             data={ehfList}
-            tableHeader="EHF LIST"
+            tableHeader="EHF List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
@@ -135,7 +135,7 @@ const EhfUHFList: React.FC = () => {
           <VaxTable
             columns={columns}
             data={uhfList}
-            tableHeader="UHF LIST"
+            tableHeader="UHF List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}

@@ -144,7 +144,7 @@ const UserList: React.FC = () => {
           <VaxTable
             columns={columns}
             data={rolesList}
-            tableHeader="User List"
+            tableHeader="User Management List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}

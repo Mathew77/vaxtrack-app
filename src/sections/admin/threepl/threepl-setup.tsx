@@ -209,29 +209,23 @@ export default function ThreePlSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="threepl" >
-              3PL Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="threepl"
-              name="threepl"
-              value={data.threepl}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                Select 3pl Name
-              </MenuItem>
-            </Select>
-            {errors?.threepl !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.threepl}
-              </Typography>
-            )}
-          </FormControl>
+          <Typography component="label" htmlFor="threepl" >
+            3PL Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="threepl"
+            name="threepl"
+            placeholder="Enter 3PL Name"
+            value={data.threepl}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.threepl !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.threepl}</span>
+              ) : ''
+            }
+          />
         </Grid>
 
         <Grid item xs={12}> 

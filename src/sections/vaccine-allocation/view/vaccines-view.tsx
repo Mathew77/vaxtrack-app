@@ -60,9 +60,9 @@ export function VaccineAllocationList() {
   const [vaccineLines, setVaccineLines] = useState<VaccineLine[]>([]);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
 
-  useEffect(() => {
-    console.log('Selected Tab:', selectedTab);
-  }, [selectedTab]);
+  // useEffect(() => {
+  //   console.log('Selected Tab:', selectedTab);
+  // }, [selectedTab]);
 
   const sortVaccinesByOriginalOrder = (vaccines: VaccineOption[]): VaccineOption[] => {
     return [...vaccines].sort((a, b) => {
@@ -233,7 +233,7 @@ export function VaccineAllocationList() {
                 })()}
               </Box>
             )}
-
+{/* 
             {availableVaccines.length === 0 && vaccineLines.length === 0 && (
               <Box
                 sx={{
@@ -249,7 +249,7 @@ export function VaccineAllocationList() {
                   Select a Vaccine to show data
                 </Typography>
               </Box>
-            )}
+            )} */}
 
             {vaccineLines.length > 0 && (
               <Box>
