@@ -71,7 +71,7 @@ export default function VaccineOverview() {
       {/* Pending Vaccine Requests */}
       <Grid item xs={12} sm={4}>
         <VaccineCard
-          title="Pending Requests"
+          title="Number of Mismatches"
           total="120K"
           icon={<PendingActionsIcon fontSize="large" />}
           bgColor="linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)"

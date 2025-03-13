@@ -13,7 +13,7 @@ export default function Page() {
         <title> {`404 page not found! | Error - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <NotFoundView />
+      {/* <NotFoundView /> */}
     </>
   );
 }

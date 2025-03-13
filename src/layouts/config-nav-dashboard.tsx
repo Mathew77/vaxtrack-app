@@ -1,5 +1,7 @@
 //import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
+import StackedLineChartIcon from '@mui/icons-material/StackedLineChart';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 // ----------------------------------------------------------------------
 
@@ -12,7 +14,7 @@ export const navData = [
   //   title: 'Dashboard',
   //   path: '/home',
   //   icon: icon('ic-analytics'),
-  //   roles: ['admin', 'ehf', 'uhf', 'lcco', 'slwg', 'threepl'],
+  //   roles: ['admin', 'ehf', 'uhf', 'lcs', 'slwg', 'threepl'],
   // },
 //EHF Menu
   {
@@ -21,8 +23,10 @@ export const navData = [
     icon: icon('ic-user'),
     roles: ['ehf'],
     children: [
-      { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['ehf', 'admin'] },
-      { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['ehf', 'admin'] },
+      // { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['ehf', 'admin'] },
+      // { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['ehf', 'admin'] },
+      { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['', ] },
+      { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['', ''] },
     ],
   },
   
@@ -38,15 +42,26 @@ export const navData = [
     ],
   },
   
-  //LCCO Menu
+  //LCS Menu
   {
     title: 'Dashboard',
-    path: '/lcco-home',
+    path: '/lcs-home',
     icon: icon('ic-analytics'),
-    roles: ['lcco'],
+    roles: ['lcs'],
     children: [
-      { title: 'LCCO Dashboard 1', path: '/lcco-home/dashboard1', roles: ['lcco', 'admin'] },
-      { title: 'LCCO Dashboard 2', path: '/lcco-home/dashboard2', roles: ['lcco', 'admin'] },
+      { title: 'LCS Dashboard 1', path: '/lcs-home/dashboard1', roles: ['lcs', 'admin'] },
+      { title: 'LCS Dashboard 2', path: '/lcs-home/dashboard2', roles: ['lcs', 'admin'] },
+    ],
+  },
+
+  {
+    title: 'Dashboard',
+    path: '/scs-home',
+    icon: icon('ic-analytics'),
+    roles: ['scs'],
+    children: [
+      { title: 'SCS Dashboard 1', path: '/scs-home/dashboard1', roles: ['scs', 'admin'] },
+      { title: 'SCS Dashboard 2', path: '/scs-home/dashboard2', roles: ['scs', 'admin'] },
     ],
   },
   
@@ -73,6 +88,19 @@ export const navData = [
       { title: '3PL Dashboard 2', path: '/threepl-home/dashboard2', roles: ['threepl', 'admin'] },
     ],
   },
+
+  //Conveyor Menu
+  {
+    title: 'Dashboard',
+    path: '/conveyor-home',
+    icon: icon('ic-user'),
+    roles: ['conveyor'],
+    children: [
+      { title: 'Conveyor Dashboard 1', path: '/conveyor-home/dashboard1', roles: ['conveyor', 'admin'] },
+      { title: 'Conveyor Dashboard 2', path: '/conveyor-home/dashboard2', roles: ['conveyor', 'admin'] },
+    ],
+  },
+  
  
   //Adminsitratve  Menu
   {
@@ -81,54 +109,116 @@ export const navData = [
     icon: icon('ic-analytics'),
     roles: ['admin'],
   },
-  
-  {
-    title: 'EHF & UHF Setup',
-    path: '/',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'LCCO & SLWG SETUP',
-    path: '/',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: '3PL & SCS SETUP',
-    path: '/',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
-  {
-    title: 'Roles & Permissions',
-    path: '/',
-    icon: icon('ic-user'),
-    roles: ['admin'],
-  },
   {
     title: 'User Management',
-    path: '/',
+    path: '/user-management',
     icon: icon('ic-user'),
     roles: ['admin'],
   },
   {
+    title: 'EHF & UHF Setup',
+    path: '/ehf-uhf-page',
+    icon: icon('ic-facility'),
+    roles: ['admin', 'lcs', 'slwg'],
+  },
+  {
+    title: 'LCS & SCS Setup',
+    path: '/lcs-scs-page',
+    icon: icon('ic-local'),
+    roles: ['admin', 'slwg'],
+  },
+  {
+    title: 'Roles & Permissions Setup',
+    path: '/roles-permissions-page',
+    icon: icon('ic-access'),
+    roles: ['admin'],
+  },
+  // {
+  //   title: 'LCS SETUP',
+  //   path: '/lcs-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'UHF SETUP',
+  //   path: '/uhf-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  {
+    title: '3PL SETUP',
+    path: '/threepl-page',
+    icon: icon('ic-logistic'),
+    roles: ['admin'],
+  },
+  // {
+  //   title: 'Role',
+  //   path: '/role-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'Permission',
+  //   path: '/permission-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  // {
+  //   title: 'SCS',
+  //   path: '/scs-setup',
+  //   icon: icon('ic-user'),
+  //   roles: ['admin'],
+  // },
+  {
     title: 'Organisation Unit',
-    path: '/',
-    icon: icon('ic-user'),
+    path: '/org-unit-page',
+    icon: icon('ic-org'),
+    roles: ['admin'],
+  },
+  {
+    title: 'Zone Management',
+    path: '/zone-page',
+    icon: icon('ic-zone'),
     roles: ['admin'],
   },
   //Generic Menu 
   {
-    title: 'Vaccine Request Form',
-    path: '/vaccines',
-    icon: icon('ic-lock'),
-    roles: ['ehf','uhf','lcco','slwg','threepl'],
+
+    title: 'Vaccine Request',
+    path: '/vaccine-page',
+    icon: <MenuBookIcon />,
+    roles: ['ehf', 'lcs', 'scs', 'threepl'],
   },
+  // {
+  //   title: 'Vaccine Allocation',
+  //   path: '/conveyor',
+  //   icon: <MenuBookIcon />,
+  //   roles: ['conveyor', 'ehf', 'uhf'],
+
+  // },
+  {
+    title: 'Vaccine Allocation',
+    path: '/vaccine-conveyor-page',
+    icon: icon('ic-community'),
+    roles: ['conveyor', 'ehf', 'uhf'],
+  },
+  // {
+  //   title: 'Table Page',
+  //   path: '/table',
+  //   icon: icon('ic-lock'),
+  //   roles: ['ehf','uhf','lcs','slwg','threepl'],
+  // },
   {
     title: 'Report',
     path: '/report',
+    icon: <StackedLineChartIcon />,
+    roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
+  },
+  //test-page
+  {
+    title: 'Test-Page',
+    path: '/test-page',
     icon: icon('ic-blog'),
-    roles: ['ehf','uhf','lcco','slwg','threepl'],
+    roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
   },
 ];

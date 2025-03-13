@@ -19,7 +19,7 @@ export function Main({ children, sx, ...other }: BoxProps) {
         display: 'flex',
         flex: '1 1 auto',
         flexDirection: 'column',
-        //marginTop: '10px',
+        marginTop: '40px',
         ...sx,
       }}
       {...other}

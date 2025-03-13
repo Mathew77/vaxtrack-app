@@ -1,15 +1,30 @@
-import React, { useState } from "react";
-import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { YFVaccineData, YFVaccineProps } from "src/types/vaccines/yf";
-import { format } from 'date-fns'
+import React, { useEffect, useState } from 'react';
+import {
+  TextField,
+  FormControl,
+  Grid,
+  Button,
+  Typography,
+  Box,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import { YFVaccineData } from 'src/types/vaccines/yf';
 import { sectionBorderStyle } from 'src/utils/constants';
 
-export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }) => {
+interface ExtendedYFVaccineProps {
+  initialData?: any;
+  onDataChange: (data: any) => void;
+}
 
+export const YfVaccine = ({
+  initialData,
+  onDataChange,
+}: ExtendedYFVaccineProps): JSX.Element => {
   const [formData, setFormData] = useState<YFVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -25,34 +40,17 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
   });
 
   const handleInputChange = (field: keyof YFVaccineData) => (
-      event: React.ChangeEvent<HTMLInputElement | { value: string | number }>
-    ) => {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: event.target.value,
-      }));
-    };
+    event: React.ChangeEvent<HTMLInputElement | { value: unknown }>
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: event.target.value as string,
+    }));
+  };
 
-    const handleAddToLine = () => {
-      onAddToLine(formData);
-  
-      setFormData({
-        physicalStock: '',
-        avgDailyConsumption: '',
-        dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-        expiryDate: '',
-        batchNo: '',
-        vvm2: '',
-        numberImmunized: '',
-        daysOfStock: '',
-        adjForAdd: '',
-        belowMinStock: '',
-        aboveMaxStock: '',
-        qtyReceived: '',
-        closingBalance: '',
-        postLmdDos: '',
-      });
-    };
+  useEffect(() => {
+    onDataChange(formData);
+  }, [formData, onDataChange])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -73,7 +71,7 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
       </Typography>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>YF Vaccine</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>YF Antigen</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -94,23 +92,8 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <TextField 
                 fullWidth 
                 variant="outlined" 
-                defaultValue=""
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
-                 />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Date Created</InputLabel>
-              <TextField
-                fullWidth
-                type="datetime-local"
-                variant="outlined"
-                value={formData.dateCreated}
-                disabled
-                InputLabelProps={{ shrink: true }}
               />
             </Box>
           </Grid>
@@ -122,6 +105,8 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
                 fullWidth
                 type="date"
                 variant="outlined"
+                value={formData.expiryDate}
+                onChange={handleInputChange('expiryDate')}
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
@@ -132,20 +117,23 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <InputLabel>Batch No for Earliest Expiry Dates</InputLabel>
               <TextField
                 fullWidth
-                type="date"
                 variant="outlined"
-                InputLabelProps={{ shrink: true }}
+                value={formData.batchNo}
+                onChange={handleInputChange('batchNo')}
               />
             </Box>
           </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">VVM 2</InputLabel>
+
+              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
-                  // defaultValue="yes"
+                  value={formData.vvm2}
+                  // onChange={handleInputChange('vvm2')}
                   inputProps={{
                     name: 'vvm2',
                   }}
@@ -165,7 +153,7 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
                 variant="outlined" 
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
-                />
+              />
             </Box>
           </Grid>
 
@@ -177,14 +165,7 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
                 variant="outlined" 
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
-                />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField fullWidth variant="outlined" />
+              />
             </Box>
           </Grid>
 
@@ -194,7 +175,8 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <FormControl fullWidth>
                 <Select
                   id="min-stock"
-                  // defaultValue="yes"
+                  value={formData.belowMinStock}
+                  // onChange={handleInputChange('belowMinStock')}
                   inputProps={{
                     name: 'min-stock',
                   }}
@@ -212,7 +194,8 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <FormControl fullWidth>
                 <Select
                   id="max-stock"
-                  // defaultValue="max stock"
+                  value={formData.aboveMaxStock}
+                  // onChange={handleInputChange('aboveMaxStock')}
                   inputProps={{
                     name: 'max-stock',
                   }}
@@ -230,7 +213,8 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <TextField
                 fullWidth
                 variant="outlined"
-                // defaultValue=""
+                value={formData.qtyReceived}
+                onChange={handleInputChange('qtyReceived')}
               />
             </Box>
           </Grid>
@@ -241,7 +225,8 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <TextField
                 fullWidth
                 variant="outlined"
-                // disabled value=""
+                value={formData.closingBalance}
+                onChange={handleInputChange('closingBalance')}
               />
             </Box>
           </Grid>
@@ -252,99 +237,9 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
               <TextField
                 fullWidth
                 variant="outlined"
-                // disabled value=""
+                value={formData.postLmdDos}
+                onChange={handleInputChange('postLmdDos')}
               />
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                // disabled value=""
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                // disabled value=""
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="min-stock"
-                  // defaultValue="yes"
-                  inputProps={{
-                    name: 'min-stock',
-                  }}
-                >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="max-stock"
-                  // defaultValue="max stock"
-                  inputProps={{
-                    name: 'max-stock',
-                  }}
-                >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Closing Balance</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Post LMD DoS</InputLabel>
-              <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
         </Grid>
@@ -362,27 +257,12 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="min-stock"
-                  // defaultValue="yes"
+                  id="mis-match"
                   inputProps={{
-                    name: 'min-stock',
+                    name: 'mis-match',
                   }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -394,47 +274,16 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="max-stock"
-                  // defaultValue="max stock"
-                  inputProps={{
-                    name: 'max-stock',
-                  }}
-                >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
+              <InputLabel>Mismatch adjusted Value</InputLabel>
               <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Closing Balance</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Post LMD DoS</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.05ml Syringe per Vaccine Dose</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -445,27 +294,12 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="min-stock"
-                  // defaultValue="yes"
+                  id="mis-match"
                   inputProps={{
-                    name: 'min-stock',
+                    name: 'mis-match',
                   }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -477,60 +311,50 @@ export const YfVaccine: React.FC<YFVaccineProps> = ({ onAddToLine, initialData }
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="max-stock"
-                  // defaultValue="max stock"
-                  inputProps={{
-                    name: 'max-stock',
-                  }}
-                >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
+              <InputLabel>Mismatch adjusted Value</InputLabel>
               <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Closing Balance</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Post LMD DoS</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
         </Grid>
       </Box>
-      <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-        <Button 
-          variant="contained" 
-          color="inherit" 
-          size="medium"
-          onClick={handleAddToLine}
-        >
-          Add to Line
-        </Button>
-      </Box>   
 
-      {/* <Box sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" size="large">
-          Submit
-        </Button>
-      </Box> */}
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Physical Stock Balance</InputLabel>
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="mis-match"
+                  inputProps={{
+                    name: 'mis-match',
+                  }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Mismatch adjusted Value</InputLabel>
+              <TextField fullWidth variant="outlined" />
+            </Box>
+          </Grid>
+
+        </Grid>
+      </Box>
     </Box>
   );
 };

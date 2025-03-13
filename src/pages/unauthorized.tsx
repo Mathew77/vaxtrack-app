@@ -13,7 +13,7 @@ export default function Page() {
         <title> {`unauthorized - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <UnauthorizedView />
+      {/* <UnauthorizedView /> */}
     </>
   );
 }

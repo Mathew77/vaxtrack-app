@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { PcvVaccineData, PcvVaccineProps } from "src/types/vaccines/pcv";
 import { format } from 'date-fns'
 import { sectionBorderStyle } from "src/utils/constants";
 
 
-export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialData }) => {
+interface ExtendedPcvVaccineProps {
+  initialData?: any;
+  onDataChange: (data: any) => void;
+}
+
+export const  PcvVaccine = ({ 
+  initialData,
+  onDataChange,
+}: ExtendedPcvVaccineProps): JSX.Element => {
 
   const [formData, setFormData] = useState<PcvVaccineData>({
     physicalStock: '',
     avgDailyConsumption: '',
-    dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
     expiryDate: '',
     batchNo: '',
     vvm2: '',
@@ -35,26 +42,9 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
       }));
     };
 
-  const handleAddToLine = () => {
-    onAddToLine(formData);
-
-    setFormData({
-      physicalStock: '',
-      avgDailyConsumption: '',
-      dateCreated: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-      expiryDate: '',
-      batchNo: '',
-      vvm2: '',
-      numberImmunized: '',
-      daysOfStock: '',
-      adjForAdd: '',
-      belowMinStock: '',
-      aboveMaxStock: '',
-      qtyReceived: '',
-      closingBalance: '',
-      postLmdDos: '',
-    });
-  };
+    useEffect(() => {
+        onDataChange(formData);
+      }, [formData, onDataChange])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -75,7 +65,7 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
       </Typography>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>PCV Vaccine</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>PCV Antigen</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -103,7 +93,7 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Date Created</InputLabel>
               <TextField
@@ -115,7 +105,7 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
                 InputLabelProps={{ shrink: true }}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -143,7 +133,9 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">VVM 2</InputLabel>
+
+              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
@@ -169,13 +161,6 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Days of Stock</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
               <TextField fullWidth variant="outlined" />
             </Box>
           </Grid>
@@ -251,47 +236,25 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
         </Grid>
       </Box>
 
-      <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe per Vaccine Dose</Typography>
+     <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>PCV Diluent</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Physical Stock Balance"</InputLabel>
+              <InputLabel>Physical Stock Balance</InputLabel>
               <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
             </Box>
           </Grid>
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                // disabled value=""
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Adj for ADD</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                // disabled value=""
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="min-stock"
+                  id="mis-match"
                   // defaultValue="yes"
                   inputProps={{
-                    name: 'min-stock',
+                    name: 'mis-match',
                   }}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
@@ -303,61 +266,89 @@ export const  PcvVaccine: React.FC<PcvVaccineProps>  = ({ onAddToLine, initialDa
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="max-stock">Above Max Stock Level</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="max-stock"
-                  // defaultValue="max stock"
-                  inputProps={{
-                    name: 'max-stock',
-                  }}
-                >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                </Select>
-              </FormControl>
+              <InputLabel>Mistmatch adjusted Value	</InputLabel>
+              <TextField fullWidth variant="outlined"   />
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Closing Balance</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Post LMD DoS</InputLabel>
-              <TextField fullWidth variant="outlined" />
-            </Box>
-          </Grid>
         </Grid>
       </Box>
 
-      <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-        <Button 
-          variant="contained" 
-          color="inherit" 
-          size="medium"
-          onClick={handleAddToLine}
-        >
-          Add to Line
-        </Button>
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>5ml Syringe</Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Physical Stock Balance</InputLabel>
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="mis-match"
+                  // defaultValue="yes"
+                  inputProps={{
+                    name: 'mis-match',
+                  }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Mistmatch adjusted Value	</InputLabel>
+              <TextField fullWidth variant="outlined"   />
+            </Box>
+          </Grid>
+
+        </Grid>
       </Box>
 
-      {/* <Box sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" size="large">
-          Submit
-        </Button>
-      </Box> */}
+      <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Physical Stock Balance</InputLabel>
+              <TextField fullWidth variant="outlined" placeholder="Physical Stock Balance" />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="mis-match">Mismatch outcome</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="mis-match"
+                  // defaultValue="yes"
+                  inputProps={{
+                    name: 'mis-match',
+                  }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Mistmatch adjusted Value	</InputLabel>
+              <TextField fullWidth variant="outlined"   />
+            </Box>
+          </Grid>
+
+        </Grid>
+      </Box>
     </Box>
   );
 };

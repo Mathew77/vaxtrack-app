@@ -1,7 +1,7 @@
 export interface BcgVaccineData {
     physicalStock: string;
     avgDailyConsumption: string;
-    dateCreated: string,
+    // dateCreated: string,
     expiryDate: string;
     batchNo: string;
     vvm2: string;

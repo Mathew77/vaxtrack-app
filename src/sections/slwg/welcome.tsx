@@ -6,6 +6,7 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 
 
+
 // Define the types for the props
 interface CardProps {
   title: string;
@@ -18,8 +19,8 @@ interface CardProps {
 const cardData: CardProps[] =[
   { title: 'Total EHF', value: 35, icon: <LocalHospitalIcon />, bgColor: '#3F51B5', shadowColor: 'rgba(63, 81, 181, 0.3)' },
   { title: 'Total UHF', value: 23, icon: <OpenInNewIcon />, bgColor: '#F57C00', shadowColor: 'rgba(245, 124, 0, 0.3)' },
-  { title: 'Total LCCO', value: 5, icon: <AccountBalanceIcon />, bgColor: '#1976D2', shadowColor: 'rgba(25, 118, 210, 0.3)' },
-  { title: 'Total Vaccines', value: 12, icon: <VaccinesIcon />, bgColor: '#D81B60', shadowColor: 'rgba(216, 27, 96, 0.3)' }
+  { title: 'Total LCS', value: 5, icon: <AccountBalanceIcon />, bgColor: '#1976D2', shadowColor: 'rgba(25, 118, 210, 0.3)' },
+  { title: 'Number of LCS that reported at least one CCE in Non-functional status', value: 12, icon: <VaccinesIcon />, bgColor: '#D81B60', shadowColor: 'rgba(216, 27, 96, 0.3)' }
 ];
 
 const StyledCard: React.FC<CardProps> = ({ title, value, icon, bgColor, shadowColor }) => {
