@@ -3,7 +3,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = 'http://82.29.173.87:8000/api';
 
 export interface LoginResponse {
   username: string;
