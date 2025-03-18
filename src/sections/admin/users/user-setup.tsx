@@ -9,6 +9,7 @@ import {
  MenuItem,
  Select,
  FormControl,
+ SelectChangeEvent,
 } from '@mui/material';
 import DualListBox from 'react-dual-listbox';
 import 'react-dual-listbox/lib/react-dual-listbox.css';
@@ -18,93 +19,72 @@ import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
-
-interface FormData {
-  firstName: string;
-  lastName: string;
-  userName: string;
-  passWord: string;
-  confirmPassword: string;
-  roleId: string;
-  phoneNumber: string;
-  email: string;
-  permission: string[]
-}
-
-interface Role {
-  id: string | number; 
-  name: string;
-}
+import { UserType } from 'src/hooks/apis/user/user-types';
+import { useUpsertUser, useFetchOrgUnitLevel, useFetchPermissions, useFetchRoles, useFetchUsers } from 'src/hooks/apis/user/user-hooks';
 
 
 export default function UserSetup() {
 
   const navigate = useNavigate()
 
- const initialValues: FormData = {
-   firstName: '',
-   lastName: '',
-   userName: '',
-   passWord: '',
-   confirmPassword: '',
-   roleId: '',
-   phoneNumber: '',
-  email: '',
-  permission: []
-  //  roleId: '',
+  const { data: permissions = [] } = useFetchPermissions();
+  const { data: orgUnits = [] } = useFetchOrgUnitLevel();
+  const { data: roles = [] } = useFetchRoles();
+  const upsertUser = useUpsertUser();
+
+ const initialValues: UserType = {
+    first_name: '',
+    last_name: '',
+    username: '',
+    password: '',
+    confirm_password: '',
+    fk_org_unit_level: '',
+    phone_number: '',
+    email: '',
+    groups: [] as string[],
+    user_permissions: [] as string[]
  };
 
 
-
-
- const [data, setData] = useState<FormData>(initialValues);
- const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
- const [roles, setRoles] = useState<Role[]>([]);
+ const [data, setData] = useState<UserType>(initialValues);
+ const [errors, setErrors] = useState<Partial<Record<keyof UserType, string>>>({});
+//  const [roles, setRoles] = useState<Role[]>([]);
  const [permission, setPermission] = useState([]);
-
-
- const permisionOptions = [
-  { value: '1', label: 'Permission 1' },
-  { value: '2', label: 'Permission 2' },
-  { value: '3', label: 'Permission 3' },
-];
-
-const handlePermission = (selected: string[]) => {
-  setData((prev) => ({
-    ...prev,
-    permission: selected,
-  }));
-};
+ const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
 
 
  const validate = () => {
    let temp = { ...errors };
-   temp.firstName = data.firstName
+   temp.first_name = data.first_name
        ? ''
        : 'First name is required';
-   temp.lastName = data.lastName
+   temp.last_name = data.last_name
        ? ''
        : 'Last name is required';
-   temp.userName = data.userName
+   temp.username = data.username
        ? ''
        : 'Username is required';
-   temp.passWord = data.passWord
+   temp.password = data.password
        ? ''
        : 'Password required';
-  temp.confirmPassword = data.confirmPassword
-       ? ''
+    temp.confirm_password = data.confirm_password
+       ? data.password === data.confirm_password
+         ? ''
+         : 'Passwords do not match'
        : 'Confirm password required';
-   temp.roleId = data.roleId
+   temp.fk_org_unit_level = data.fk_org_unit_level
        ? ''
-       : 'Role required';
-  temp.phoneNumber = data.phoneNumber
+       : 'Org Unit required';
+  temp.phone_number = data.phone_number
        ? ''
        : 'Phone Number is required';
   temp.email = data.email
        ? ''
        : 'Email required';
+  temp.groups = (data.groups as string[]).length > 0 ? '' : 'Select at least one role';
 
-  temp.permission = data.permission.length > 0 ? '' : 'UHF required';
+  temp.user_permissions = (data.user_permissions as string[]).length > 0 ? '' : 'Permission required';
       
    setErrors({ ...temp });
    return Object.values(temp).every((x) => x === '');
@@ -120,45 +100,65 @@ const handlePermission = (selected: string[]) => {
  };
 
 
- useEffect(() => {
-  FetchRoles();
-}, []);
+ const handleRoleChange = (selected: string[]) => {
+  setData((prev) => ({
+    ...prev,
+    groups: selected, 
+  }));
+};
 
-  const FetchRoles = async () => {
-    try {
-      const response = await fetch('your-api-endpoint/permission');
-      const roleData = await response.json();
-      setRoles(roleData); 
-    } catch (error) {
-      console.error('Error fetching roles:', error);
+const handlePermissionChange = (selected: string[]) => {
+  setData((prev) => ({
+    ...prev,
+    user_permissions: selected,
+  }));
+};
+
+const handleSelectChange = (event: SelectChangeEvent<string>) => {
+  const { name, value } = event.target;
+  setData((prev) => ({ ...prev, [name]: value }));
+};
+ 
+
+const permissionOptions = permissions.map((perm) => ({
+  label: perm.name,
+  value: perm.id.toString(),
+}));
+
+const rolesOptions = roles.map((role) => ({
+  label: role.name,
+  value: role.id.toString(),
+}));
+
+const handleSubmit = () => {
+  if (validate()) {
+    const toBeSent = {
+      ...data,
+      groups: (data.groups as string[]).map(Number),
+      user_permissions: (data.user_permissions as string[]).map(Number),
+    };
+
+    if (isUpdate) {
+      upsertUser.mutate(
+        { id: data.id, data: toBeSent },
+        {
+          onSuccess: () => {
+            navigate('/user-management');
+          },
+        }
+      );
+    } else {
+      upsertUser.mutate(
+        { data: toBeSent },
+        {
+          onSuccess: () => {
+            navigate('/user-management');
+          },
+        }
+      );
     }
-  };
-
-  const handleChangePermission = (e: any) => {
-    const value = e.target.value
-    setPermission(typeof value === 'string' ? value.split(',') : value)
-    // setData()
-}
-
-  const GetPermission = (e: any) => {
-    setData({ ...data, [e.target.name]: e.target.value });
-    const stateId = e.target.value;
-    async function getCharacters() {
-                console.log("response");
-         
-    }
-    getCharacters();
-
-}
-
- const handleSubmit = () => {
-   if (validate()) {
-     console.log('Form Data:', data);
-     setData(initialValues);
-     setErrors({});
-   }
- };
-
+  }
+};
 
  return (
    <Container sx={{ mt:2 }}>
@@ -173,20 +173,20 @@ const handlePermission = (selected: string[]) => {
 
      <Grid container spacing={2}>
        <Grid item xs={6}>
-         <Typography component="label" htmlFor="firstName" >
+         <Typography component="label" htmlFor="first_name" >
            First Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
          </Typography>
          <TextField
            fullWidth
-           id="firstName"
-           name="firstName"
+           id="first_name"
+           name="first_name"
            placeholder="First Name"
-           value={data.firstName}
+           value={data.first_name}
            onChange={handleChange}
            variant="outlined"
            helperText={
-             errors?.firstName !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.firstName}</span>
+             errors?.first_name !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.first_name}</span>
              ) : ''
            }
          />
@@ -194,20 +194,20 @@ const handlePermission = (selected: string[]) => {
 
 
        <Grid item xs={6}>
-         <Typography component="label" htmlFor="lastName" >
+         <Typography component="label" htmlFor="last_name" >
            Last Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
          </Typography>
          <TextField
            fullWidth
-           id="lastName"
-           name="lastName"
+           id="last_name"
+           name="last_name"
            placeholder="Last Name"
-           value={data.lastName}
+           value={data.last_name}
            onChange={handleChange}
            variant="outlined"
            helperText={
-             errors?.lastName !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lastName}</span>
+             errors?.last_name !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.last_name}</span>
              ) : ''
            }
          />
@@ -215,139 +215,111 @@ const handlePermission = (selected: string[]) => {
 
 
        <Grid item xs={6}>
-         <Typography component="label" htmlFor="userName" >
+         <Typography component="label" htmlFor="username" >
            Username <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
          </Typography>
          <TextField
            fullWidth
-           id="lccouserName_name"
-           name="userName"
-           placeholder="Userame"
-           value={data.userName}
+           id="username"
+           name="username"
+           placeholder="Username"
+           value={data.username}
            onChange={handleChange}
            variant="outlined"
            helperText={
-             errors?.userName !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.userName}</span>
+             errors?.username !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.username}</span>
              ) : ''
            }
          />
        </Grid>
 
        <Grid item xs={6}>
-         <Typography component="label" htmlFor="passWord" >
+         <Typography component="label" htmlFor="password" >
            Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
          </Typography>
          <TextField
             type='password'
-           fullWidth
-           id="passWord"
-           name="passWord"
-           placeholder="Password"
-           value={data.passWord}
-           onChange={handleChange}
-           variant="outlined"
-           helperText={
-             errors?.passWord !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.passWord}</span>
-             ) : ''
-           }
+            fullWidth
+            id="password"
+            name="password"
+            placeholder="Password"
+            value={data.password}
+            onChange={handleChange}
+            variant="outlined"
+            helperText={
+              errors?.password !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.password}</span>
+              ) : ''
+            }
          />
         </Grid>
 
         <Grid item xs={6}>
-         <Typography component="label" htmlFor="confirmPassword" >
+         <Typography component="label" htmlFor="confirm_password" >
            Confirm Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
          </Typography>
          <TextField
             type='password'
            fullWidth
-           id="confirmPassword"
-           name="confirmPassword"
-           placeholder="confirm Password"
-           value={data.confirmPassword}
+           id="confirm_password"
+           name="confirm_password"
+           placeholder="Confirm Password"
+           value={data.confirm_password}
            onChange={handleChange}
            variant="outlined"
            helperText={
-             errors?.confirmPassword !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.confirmPassword}</span>
+             errors?.confirm_password !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.confirm_password}</span>
              ) : ''
            }
          />
         </Grid>
 
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="roleId" >
-            Role <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <Select
-            fullWidth
-            id="roleId"
-            name="roleId"
-            value={data.roleId}
-            onChange={GetPermission}
-            variant="outlined"
-            displayEmpty
-          >
-            <MenuItem value="">Select Role</MenuItem>
-            {roles.map((role) => (
-              <MenuItem key={`${role.name}-${role.id}`} value={role.id}>
-                {role.name}
-              </MenuItem>
-            ))}
-          </Select>
-          {errors?.roleId !== '' && (
-            <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-              {errors?.roleId}
-            </Typography>
-          )}
-        </Grid>
-
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="orgUnit" >
+            <Typography component="label" htmlFor="fk_org_unit_level" >
               Org Unit ID <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="orgUnit"
-              name="orgUnit"
-              // value={data.orgUnit} 
-              onChange={handleChangePermission}
+              id="fk_org_unit_level"
+              name="fk_org_unit_level"
+              value={data.fk_org_unit_level} 
+              onChange={handleSelectChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined" 
             >
               <MenuItem value="">Select Org Unit</MenuItem>
-              {/* {orgUnit.map((each) => (
-                <MenuItem key={`${each.name}-${each.id}`} value={each.id}>
-                  {each.name} // Fixed from role.name to each.name
+              {orgUnits.map((orgUnit) => (
+                <MenuItem key={`${orgUnit.name}-${orgUnit.id}`} value={orgUnit.id}>
+                  {orgUnit.name}
                 </MenuItem>
-              ))} */}
+              ))}
             </Select>
-            {errors?.roleId !== '' && (
+            {errors?.fk_org_unit_level !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.roleId}
+                {errors?.fk_org_unit_level}
               </Typography>
             )}
           </FormControl>
         </Grid>
 
         <Grid item xs={6}>
-         <Typography component="label" htmlFor="phoneNumber" >
+         <Typography component="label" htmlFor="phone_number" >
            Phone Number <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
          </Typography>
          <TextField
            fullWidth
-           id="phoneNumber"
-           name="phoneNumber"
+           id="phone_number"
+           name="phone_number"
            placeholder="Phone Number"
-           value={data.phoneNumber}
+           value={data.phone_number}
            onChange={handleChange}
            variant="outlined"
            helperText={
-             errors?.phoneNumber !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.phoneNumber}</span>
+             errors?.phone_number !== '' ? (
+               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.phone_number}</span>
              ) : ''
            }
          />
@@ -373,16 +345,16 @@ const handlePermission = (selected: string[]) => {
          />
        </Grid>
 
-        <Grid item xs={12}> 
+       <Grid item xs={12}> 
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" sx={{ mb: 1 }}>
-              Permissions <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Role <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <DualListBox
               canFilter
-              options={permisionOptions}
-              onChange={handlePermission}
-              selected={data.permission}
+              options={rolesOptions}
+              onChange={handleRoleChange}
+              selected={data.groups as string[]}
               className="dual-listbox-custom"
               alignActions="middle" 
               icons={{
@@ -392,9 +364,36 @@ const handlePermission = (selected: string[]) => {
                 moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
               }}
             />
-            {errors?.permission !== '' && (
+            {errors?.groups !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.permission}
+                {errors?.groups}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid>
+
+        <Grid item xs={12}> 
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" sx={{ mb: 1 }}>
+              Permissions <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <DualListBox
+              canFilter
+              options={permissionOptions}
+              onChange={handlePermissionChange}
+              selected={data.user_permissions as string[]}
+              className="dual-listbox-custom"
+              alignActions="middle" 
+              icons={{
+                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
+                moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
+              }}
+            />
+            {errors?.user_permissions !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.user_permissions}
               </Typography>
             )}
           </FormControl>

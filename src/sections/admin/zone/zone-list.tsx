@@ -8,15 +8,14 @@ import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
+import { useDeleteZone, useFetchZoneManagement } from 'src/hooks/apis/zone-management/zone-hooks';
+import { FaEye } from 'react-icons/fa';
 
 interface TableRow {
-  username: string;
-  full_name: string;
-  email: string;
-  address: string;
-  phone_number: string;
-  role: string;
-  org_unit: string;
+  id?: number;
+  zone_name: string;
+  state: string;
+  lgas: string[];
 }
 
 interface TabPanelProps {
@@ -56,7 +55,12 @@ function a11yProps(index: number) {
 }
 
 const ZoneList: React.FC = () => {
-    const navigate = useNavigate();
+
+  const navigate = useNavigate();
+
+  const {data: zoneList} = useFetchZoneManagement();
+  const deleteZone = useDeleteZone()
+
 
   const [value, setValue] = useState<number>(0);
 
@@ -64,43 +68,74 @@ const ZoneList: React.FC = () => {
     setValue(newValue);
   };
 
-  const zoneList: TableRow[] = [];
-  const permissionsList: TableRow[] = [];
+  // const zoneList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
       {
         accessorKey: 'zone_name',
         header: 'Zone Name',
-        size: 100,
+        size: 200,
       },
       {
         accessorKey: 'state',
         header: 'State',
-        size: 200,
+        size: 100,
       },
       {
-        accessorKey: 'lga',
+        accessorKey: 'lgas',
         header: 'LGA',
-        size: 200,
+        size: 300,
+        Cell: ({ cell }: { cell: { getValue: () => unknown } }) => {
+          const lgas = cell.getValue() as string[];
+          return lgas.join(',  ');
+        },
       },
     ],
     []
   );
 
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
-    {
-      display: 'View',
+  const getTabType = () => 'zone';
 
+  const handleView = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isView: true } });
+  };
+
+  const handleEdit = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+  };
+
+  const handleDelete = (data: TableRow) => {
+    if (data.id) {
+      deleteZone.mutate(data.id);
+    }
+  };
+
+  const handleAddNew = () => {
+    const type = getTabType();
+    navigate(`/${type}-setup`);
+  };
+
+
+
+  const zoneListItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
     },
   ];
 
@@ -129,8 +164,8 @@ const ZoneList: React.FC = () => {
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add Zone"
-            customRightButtonCallBackFunction={() => navigate('/zone-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={zoneListItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',

@@ -8,15 +8,17 @@ import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
+import { useFetchThreePl, useDeleteThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
+import { FaEye } from 'react-icons/fa';
 
 interface TableRow {
-  username: string;
-  full_name: string;
-  email: string;
-  address: string;
-  phone_number: string;
-  role: string;
-  org_unit: string;
+  id?: number;
+  state: string;  
+  lga: string;    
+  ward: string;   
+  org_unit: string; 
+  threepl_name: string;    
+  ehf_list: string[]; 
 }
 
 interface TabPanelProps {
@@ -58,69 +60,96 @@ function a11yProps(index: number) {
 const ThreeplList: React.FC = () => {
     const navigate = useNavigate();
 
+    const { data: threepl = [] } = useFetchThreePl();
+    const deleteThreepl = useDeleteThreepl();
+
   const [value, setValue] = useState<number>(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
-  const threeplList: TableRow[] = [];
-  const permissionsList: TableRow[] = [];
+  // const threeplList: TableRow[] = [];
+  // const permissionsList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: 'username',
-        header: 'User Name',
-        size: 100,
+        accessorKey: "state",
+        header: "State",
+        size: 150,
       },
       {
-        accessorKey: 'full_name',
-        header: 'Full Name',
+        accessorKey: "lga",
+        header: "LGA",
+        size: 150,
+      },
+      {
+        accessorKey: "ward",
+        header: "Ward",
+        size: 150,
+      },
+      {
+        accessorKey: "org_unit",
+        header: "Org. Unit",
         size: 200,
       },
       {
-        accessorKey: 'email',
-        header: 'Email',
+        accessorKey: "threepl_name",
+        header: "3PL Name",
         size: 200,
       },
       {
-        accessorKey: 'address',
-        header: 'Address',
+        accessorKey: "ehf_list",
+        header: "EHF List",
         size: 200,
-      },
-      {
-        accessorKey: 'phone_number',
-        header: 'Phone Number',
-        size: 200,
-      },
-      {
-        accessorKey: 'role',
-        header: 'Role',
-        size: 200,
-      },
-      {
-        accessorKey: 'org_unit',
-        header: 'Org. Unit',
-        size: 200,
+        Cell: ({ cell }: { cell: { getValue: () => unknown } }) => {
+          const ehf_list = cell.getValue() as string[];
+          return ehf_list.join(',  ');
+        },
       },
     ],
     []
   );
+  
+  const getTabType = () => 'threepl';
 
+  const handleView = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isView: true } });
+  };
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
+  const handleEdit = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+  };
+
+  const handleDelete = (data: TableRow) => {
+    if (data.id) {
+      deleteThreepl.mutate(data.id);
+    }
+  };
+
+  const handleAddNew = () => {
+    const type = getTabType();
+    navigate(`/${type}-setup`);
+  };
+
+  const threeplItem: ActionMenuItem<TableRow>[] = [
     {
-      display: 'View',
-
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
     },
   ];
 
@@ -143,14 +172,14 @@ const ThreeplList: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={threeplList}
+            data={threepl}
             tableHeader="3PL List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add 3PL"
             customRightButtonCallBackFunction={() => navigate('/threepl-setup')}
-            actionMenuItems={actionMenuItems}
+            actionMenuItems={threeplItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',

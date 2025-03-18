@@ -11,53 +11,80 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-interface FormData {
-  stateId: string;
-  orgUnitId: string;
-  scsName: string;
-
-  contactPersonName: string;
-  contactPersonPhone: string;
-  contactPersonEmail: string;
-
-}
+import { SCSType } from 'src/hooks/apis/lcs-scs/scs-type';
+import { useFetchStates, useUpsertScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
+import { toast } from 'react-toastify';
 
 
 export default function ScsSetup() {
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
 
-    const initialValues: FormData = {
-        stateId: '',
-        orgUnitId: '',
-        scsName: '',
-        contactPersonName: '',
-        contactPersonPhone: '',
-        contactPersonEmail: '',
+  const { data: states = [] } = useFetchStates();
+  const  upsertScs = useUpsertScs();
 
+    const initialValues: SCSType = {
+        status: '',
+        stat_id: '',
+        scs_name: '',
+        contact_person_name: '',
+        contact_person_phone: '',
+        contact_person_email: '',
+        longtitude: '',
+        lagtitude: '', 
     };
 
-    const [data, setData] = useState<FormData>(initialValues);
-    const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [data, setData] = useState<SCSType>(initialValues);
+  const [errors, setErrors] = useState<Partial<SCSType>>({});
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
+
+  const setCurrentState = () => {
+    if (state?.data) {
+      const scsData = state.data;
+      setData({
+        ...initialValues,
+        ...scsData,
+        stat_id: scsData.stat_id || '',
+      });
+      setIsUpdate(state.isUpdate || false);
+      setIsView(state.isView || false);
+    }
+  };
+
+  useEffect(() => {
+    setCurrentState();
+  }, [state]);
+    
 
 
   const validate = () => {
     let temp = { ...errors };
-    temp.stateId = data.stateId ? '' : 'State is required';
-    temp.orgUnitId = data.orgUnitId ? '' : 'Org Unit required';
-    temp.scsName = data.scsName ? '' : 'Scs is required';
-    temp.contactPersonName = data.contactPersonName 
-    ? '' 
-    : 'Contact person naame required';
-  temp.contactPersonPhone = data.contactPersonPhone 
-      ? '' 
-      : 'Contact person phone required';
-  temp.contactPersonEmail = data.contactPersonEmail 
-      ? '' 
-      : 'Contact person email required';
+    temp.stat_id = data.stat_id 
+        ? '' 
+        : 'State is required';
+    temp.scs_name = data.scs_name 
+        ? '' 
+        : 'Scs is required';
+    temp.contact_person_name = data.contact_person_name 
+        ? '' 
+        : 'Contact person naame required';
+    temp.contact_person_phone = data.contact_person_phone 
+        ? '' 
+        : 'Contact person phone required';
+    temp.contact_person_email = data.contact_person_email 
+        ? '' 
+        : 'Contact person email required';
+    temp.longtitude = data.longtitude 
+        ? '' 
+        : 'Longitude is required';
+    temp.lagtitude = data.lagtitude 
+        ? '' 
+        : 'Latitude is required';
 
     
     setErrors({ ...temp });
@@ -75,10 +102,29 @@ export default function ScsSetup() {
 
   const handleSubmit = () => {
     if (validate()) {
-      console.log('Form Data:', data);
+      if (isUpdate) {
+        upsertScs.mutate(
+          { id: data.id, data },
+          {
+            onSuccess: (response) => {
+              toast.success(response?.status || "SCS Updated Successfully");
+              navigate('/lcs-scs-page');
+            },
+          }
+        );
+      } else {
+        upsertScs.mutate(
+          { data },
+          {
+            onSuccess: (response) => {
+              toast.success(response?.status || "SCS Created Successfully");
+              navigate('/lcs-scs-page');
+            },
+          }
+        );
+      }
     }
   };
-
 
   return (
     <Container sx={{ mt: 2 }}>
@@ -86,79 +132,100 @@ export default function ScsSetup() {
         <Typography variant="h5">SCS Setup</Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page')}>
           Back
-        </Button>
-     
+        </Button>   
       </Box>
-
       <Grid container spacing={2}>
         <Grid item xs={6}>
             <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="stateId" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="stat_id" >
                 State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-                id="stateId"
-                name="stateId"
-                value={data.stateId}
+                id="stat_id"
+                name="stat_id"
+                value={data.stat_id}
                 onChange={handleChange}
                 sx={{ width: '100%' }}
                 displayEmpty
                 variant="outlined"
+                disabled={isView}
             >
                 <MenuItem value="" disabled>
                 Select State
                 </MenuItem>
+                 {states.map((state) => (
+                    <MenuItem key={state.state} value={state.state}>
+                      {state.state}
+                    </MenuItem>
+                  ))}
             </Select>
-            {errors?.stateId !== '' && (
+            {errors?.stat_id !== '' && (
                 <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.stateId}
+                {errors?.stat_id}
                 </Typography>
             )}
             </FormControl>
         </Grid>
 
         <Grid item xs={6}>
-            <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="orgUnitId" sx={{ mb: 1 }}>
-                Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-                id="orgUnitId"
-                name="orgUnitId"
-                value={data.orgUnitId}
-                onChange={handleChange}
-                sx={{ width: '100%' }}
-                displayEmpty
-                variant="outlined"
-            >
-                <MenuItem value="" disabled>
-                Select Org Unit
-                </MenuItem>
-            </Select>
-            {errors?.orgUnitId !== '' && (
-                <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.orgUnitId}
-                </Typography>
-            )}
-            </FormControl>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="scsName">
+          <Typography component="label" htmlFor="scs_name">
             SCS Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
-            id="scsName"
-            name="scsName"
+            id="scs_name"
+            name="scs_name"
             placeholder="Enter Scs Name"
-            value={data.scsName}
+            value={data.scs_name}
             onChange={handleChange}
             variant="outlined"
+            disabled={isView}
             helperText={
-              errors?.scsName && (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.scsName}</span>
+              errors?.scs_name && (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.scs_name}</span>
               )
+            }
+          />
+        </Grid>
+
+        <Grid item xs={6}>
+          <Typography component="label" htmlFor="longtitude" >
+            Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="longtitude"
+            name="longtitude"
+            placeholder="Longitude"
+            value={data.longtitude}
+            onChange={handleChange}
+            variant="outlined"
+            disabled={isView}
+            helperText={
+              errors?.longtitude !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
+              ) : ''
+            }
+          />
+        </Grid>
+
+        <Grid item xs={6}>
+          <Typography component="label" htmlFor="lagtitude" >
+            Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="lagtitude"
+            name="lagtitude"
+            placeholder="Latitude"
+            value={data.lagtitude}
+            onChange={handleChange}
+            variant="outlined"
+            disabled={isView}
+            helperText={
+              errors?.lagtitude !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
+              ) : ''
             }
           />
         </Grid>
@@ -184,12 +251,13 @@ export default function ScsSetup() {
                 id="contact_person_name"
                 name="contact_person_name"
                 placeholder="Contact Person Name"
-                value={data.contactPersonName}
+                value={data.contact_person_name}
                 onChange={handleChange}
                 variant="outlined"
+                disabled={isView}
                 helperText={
-                  errors?.contactPersonName ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonName}</span>
+                  errors?.contact_person_name ? (
+                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_name}</span>
                   ) : ''
                 }
               />
@@ -204,13 +272,14 @@ export default function ScsSetup() {
                 id="contact_person_phone"
                 name="contact_person_phone"
                 placeholder="Phone Number "
-                value={data.contactPersonPhone}
+                value={data.contact_person_phone}
                 onChange={handleChange}
                 variant="outlined"
+                disabled={isView}
                 type="tel"
                 helperText={
-                  errors?.contactPersonPhone ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonPhone}</span>
+                  errors?.contact_person_phone ? (
+                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
                   ) : ''
                 }
               />
@@ -225,13 +294,14 @@ export default function ScsSetup() {
                 id="contact_person_email"
                 name="contact_person_email"
                 placeholder="Email Address"
-                value={data.contactPersonEmail}
+                value={data.contact_person_email}
                 onChange={handleChange}
                 variant="outlined"
+                disabled={isView}
                 type="email"
                 helperText={
-                  errors?.contactPersonEmail ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonEmail}</span>
+                  errors?.contact_person_email ? (
+                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_email}</span>
                   ) : ''
                 }
               />

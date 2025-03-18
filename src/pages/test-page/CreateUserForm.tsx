@@ -1,46 +1,46 @@
 import React, { useState } from 'react';
-import { useCreateUser } from './../../hooks/apis/user/user-hooks';
+import { useUpsertUser } from './../../hooks/apis/user/user-hooks';
 
 const CreateUserForm: React.FC = () => {
   const [username, setName] = useState('');
   const [email, setEmail] = useState('');
-  const { mutate: createUser, isPending, error, isSuccess } = useCreateUser();
+  const { mutate: createUser, isPending, error, isSuccess } = useUpsertUser();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createUser(
-      {
-          username, email,
-          password: '',
-          last_login: null,
-          is_superuser: false,
-          is_staff: false,
-          is_active: false,
-          date_joined: '',
-          first_name: '',
-          last_name: '',
-          phone_number: '',
-          role: '',
-          org_unit: '',
-          active: false,
-          created_by: '',
-          created_date: '',
-          modify_by: null,
-          modify_date: null,
-          fk_org_unit_level: null,
-          groups: [],
-          user_permissions: []
-      },
-      {
-        onSuccess: () => {
-          setName('');
-          setEmail('');
-        },
-        onError: (err) => {
-          console.error('Create user failed:', err);
-        },
-      }
-    );
+    // createUser(
+    //   {
+    //       username, email,
+    //       password: '',
+    //       // last_login: null,
+    //       // is_superuser: false,
+    //       // is_staff: false,
+    //       // is_active: false,
+    //       // date_joined: '',
+    //       first_name: '',
+    //       last_name: '',
+    //       phone_number: '',
+    //       // role: '',
+    //       // org_unit: '',
+    //       // active: false,
+    //       // created_by: '',
+    //       created_date: '',
+    //       modify_by: null,
+    //       modify_date: null,
+    //       // fk_org_unit_level: null,
+    //       groups: [],
+    //       user_permissions: []
+    //   },
+    //   {
+    //     onSuccess: () => {
+    //       setName('');
+    //       setEmail('');
+    //     },
+    //     onError: (err) => {
+    //       console.error('Create user failed:', err);
+    //     },
+    //   }
+    // );
   };
 
   return (

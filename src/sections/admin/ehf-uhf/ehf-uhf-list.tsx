@@ -8,10 +8,21 @@ import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
+import { useFetchUHF, useDeleteUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { FaEye } from 'react-icons/fa';
+import { useDeleteEHF, useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
 interface TableRow {
-  name: string;
-  description: string;
+  id?: number;
+  state?: string;
+  lga?: string;
+  ward?: string;
+  contact_person_name?: string;
+  contact_person_phone?: string;
+  contact_person_email?: string;
+  org_unit?: string;
+  uhf_name?: string;
+  ehf_name?: string;
 }
 
 interface TabPanelProps {
@@ -55,23 +66,92 @@ const EhfUHFList: React.FC = () => {
 
   const [value, setValue] = useState<number>(0);
 
+  const { data: ehfList = [] } = useFetchEHF();
+  const deleteEHF = useDeleteEHF();
+
+  const { data: uhfList = [] } = useFetchUHF();
+  const deleteUHF = useDeleteUHF();
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
-  const ehfList: TableRow[] = [];
-  const uhfList: TableRow[] = [];
-
-  const columns = useMemo(
+  const ehfColumns = useMemo(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'state',
+        header: 'State',
         size: 100,
       },
       {
-        accessorKey: 'description',
-        header: 'Description',
+        accessorKey: 'lga',
+        header: 'LGA',
+        size: 120,
+      },
+      {
+        accessorKey: 'ward',
+        header: 'Ward',
+        size: 120,
+      },
+      {
+        accessorKey: 'ehf_name',
+        header: 'EHF Name',
+        size: 150,
+      },
+      {
+        accessorKey: 'contact_person_name',
+        header: 'Contact Person',
+        size: 150,
+      },
+      {
+        accessorKey: 'contact_person_phone',
+        header: 'Phone',
+        size: 120,
+      },
+      {
+        accessorKey: 'contact_person_email',
+        header: 'Email',
+        size: 200,
+      },
+    ],
+    []
+  );
+
+  const uhfColumns = useMemo(
+    () => [
+      {
+        accessorKey: 'state',
+        header: 'State',
+        size: 100,
+      },
+      {
+        accessorKey: 'lga',
+        header: 'LGA',
+        size: 120,
+      },
+      {
+        accessorKey: 'ward',
+        header: 'Ward',
+        size: 120,
+      },
+      {
+        accessorKey: 'uhf_name',
+        header: 'UHF Name',
+        size: 150,
+      },
+      {
+        accessorKey: 'contact_person_name',
+        header: 'Contact Person',
+        size: 150,
+      },
+      {
+        accessorKey: 'contact_person_phone',
+        header: 'Phone',
+        size: 120,
+      },
+      {
+        accessorKey: 'contact_person_email',
+        header: 'Email',
         size: 200,
       },
     ],
@@ -79,18 +159,66 @@ const EhfUHFList: React.FC = () => {
   );
 
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
-    {
-      display: 'View',
+  const getTabType = () => (value === 0 ? 'ehf' : 'uhf');
 
+  const handleView = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isView: true } });
+  };
+
+  const handleEdit = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+  };
+
+  const handleDelete = (data: TableRow) => {
+    const type = getTabType();
+    if (data.id) {
+      if(type === 'ehf'){
+        deleteEHF.mutate(data.id)
+      }else {
+        deleteUHF.mutate(data.id);
+      }
+    }
+  };
+
+  const handleAddNew = () => {
+    navigate(`/${getTabType()}-setup`);
+  };
+
+  const ehfItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+    },
+  ];
+
+  const uhfItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
+    },
+    {
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+    },
+    {
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
     },
   ];
 
@@ -112,15 +240,15 @@ const EhfUHFList: React.FC = () => {
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
-            columns={columns}
+            columns={ehfColumns}
             data={ehfList}
             tableHeader="EHF List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add EHF"
-            customRightButtonCallBackFunction={() => navigate('/ehf-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={ehfItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',
@@ -133,15 +261,15 @@ const EhfUHFList: React.FC = () => {
       <TabPanel value={value} index={1}>
         <Box>
           <VaxTable
-            columns={columns}
+            columns={uhfColumns}
             data={uhfList}
             tableHeader="UHF List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add UHF"
-            customRightButtonCallBackFunction={() => navigate('/uhf-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={uhfItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',

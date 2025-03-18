@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -10,6 +10,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
 import DualListBox from 'react-dual-listbox';
 import 'react-dual-listbox/lib/react-dual-listbox.css';
@@ -17,66 +18,99 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { EHFType } from 'src/hooks/apis/ehf-uhf/ehf-type';
+import { useFetchStates, useFetchLgas, useFetchWards, useFetchOrgUnits, useUpsertEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { toast } from 'react-toastify';
 
-interface FormData {
-  State_id: string;
-  lga_id: string;
-  ward_id: string;
-  org_unit_id: string;
-  ehf_name: string;
-  uhf_ids: string[];
-  contactPersonName: string;
-  contactPersonPhone: string;
-  contactPersonEmail: string;
-}
 
 export default function EhfSetup() {
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
 
-  const initialValues: FormData = {
-    State_id: '',
-    lga_id: '',
-    ward_id: '',
-    org_unit_id: '',
+  const upsertEHF = useUpsertEHF();
+
+  const {data: states = [] } = useFetchStates();
+  
+  const [selectedState, setSelectedState] = useState('');
+  const { data: lgas = [] } = useFetchLgas(selectedState);
+
+  const [selectedLga, setSelectedLga] = useState('');
+  const { data: wards = [] } = useFetchWards(selectedLga);
+
+  const { data: orgUnits = [] } = useFetchOrgUnits();
+
+  const { data: uhfs = [] } = useFetchUHF();
+
+  const initialValues: EHFType = {
+    status: '',
+    state: '',
+    lga: '',
+    ward: '',
+    org_unit: '',
     ehf_name: '',
-    uhf_ids: [],
-    contactPersonName: '',
-    contactPersonPhone: '',
-    contactPersonEmail: ''
+    uhf_list: [],
+    contact_person_name: '',
+    contact_person_phone: '',
+    contact_person_email: ''
   };
 
-  const [data, setData] = useState<FormData>(initialValues);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [data, setData] = useState<EHFType>(initialValues);
+  const [errors, setErrors] = useState<Partial<Record<keyof EHFType, string>>>({});
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
+
+  const setCurrentState = () => {
+    if (state?.data) {
+      const ehfData = state.data;
+      setData({
+        ...initialValues,
+        ...ehfData,
+        state: ehfData.state || '',
+        lga: ehfData.lga || '',
+        ward: ehfData.ward || ''
+      });
+      setSelectedState(ehfData.state || ''); 
+      setSelectedLga(ehfData.lga || ''); 
+      setIsUpdate(state.isUpdate || false);
+      setIsView(state.isView || false);
+    }
+  };
+
+  useEffect(() => {
+    setCurrentState();
+  }, [state]);
 
   const validate = () => {
     let temp = { ...errors };
-    temp.State_id = data.State_id 
+    temp.state = data.state 
         ? '' 
         : 'State is required';
-    temp.lga_id = data.lga_id 
+    temp.lga = data.lga 
         ? '' 
         : 'Lga is required';
-    temp.ward_id = data.ward_id 
+    temp.ward = data.ward 
         ? '' 
         : 'Ward is required';
-    temp.org_unit_id = data.org_unit_id 
+    temp.org_unit = data.org_unit 
         ? '' 
         : 'Org unit required';
     temp.ehf_name = data.ehf_name 
         ? '' 
         : 'EHF name required';
-    temp.uhf_ids = data.uhf_ids.length > 0 ? '' : 'UHF required';
+    temp.uhf_list = data.uhf_list.length > 0 ? '' : 'UHF required';
 
-    temp.contactPersonName = data.contactPersonName 
+    temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person name required';
-    temp.contactPersonPhone = data.contactPersonPhone 
+    temp.contact_person_phone = data.contact_person_phone 
         ? '' 
         : 'Contact person phone required';
-    temp.contactPersonEmail = data.contactPersonEmail 
+    temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
 
@@ -84,11 +118,10 @@ export default function EhfSetup() {
     return Object.values(temp).every((x) => x === '');
   };
 
-  const uhfOptions = [
-    { value: 'uhf1', label: 'UHF 1' },
-    { value: 'uhf2', label: 'UHF 2' },
-    { value: 'uhf3', label: 'UHF 3' },
-  ];
+  const uhfOptions = uhfs.map(uhf => ({
+    value: uhf.id?.toString() || '', 
+    label: uhf.uhf_name 
+  }));
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
@@ -98,18 +131,58 @@ export default function EhfSetup() {
     }));
   };
 
-  const handleChangeUHF = (selected: string[]) => {
-    setData((prev) => ({
-      ...prev,
-      uhf_ids: selected,
-    }));
-  };
+  const GetLGA = (e: SelectChangeEvent<string>) => {
+      const state = e.target.value;
+      setSelectedState(state); 
+      setData((prev) => ({
+        ...prev,
+        state: state,
+        lga_id: '',
+      }));
+    };
+  
+    const GetWards = (event: SelectChangeEvent<string>) => {
+      const lga = event.target.value;
+      setSelectedLga(lga)
+      setData((prev) => ({ 
+        ...prev, 
+        lga: lga,
+        ward: ''
+      }));
+    };
 
-  const handleSubmit = () => {
-    if (validate()) {
-      console.log('Form Data:', data);
-    }
-  };
+    const handleUHFChange = (selected: string[]) => {
+      setData((prev) => ({
+        ...prev,
+        uhf_list: selected
+      }));
+    };
+
+    const handleSubmit = () => {
+      if (validate()) {
+        if (isUpdate) {
+          upsertEHF.mutate(
+            { id: data.id, data },
+            {
+              onSuccess: (response) => {
+                toast.success(response?.status || "EHF Updated Successfully");
+                navigate('/ehf-uhf-page');
+              },
+            }
+          );
+        } else {
+          upsertEHF.mutate(
+            { data },
+            {
+              onSuccess: (response) => {
+                toast.success(response?.status || "EHF Created Successfully");
+                navigate('/ehf-uhf-page');
+              },
+            }
+          );
+        }
+      }
+    };
 
   return (
     <Container sx={{ mt: 2 }}>
@@ -124,25 +197,31 @@ export default function EhfSetup() {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="State_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="state" sx={{ mb: 1 }}>
               State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="State_id"
-              name="State_id"
-              value={data.State_id}
-              onChange={handleChange}
+              id="state"
+              name="state"
+              value={data.state}
+              onChange={GetLGA}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select State
               </MenuItem>
+              {states.map((state) => (
+                <MenuItem key={state.state} value={state.state}>
+                  {state.state}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.State_id !== '' && (
+            {errors?.state !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.State_id}
+                {errors?.state}
               </Typography>
             )}
           </FormControl>
@@ -150,25 +229,31 @@ export default function EhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="lga_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
               Lga <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="lga_id"
-              name="lga_id"
-              value={data.lga_id}
-              onChange={handleChange}
+              id="lga_lgaid"
+              name="lga"
+              value={data.lga}
+              onChange={GetWards}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select LGA
               </MenuItem>
+              {lgas.map((lga) => (
+                <MenuItem key={lga.lga} value={lga.lga}>
+                  {lga.lga}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.lga_id !== '' && (
+            {errors?.lga !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.lga_id}
+                {errors?.lga}
               </Typography>
             )}
           </FormControl>
@@ -176,25 +261,31 @@ export default function EhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="ward_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
               Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="ward_id"
-              name="ward_id"
-              value={data.ward_id}
+              id="ward"
+              name="ward"
+              value={data.ward}
               onChange={handleChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select Ward
               </MenuItem>
+              {wards.map((ward) => (
+                <MenuItem key={ward.ward} value={ward.ward}>
+                  {ward.ward}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.ward_id !== '' && (
+            {errors?.ward !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.ward_id}
+                {errors?.ward}
               </Typography>
             )}
           </FormControl>
@@ -202,25 +293,31 @@ export default function EhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="org_unit_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="org_unit" sx={{ mb: 1 }}>
               Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="org_unit_id"
-              name="org_unit_id"
-              value={data.org_unit_id}
+              id="org_unit"
+              name="org_unit"
+              value={data.org_unit}
               onChange={handleChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select Org Unit
               </MenuItem>
+              {orgUnits.map((orgUnit) => (
+                <MenuItem key={`${orgUnit.name}-${orgUnit.id}`} value={orgUnit.id}>
+                  {orgUnit.name}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.org_unit_id !== '' && (
+            {errors?.org_unit !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.org_unit_id}
+                {errors?.org_unit}
               </Typography>
             )}
           </FormControl>
@@ -238,6 +335,7 @@ export default function EhfSetup() {
             value={data.ehf_name}
             onChange={handleChange}
             variant="outlined"
+            disabled={isView}
             helperText={
               errors?.ehf_name !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.ehf_name}</span>
@@ -254,10 +352,11 @@ export default function EhfSetup() {
               <DualListBox
                 canFilter
                 options={uhfOptions}
-                onChange={handleChangeUHF}
-                selected={data.uhf_ids}
+                onChange={handleUHFChange}
+                selected={data.uhf_list}
                 className="dual-listbox-custom"
                 alignActions="middle" 
+                disabled={isView}
                 icons={{
                   moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
                   moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
@@ -265,9 +364,9 @@ export default function EhfSetup() {
                   moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
                 }}
               />
-            {errors?.uhf_ids !== '' && (
+            {errors?.uhf_list !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.uhf_ids}
+                {errors?.uhf_list}
               </Typography>
             )}
           </FormControl>
@@ -293,12 +392,13 @@ export default function EhfSetup() {
               id="contact_person_name"
               name="contact_person_name"
               placeholder="Contact Person Name"
-              value={data.contactPersonName}
-              onChange={handleChange}
+              value={data.contact_person_name}
+              onChange={handleChange} 
               variant="outlined"
+              disabled={isView}
               helperText={
-                errors?.contactPersonName ? (
-                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonName}</span>
+                errors?.contact_person_name ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_name}</span>
                 ) : ''
               }
             />
@@ -313,13 +413,14 @@ export default function EhfSetup() {
               id="contact_person_phone"
               name="contact_person_phone"
               placeholder="Phone Number "
-              value={data.contactPersonPhone}
+              value={data.contact_person_phone}
               onChange={handleChange}
               variant="outlined"
+              disabled={isView}
               type="tel"
               helperText={
-                errors?.contactPersonPhone ? (
-                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonPhone}</span>
+                errors?.contact_person_phone ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
                 ) : ''
               }
             />
@@ -334,13 +435,14 @@ export default function EhfSetup() {
               id="contact_person_email"
               name="contact_person_email"
               placeholder="Email Address"
-              value={data.contactPersonEmail}
+              value={data.contact_person_email}
               onChange={handleChange}
               variant="outlined"
+              disabled={isView}
               type="email"
               helperText={
-                errors?.contactPersonEmail ? (
-                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonEmail}</span>
+                errors?.contact_person_email ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_email}</span>
                 ) : ''
               }
             />

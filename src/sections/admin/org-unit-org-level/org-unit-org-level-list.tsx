@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import Tabs from '@mui/material/Tabs';
@@ -8,14 +8,20 @@ import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
-import { FaEye } from 'react-icons/fa';
-import { useDeleteRole, useFetchRoles } from 'src/hooks/apis/roles-permissions/roles-hook';
+import { apiHelper } from 'src/hooks/apis/apiHelper';
+import { url } from 'src/hooks/api';
+import { FaEye } from "react-icons/fa";
+import { useFetchOrgLevels, useDeleteOrgLevel } from 'src/hooks/apis/org-unit/org-level-hook';
+import { useDeleteOrgUnit, useFetchOrgUnits } from 'src/hooks/apis/org-unit/org-unit-hooks';
 
 interface TableRow {
-  id?: string | number;
-  name: string;
-  fk_org_unit_level_id: string
-  permissions: string[]
+  id?: number;
+  name?: string;
+  description?: string;
+  state?: string;
+  lga?: string;
+  ward?: string;
+  facilty_name?: string;
 }
 
 interface TabPanelProps {
@@ -23,6 +29,7 @@ interface TabPanelProps {
   value: number;
   index: number;
 }  
+
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -54,31 +61,73 @@ function a11yProps(index: number) {
   };
 }
 
-const RolesPermissionsList: React.FC = () => {
+const OrgUnitLevelList: React.FC = () => {
     const navigate = useNavigate();
 
-  const [value, setValue] = useState<number>(0);
+    const [value, setValue] = useState<number>(0);
+    // const [orgLevelList, setOrgLevelList] = useState<TableRow[]>([]);
 
-  const { data: rolesList = [] } = useFetchRoles();
-  const deleteRole = useDeleteRole()
+    const { data: orgLevelList = [], isLoading } = useFetchOrgLevels();
+    const deleteOrgLevel = useDeleteOrgLevel();
+
+    const { data: orgUnitList = [] } = useFetchOrgUnits();
+    const deleteOrgUnit = useDeleteOrgUnit();
+
+
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
-  // const rolesList: TableRow[] = [];
-  const permissionsList: TableRow[] = [];
+  const unitList: TableRow[] = [];
+  // const levelList: TableRow[] = [];
 
-  const columns = useMemo(
+  const orgUnit = useMemo(
     () => [
+       // {
+         //    accessorKey: 'id', 
+         //    header: 'ID',
+         //    size: 150,
+         // },
+      {
+        accessorKey: 'state',
+        header: 'State',
+        size: 100,
+      },
+      {
+        accessorKey: 'lga',
+        header: 'LGA',
+        size: 200,
+      },
+      {
+        accessorKey: 'ward',
+        header: 'Ward',
+        size: 200,
+      },
+      {
+        accessorKey: 'facility_name',
+        header: 'Facility Name',
+        size: 300,
+      }
+    ],
+    []
+  );
+
+  const orgLevel = useMemo(
+    () => [
+       // {
+         //    accessorKey: 'id', 
+         //    header: 'ID',
+         //    size: 150,
+         // },
       {
         accessorKey: 'name',
         header: 'Name',
         size: 100,
       },
       {
-        accessorKey: 'fk_org_unit_level_id',
-        header: 'Organisation Level',
+        accessorKey: 'description',
+        header: 'Description',
         size: 200,
       },
     ],
@@ -86,22 +135,7 @@ const RolesPermissionsList: React.FC = () => {
   );
 
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
-    {
-      display: 'View',
-
-    },
-    {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
-    },
-    {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
-    },
-  ];
-
-  const getTabType = () => (value === 0 ? 'role' : 'permission');
+  const getTabType = () => (value === 0 ? 'org-unit' : 'org-level');
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
@@ -115,15 +149,34 @@ const RolesPermissionsList: React.FC = () => {
 
   const handleDelete = (data: TableRow) => {
     if (data.id) {
-      deleteRole.mutate(data.id);
+      deleteOrgLevel.mutate(data.id)
     }
   };
 
   const handleAddNew = () => {
-    navigate(`/${getTabType()}-setup`);
+    const type = getTabType();
+    navigate(`/${type}-setup`);
   };
 
-  const rolesItem: ActionMenuItem<TableRow>[] = [
+  const orgUnitItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
+    },
+    {
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+    },
+    {
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+    },
+  ];
+
+  const orgListItem: ActionMenuItem<TableRow>[] = [
     {
       display: "View",
       handleClick: handleView,
@@ -142,6 +195,16 @@ const RolesPermissionsList: React.FC = () => {
   ];
 
 
+  // const fetchOrgLevel = () => {
+  //   apiHelper.getResource<ApiResponse<TableRow[]>>(`${url}v1/org-unit-level/`)
+  //   .then((response) =>{
+  //     setOrgLevelList(response.data);
+  //   })
+  // }
+
+  // useEffect(() => {
+  //   fetchOrgLevel()
+  // }, [])
 
   return (
     <>
@@ -154,22 +217,22 @@ const RolesPermissionsList: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="Roles " {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="Permissions " {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="Organisation Unit" {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="Organisation Level" {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
-            columns={columns}
-            data={rolesList}
-            tableHeader="Roles List"
+            columns={orgUnit}
+            data={orgUnitList}
+            tableHeader="Organisation Unit List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Roles"
+            customRightButtonText="Add Org Unit"
             customRightButtonCallBackFunction={handleAddNew}
-            actionMenuItems={rolesItem}
+            actionMenuItems={orgUnitItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',
@@ -182,15 +245,15 @@ const RolesPermissionsList: React.FC = () => {
       <TabPanel value={value} index={1}>
         <Box>
           <VaxTable
-            columns={columns}
-            data={permissionsList}
-            tableHeader="Permissions List"
+            columns={orgLevel}
+            data={orgLevelList}
+            tableHeader="Organisation Level List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Permissions"
-            customRightButtonCallBackFunction={() => navigate('/permission-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonText="Add Org Level"
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={orgListItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',
@@ -203,4 +266,4 @@ const RolesPermissionsList: React.FC = () => {
   );
 };
 
-export default RolesPermissionsList;
+export default OrgUnitLevelList;

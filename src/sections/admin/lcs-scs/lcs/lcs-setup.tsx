@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -9,42 +9,69 @@ import {
   FormControl,
   MenuItem,
   Select,
+  SelectChangeEvent,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { LcsType } from 'src/hooks/apis/lcs-scs/lcs-type';
+import { useFetchLgas, useFetchStates, useUpsertLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
+import { toast } from 'react-toastify';
 
-interface FormData {
-  State_id: string;
-  lga_id: string;
-  lcs_name: string;
-  longitude: string;
-  latitude: string;
-  contactPersonName: string;
-  contactPersonPhone: string;
-  contactPersonEmail: string;
-}
+
 
 export default function LcsSetup() {
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
 
-  const initialValues: FormData = {
-    State_id: '',
-    lga_id: '',
-    lcs_name: '',
-    longitude: '',
-    latitude: '',
-    contactPersonName: '',
-    contactPersonPhone: '',
-    contactPersonEmail: '',
+  const {data: states = []} = useFetchStates()
+  const [selectedState, setSelectedState] = useState('');
+  const { data: lgas = [] } = useFetchLgas(selectedState);
+  const upsertLcs = useUpsertLcs()
+
+  const initialValues: LcsType = {
+    status: "",
+    stat_id: "",
+    lga_id: "",
+    lcs_name: "",
+    longtitude: "",
+    lagtitude: "",
+    contact_person_name: "",
+    contact_person_phone: "",
+    contact_person_email: ""
+  }
+  
+
+  const [data, setData] = useState<LcsType>(initialValues);
+  const [errors, setErrors] = useState<Partial<LcsType>>({});
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
+
+
+  const setCurrentState = () => {
+    if (state?.data) {
+      const lcsData = state.data;
+      setData({
+        ...initialValues,
+        ...lcsData,
+        stat_id: lcsData.stat_id || '',
+        lga_id: lcsData.lga_id || '',
+      });
+      setSelectedState(lcsData.stat_id || ''); 
+      setIsUpdate(state.isUpdate || false);
+      setIsView(state.isView || false);
+    }
   };
 
-  const [data, setData] = useState<FormData>(initialValues);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  useEffect(() => {
+    setCurrentState();
+  }, [state]);
+
 
   const validate = () => {
     let temp = { ...errors };
-    temp.State_id = data.State_id 
+    temp.stat_id = data.stat_id 
         ? '' 
         : 'State is required';
     temp.lga_id = data.lga_id 
@@ -53,19 +80,19 @@ export default function LcsSetup() {
     temp.lcs_name = data.lcs_name 
         ? '' 
         : 'Lcs name required';
-    temp.longitude = data.longitude 
+    temp.longtitude = data.longtitude 
         ? '' 
         : 'Longitude required';
-    temp.latitude = data.latitude 
+    temp.lagtitude = data.lagtitude 
         ? '' 
         : 'Latitude required';
-    temp.contactPersonName = data.contactPersonName 
+    temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person naame required';
-    temp.contactPersonPhone = data.contactPersonPhone 
+    temp.contact_person_phone = data.contact_person_phone 
         ? '' 
         : 'Contact person phone required';
-    temp.contactPersonEmail = data.contactPersonEmail 
+    temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
 
@@ -81,16 +108,53 @@ export default function LcsSetup() {
     }));
   };
 
+  const GetLGA = (e: SelectChangeEvent<string>) => {
+    const stateId = e.target.value;
+    setSelectedState(stateId); 
+    setData((prev) => ({
+      ...prev,
+      stat_id: stateId,
+      lga_id: '',
+    }));
+  };
+  
+  const handleLgaChange = (event: SelectChangeEvent<string>) => {
+    const lgaId = event.target.value;
+    setData((prev) => ({ ...prev, lga_id: lgaId }));
+  };
+
   const handleSubmit = () => {
     if (validate()) {
-      console.log('Form Data:', data);
+      if (isUpdate) {
+        upsertLcs.mutate(
+          { id: data.id, data },
+          {
+            onSuccess: (response) => {
+              toast.success(response?.status || "LCS Updated Successfully");
+              navigate('/lcs-scs-page');
+            },
+          }
+        );
+      } else {
+        upsertLcs.mutate(
+          { data },
+          {
+            onSuccess: (response) => {
+              toast.success(response?.status || "LCS Created Successfully");
+              navigate('/lcs-scs-page');
+            },
+          }
+        );
+      }
     }
   };
 
   return (
     <Container sx={{ mt:2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-        <Typography variant="h5">LCS Setup</Typography>
+        <Typography variant="h5">
+          {isUpdate ? 'Edit LCS' : isView ? 'View LCS' : 'LCS Setup'}
+        </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page')}>
           Back
         </Button>
@@ -100,25 +164,31 @@ export default function LcsSetup() {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="State_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="stat_id" sx={{ mb: 1 }}>
               State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="State_id"
-              name="State_id"
-              value={data.State_id}
-              onChange={handleChange}
+              id="stat_id"
+              name="stat_id"
+              value={data.stat_id}
+              onChange={GetLGA}
               sx={{ width: '100%' }}
               displayEmpty
+              disabled={isView}
               variant="outlined"
             >
               <MenuItem value="" disabled>
                 Select State
               </MenuItem>
+              {states.map((state) => (
+                <MenuItem key={state.state} value={state.state}>
+                  {state.state}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.State_id !== '' && (
+            {errors?.stat_id !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.State_id}
+                {errors?.stat_id}
               </Typography>
             )}
           </FormControl>
@@ -133,14 +203,20 @@ export default function LcsSetup() {
               id="lga_id"
               name="lga_id"
               value={data.lga_id}
-              onChange={handleChange}
+              onChange={handleLgaChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select LGA
               </MenuItem>
+              {lgas.map((lga) => (
+                <MenuItem key={lga.lga} value={lga.lga}>
+                  {lga.lga}
+                </MenuItem>
+              ))}
             </Select>
             {errors?.lga_id !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
@@ -162,6 +238,7 @@ export default function LcsSetup() {
             value={data.lcs_name}
             onChange={handleChange}
             variant="outlined"
+            disabled={isView}
             helperText={
               errors?.lcs_name !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lcs_name}</span>
@@ -171,40 +248,42 @@ export default function LcsSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="longitude" >
+          <Typography component="label" htmlFor="longtitude" >
             Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
-            id="longitude"
-            name="longitude"
+            id="longtitude"
+            name="longtitude"
             placeholder="Longitude"
-            value={data.longitude}
+            value={data.longtitude}
             onChange={handleChange}
             variant="outlined"
+            disabled={isView}
             helperText={
-              errors?.longitude !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longitude}</span>
+              errors?.longtitude !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
               ) : ''
             }
           />
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="latitude" >
+          <Typography component="label" htmlFor="lagtitude" >
             Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
-            id="latitude"
-            name="latitude"
+            id="lagtitude"
+            name="lagtitude"
             placeholder="Latitude"
-            value={data.latitude}
+            value={data.lagtitude}
             onChange={handleChange}
             variant="outlined"
+            disabled={isView}
             helperText={
-              errors?.latitude !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.latitude}</span>
+              errors?.lagtitude !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
               ) : ''
             }
           />
@@ -213,8 +292,7 @@ export default function LcsSetup() {
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
           <Typography
-            variant="h5"
-    
+            variant="h5" 
           >
             Contact Information
           </Typography>
@@ -230,12 +308,13 @@ export default function LcsSetup() {
                   id="contact_person_name"
                   name="contact_person_name"
                   placeholder="Contact Person Name"
-                  value={data.contactPersonName}
+                  value={data.contact_person_name}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isView}
                   helperText={
-                    errors?.contactPersonName ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonName}</span>
+                    errors?.contact_person_name ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_name}</span>
                     ) : ''
                   }
                 />
@@ -250,13 +329,14 @@ export default function LcsSetup() {
                   id="contact_person_phone"
                   name="contact_person_phone"
                   placeholder="Phone Number "
-                  value={data.contactPersonPhone}
+                  value={data.contact_person_phone}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isView}
                   type="tel"
                   helperText={
-                    errors?.contactPersonPhone ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonPhone}</span>
+                    errors?.contact_person_phone ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
                     ) : ''
                   }
                 />
@@ -271,13 +351,14 @@ export default function LcsSetup() {
                   id="contact_person_email"
                   name="contact_person_email"
                   placeholder="Email Address"
-                  value={data.contactPersonEmail}
+                  value={data.contact_person_email}
                   onChange={handleChange}
                   variant="outlined"
                   type="email"
+                  disabled={isView}
                   helperText={
-                    errors?.contactPersonEmail ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonEmail}</span>
+                    errors?.contact_person_email ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_email}</span>
                     ) : ''
                   }
                 />

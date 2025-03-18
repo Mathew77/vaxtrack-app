@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -9,68 +9,96 @@ import {
   FormControl,
   MenuItem,
   Select,
+  SelectChangeEvent,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { UHFType } from 'src/hooks/apis/ehf-uhf/uhf-type';
+import { useFetchStates, useFetchLgas, useFetchWards, useFetchOrgUnits, useUpsertUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { toast } from 'react-toastify';
 
-interface FormData {
-  State_id: string;
-  lga_id: string;
-  ward_id: string;
-  org_unit_id: string;
-  ehf_name: string;
-  uhf_name: string;
-  contactPersonName: string;
-  contactPersonPhone: string;
-  contactPersonEmail: string;
-}
 
 export default function UhfSetup() {
 
   const navigate = useNavigate()
+  const location = useLocation();
+  const { state } = location;
 
-  const initialValues: FormData = {
-    State_id: '',
-    lga_id: '',
-    ward_id: '',
-    org_unit_id: '',
-    ehf_name: '',
+  const {data: states = [] } = useFetchStates();
+
+  const [selectedState, setSelectedState] = useState('');
+  const { data: lgas = [] } = useFetchLgas(selectedState);
+
+  const [selectedLga, setSelectedLga] = useState('');
+  const { data: wards = [] } = useFetchWards(selectedLga);
+
+  const { data: orgUnits = [] } = useFetchOrgUnits();
+
+  const upsertUHF = useUpsertUHF();
+
+  const initialValues: UHFType = {
+    status: '',
+    state: '',
+    lga: '',
+    ward: '',
+    org_unit: '',
     uhf_name: '',
-    contactPersonName: '',
-    contactPersonPhone: '',
-    contactPersonEmail: '',
+    contact_person_name: '',
+    contact_person_phone: '',
+    contact_person_email: '',
   };
 
-  const [data, setData] = useState<FormData>(initialValues);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [data, setData] = useState<UHFType>(initialValues);
+  const [errors, setErrors] = useState<Partial<UHFType>>({});
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
+
+
+  const setCurrentState = () => {
+      if (state?.data) {
+        const uhfData = state.data;
+        setData({
+          ...initialValues,
+          ...uhfData,
+          state: uhfData.state || '',
+          lga: uhfData.lga || '',
+          ward: uhfData.ward || ''
+        });
+        setSelectedState(uhfData.state || ''); 
+        setSelectedLga(uhfData.lga || ''); 
+        setIsUpdate(state.isUpdate || false);
+        setIsView(state.isView || false);
+      }
+    };
+  
+    useEffect(() => {
+      setCurrentState();
+    }, [state]);
 
   const validate = () => {
     let temp = { ...errors };
-    temp.State_id = data.State_id 
+    temp.state = data.state 
         ? '' 
         : 'State is required';
-    temp.lga_id = data.lga_id 
+    temp.lga = data.lga 
         ? '' 
         : 'Lga is required';
-    temp.ward_id = data.ward_id 
+    temp.ward = data.ward 
         ? '' 
         : 'Ward is required';
-    temp.org_unit_id = data.org_unit_id 
+    temp.org_unit = data.org_unit 
         ? '' 
         : 'Org unit required';
-    temp.ehf_name = data.ehf_name 
-        ? '' 
-        : 'ehf name required';
     temp.uhf_name = data.uhf_name 
         ? '' 
         : 'uhf name required';
-    temp.contactPersonName = data.contactPersonName 
+    temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person naame required';
-    temp.contactPersonPhone = data.contactPersonPhone 
+    temp.contact_person_phone = data.contact_person_phone 
         ? '' 
         : 'Contact person phone required';
-    temp.contactPersonEmail = data.contactPersonEmail 
+    temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
 
@@ -86,17 +114,58 @@ export default function UhfSetup() {
     }));
   };
 
-  const handleSubmit = () => {
-    if (validate()) {
-      console.log('Form Data:', data);
-
-    }
+  const GetLGA = (e: SelectChangeEvent<string>) => {
+    const state = e.target.value;
+    setSelectedState(state); 
+    setData((prev) => ({
+      ...prev,
+      state: state,
+      lga_id: '',
+    }));
   };
+
+   const GetWards = (event: SelectChangeEvent<string>) => {
+      const lga = event.target.value;
+      setSelectedLga(lga)
+      setData((prev) => ({ 
+        ...prev, 
+        lga: lga,
+        ward: ''
+      }));
+    };
+
+    const handleSubmit = () => {
+      if (validate()) {
+        if (isUpdate) {
+          upsertUHF.mutate(
+            { id: data.id, data },
+            {
+              onSuccess: response => {
+                toast.success(response?.status || "UHF Updated Successfully");
+                navigate('/ehf-uhf-page');
+              },
+            }
+          );
+        } else {
+          upsertUHF.mutate(
+            { data },
+            {
+              onSuccess: (response) => {
+                toast.success(response?.status || "UHF Updated Successfully");
+                navigate('/ehf-uhf-page');
+              },
+            }
+          );
+        }
+      }
+    };
 
   return (
     <Container sx={{ mt:2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-        <Typography variant="h5">UHF Setup</Typography>
+        <Typography variant="h5">
+          {isUpdate ? 'Edit UHF' : isView ? 'View UHF' : 'UHF Setup'}
+        </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page')}>
           Back
         </Button>
@@ -107,25 +176,31 @@ export default function UhfSetup() {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="State_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="state" sx={{ mb: 1 }}>
               State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="State_id"
-              name="State_id"
-              value={data.State_id}
-              onChange={handleChange}
+              id="state"
+              name="state"
+              value={data.state}
+              onChange={GetLGA}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select State
               </MenuItem>
+              {states.map((state) => (
+                <MenuItem key={state.state} value={state.state}>
+                  {state.state}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.State_id !== '' && (
+            {errors?.state !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.State_id}
+                {errors?.state}
               </Typography>
             )}
           </FormControl>
@@ -133,25 +208,31 @@ export default function UhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="lga_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
               Lga <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="lga_id"
-              name="lga_id"
-              value={data.lga_id}
-              onChange={handleChange}
+              id="lga"
+              name="lga"
+              value={data.lga}
+              onChange={GetWards}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select LGA
               </MenuItem>
+              {lgas.map((lga) => (
+                <MenuItem key={lga.lga} value={lga.lga}>
+                  {lga.lga}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.lga_id !== '' && (
+            {errors?.lga !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.lga_id}
+                {errors?.lga}
               </Typography>
             )}
           </FormControl>
@@ -159,25 +240,31 @@ export default function UhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="ward_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
               Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="ward_id"
-              name="ward_id"
-              value={data.ward_id}
+              id="ward"
+              name="ward"
+              value={data.ward}
               onChange={handleChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select Ward
               </MenuItem>
+              {wards.map((ward) => (
+                <MenuItem key={ward.ward} value={ward.ward}>
+                  {ward.ward}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.ward_id !== '' && (
+            {errors?.ward !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.ward_id}
+                {errors?.ward}
               </Typography>
             )}
           </FormControl>
@@ -185,88 +272,62 @@ export default function UhfSetup() {
 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="org_unit_id" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="org_unit" sx={{ mb: 1 }}>
               Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="org_unit_id"
-              name="org_unit_id"
-              value={data.org_unit_id}
+              id="org_unit"
+              name="org_unit"
+              value={data.org_unit}
               onChange={handleChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
+              disabled={isView}
             >
               <MenuItem value="" disabled>
                 Select Org Unit
               </MenuItem>
+              {orgUnits.map((orgUnit) => (
+                <MenuItem key={`${orgUnit.name}-${orgUnit.id}`} value={orgUnit.id}>
+                  {orgUnit.name}
+                </MenuItem>
+              ))}
             </Select>
-            {errors?.org_unit_id !== '' && (
+            {errors?.org_unit !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.org_unit_id}
+                {errors?.org_unit}
               </Typography>
             )}
           </FormControl>
         </Grid>
 
         <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="ehf_name" >
-              EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="ehf_name"
-              name="ehf_name"
-              value={data.ehf_name}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                EHF name
-              </MenuItem>
-            </Select>
-            {errors?.ehf_name !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.ehf_name}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="uhf_name" >
+            <Typography component="label" htmlFor="uhf_name">
               UHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
-            <Select
+            <TextField
+              fullWidth
               id="uhf_name"
               name="uhf_name"
+              placeholder="UHF Name"
               value={data.uhf_name}
               onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
               variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                UHF name
-              </MenuItem>
-            </Select>
-            {errors?.uhf_name !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.uhf_name}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
+              disabled={isView}
+              helperText={
+                errors?.uhf_name ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.uhf_name}</span>
+                ) : ''
+              }
+            />
+          </Grid>
 
       </Grid>
 
        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
           <Typography
             variant="h5"
-    
           >
             Contact Information
           </Typography>
@@ -282,12 +343,13 @@ export default function UhfSetup() {
                   id="contact_person_name"
                   name="contact_person_name"
                   placeholder="Contact Person Name"
-                  value={data.contactPersonName}
+                  value={data.contact_person_name}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isView}
                   helperText={
-                    errors?.contactPersonName ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonName}</span>
+                    errors?.contact_person_name ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_name}</span>
                     ) : ''
                   }
                 />
@@ -302,13 +364,14 @@ export default function UhfSetup() {
                   id="contact_person_phone"
                   name="contact_person_phone"
                   placeholder="Phone Number "
-                  value={data.contactPersonPhone}
+                  value={data.contact_person_phone}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isView}
                   type="tel"
                   helperText={
-                    errors?.contactPersonPhone ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonPhone}</span>
+                    errors?.contact_person_phone ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
                     ) : ''
                   }
                 />
@@ -323,13 +386,14 @@ export default function UhfSetup() {
                   id="contact_person_email"
                   name="contact_person_email"
                   placeholder="Email Address"
-                  value={data.contactPersonEmail}
+                  value={data.contact_person_email}
                   onChange={handleChange}
                   variant="outlined"
+                  disabled={isView}
                   type="email"
                   helperText={
-                    errors?.contactPersonEmail ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contactPersonEmail}</span>
+                    errors?.contact_person_email ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_email}</span>
                     ) : ''
                   }
                 />

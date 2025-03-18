@@ -171,7 +171,7 @@ export const navData = [
   // },
   {
     title: 'Organisation Unit',
-    path: '/org-unit-page',
+    path: '/org-units-page',
     icon: icon('ic-org'),
     roles: ['admin'],
   },

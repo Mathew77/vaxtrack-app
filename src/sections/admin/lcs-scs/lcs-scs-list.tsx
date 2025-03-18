@@ -8,10 +8,19 @@ import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
+import { FaEye } from 'react-icons/fa';
+import { useDeleteLcs, useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
+import { useDeleteScs, useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 
 interface TableRow {
-  name: string;
-  description: string;
+    id?: number;
+    stat_id?: string;
+    lga_id?: string;
+    lcs_name?: string;
+    scs_name?: string;
+    contact_person_name?: string;
+    contact_person_phone?: string;
+    contact_person_email?: string;
 }
 
 interface TabPanelProps {
@@ -55,23 +64,49 @@ const LcsScsList: React.FC = () => {
 
   const [value, setValue] = useState<number>(0);
 
+  const { data: lcsList = [] } = useFetchLcs();
+  const deleteLcs = useDeleteLcs();
+
+  const { data: scsList = [] } = useFetchScs();
+  const deleteScs = useDeleteScs()
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
-  const lccoList: TableRow[] = [];
-  const scsList: TableRow[] = [];
+  // const lccoList: TableRow[] = [];
+  // const scsList: TableRow[] = [];
 
-  const columns = useMemo(
+  const lscColumns = useMemo(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'stat_id',
+        header: 'State',
         size: 100,
       },
       {
-        accessorKey: 'description',
-        header: 'Description',
+        accessorKey: 'lga_id',
+        header: 'LGA',
+        size: 100,
+      },
+      {
+        accessorKey: 'lcs_name',
+        header: 'LCS Name',
+        size: 150,
+      },
+      {
+        accessorKey: 'contact_person_name',
+        header: 'Contact Person',
+        size: 150,
+      },
+      {
+        accessorKey: 'contact_person_phone',
+        header: 'Phone',
+        size: 120,
+      },
+      {
+        accessorKey: 'contact_person_email',
+        header: 'Email',
         size: 200,
       },
     ],
@@ -79,20 +114,103 @@ const LcsScsList: React.FC = () => {
   );
 
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
-    {
-      display: 'View',
+  const scsColumns = useMemo(
+    () => [
+      {
+        accessorKey: 'stat_id',
+        header: 'State',
+        size: 100,
+      },
+      {
+        accessorKey: 'scs_name',
+        header: 'LCS Name',
+        size: 200,
+      },
+      {
+        accessorKey: 'contact_person_name',
+        header: 'Contact Person',
+        size: 200,
+      },
+      {
+        accessorKey: 'contact_person_phone',
+        header: 'Phone',
+        size: 120,
+      },
+      {
+        accessorKey: 'contact_person_email',
+        header: 'Email',
+        size: 200,
+      },
+    ],
+    []
+  );
 
+
+  const getTabType = () => (value === 0 ? 'lcs' : 'scs');
+
+  const handleView = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isView: true } });
+  };
+
+  const handleEdit = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+  };
+
+  const handleDelete = (data: TableRow) => {
+    const type = getTabType();
+    if (data.id) {
+      if(type === "lcs"){
+        deleteLcs.mutate(data.id);
+      }else {
+        deleteScs.mutate(data.id);
+      }   
+    }
+  };
+
+  const handleAddNew = () => {
+    navigate(`/${getTabType()}-setup`);
+  };
+
+  const scsItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
     },
   ];
+
+  const lcsItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
+    },
+    {
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+    },
+    {
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+    },
+  ];
+
+
+
 
   return (
     <>
@@ -112,15 +230,15 @@ const LcsScsList: React.FC = () => {
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
-            columns={columns}
-            data={lccoList}
+            columns={lscColumns}
+            data={lcsList}
             tableHeader="LCS List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add LCS"
-            customRightButtonCallBackFunction={() => navigate('/lcs-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={lcsItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',
@@ -133,15 +251,15 @@ const LcsScsList: React.FC = () => {
       <TabPanel value={value} index={1}>
         <Box>
           <VaxTable
-            columns={columns}
+            columns={scsColumns}
             data={scsList}
             tableHeader="SCS List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add SCS"
-            customRightButtonCallBackFunction={() => navigate('/scs-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={scsItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',

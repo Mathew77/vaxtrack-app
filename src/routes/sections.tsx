@@ -62,6 +62,8 @@ export const RolesSetup = lazy(() => import('src/sections/admin/roles-permission
 export const PermissionsSetup = lazy(() => import('src/sections/admin/roles-permissions/permission/permission-setup'));
 export const ThreePlSetup = lazy(() => import('src/sections/admin/threepl/threepl-setup'));
 export const ZoneSetup = lazy(() => import('src/sections/admin/zone/zone-setup'));
+// export const OrgUnitSetup = lazy(() => import('src/sections/admin/org-unit-org-level/org-unit/org-unit-setup'));
+export const OrgLevelSetup = lazy(() => import('src/sections/admin/org-unit-org-level/org-level/org-level-setup'));
 
 
 //Test page
@@ -139,7 +141,7 @@ export function Router() {
         { path: 'role-setup', element: <RolesSetup /> },
         { path: 'permission-setup', element: <PermissionsSetup /> },
         { path: 'scs-setup', element: <ScsSetup /> },
-        { path: 'org-unit-page', element: <OrgUnitPage /> },
+        { path: 'org-units-page', element: <OrgUnitPage /> },
 
         { path: 'roles-permissions-page', element: <RolesPermissionsPage /> },
 
@@ -153,6 +155,8 @@ export function Router() {
         { path: 'threepl-page', element: <ThreePlPage /> },
         { path: 'zone-page', element: <ZonePage /> },
         { path: 'zone-setup', element: <ZoneSetup /> },
+        // { path: 'org-unit-setup', element: <OrgUnitSetup /> },
+        { path: 'org-level-setup', element: <OrgLevelSetup /> },
 
 
         //TestPage

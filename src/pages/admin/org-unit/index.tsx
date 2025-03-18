@@ -1,11 +1,11 @@
-import OrgUnitList from "src/sections/admin/org-unit/org-unit-list";
+import OrgUnitLevelList from "src/sections/admin/org-unit-org-level/org-unit-org-level-list";
 
 
 
 const OrgUnitPage: React.FC = () => {
     return (
         <>
-         <OrgUnitList />
+         <OrgUnitLevelList />
         </>
     )
 };

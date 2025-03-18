@@ -17,48 +17,62 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
-
-interface FormData {
-  zone_name: string;
-  state: string;
-  lga: string;
-}
-
-interface Role {
-  id: string | number; 
-  name: string;
-}
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useFetchStates, useFetchLgas, useUpsertZone } from 'src/hooks/apis/zone-management/zone-hooks';
+import { ZoneType } from 'src/hooks/apis/zone-management/zoneType';
+import { toast } from 'react-toastify';
 
 
 export default function ZoneSetup() {
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
 
- const initialValues: FormData = {
+  const upsertZone = useUpsertZone();
+  const { data: states = [] } = useFetchStates();
+
+  const [selectedState, setSelectedState] = useState('');
+  const { data: lgas = [] } = useFetchLgas(selectedState);
+
+
+ const initialValues: ZoneType = {
+    status: '',
+    state: '',
+    lgas: [],
     zone_name: '',
-   state: '',
-   lga: '',
  };
 
+ const setCurrentState = () => {
+  const zoneData = state.data;
+  const persistLga = zoneData.lgas || []; 
+  setData({ ...zoneData, lgas: persistLga });
+  setIsUpdate(state.isUpdate || false);
+  setIsView(state.isView || false);
+};
 
+useEffect(() => {
+  if (state?.data) {
+    setCurrentState();
+    setSelectedState(state.data.state); 
+  }
+}, [state]);
 
-
- const [data, setData] = useState<FormData>(initialValues);
- const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
- const [states, setStates] = useState<Role[]>([]);
- const [permission, setPermission] = useState([]);
+  const [data, setData] = useState<ZoneType>(initialValues);
+  const [errors, setErrors] = useState<Partial<Record<keyof ZoneType, string>>>({});
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
 
 
  const validate = () => {
    let temp = { ...errors };
-   temp.zone_name = data.zone_name
-       ? ''
-       : 'First name is required';
    temp.state = data.state
        ? ''
-       : 'Last name is required';
-   temp.lga = data.lga
+       : 'State is required';
+   temp.zone_name = data.zone_name
+       ? ''
+       : 'Zone name is required';
+   temp.lgas = data.lgas
        ? ''
        : 'LGA required';
       
@@ -75,45 +89,47 @@ export default function ZoneSetup() {
    }));
  };
 
-
- useEffect(() => {
-  FetchRoles();
-}, []);
-
-  const FetchRoles = async () => {
-    try {
-      const response = await fetch('your-api-endpoint/permission');
-      const roleData = await response.json();
-      setStates(roleData); 
-    } catch (error) {
-      console.error('Error fetching roles:', error);
-    }
-  };
-
-  const handleChangePermission = (e: any) => {
-    const value = e.target.value
-    setPermission(typeof value === 'string' ? value.split(',') : value)
-    // setData()
+const GetLGA = (e: any) => {
+  const stateValue = e.target.value;
+  setSelectedState(stateValue);
+  setData((prev) => ({...prev, [e.target.name]: stateValue, lgas: []}));
 }
 
-  const GetPermission = (e: any) => {
-    setData({ ...data, [e.target.name]: e.target.value });
-    const stateId = e.target.value;
-    async function getCharacters() {
-                console.log("response");
-         
-    }
-    getCharacters();
-
+const handleLgaChange = (selectedLga: string[]) => {  
+  setData((prev => ({...prev, lgas: selectedLga})))
 }
 
- const handleSubmit = () => {
-   if (validate()) {
-     console.log('Form Data:', data);
-     setData(initialValues);
-     setErrors({});
-   }
- };
+ const lgaOptions = lgas.map((lga) => ({
+  label: lga.lga,
+  value: lga.lga,
+}));
+
+
+const handleSubmit = () => {
+  if (validate()) {
+    if (isUpdate) {
+      upsertZone.mutate(
+        { id: data.id, data },
+        {
+          onSuccess: (response) => {
+            toast.success(response?.status || "Zone Updated Successfully");
+            navigate('/zone-page');
+          },
+        }
+      );
+    } else {
+      upsertZone.mutate(
+        { data },
+        {
+          onSuccess: (response) => {
+            toast.success(response?.status || "Zone Created Successfully");
+            navigate('/zone-page');
+          },
+        }
+      );
+    }
+  }
+};
 
 
  return (
@@ -139,6 +155,7 @@ export default function ZoneSetup() {
            value={data.zone_name}
            onChange={handleChange}
            variant="outlined"
+           disabled={isView}
            helperText={
              errors?.zone_name !== '' ? (
                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.zone_name}</span>
@@ -156,14 +173,15 @@ export default function ZoneSetup() {
             id="state"
             name="state"
             value={data.state}
-            onChange={GetPermission}
+            onChange={GetLGA}
             variant="outlined"
+            disabled={isView}
             displayEmpty
           >
-            <MenuItem value="">Select Role</MenuItem>
+            <MenuItem value="">Select State</MenuItem>
             {states.map((state) => (
-              <MenuItem key={`${state.name}-${state.id}`} value={state.id}>
-                {state.name}
+              <MenuItem key={state.state} value={state.state}>
+                {state.state}
               </MenuItem>
             ))}
           </Select>
@@ -174,30 +192,29 @@ export default function ZoneSetup() {
           )}
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid item xs={12}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="lga" >
+            <Typography component="label" sx={{ mb: 1 }}>
               LGA <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
-            <Select
-              id="lga"
-              name="lga"
-              // value={data.orgUnit} 
-              onChange={handleChangePermission}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined" 
-            >
-              <MenuItem value="">Select Lga</MenuItem>
-              {/* {orgUnit.map((each) => (
-                <MenuItem key={`${each.name}-${each.id}`} value={each.id}>
-                  {each.name} // Fixed from role.name to each.name
-                </MenuItem>
-              ))} */}
-            </Select>
-            {errors?.lga !== '' && (
+            <DualListBox
+              canFilter
+              options={lgaOptions} 
+              onChange={handleLgaChange}
+              selected={data.lgas}
+              className="dual-listbox-custom"
+              alignActions="middle"
+              disabled={isView}
+              icons={{
+                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
+              }}
+            />
+            {errors?.lgas && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.lga}
+                {errors?.lgas}
               </Typography>
             )}
           </FormControl>

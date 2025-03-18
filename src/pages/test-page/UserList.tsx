@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFetchUsers, useDeleteUser } from './../../hooks/apis/user/user-hooks';
-import { User } from './../../hooks/apis/user/user-types';
+import { UserType } from './../../hooks/apis/user/user-types';
 
 const UserList: React.FC = () => {
   const { data: users, error, isLoading, refetch } = useFetchUsers(); 
@@ -26,11 +26,11 @@ const UserList: React.FC = () => {
         <p>No users available. Add some users using the form above.</p>
       ) : (
         <ul>
-          {users?.map((user: User) => (
+          {users?.map((user: UserType) => (
             <li key={user.id}>
               {user.username} ({user.email})
               <button
-                onClick={() => deleteUser(user.id)}
+                // onClick={() => deleteUser(user.id)}
                 disabled={isPending}
               >
                 {isPending ? 'Deleting...' : 'Delete'}

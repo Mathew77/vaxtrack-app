@@ -12,32 +12,38 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useCreatePermission } from 'src/hooks/apis/roles-permissions/permissions-hook';
+import { PermissionType } from 'src/hooks/apis/roles-permissions/permissions-type';
 
-interface FormData {
-  name: string; 
-  description: string; 
-}
+// interface FormData {
+//   name: string; 
+//   description: string; 
+// }
 
 export default function PermissionSetup() {
 
   const navigate = useNavigate();
 
-  const initialValues: FormData = {
+  const initialValues: Omit<PermissionType, 'id'> = {
     name: '',
-    description: '',
+    codename: '',
   };
 
-  const [data, setData] = useState<FormData>(initialValues);
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [data, setData] = useState<Omit<PermissionType, 'id'>>(initialValues);
+  const [errors, setErrors] = useState<Partial<Omit<PermissionType, 'id'>>>({});
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [isView, setIsView] = useState<boolean>(false);
+
+  const { mutate: createPermission } = useCreatePermission();
 
   const validate = () => {
     let temp = { ...errors };
     temp.name = data.name 
         ? '' 
         : 'Name is required';
-    temp.description = data.description 
+    temp.codename = data.codename 
         ? '' 
-        : 'Description is required';
+        : 'Codenaame is required';
     
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -51,11 +57,15 @@ export default function PermissionSetup() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validate()) {
-      console.log('Form Data:', data);
-      setData(initialValues);
-      setErrors({});
+      createPermission(data, {
+        onSuccess: () => {
+          navigate('/org-units-page');
+        },
+        onError: (error) => {
+        },
+      });
     }
   };
 
@@ -90,20 +100,20 @@ export default function PermissionSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="description">
+          <Typography component="label" htmlFor="codename">
             Description <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
-            id="description"
-            name="description"
+            id="codename"
+            name="codename"
             placeholder="Enter Description"
-            value={data.description}
+            value={data.codename}
             onChange={handleChange}
             variant="outlined"
             helperText={
-              errors?.description && (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.description}</span>
+              errors?.codename && (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.codename}</span>
               )
             }
           />
