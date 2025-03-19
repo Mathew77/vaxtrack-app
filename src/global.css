@@ -42,7 +42,7 @@ ul {
   padding: 0;
   list-style-type: none;
 }
-input[type='number'] {
+/* input[type='number'] {
   -moz-appearance: textfield;
   appearance: none;
 }
@@ -53,4 +53,4 @@ input[type='number']::-webkit-outer-spin-button {
 input[type='number']::-webkit-inner-spin-button {
   margin: 0;
   -webkit-appearance: none;
-}
+} */

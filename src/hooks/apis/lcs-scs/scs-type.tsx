@@ -8,6 +8,15 @@ export interface SCSType {
     contact_person_email?: string;
     longtitude: string; 
     lagtitude: string;  
+    storage_capcity: number;
+    utilization_factor: number;
+    vaccine_volume: number;
+    doses_vial: number;
+    packing_factor: number; 
+    buffer_stock: number; 
+    max_vial: number; 
+    max_doses: number; 
+    adjusted_max_doses: number; 
   }
 
   export interface StateType {

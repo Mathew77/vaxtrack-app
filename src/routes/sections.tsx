@@ -22,6 +22,7 @@ export const EhfHome = lazy(() => import('src/pages/ehf/home'));
 export const ConveyorHome = lazy(() => import('src/pages/conveyor/home'));
 // export const ConveyorAllocation = lazy(() => import('src/pages/conveyor-allocation'));
 export const VaccineConveyorPage = lazy(() => import('src/pages/vaccine-conveyor/index'));
+export const InvoicePage = lazy(() => import('src/pages/invoice/index'));
 
 export const LcsHome = lazy(() => import('src/pages/lcs/home'));
 export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
@@ -44,6 +45,7 @@ export const RolesPermissionsPage = lazy(() => import('src/pages/admin/roles-per
 export const OrgUnitPage = lazy(() => import('src/pages/admin/org-unit/index'));
 export const ThreePlPage = lazy(() => import('src/pages/admin/threepl/index'));
 export const ZonePage = lazy(() => import('src/pages/admin/zone/index'));
+export const NcsPage = lazy(() => import('src/pages/admin/ncs/index'));
 
 // export const ScsSetup = lazy(() => import('src/pages/admin/lcs-scs/scs/scs-setup'));
 export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
@@ -64,6 +66,7 @@ export const ThreePlSetup = lazy(() => import('src/sections/admin/threepl/threep
 export const ZoneSetup = lazy(() => import('src/sections/admin/zone/zone-setup'));
 // export const OrgUnitSetup = lazy(() => import('src/sections/admin/org-unit-org-level/org-unit/org-unit-setup'));
 export const OrgLevelSetup = lazy(() => import('src/sections/admin/org-unit-org-level/org-level/org-level-setup'));
+export const NcsSetup = lazy(() => import('src/sections/admin/ncs/ncs-setup'));
 
 
 //Test page
@@ -120,6 +123,7 @@ export function Router() {
         { path: 'user', element: <UserPage /> },
         // { path: 'products', element: <ProductsPage /> },
         { path: 'vaccine-page', element: <VaccineRequestPage /> },
+        { path: 'invoice-page', element: <InvoicePage /> },
         { path: 'table', element: <TablePage /> },
         // { path: 'conveyor', element: <ConveyorAllocation /> },
         // { path: 'blog', element: <BlogPage /> },
@@ -157,6 +161,9 @@ export function Router() {
         { path: 'zone-setup', element: <ZoneSetup /> },
         // { path: 'org-unit-setup', element: <OrgUnitSetup /> },
         { path: 'org-level-setup', element: <OrgLevelSetup /> },
+
+        { path: 'ncs-page', element: <NcsPage /> },
+        { path: 'ncs-setup', element: <NcsSetup /> },
 
 
         //TestPage

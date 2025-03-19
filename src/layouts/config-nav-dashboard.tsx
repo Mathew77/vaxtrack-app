@@ -181,6 +181,12 @@ export const navData = [
     icon: icon('ic-zone'),
     roles: ['admin'],
   },
+  {
+    title: 'NCS Setup',
+    path: '/ncs-page',
+    icon: icon('ic-local'),
+    roles: ['admin'],
+  },
   //Generic Menu 
   {
 
@@ -201,6 +207,12 @@ export const navData = [
     path: '/vaccine-conveyor-page',
     icon: icon('ic-community'),
     roles: ['conveyor', 'ehf', 'uhf'],
+  },
+  {
+    title: 'Invoice',
+    path: '/invoice-page',
+    icon: <StackedLineChartIcon />,
+    roles: ['threepl'],
   },
   // {
   //   title: 'Table Page',
