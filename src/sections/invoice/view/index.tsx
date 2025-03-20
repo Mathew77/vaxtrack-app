@@ -1,1 +1,1 @@
-export * from './invoice-view'
+export * from '../view/invoice-view'

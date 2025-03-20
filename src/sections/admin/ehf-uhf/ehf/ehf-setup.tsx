@@ -21,7 +21,7 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { EHFType } from 'src/hooks/apis/ehf-uhf/ehf-type';
-import { useFetchStates, useFetchLgas, useFetchWards, useFetchOrgUnits, useUpsertEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchStates, useFetchLgas, useFetchWards, useUpsertEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
 
@@ -31,6 +31,7 @@ export default function EhfSetup() {
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
+  const activeTab = state?.activeTab || 0;    
 
   const upsertEHF = useUpsertEHF();
 
@@ -42,7 +43,7 @@ export default function EhfSetup() {
   const [selectedLga, setSelectedLga] = useState('');
   const { data: wards = [] } = useFetchWards(selectedLga);
 
-  const { data: orgUnits = [] } = useFetchOrgUnits();
+  // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const { data: uhfs = [] } = useFetchUHF();
 
@@ -51,7 +52,7 @@ export default function EhfSetup() {
     state: '',
     lga: '',
     ward: '',
-    org_unit: '',
+    // org_unit: '',
     ehf_name: '',
     uhf_list: [],
     contact_person_name: '',
@@ -146,9 +147,9 @@ export default function EhfSetup() {
     temp.ward = data.ward 
         ? '' 
         : 'Ward is required';
-    temp.org_unit = data.org_unit 
-        ? '' 
-        : 'Org unit required';
+    // temp.org_unit = data.org_unit 
+    //     ? '' 
+    //     : 'Org unit required';
     temp.ehf_name = data.ehf_name 
         ? '' 
         : 'EHF name required';
@@ -259,7 +260,7 @@ export default function EhfSetup() {
             {
               onSuccess: (response) => {
                 toast.success(response?.status || "EHF Updated Successfully");
-                navigate('/ehf-uhf-page');
+                navigate('/ehf-uhf-page', { state: { activeTab } });
               },
             }
           );
@@ -269,7 +270,7 @@ export default function EhfSetup() {
             {
               onSuccess: (response) => {
                 toast.success(response?.status || "EHF Created Successfully");
-                navigate('/ehf-uhf-page');
+                navigate('/ehf-uhf-page', { state: { activeTab } });
               },
             }
           );
@@ -282,7 +283,7 @@ export default function EhfSetup() {
     <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
         <Typography variant="h5">EHF Setup</Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Back
         </Button>
       </Box>
@@ -383,7 +384,7 @@ export default function EhfSetup() {
             )}
           </FormControl>
         </Grid>
-
+{/* 
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="org_unit" sx={{ mb: 1 }}>
@@ -414,7 +415,7 @@ export default function EhfSetup() {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="ehf_name">
@@ -723,7 +724,11 @@ export default function EhfSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Cancel
         </Button>
       </Box>

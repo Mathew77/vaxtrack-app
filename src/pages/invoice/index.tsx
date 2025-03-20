@@ -1,11 +1,11 @@
-import { InvoiceForm } from "src/sections/invoice/view/invoice-view";
+import InvoiceList from "src/sections/invoice/view/invoice-view";
 
 
 
 const InvoicePage: React.FC = () => {
     return (
         <>
-         <InvoiceForm />
+         <InvoiceList />
         </>
     )
 };

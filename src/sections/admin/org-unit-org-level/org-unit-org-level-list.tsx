@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { apiHelper } from 'src/hooks/apis/apiHelper';
 import { url } from 'src/hooks/api';
 import { FaEye } from "react-icons/fa";
@@ -63,8 +63,11 @@ function a11yProps(index: number) {
 
 const OrgUnitLevelList: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { state } = location;
+    const initialTab = state?.activeTab || 0
 
-    const [value, setValue] = useState<number>(0);
+    const [value, setValue] = useState<number>(initialTab);
     // const [orgLevelList, setOrgLevelList] = useState<TableRow[]>([]);
 
     const { data: orgLevelList = [], isLoading } = useFetchOrgLevels();
@@ -139,12 +142,12 @@ const OrgUnitLevelList: React.FC = () => {
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true } });
+    navigate(`/${type}-setup`, { state: { data, isView: true , activeTab: value} });
   };
 
   const handleEdit = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true , activeTab: value} });
   };
 
   const handleDelete = (data: TableRow) => {
@@ -155,7 +158,7 @@ const OrgUnitLevelList: React.FC = () => {
 
   const handleAddNew = () => {
     const type = getTabType();
-    navigate(`/${type}-setup`);
+    navigate(`/${type}-setup`, {state: { activeTab: value }});
   };
 
   const orgUnitItem: ActionMenuItem<TableRow>[] = [

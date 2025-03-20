@@ -4,7 +4,6 @@ export interface EHFType {
   state: string;
   lga: string;
   ward: string;
-  org_unit: string;
   ehf_name: string;
   uhf_list: string[];
   contact_person_name: string;

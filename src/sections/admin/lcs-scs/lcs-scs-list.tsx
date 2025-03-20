@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { useDeleteLcs, useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 import { useDeleteScs, useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
@@ -61,8 +61,11 @@ function a11yProps(index: number) {
 
 const LcsScsList: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { state } = location;
+    const initialTab = state?.activeTab || 0;
 
-  const [value, setValue] = useState<number>(0);
+  const [value, setValue] = useState<number>(initialTab);
 
   const { data: lcsList = [] } = useFetchLcs();
   const deleteLcs = useDeleteLcs();
@@ -150,12 +153,12 @@ const LcsScsList: React.FC = () => {
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true } });
+    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value } });
   };
 
   const handleEdit = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true, activeTab: value } });
   };
 
   const handleDelete = (data: TableRow) => {
@@ -170,7 +173,7 @@ const LcsScsList: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    navigate(`/${getTabType()}-setup`);
+    navigate(`/${getTabType()}-setup`, {state: { activeTab: value }});
   };
 
   const scsItem: ActionMenuItem<TableRow>[] = [

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import Tabs from '@mui/material/Tabs';
@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useFetchUHF, useDeleteUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { FaEye } from 'react-icons/fa';
 import { useDeleteEHF, useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
@@ -20,7 +20,6 @@ interface TableRow {
   contact_person_name?: string;
   contact_person_phone?: string;
   contact_person_email?: string;
-  org_unit?: string;
   uhf_name?: string;
   ehf_name?: string;
 }
@@ -62,9 +61,17 @@ function a11yProps(index: number) {
 }
 
 const EhfUHFList: React.FC = () => {
-    const navigate = useNavigate();
 
-  const [value, setValue] = useState<number>(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const initialTab = state?.activeTab || 0;
+
+  useEffect(() => {
+    setValue(initialTab);
+  }, [initialTab]);
+
+  const [value, setValue] = useState<number>(initialTab);
 
   const { data: ehfList = [] } = useFetchEHF();
   const deleteEHF = useDeleteEHF();
@@ -163,12 +170,12 @@ const EhfUHFList: React.FC = () => {
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true } });
+    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value } });
   };
 
   const handleEdit = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true, activeTab: value } });
   };
 
   const handleDelete = (data: TableRow) => {
@@ -183,7 +190,7 @@ const EhfUHFList: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    navigate(`/${getTabType()}-setup`);
+    navigate(`/${getTabType()}-setup`, { state: { activeTab: value } });
   };
 
   const ehfItem: ActionMenuItem<TableRow>[] = [

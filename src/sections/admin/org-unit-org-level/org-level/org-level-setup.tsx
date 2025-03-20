@@ -22,6 +22,7 @@ export default function OrgLevelSetup() {
     const navigate = useNavigate();
     const location = useLocation();
     const { state } = location;
+    const activeTab = state?.activeTab || 0
 
   const initialValues: OrgLevelType = {
     status: '',
@@ -76,7 +77,7 @@ export default function OrgLevelSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "Org Level Updated Successfully");
-              navigate('/org-units-page');
+              navigate('/org-units-page', { state : { activeTab }});
             },
           }
         );
@@ -86,7 +87,7 @@ export default function OrgLevelSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "Org Level Created Successfully");
-              navigate('/org-units-page');
+              navigate('/org-units-page', { state: { activeTab }});
             },
           }
         );
@@ -100,7 +101,7 @@ export default function OrgLevelSetup() {
         <Typography variant="h5">
           {isUpdate ? 'Edit Organisation Level' : isView ? 'View Organisation Level' : 'Organisation Level Setup'}
         </Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/org-units-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/org-units-page', { state: { activeTab }})}>
           Back
         </Button>
       </Box>
@@ -159,7 +160,11 @@ export default function OrgLevelSetup() {
         >
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/org-units-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/org-units-page', {state: { activeTab} })}>
           Cancel
         </Button>
       </Box>

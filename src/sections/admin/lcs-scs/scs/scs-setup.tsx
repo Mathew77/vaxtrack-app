@@ -24,6 +24,7 @@ export default function ScsSetup() {
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
+  const activeTab = state?.activeTab || 0;    
 
   const { data: states = [] } = useFetchStates();
   const  upsertScs = useUpsertScs();
@@ -206,7 +207,7 @@ export default function ScsSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "SCS Updated Successfully");
-              navigate('/lcs-scs-page');
+              navigate('/lcs-scs-page', { state: { activeTab } });
             },
           }
         );
@@ -216,7 +217,7 @@ export default function ScsSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "SCS Created Successfully");
-              navigate('/lcs-scs-page');
+              navigate('/lcs-scs-page', { state: { activeTab } });
             },
           }
         );
@@ -228,7 +229,7 @@ export default function ScsSetup() {
     <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
         <Typography variant="h5">SCS Setup</Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page', { state: { activeTab } })}>
           Back
         </Button>   
       </Box>
@@ -600,7 +601,11 @@ export default function ScsSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcs-scs-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/lcs-scs-page', { state: { activeTab } })}>
           Cancel
         </Button>
       </Box>

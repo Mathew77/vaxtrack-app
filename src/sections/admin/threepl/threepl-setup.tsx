@@ -36,6 +36,7 @@ export default function ThreePlSetup() {
   const { data: wards = [] } = useFetchWards(selectedLga);
   const { data: orgUnits = [] } = useFetchOrgUnits();
   const { data: ehfs = [] } = useFetchEHFs(selectedState, selectedLga || undefined);
+  const [level, setLevel] = useState('');
 
 
 const initialValues: ThreePlType = {
@@ -46,6 +47,7 @@ const initialValues: ThreePlType = {
     org_unit: '',
     threepl_name: '',
     ehf_list: [],
+    states: [],
   };
 
   const [data, setData] = useState<ThreePlType>(initialValues);
@@ -61,12 +63,14 @@ const initialValues: ThreePlType = {
           ...threePlData,
           state: threePlData.state || '',
           lga: threePlData.lga || '',
-          ward: threePlData.ward || ''
+          ward: threePlData.ward || '',
+          states: threePlData.states || [],
         });
         setSelectedState(threePlData.state || ''); 
         setSelectedLga(threePlData.lga || ''); 
         setIsUpdate(state.isUpdate || false);
         setIsView(state.isView || false);
+        setLevel(threePlData.state ? 'State' : threePlData.states?.length > 0 ? 'National' : '');
       }
     };
 
@@ -76,23 +80,26 @@ const initialValues: ThreePlType = {
 
     const validate = () => {
       let temp = { ...errors };
-      temp.state = data.state 
-          ? '' 
-          : 'State is required';
-      temp.lga = data.lga
-          ? '' 
-          : 'Lga is required';
-      temp.ward = data.ward
-          ? '' 
-          : 'Ward is required';
       temp.org_unit = data.org_unit 
           ? '' 
           : 'Org unit required';
       temp.threepl_name = data.threepl_name 
           ? '' 
           : '3pl required';
-      temp.ehf_list = data.ehf_list.length > 0 ? '' : 'EHF required';
-  
+      if (level === 'State') {
+        temp.state = data.state ? '' : 'State is required';
+        temp.lga = data.lga ? '' : 'LGA is required';
+        temp.ward = data.ward ? '' : 'Ward is required';
+        temp.ehf_list = data.ehf_list.length > 0 ? '' : 'EHF required';
+        temp.states = ''; 
+      } else if (level === 'National') {
+        temp.states = data.states.length > 0 ? '' : 'States are required';
+        temp.state = ''; 
+        temp.lga = '';
+        temp.ward = '';
+        temp.ehf_list = '';
+      }
+
       setErrors({ ...temp });
       return Object.values(temp).every((x) => x === '');
     };
@@ -102,6 +109,28 @@ const initialValues: ThreePlType = {
     setData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleLevelChange = (e: any) => {
+    const levelValue = e.target.value;
+    setLevel(levelValue);
+    setData((prev) => ({
+      ...prev,
+      state: '',
+      lga: '',
+      ward: '',
+      ehf_list: [],
+      states: [],
+    }));
+    setSelectedState('');
+    setSelectedLga('');
+  };
+
+  const handleStateMultiSelect = (selected: string[]) => {
+    setData((prev) => ({
+      ...prev,
+      states: selected,
     }));
   };
 
@@ -141,131 +170,104 @@ const initialValues: ThreePlType = {
     label: ehf.ehf_name
   }))
 
+  const stateOptions = states.map((state) => ({
+    value: state.state,
+    label: state.state,
+  }));
+
   const handleSubmit = () => {
     if (validate()) {
+      const submitData = level === 'National'
+        ? {
+            org_unit: data.org_unit,
+            threepl_name: data.threepl_name,
+            states: data.states,
+            state: '',
+            lga: '',
+            ward: '',
+            ehf_list: [],
+          }
+        : { ...data, states: [] }; 
+
       if (isUpdate) {
         upsertThreepl.mutate(
-          { id: data.id, data },
+          { id: data.id, data: submitData },
           {
             onSuccess: (response) => {
-               toast.success(response?.status || "3PL Updated Successfully");
+              toast.success(response?.status || '3PL Updated Successfully');
               navigate('/threepl-page');
             },
           }
         );
       } else {
         upsertThreepl.mutate(
-          { data },
+          { data: submitData },
           {
             onSuccess: (response) => {
-               toast.success(response?.status || "3pl Created Successfully");
+              toast.success(response?.status || '3PL Created Successfully');
               navigate('/threepl-page');
             },
           }
         );
       }
-    } 
+    }
   };
 
   return (
-    <Container sx={{ mt:2 }}>
+    <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
         <Typography variant="h5">3PL Setup</Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/threepl-page')}>
           Back
         </Button>
-     
       </Box>
 
       <Grid container spacing={2}>
-       <Grid item xs={6}>
+        <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="state" sx={{ mb: 1 }}>
-              State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            <Typography component="label" htmlFor="level" sx={{ mb: 1 }}>
+              Level <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="state"
-              name="state"
-              value={data.state}
-              onChange={GetLGA}
+              id="level"
+              value={level}
+              onChange={handleLevelChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
               disabled={isView}
             >
-              <MenuItem value="">Select State</MenuItem>
-              {states.map((state) => (
-                <MenuItem key={state.state} value={state.state}>
-                  {state.state}
-                </MenuItem>
-              ))}
+              <MenuItem value="">Select Level</MenuItem>
+              <MenuItem value="National">National</MenuItem>
+              <MenuItem value="State">State</MenuItem>
             </Select>
-            {errors?.state !== '' && (
+            {level === '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.state}
+                Level is required
               </Typography>
             )}
           </FormControl>
         </Grid>
 
         <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
-              Lga <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="lga"
-              name="lga"
-              value={data.lga}
-              onChange={GetWard}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-              disabled={isView}
-            >
-              <MenuItem value="">Select LGA</MenuItem>
-              {lgas.map((lga) => (
-                <MenuItem key={lga.lga} value={lga.lga}>
-                  {lga.lga}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors?.lga !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.lga}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
-              Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="ward"
-              name="ward"
-              value={data.ward}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-              disabled={isView}
-            >
-              <MenuItem value="">Select Ward</MenuItem>
-              {wards.map((ward) => (
-                <MenuItem key={ward.ward} value={ward.ward}>
-                  {ward.ward}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors?.ward !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.ward}
-              </Typography>
-            )}
-          </FormControl>
+          <Typography component="label" htmlFor="threepl_name">
+            3PL Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            id="threepl_name"
+            name="threepl_name"
+            placeholder="Enter 3PL Name"
+            value={data.threepl_name}
+            onChange={handleChange}
+            variant="outlined"
+            disabled={isView}
+            helperText={
+              errors?.threepl_name !== '' ? (
+                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.threepl_name}</span>
+              ) : ''
+            }
+          />
         </Grid>
 
         <Grid item xs={6}>
@@ -300,63 +302,165 @@ const initialValues: ThreePlType = {
           </FormControl>
         </Grid>
 
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="threepl_name" >
-            3PL Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="threepl_name"
-            name="threepl_name"
-            placeholder="Enter 3PL Name"
-            value={data.threepl_name}
-            onChange={handleChange}
-            variant="outlined"
-            disabled={isView}
-            helperText={
-              errors?.threepl_name !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.threepl_name}</span>
-              ) : ''
-            }
-          />
-        </Grid>
+        {level === 'National' && (
+          <Grid item xs={12}>
+            <FormControl sx={{ m: 0, width: '100%' }}>
+              <Typography component="label" sx={{ mb: 1 }}>
+                States <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              </Typography>
+              <DualListBox
+                canFilter
+                options={stateOptions}
+                onChange={handleStateMultiSelect}
+                selected={data.states}
+                className="dual-listbox-custom"
+                alignActions="middle"
+                disabled={isView}
+                icons={{
+                  moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                  moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                  moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                  moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
+                }}
+              />
+              {errors?.states !== '' && (
+                <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                  {errors?.states}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+        )}
 
-        <Grid item xs={12}>
-        <FormControl sx={{ m: 0, width: '100%' }}>
-          <Typography component="label" sx={{ mb: 1 }}>
-            EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <DualListBox
-            canFilter
-            options={ehfOptions}
-            onChange={handleChangeEHF}
-            selected={data.ehf_list}
-            className="dual-listbox-custom"
-            alignActions="middle"
-            disabled={isView}
-            icons={{
-              moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
-              moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
-              moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
-              moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
-            }}
-          />
-          {ehfOptions.length === 0 && selectedState && (
-            <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-              No EHFs available for selected State/LGA
-            </Typography>
-          )}
-          {errors.ehf_list && (
-            <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-              {errors.ehf_list}
-            </Typography>
-          )}
-        </FormControl>
+        {level === 'State' && (
+          <>
+            <Grid item xs={6}>
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="state" sx={{ mb: 1 }}>
+                  State <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <Select
+                  id="state"
+                  name="state"
+                  value={data.state}
+                  onChange={GetLGA}
+                  sx={{ width: '100%' }}
+                  displayEmpty
+                  variant="outlined"
+                  disabled={isView}
+                >
+                  <MenuItem value="">Select State</MenuItem>
+                  {states.map((state) => (
+                    <MenuItem key={state.state} value={state.state}>
+                      {state.state}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors?.state !== '' && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.state}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={6}>
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
+                  LGA <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <Select
+                  id="lga"
+                  name="lga"
+                  value={data.lga}
+                  onChange={GetWard}
+                  sx={{ width: '100%' }}
+                  displayEmpty
+                  variant="outlined"
+                  disabled={isView}
+                >
+                  <MenuItem value="">Select LGA</MenuItem>
+                  {lgas.map((lga) => (
+                    <MenuItem key={lga.lga} value={lga.lga}>
+                      {lga.lga}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors?.lga !== '' && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.lga}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={6}>
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
+                  Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <Select
+                  id="ward"
+                  name="ward"
+                  value={data.ward}
+                  onChange={handleChange}
+                  sx={{ width: '100%' }}
+                  displayEmpty
+                  variant="outlined"
+                  disabled={isView}
+                >
+                  <MenuItem value="">Select Ward</MenuItem>
+                  {wards.map((ward) => (
+                    <MenuItem key={ward.ward} value={ward.ward}>
+                      {ward.ward}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors?.ward !== '' && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.ward}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" sx={{ mb: 1 }}>
+                  EHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <DualListBox
+                  canFilter
+                  options={ehfOptions}
+                  onChange={handleChangeEHF}
+                  selected={data.ehf_list}
+                  className="dual-listbox-custom"
+                  alignActions="middle"
+                  disabled={isView}
+                  icons={{
+                    moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                    moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                    moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                    moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
+                  }}
+                />
+                {ehfOptions.length === 0 && selectedState && (
+                  <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    No EHFs available for selected State/LGA
+                  </Typography>
+                )}
+                {errors.ehf_list && (
+                  <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors.ehf_list}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+          </>
+        )}
       </Grid>
 
-      </Grid>
-
-      <Box sx={{display: 'flex', gap:4, mt: 4, mb: 4 }}>
+      <Box sx={{ display: 'flex', gap: 4, mt: 4, mb: 4 }}>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>

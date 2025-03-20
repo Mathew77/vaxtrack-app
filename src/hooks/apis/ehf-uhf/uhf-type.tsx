@@ -7,7 +7,6 @@ export interface UHFType {
     contact_person_name: string;
     contact_person_phone: string;
     contact_person_email: string;
-    org_unit: string;
     uhf_name: string;
 }
 

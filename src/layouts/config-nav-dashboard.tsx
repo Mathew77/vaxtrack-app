@@ -209,8 +209,8 @@ export const navData = [
     roles: ['conveyor', 'ehf', 'uhf'],
   },
   {
-    title: 'Invoice',
-    path: '/invoice-page',
+    title: 'WayBill / Invoice',
+    path: '/waybill-invoice-page',
     icon: <StackedLineChartIcon />,
     roles: ['threepl'],
   },

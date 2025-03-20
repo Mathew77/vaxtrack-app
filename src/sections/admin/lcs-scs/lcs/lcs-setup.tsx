@@ -24,6 +24,7 @@ export default function LcsSetup() {
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
+  const activeTab = state?.activeTab || 0
 
   const {data: states = []} = useFetchStates()
   const [selectedState, setSelectedState] = useState('');
@@ -217,7 +218,7 @@ export default function LcsSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "LCS Updated Successfully");
-              navigate('/lcs-scs-page');
+              navigate('/lcs-scs-page', {state: { activeTab }});
             },
           }
         );
@@ -227,7 +228,7 @@ export default function LcsSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "LCS Created Successfully");
-              navigate('/lcs-scs-page');
+              navigate('/lcs-scs-page', {state: { activeTab }});
             },
           }
         );
@@ -241,7 +242,7 @@ export default function LcsSetup() {
         <Typography variant="h5">
           {isUpdate ? 'Edit LCS' : isView ? 'View LCS' : 'LCS Setup'}
         </Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page', {state: { activeTab }})}>
           Back
         </Button>
      
@@ -640,7 +641,11 @@ export default function LcsSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/lcs-scs-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/lcs-scs-page', { state: { activeTab }})}>
           Cancel
         </Button>
       </Box>

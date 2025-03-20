@@ -60,15 +60,15 @@ export const useFetchStates = () => {
     });
   };    
 
-    export const useFetchOrgUnits = () => {
-        return useQuery<OrgUnit[], Error>({
-            queryKey: ['orgUnits'],
-            queryFn: async () => {
-            const response = await apiHelper.getResource<ApiResponse<OrgUnit[]>>(`${url}v1/org-unit-level/`);
-            return response.data;
-            },
-        });
-    };
+    // export const useFetchOrgUnits = () => {
+    //     return useQuery<OrgUnit[], Error>({
+    //         queryKey: ['orgUnits'],
+    //         queryFn: async () => {
+    //         const response = await apiHelper.getResource<ApiResponse<OrgUnit[]>>(`${url}v1/org-unit-level/`);
+    //         return response.data;
+    //         },
+    //     });
+    // };
 
 
     export const useUpsertUHF = () => {

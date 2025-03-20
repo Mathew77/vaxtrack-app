@@ -10,7 +10,7 @@ import {
   Select,
   FormControl,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useCreatePermission } from 'src/hooks/apis/roles-permissions/permissions-hook';
 import { PermissionType } from 'src/hooks/apis/roles-permissions/permissions-type';
@@ -23,6 +23,9 @@ import { PermissionType } from 'src/hooks/apis/roles-permissions/permissions-typ
 export default function PermissionSetup() {
 
   const navigate = useNavigate();
+   const location = useLocation();
+    const { state } = location;
+    const activeTab = state?.activeTab || 0
 
   const initialValues: Omit<PermissionType, 'id'> = {
     name: '',
@@ -61,7 +64,7 @@ export default function PermissionSetup() {
     if (validate()) {
       createPermission(data, {
         onSuccess: () => {
-          navigate('/org-units-page');
+          navigate('/org-units-page', {state: { activeTab }});
         },
         onError: (error) => {
         },
@@ -73,7 +76,7 @@ export default function PermissionSetup() {
     <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
         <Typography variant="h5">Permission Setup</Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/roles-permissions-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/roles-permissions-page', {state: { activeTab }})}>
           Back
         </Button>
       </Box>
@@ -124,7 +127,11 @@ export default function PermissionSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/roles-permissions-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/roles-permissions-page', {state: { activeTab }})}>
           Cancel
         </Button>
       </Box>

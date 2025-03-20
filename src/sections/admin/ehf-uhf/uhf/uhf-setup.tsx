@@ -14,7 +14,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { UHFType } from 'src/hooks/apis/ehf-uhf/uhf-type';
-import { useFetchStates, useFetchLgas, useFetchWards, useFetchOrgUnits, useUpsertUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { useFetchStates, useFetchLgas, useFetchWards, useUpsertUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
 
 
@@ -23,6 +23,7 @@ export default function UhfSetup() {
   const navigate = useNavigate()
   const location = useLocation();
   const { state } = location;
+  const activeTab = state?.activeTab || 0;  
 
   const {data: states = [] } = useFetchStates();
 
@@ -32,7 +33,7 @@ export default function UhfSetup() {
   const [selectedLga, setSelectedLga] = useState('');
   const { data: wards = [] } = useFetchWards(selectedLga);
 
-  const { data: orgUnits = [] } = useFetchOrgUnits();
+  // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const upsertUHF = useUpsertUHF();
 
@@ -41,7 +42,7 @@ export default function UhfSetup() {
     state: '',
     lga: '',
     ward: '',
-    org_unit: '',
+    // org_unit: '',
     uhf_name: '',
     contact_person_name: '',
     contact_person_phone: '',
@@ -86,9 +87,9 @@ export default function UhfSetup() {
     temp.ward = data.ward 
         ? '' 
         : 'Ward is required';
-    temp.org_unit = data.org_unit 
-        ? '' 
-        : 'Org unit required';
+    // temp.org_unit = data.org_unit 
+    //     ? '' 
+    //     : 'Org unit required';
     temp.uhf_name = data.uhf_name 
         ? '' 
         : 'uhf name required';
@@ -142,7 +143,7 @@ export default function UhfSetup() {
             {
               onSuccess: response => {
                 toast.success(response?.status || "UHF Updated Successfully");
-                navigate('/ehf-uhf-page');
+                navigate('/ehf-uhf-page', { state: { activeTab } });
               },
             }
           );
@@ -152,7 +153,7 @@ export default function UhfSetup() {
             {
               onSuccess: (response) => {
                 toast.success(response?.status || "UHF Updated Successfully");
-                navigate('/ehf-uhf-page');
+                navigate('/ehf-uhf-page', { state: { activeTab } });
               },
             }
           );
@@ -166,7 +167,7 @@ export default function UhfSetup() {
         <Typography variant="h5">
           {isUpdate ? 'Edit UHF' : isView ? 'View UHF' : 'UHF Setup'}
         </Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Back
         </Button>
      
@@ -270,7 +271,7 @@ export default function UhfSetup() {
           </FormControl>
         </Grid>
 
-        <Grid item xs={6}>
+        {/* <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="org_unit" sx={{ mb: 1 }}>
               Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -300,7 +301,7 @@ export default function UhfSetup() {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={6}>
             <Typography component="label" htmlFor="uhf_name">
@@ -406,7 +407,11 @@ export default function UhfSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ehf-uhf-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Cancel
         </Button>
       </Box>

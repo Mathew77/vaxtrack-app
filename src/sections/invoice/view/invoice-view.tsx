@@ -1,377 +1,214 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Grid,
-  Container,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  SelectChangeEvent,
-} from '@mui/material';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { InvoiceType } from 'src/hooks/apis/invoice/invoice-type';
-import { useUpsertInvoice } from 'src/hooks/apis/invoice/invoice-hooks';
-import { toast } from 'react-toastify';
+// InvoiceList.jsx
+import React, { useMemo, useState } from 'react';
+import { Alert, Box, Button, Typography } from '@mui/material';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import PropTypes from 'prop-types';
+import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import { useNavigate } from 'react-router-dom';
+import { useDeleteZone, useFetchZoneManagement } from 'src/hooks/apis/zone-management/zone-hooks';
+import { FaEye } from 'react-icons/fa';
 
-export function InvoiceForm() {
+interface TableRow {
+  id?: number;
+  waybill_number: string;
+  date: string;
+  status: string;
+}
 
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { state } = location;
+interface TabPanelProps {
+  children?: React.ReactNode;
+  value: number;
+  index: number;
+}  
 
-  const upsertInvoice = useUpsertInvoice()
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
-  const initialValues: InvoiceType = {
-    invoice_number: "",
-    carrier_name: "",
-    waybill_number: "",
-    status: "",
-    approval_date: "",
-    payment_date: "",
-    remark: "",
-    payment_rate: "",
-    delivery_proof: "",
-    payment_request: "",
-    payment_request_date: "",
-    approved_by: "",
-    created_by: ""
+  return (
+    <Typography
+      component="div"
+      role="tabpanel"
+      hidden={value !== index}
+      id={`scrollable-force-tabpanel-${index}`}
+      aria-labelledby={`scrollable-force-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box paddingY={1}>{children}</Box>}
+    </Typography>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.any.isRequired,
+  value: PropTypes.any.isRequired,
+};
+
+function a11yProps(index: number) {
+  return {
+    id: `scrollable-force-tab-${index}`,
+    'aria-controls': `scrollable-force-tabpanel-${index}`,
+  };
+}
+
+export default function InvoiceList() {
+  const navigate = useNavigate();
+  const {data: zoneList} = useFetchZoneManagement();
+  const deleteZone = useDeleteZone();
+  const [value, setValue] = useState<number>(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
 
-  const [data, setData] = useState<InvoiceType>(initialValues);
-  const [errors, setErrors] = useState<Partial<Record<keyof InvoiceType, string>>>({});
-  const [isUpdate, setIsUpdate] = useState<boolean>(false);
-  const [isView, setIsView] = useState<boolean>(false);
+  const sampleData: TableRow[] = [
+    {
+      id: 1,
+      waybill_number: "WB001",
+      date: "2023-03-15",
+      status: "approved"
+    },
+  ];
 
-//   const setCurrentState = () => {
-//     const invoiceData = state.data;
-//     setData(invoiceData);
-//     setIsUpdate(state.isUpdate || false);
-//     setIsView(state.isView || false);
-//   };
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: 'waybill_number',
+        header: 'Way Bill Number',
+        size: 200,
+      },
+      {
+        accessorKey: 'date',
+        header: 'Date',
+        size: 100,
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        size: 200,
+      },
+      {
+        accessorKey: 'invoice',
+        header: 'Invoices',
+        size: 200,
+        Cell: ({ row } : {row: any}) => (
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => handleViewInvoices(row.original)}
+            sx={{ backgroundColor: '#1976D2' }}
+          >
+            Submit Invoice
+          </Button>
+        ),
+      },
+    ],
+    []
+  );
 
-//   useEffect(() => {
-//     if (state?.data) {
-//       setCurrentState();
-//     }
-//   }, [state]);
-
-  const validate = () => {
-    let temp = { ...errors };
-    temp.invoice_number = data.invoice_number 
-        ? '' 
-        : 'Invoice number is required';
-    temp.carrier_name = data.carrier_name 
-        ? '' 
-        : 'Carrier name is required';
-    temp.waybill_number = data.waybill_number 
-        ? '' 
-        : 'Waybill number is required';
-    temp.created_by = data.created_by 
-        ? '' 
-        : 'Created by is required';
-    setErrors({ ...temp });
-    return Object.values(temp).every((x) => x === '');
+  const handleViewInvoices = (rowData: TableRow) => {
+    navigate('/waybill-details', { state: { data: rowData } });
   };
 
-  const handleSelectChange = (event: SelectChangeEvent<string>) => {
-    const { name, value } = event.target;
-    setData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const getTabType = () => (value === 0 ? 'waybill' : 'invoice');
+
+  const handleView = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isView: true } });
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleEdit = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
   };
 
-  const handleSubmit = () => {
-    if (validate()) {
-        upsertInvoice.mutate(
-            { data },
-            {onSuccess: (response) => {
-                toast.success(response?.status)
-                navigate('/threepl-home')
-            }}
-        )
+  const handleDelete = (data: TableRow) => {
+    if (data.id) {
+      deleteZone.mutate(data.id);
     }
   };
 
+  const handleAddNew = () => {
+    const type = getTabType();
+    navigate(`/${type}-setup`);
+  };
+
+  // const zoneListItem: ActionMenuItem<TableRow>[] = [
+  //   {
+  //     display: "View",
+  //     handleClick: handleView,
+  //     icon: <FaEye style={{ color: "#1976D2" }} />, 
+  //   },
+  //   {
+  //     display: "Edit",
+  //     handleClick: handleEdit,
+  //     icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+  //   },
+  //   {
+  //     display: "Delete",
+  //     handleClick: handleDelete,
+  //     icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+  //   },
+  // ];
+
   return (
-    <Container sx={{ mt: 2 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5">Invoice Management Setup</Typography>
-      </Box>
+    <>
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        variant="scrollable"
+        scrollButtons="auto"
+        textColor="primary"
+        aria-label="scrollable force tabs"
+      >
+        <Tab style={{ textTransform: 'none' }} label="Way Bills" {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="Invoice" {...a11yProps(1)} />
+      </Tabs>
 
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="invoice_number">
-            Invoice Number<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="invoice_number"
-            name="invoice_number"
-            placeholder="Enter Invoice Number"
-            value={data.invoice_number}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            helperText={
-              errors?.invoice_number && (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.invoice_number}</span>
-              )
-            }
+      <TabPanel value={value} index={0}>
+        <Box>
+          <VaxTable
+            columns={columns}
+            data={sampleData}
+            tableHeader="Way Bills"
+            customRightButton={false}
+            customRightButtonIcon={<AddOutlinedIcon />}
+            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
+            customRightButtonText="Way Bills"
+            customRightButtonCallBackFunction={handleAddNew}
+            // actionMenuItems={zoneListItem}
+            headerStyles={{
+              backgroundColor: '#1976D2',
+              color: 'white',
+              fontSize: '16px',
+            }}
           />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="carrier_name">
-            Carrier Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="carrier_name"
-            name="carrier_name"
-            placeholder="Carrier Name"
-            value={data.carrier_name}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            helperText={
-              errors?.carrier_name && (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.carrier_name}</span>
-              )
-            }
+        </Box>
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        <Box>
+          <VaxTable
+            columns={columns}
+            data={sampleData}
+            tableHeader="Invoice"
+            customRightButton={false}
+            customRightButtonIcon={<AddOutlinedIcon />}
+            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
+            customRightButtonText="Invoice"
+            customRightButtonCallBackFunction={handleAddNew}
+            // actionMenuItems={zoneListItem}
+            headerStyles={{
+              backgroundColor: '#1976D2',
+              color: 'white',
+              fontSize: '16px',
+            }}
           />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="waybill_number">
-            Waybill Number<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="waybill_number"
-            name="waybill_number"
-            placeholder="Waybill Number"
-            value={data.waybill_number}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            helperText={
-              errors?.waybill_number && (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.waybill_number}</span>
-              )
-            }
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="status" >
-              Status
-            </Typography>
-            <Select
-              id="status"
-              name="status"
-              value={data.status}
-              onChange={handleSelectChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              disabled={isView}
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                Select Status
-              </MenuItem>
-              <MenuItem value="approved">Approved</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="rejected">Rejected</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="approval_date">
-            Approval Date
-          </Typography>
-          <TextField
-            fullWidth
-            id="approval_date"
-            name="approval_date"
-            type="datetime-local"
-            value={data.approval_date}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            InputLabelProps={{ shrink: true }}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="payment_date">
-            Payment Date
-          </Typography>
-          <TextField
-            fullWidth
-            id="payment_date"
-            name="payment_date"
-            type="date"
-            value={data.payment_date}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            InputLabelProps={{ shrink: true }}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="payment_rate">
-            Payment Rate
-          </Typography>
-          <TextField
-            fullWidth
-            id="payment_rate"
-            name="payment_rate"
-            placeholder="Payment Rate"
-            value={data.payment_rate}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="delivery_proof">
-            Delivery Proof
-          </Typography>
-          <TextField
-            fullWidth
-            id="delivery_proof"
-            name="delivery_proof"
-            placeholder="Delivery Proof"
-            value={data.delivery_proof}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="payment_request">
-              Payment Request
-            </Typography>
-            <Select
-              id="payment_request"
-              name="payment_request"
-              value={data.payment_request}
-              onChange={handleSelectChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              disabled={isView}
-              variant="outlined"
-            >
-              <MenuItem value="" disabled>
-                Select Payment Request
-              </MenuItem>
-              <MenuItem value="Submitted">Submitted</MenuItem>
-              <MenuItem value="Pending">Pending</MenuItem>
-              <MenuItem value="Processed">Processed</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="payment_request_date">
-            Payment Request Date
-          </Typography>
-          <TextField
-            fullWidth
-            id="payment_request_date"
-            name="payment_request_date"
-            type="datetime-local"
-            value={data.payment_request_date}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            InputLabelProps={{ shrink: true }}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="approved_by">
-            Approved By
-          </Typography>
-          <TextField
-            fullWidth
-            id="approved_by"
-            name="approved_by"
-            placeholder="Approved By"
-            value={data.approved_by || ''}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="created_by">
-            Created By<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-          </Typography>
-          <TextField
-            fullWidth
-            id="created_by"
-            name="created_by"
-            placeholder="Created By"
-            value={data.created_by}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            helperText={
-              errors?.created_by && (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.created_by}</span>
-              )
-            }
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="remark">
-            Remark
-          </Typography>
-          <TextField
-            fullWidth
-            id="remark"
-            name="remark"
-            placeholder="Remark"
-            value={data.remark || ''}
-            onChange={handleInputChange}
-            variant="outlined"
-            disabled={isView}
-            multiline
-            rows={3}
-          />
-        </Grid>
-      </Grid>
-
-      <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 2 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
-        {/* <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/invoice-page')}>
-          Cancel
-        </Button> */}
-      </Box>
-    </Container>
+        </Box>
+      </TabPanel>
+    </>
   );
 }

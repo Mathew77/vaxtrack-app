@@ -29,6 +29,7 @@ export default function RolesSetup() {
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
+  const activeTab = state?.activeTab || 0
 
   const { data: permissions = [] } = useFetchPermissions();
   const { data: orgUnits = [] } = useFetchOrgUnits();
@@ -102,7 +103,7 @@ export default function RolesSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "Role updated successfully");
-              navigate('/roles-permissions-page');
+              navigate('/roles-permissions-page', {state: { activeTab }});
             },
           }
         );
@@ -112,7 +113,7 @@ export default function RolesSetup() {
           {
             onSuccess: (response) => {
               toast.success(response?.status || "Role created successfully");
-              navigate('/roles-permissions-page');
+              navigate('/roles-permissions-page', {state: { activeTab }});
             },
           }
         );
@@ -134,7 +135,7 @@ export default function RolesSetup() {
         <Typography variant="h5">
           {isUpdate ? 'Edit Role' : isView ? 'View Role' : 'Role Setup'}
         </Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/roles-permissions-page')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/roles-permissions-page', { state: { activeTab } })}>
           Back
         </Button>
       </Box>
@@ -218,7 +219,11 @@ export default function RolesSetup() {
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
           Submit
         </Button>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/roles-permissions-page')}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/roles-permissions-page', { state: { activeTab } })}>
           Cancel
         </Button>
       </Box>

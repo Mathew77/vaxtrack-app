@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { act, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import Tabs from '@mui/material/Tabs';
@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
 import { useDeleteRole, useFetchRoles } from 'src/hooks/apis/roles-permissions/roles-hook';
 
@@ -56,8 +56,11 @@ function a11yProps(index: number) {
 
 const RolesPermissionsList: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { state } = location;
+    const initialTab = state?.activeTab || 0
 
-  const [value, setValue] = useState<number>(0);
+  const [value, setValue] = useState<number>(initialTab);
 
   const { data: rolesList = [] } = useFetchRoles();
   const deleteRole = useDeleteRole()
@@ -105,12 +108,12 @@ const RolesPermissionsList: React.FC = () => {
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true } });
+    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value }});
   };
 
   const handleEdit = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true, activeTab: value } });
   };
 
   const handleDelete = (data: TableRow) => {
@@ -120,7 +123,7 @@ const RolesPermissionsList: React.FC = () => {
   };
 
   const handleAddNew = () => {
-    navigate(`/${getTabType()}-setup`);
+    navigate(`/${getTabType()}-setup`, {state: { activeTab: value }});
   };
 
   const rolesItem: ActionMenuItem<TableRow>[] = [
@@ -189,7 +192,7 @@ const RolesPermissionsList: React.FC = () => {
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add Permissions"
-            customRightButtonCallBackFunction={() => navigate('/permission-setup')}
+            customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={actionMenuItems}
             headerStyles={{
               backgroundColor: '#1976D2',

@@ -22,7 +22,7 @@ export const EhfHome = lazy(() => import('src/pages/ehf/home'));
 export const ConveyorHome = lazy(() => import('src/pages/conveyor/home'));
 // export const ConveyorAllocation = lazy(() => import('src/pages/conveyor-allocation'));
 export const VaccineConveyorPage = lazy(() => import('src/pages/vaccine-conveyor/index'));
-export const InvoicePage = lazy(() => import('src/pages/invoice/index'));
+export const WayBillInvoicePage = lazy(() => import('src/pages/invoice/index'));
 
 export const LcsHome = lazy(() => import('src/pages/lcs/home'));
 export const SlwgHome = lazy(() => import('src/pages/slwg/home'));
@@ -67,6 +67,8 @@ export const ZoneSetup = lazy(() => import('src/sections/admin/zone/zone-setup')
 // export const OrgUnitSetup = lazy(() => import('src/sections/admin/org-unit-org-level/org-unit/org-unit-setup'));
 export const OrgLevelSetup = lazy(() => import('src/sections/admin/org-unit-org-level/org-level/org-level-setup'));
 export const NcsSetup = lazy(() => import('src/sections/admin/ncs/ncs-setup'));
+
+export const WayBillDetails = lazy(() => import('src/sections/invoice/waybill-details'));
 
 
 //Test page
@@ -123,7 +125,7 @@ export function Router() {
         { path: 'user', element: <UserPage /> },
         // { path: 'products', element: <ProductsPage /> },
         { path: 'vaccine-page', element: <VaccineRequestPage /> },
-        { path: 'invoice-page', element: <InvoicePage /> },
+        { path: 'waybill-invoice-page', element: <WayBillInvoicePage /> },
         { path: 'table', element: <TablePage /> },
         // { path: 'conveyor', element: <ConveyorAllocation /> },
         // { path: 'blog', element: <BlogPage /> },
@@ -164,6 +166,8 @@ export function Router() {
 
         { path: 'ncs-page', element: <NcsPage /> },
         { path: 'ncs-setup', element: <NcsSetup /> },
+
+        { path: 'waybill-details', element: <WayBillDetails /> },
 
 
         //TestPage

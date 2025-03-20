@@ -7,6 +7,7 @@ export type ThreePlType = {
     org_unit: string; 
     threepl_name: string;    
     ehf_list: string[]; 
+    states: string[];
   };
 
   export interface StateType {
