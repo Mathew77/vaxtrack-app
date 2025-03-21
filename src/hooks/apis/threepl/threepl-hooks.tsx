@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiHelper } from "../apiHelper";
 import { url } from "src/hooks/api";
-import { LgaType, StateType, ThreePlType, WardType, OrgUnit  } from "./threepl-type";
+import { LgaType, StateType, ThreePlType, WardType  } from "./threepl-type";
 
 type ApiResponse<T> = {
     status: string;
@@ -70,7 +70,6 @@ export const useFetchStates = () => {
           const response = await apiHelper.getResource<ApiResponse<any>>(
             `${url}v1/ehf/${query}`
         );
-        console.log('API Response:', response);
         if (!response || !Array.isArray(response.data)) {
           return [];
         }
@@ -79,17 +78,6 @@ export const useFetchStates = () => {
       enabled: !!state,
     });
   };
-
-
-   export const useFetchOrgUnits = () => {
-      return useQuery<OrgUnit[], Error>({
-        queryKey: ['orgUnits'],
-        queryFn: async () => {
-          const response = await apiHelper.getResource<ApiResponse<OrgUnit[]>>(`${url}v1/org-unit-level/`);
-          return response.data;
-        },
-      });
-    };
 
     export const useUpsertThreepl = () => {
       const queryClient = useQueryClient();

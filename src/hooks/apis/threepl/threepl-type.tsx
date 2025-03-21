@@ -3,11 +3,10 @@ export type ThreePlType = {
     status: string;
     state: string;  
     lga: string;    
-    ward: string;   
-    org_unit: string; 
     threepl_name: string;    
     ehf_list: string[]; 
-    states: string[];
+    category_type: string;
+    state_list: string[];
   };
 
   export interface StateType {
@@ -20,9 +19,4 @@ export interface LgaType {
 
   export interface WardType {
     ward: string;
-  }
-
-  export interface OrgUnit {
-    id: string | number;
-    name: string;
   }

@@ -18,7 +18,7 @@ import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useFetchEHFs, useFetchLgas, useFetchOrgUnits, useFetchStates, useFetchWards, useUpsertThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
+import { useFetchEHFs, useFetchLgas, useFetchStates, useFetchWards, useUpsertThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { ThreePlType } from 'src/hooks/apis/threepl/threepl-type';
 import { toast } from 'react-toastify';
 
@@ -33,21 +33,17 @@ export default function ThreePlSetup() {
   const [selectedState, setSelectedState] = useState('');
   const [selectedLga, setSelectedLga] = useState('');
   const { data: lgas = [] } = useFetchLgas(selectedState);
-  const { data: wards = [] } = useFetchWards(selectedLga);
-  const { data: orgUnits = [] } = useFetchOrgUnits();
   const { data: ehfs = [] } = useFetchEHFs(selectedState, selectedLga || undefined);
-  const [level, setLevel] = useState('');
 
 
 const initialValues: ThreePlType = {
     status: '',
+    category_type: '',
     state: '',
     lga: '',
-    ward: '',
-    org_unit: '',
     threepl_name: '',
     ehf_list: [],
-    states: [],
+    state_list: [],
   };
 
   const [data, setData] = useState<ThreePlType>(initialValues);
@@ -63,14 +59,13 @@ const initialValues: ThreePlType = {
           ...threePlData,
           state: threePlData.state || '',
           lga: threePlData.lga || '',
-          ward: threePlData.ward || '',
-          states: threePlData.states || [],
+          state_list: threePlData.state_list || [],
+          category_type: threePlData.category_type || '',
         });
         setSelectedState(threePlData.state || ''); 
         setSelectedLga(threePlData.lga || ''); 
         setIsUpdate(state.isUpdate || false);
         setIsView(state.isView || false);
-        setLevel(threePlData.state ? 'State' : threePlData.states?.length > 0 ? 'National' : '');
       }
     };
 
@@ -80,23 +75,20 @@ const initialValues: ThreePlType = {
 
     const validate = () => {
       let temp = { ...errors };
-      temp.org_unit = data.org_unit 
-          ? '' 
-          : 'Org unit required';
       temp.threepl_name = data.threepl_name 
           ? '' 
           : '3pl required';
-      if (level === 'State') {
-        temp.state = data.state ? '' : 'State is required';
+      if (data.category_type === 'State') {
+        temp.state = data.state 
+          ? '' 
+          : 'State is required';
         temp.lga = data.lga ? '' : 'LGA is required';
-        temp.ward = data.ward ? '' : 'Ward is required';
         temp.ehf_list = data.ehf_list.length > 0 ? '' : 'EHF required';
-        temp.states = ''; 
-      } else if (level === 'National') {
-        temp.states = data.states.length > 0 ? '' : 'States are required';
+        temp.state_list = ''; 
+      } else if (data.category_type === 'National') {
+        temp.state_list = data.state_list.length > 0 ? '' : 'At least a state is required';
         temp.state = ''; 
         temp.lga = '';
-        temp.ward = '';
         temp.ehf_list = '';
       }
 
@@ -114,14 +106,13 @@ const initialValues: ThreePlType = {
 
   const handleLevelChange = (e: any) => {
     const levelValue = e.target.value;
-    setLevel(levelValue);
     setData((prev) => ({
       ...prev,
+      category_type: levelValue,
       state: '',
       lga: '',
-      ward: '',
       ehf_list: [],
-      states: [],
+      state_list: [],
     }));
     setSelectedState('');
     setSelectedLga('');
@@ -130,7 +121,7 @@ const initialValues: ThreePlType = {
   const handleStateMultiSelect = (selected: string[]) => {
     setData((prev) => ({
       ...prev,
-      states: selected,
+      state_list: selected,
     }));
   };
 
@@ -142,33 +133,41 @@ const initialValues: ThreePlType = {
       ...prev,
       state: stateValue,
       lga: '', 
-      ward: '' ,
       ehf_list: [],
     }));
   };
 
-  const GetWard = (e: any) => {
+  const GetEHF = (e: any) => {
     const lgaValue = e.target.value;
     setSelectedLga(lgaValue); 
     setData((prev) => ({
       ...prev,
-      lga: lgaValue,
-      ward: '',
+      lga: lgaValue, 
       ehf_list: [],
     }));
   };
 
+  // const handleChangeEHF = (selected: string[]) => {
+  //   setData((prev) => ({
+  //     ...prev,
+  //     ehf_list: selected, 
+  //   }));
+  // };
+
   const handleChangeEHF = (selected: string[]) => {
+    const selectedEhfNames = selected.map((id) =>
+      ehfs.find((ehf) => ehf.id?.toString() === id)?.ehf_name || ''
+    ).filter(Boolean)
     setData((prev) => ({
       ...prev,
-      ehf_list: selected, 
+      ehf_list: selectedEhfNames,
     }));
   };
 
   const ehfOptions = ehfs.map((ehf) => ({
-    value: ehf.id?.toString(),
-    label: ehf.ehf_name
-  }))
+    value: ehf.id?.toString() || '', 
+    label: ehf.ehf_name || '',     
+  }));
 
   const stateOptions = states.map((state) => ({
     value: state.state,
@@ -177,17 +176,14 @@ const initialValues: ThreePlType = {
 
   const handleSubmit = () => {
     if (validate()) {
-      const submitData = level === 'National'
+      const submitData = data.category_type === 'National'
         ? {
-            org_unit: data.org_unit,
-            threepl_name: data.threepl_name,
-            states: data.states,
-            state: '',
-            lga: '',
-            ward: '',
-            ehf_list: [],
+          ...data,
+          state: '',
+          lga: '',
+          ehf_list: [],
           }
-        : { ...data, states: [] }; 
+        : { ...data, state_list: [] }; 
 
       if (isUpdate) {
         upsertThreepl.mutate(
@@ -225,12 +221,12 @@ const initialValues: ThreePlType = {
       <Grid container spacing={2}>
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="level" sx={{ mb: 1 }}>
+            <Typography component="label" htmlFor="category_type">
               Level <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="level"
-              value={level}
+              id="category_type"
+              value={data.category_type}
               onChange={handleLevelChange}
               sx={{ width: '100%' }}
               displayEmpty
@@ -241,9 +237,9 @@ const initialValues: ThreePlType = {
               <MenuItem value="National">National</MenuItem>
               <MenuItem value="State">State</MenuItem>
             </Select>
-            {level === '' && (
+            {errors?.category_type && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                Level is required
+                {errors?.category_type}
               </Typography>
             )}
           </FormControl>
@@ -270,39 +266,7 @@ const initialValues: ThreePlType = {
           />
         </Grid>
 
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="org_unit" sx={{ mb: 1 }}>
-              Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="org_unit"
-              name="org_unit"
-              value={data.org_unit}
-              onChange={handleChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-              disabled={isView}
-            >
-              <MenuItem value="" disabled>
-                Select Org Unit
-              </MenuItem>
-              {orgUnits.map((orgUnit) => (
-                <MenuItem key={orgUnit.id} value={orgUnit.name}>
-                  {orgUnit.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors?.org_unit !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.org_unit}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid>
-
-        {level === 'National' && (
+        {data.category_type === 'National' && (
           <Grid item xs={12}>
             <FormControl sx={{ m: 0, width: '100%' }}>
               <Typography component="label" sx={{ mb: 1 }}>
@@ -312,7 +276,7 @@ const initialValues: ThreePlType = {
                 canFilter
                 options={stateOptions}
                 onChange={handleStateMultiSelect}
-                selected={data.states}
+                selected={data.state_list}
                 className="dual-listbox-custom"
                 alignActions="middle"
                 disabled={isView}
@@ -323,16 +287,16 @@ const initialValues: ThreePlType = {
                   moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
                 }}
               />
-              {errors?.states !== '' && (
+              {errors?.state_list !== '' && (
                 <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                  {errors?.states}
+                  {errors?.state_list}
                 </Typography>
               )}
             </FormControl>
           </Grid>
         )}
 
-        {level === 'State' && (
+        {data.category_type === 'State' && (
           <>
             <Grid item xs={6}>
               <FormControl sx={{ m: 0, width: '100%' }}>
@@ -373,7 +337,7 @@ const initialValues: ThreePlType = {
                   id="lga"
                   name="lga"
                   value={data.lga}
-                  onChange={GetWard}
+                  onChange={GetEHF}
                   sx={{ width: '100%' }}
                   displayEmpty
                   variant="outlined"
@@ -394,36 +358,6 @@ const initialValues: ThreePlType = {
               </FormControl>
             </Grid>
 
-            <Grid item xs={6}>
-              <FormControl sx={{ m: 0, width: '100%' }}>
-                <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
-                  Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-                </Typography>
-                <Select
-                  id="ward"
-                  name="ward"
-                  value={data.ward}
-                  onChange={handleChange}
-                  sx={{ width: '100%' }}
-                  displayEmpty
-                  variant="outlined"
-                  disabled={isView}
-                >
-                  <MenuItem value="">Select Ward</MenuItem>
-                  {wards.map((ward) => (
-                    <MenuItem key={ward.ward} value={ward.ward}>
-                      {ward.ward}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors?.ward !== '' && (
-                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                    {errors?.ward}
-                  </Typography>
-                )}
-              </FormControl>
-            </Grid>
-
             <Grid item xs={12}>
               <FormControl sx={{ m: 0, width: '100%' }}>
                 <Typography component="label" sx={{ mb: 1 }}>
@@ -433,10 +367,12 @@ const initialValues: ThreePlType = {
                   canFilter
                   options={ehfOptions}
                   onChange={handleChangeEHF}
-                  selected={data.ehf_list}
+                  selected={data.ehf_list.map((name) =>
+                    ehfs.find((ehf) => ehf.ehf_name === name)?.id?.toString() || ''
+                  )} 
                   className="dual-listbox-custom"
                   alignActions="middle"
-                  disabled={isView}
+                  disabled={isView} 
                   icons={{
                     moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
                     moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
@@ -444,7 +380,7 @@ const initialValues: ThreePlType = {
                     moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
                   }}
                 />
-                {ehfOptions.length === 0 && selectedState && (
+                {ehfOptions.length === 0 && data.state && data.lga && (
                   <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
                     No EHFs available for selected State/LGA
                   </Typography>

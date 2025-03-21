@@ -14,9 +14,8 @@ import { FaEye } from 'react-icons/fa';
 interface TableRow {
   id?: number;
   state: string;  
-  lga: string;    
-  ward: string;   
-  org_unit: string; 
+  lga: string; 
+  state_list: string[];   
   threepl_name: string;    
   ehf_list: string[]; 
 }
@@ -77,22 +76,21 @@ const ThreeplList: React.FC = () => {
       {
         accessorKey: "state",
         header: "State",
-        size: 150,
+        size: 100,
       },
       {
         accessorKey: "lga",
         header: "LGA",
-        size: 150,
+        size: 100,
       },
       {
-        accessorKey: "ward",
-        header: "Ward",
-        size: 150,
-      },
-      {
-        accessorKey: "org_unit",
-        header: "Org. Unit",
+        accessorKey: "state_list",
+        header: "State List",
         size: 200,
+        Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+          const state_list = cell.getValue() as string[];
+          return state_list.join(',  ')
+        }
       },
       {
         accessorKey: "threepl_name",
