@@ -8,7 +8,7 @@ export interface UserType {
   confirm_password: string;
   email: string;
   phone_number: string;
-  fk_org_unit_level: string;
+  org_unit: string;
   groups: string[] | number[]; 
   user_permissions: string[] | number[];
 }

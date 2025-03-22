@@ -8,15 +8,19 @@ import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
+import { useFetchUsers, useDeleteUser } from 'src/hooks/apis/user/user-hooks';
+import { FaEye } from 'react-icons/fa';
 
 interface TableRow {
+  id?: number;
   username: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  address: string;
   phone_number: string;
-  role: string;
+  groups: string[] | number[];
   org_unit: string;
+  user_permissions: string[] | number[];
 }
 
 interface TabPanelProps {
@@ -56,7 +60,11 @@ function a11yProps(index: number) {
 }
 
 const UserList: React.FC = () => {
+
     const navigate = useNavigate();
+
+    const { data: userList = [] } = useFetchUsers();
+    const deleteUser = useDeleteUser();
 
   const [value, setValue] = useState<number>(0);
 
@@ -75,8 +83,13 @@ const UserList: React.FC = () => {
         size: 100,
       },
       {
-        accessorKey: 'full_name',
+        accessorKey: 'first_name',
         header: 'Full Name',
+        size: 200,
+      },
+      {
+        accessorKey: 'last_name',
+        header: 'Last Name',
         size: 200,
       },
       {
@@ -85,18 +98,8 @@ const UserList: React.FC = () => {
         size: 200,
       },
       {
-        accessorKey: 'address',
-        header: 'Address',
-        size: 200,
-      },
-      {
         accessorKey: 'phone_number',
         header: 'Phone Number',
-        size: 200,
-      },
-      {
-        accessorKey: 'role',
-        header: 'Role',
         size: 200,
       },
       {
@@ -104,23 +107,68 @@ const UserList: React.FC = () => {
         header: 'Org. Unit',
         size: 200,
       },
+      {
+        accessorKey: 'groups',
+        header: 'Role',
+        size: 200,
+        Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+          const group = cell.getValue() as [];
+          return group.join(',  ')
+        }
+      },
+      {
+        accessorKey: 'user_permissions',
+        header: 'User Permission',
+        size: 200,
+        Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+          const user_permissions = cell.getValue() as [];
+          return user_permissions.join(',  ')
+        }
+      },
     ],
     []
   );
 
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
-    {
-      display: 'View',
+  const getTabType = () => 'user';
 
+  const handleView = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isView: true } });
+  };
+
+  const handleEdit = (data: TableRow) => {
+    const type = getTabType();
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true } });
+  };
+
+  const handleDelete = (data: TableRow) => {
+    if (data.id) {
+      deleteUser.mutate(data.id);
+    }
+  };
+
+  const handleAddNew = () => {
+    const type = getTabType();
+    navigate(`/${type}-setup`);
+  };
+
+
+  const userItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
     },
     {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
     },
   ];
 
@@ -143,14 +191,14 @@ const UserList: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={rolesList}
+            data={userList}
             tableHeader="User Management List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Add User"
-            customRightButtonCallBackFunction={() => navigate('/user-setup')}
-            actionMenuItems={actionMenuItems}
+            customRightButtonCallBackFunction={handleAddNew}
+            actionMenuItems={userItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',

@@ -18,7 +18,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { UserType } from 'src/hooks/apis/user/user-types';
 import { useUpsertUser, useFetchOrgUnitLevel, useFetchPermissions, useFetchRoles, useFetchUsers } from 'src/hooks/apis/user/user-hooks';
 
@@ -26,6 +26,8 @@ import { useUpsertUser, useFetchOrgUnitLevel, useFetchPermissions, useFetchRoles
 export default function UserSetup() {
 
   const navigate = useNavigate()
+  const location = useLocation();
+  const { state } = location;
 
   const { data: permissions = [] } = useFetchPermissions();
   const { data: orgUnits = [] } = useFetchOrgUnitLevel();
@@ -38,11 +40,11 @@ export default function UserSetup() {
     username: '',
     password: '',
     confirm_password: '',
-    fk_org_unit_level: '',
+    org_unit: '',
     phone_number: '',
     email: '',
-    groups: [] as string[],
-    user_permissions: [] as string[]
+    groups: [],
+    user_permissions: []
  };
 
 
@@ -52,6 +54,24 @@ export default function UserSetup() {
  const [permission, setPermission] = useState([]);
  const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [isView, setIsView] = useState<boolean>(false);
+
+  const setCurrentState = () => {
+    if (state?.data) {
+      const userData = state.data;
+      setData({
+        ...initialValues,
+        ...userData,
+        groups: userData.groups?.map((id: number) => id.toString()) || [],
+        user_permissions: userData.user_permissions?.map((id: number) => id.toString()) || [],
+      });
+      setIsUpdate(state.isUpdate || false);
+      setIsView(state.isView || false);
+    }
+  };
+
+  useEffect(() => {
+    setCurrentState();
+  }, [state]);
 
 
  const validate = () => {
@@ -65,15 +85,18 @@ export default function UserSetup() {
    temp.username = data.username
        ? ''
        : 'Username is required';
-   temp.password = data.password
-       ? ''
-       : 'Password required';
+    if (!isUpdate) {
+    temp.password = data.password ? '' : 'Password required';
     temp.confirm_password = data.confirm_password
-       ? data.password === data.confirm_password
-         ? ''
-         : 'Passwords do not match'
-       : 'Confirm password required';
-   temp.fk_org_unit_level = data.fk_org_unit_level
+      ? data.password === data.confirm_password
+        ? ''
+        : 'Passwords do not match'
+      : 'Confirm password required';
+  } else {
+    temp.password = '';
+    temp.confirm_password = '';
+  }
+   temp.org_unit = data.org_unit
        ? ''
        : 'Org Unit required';
   temp.phone_number = data.phone_number
@@ -82,9 +105,12 @@ export default function UserSetup() {
   temp.email = data.email
        ? ''
        : 'Email required';
-  temp.groups = (data.groups as string[]).length > 0 ? '' : 'Select at least one role';
-
-  temp.user_permissions = (data.user_permissions as string[]).length > 0 ? '' : 'Permission required';
+  temp.groups = data.groups.length > 0 
+      ? '' 
+      : 'Select at least one role';
+  temp.user_permissions = data.user_permissions.length > 0 
+      ? '' 
+      : 'Permission required';
       
    setErrors({ ...temp });
    return Object.values(temp).every((x) => x === '');
@@ -132,15 +158,9 @@ const rolesOptions = roles.map((role) => ({
 
 const handleSubmit = () => {
   if (validate()) {
-    const toBeSent = {
-      ...data,
-      groups: (data.groups as string[]).map(Number),
-      user_permissions: (data.user_permissions as string[]).map(Number),
-    };
-
     if (isUpdate) {
       upsertUser.mutate(
-        { id: data.id, data: toBeSent },
+        { id: data.id, data },
         {
           onSuccess: () => {
             navigate('/user-management');
@@ -149,7 +169,7 @@ const handleSubmit = () => {
       );
     } else {
       upsertUser.mutate(
-        { data: toBeSent },
+        { data },
         {
           onSuccess: () => {
             navigate('/user-management');
@@ -184,6 +204,7 @@ const handleSubmit = () => {
            value={data.first_name}
            onChange={handleChange}
            variant="outlined"
+           disabled={isView}
            helperText={
              errors?.first_name !== '' ? (
                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.first_name}</span>
@@ -205,6 +226,7 @@ const handleSubmit = () => {
            value={data.last_name}
            onChange={handleChange}
            variant="outlined"
+           disabled={isView}
            helperText={
              errors?.last_name !== '' ? (
                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.last_name}</span>
@@ -226,6 +248,7 @@ const handleSubmit = () => {
            value={data.username}
            onChange={handleChange}
            variant="outlined"
+           disabled={isView}
            helperText={
              errors?.username !== '' ? (
                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.username}</span>
@@ -234,61 +257,66 @@ const handleSubmit = () => {
          />
        </Grid>
 
-       <Grid item xs={6}>
-         <Typography component="label" htmlFor="password" >
-           Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-         </Typography>
-         <TextField
-            type='password'
-            fullWidth
-            id="password"
-            name="password"
-            placeholder="Password"
-            value={data.password}
-            onChange={handleChange}
-            variant="outlined"
-            helperText={
-              errors?.password !== '' ? (
-                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.password}</span>
-              ) : ''
-            }
-         />
-        </Grid>
+        {!isUpdate && !isView && (
+        <>
+          <Grid item xs={6}>
+            <Typography component="label" htmlFor="password">
+              Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              type="password"
+              fullWidth
+              id="password"
+              name="password"
+              placeholder="Password"
+              value={data.password}
+              onChange={handleChange}
+              variant="outlined"
+              helperText={
+                errors?.password !== '' ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.password}</span>
+                ) : ''
+              }
+            />
+          </Grid>
 
-        <Grid item xs={6}>
-         <Typography component="label" htmlFor="confirm_password" >
-           Confirm Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-         </Typography>
-         <TextField
-            type='password'
-           fullWidth
-           id="confirm_password"
-           name="confirm_password"
-           placeholder="Confirm Password"
-           value={data.confirm_password}
-           onChange={handleChange}
-           variant="outlined"
-           helperText={
-             errors?.confirm_password !== '' ? (
-               <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.confirm_password}</span>
-             ) : ''
-           }
-         />
-        </Grid>
-
+          <Grid item xs={6}>
+            <Typography component="label" htmlFor="confirm_password">
+              Confirm Password <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              type="password"
+              fullWidth
+              id="confirm_password"
+              name="confirm_password"
+              placeholder="Confirm Password"
+              value={data.confirm_password}
+              onChange={handleChange}
+              variant="outlined"
+              helperText={
+                errors?.confirm_password !== '' ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.confirm_password}</span>
+                ) : ''
+              }
+            />
+          </Grid>
+        </>
+        )}
+        
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="fk_org_unit_level" >
+            <Typography component="label" htmlFor="org_unit" >
               Org Unit ID <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="fk_org_unit_level"
-              name="fk_org_unit_level"
-              value={data.fk_org_unit_level} 
+              id="org_unit"
+              name="org_unit"
+              value={data.org_unit} 
               onChange={handleSelectChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined" 
+              disabled={isView}
             >
               <MenuItem value="">Select Org Unit</MenuItem>
               {orgUnits.map((orgUnit) => (
@@ -297,9 +325,9 @@ const handleSubmit = () => {
                 </MenuItem>
               ))}
             </Select>
-            {errors?.fk_org_unit_level !== '' && (
+            {errors?.org_unit !== '' && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.fk_org_unit_level}
+                {errors?.org_unit}
               </Typography>
             )}
           </FormControl>
@@ -317,6 +345,7 @@ const handleSubmit = () => {
            value={data.phone_number}
            onChange={handleChange}
            variant="outlined"
+           disabled={isView}
            helperText={
              errors?.phone_number !== '' ? (
                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.phone_number}</span>
@@ -337,6 +366,7 @@ const handleSubmit = () => {
            value={data.email}
            onChange={handleChange}
            variant="outlined"
+           disabled={isView}
            helperText={
              errors?.email !== '' ? (
                <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.email}</span>
@@ -357,6 +387,7 @@ const handleSubmit = () => {
               selected={data.groups as string[]}
               className="dual-listbox-custom"
               alignActions="middle" 
+              disabled={isView}
               icons={{
                 moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
                 moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
@@ -384,6 +415,7 @@ const handleSubmit = () => {
               selected={data.user_permissions as string[]}
               className="dual-listbox-custom"
               alignActions="middle" 
+              disabled={isView}
               icons={{
                 moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
                 moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
@@ -402,7 +434,7 @@ const handleSubmit = () => {
       </Grid>
 
      <Box sx={{ display:'flex', gap: 2, mt: 4, mb: 2 }}>
-       <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+       <Button variant="contained" color="primary" size="large" onClick={handleSubmit}  disabled={isView}>
          Submit
        </Button>
        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/user-management')}>
