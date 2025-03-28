@@ -22,6 +22,7 @@ export const useFetchUsers = () => {
   });
 };
 
+
 export const useUpsertUser = () => {
       const queryClient = useQueryClient();
       return useMutation({
@@ -66,17 +67,17 @@ export const useUpsertUser = () => {
   };
 
 
-  export const useFetchPermissions = () => {
-      return useQuery<PermissionType[], Error>({
-        queryKey: ['permissions'],
-        queryFn: async () => {
-          const response = await apiHelper.getResource<ApiResponse<PermissionType[]>>(
-            `${url}v1/permission/`
-          );
-          return response.data;
-        },
-      });
-    };
+  // export const useFetchPermissions = () => {
+  //     return useQuery<PermissionType[], Error>({
+  //       queryKey: ['permissions'],
+  //       queryFn: async () => {
+  //         const response = await apiHelper.getResource<ApiResponse<PermissionType[]>>(
+  //           `${url}v1/permission/`
+  //         );
+  //         return response.data;
+  //       },
+  //     });
+  //   };
 
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();

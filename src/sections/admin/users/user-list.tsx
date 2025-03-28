@@ -18,9 +18,7 @@ interface TableRow {
   last_name: string;
   email: string;
   phone_number: string;
-  groups: string[] | number[];
-  org_unit: string;
-  user_permissions: string[] | number[];
+  groups: number[];
 }
 
 interface TabPanelProps {
@@ -116,15 +114,15 @@ const UserList: React.FC = () => {
           return group.join(',  ')
         }
       },
-      {
-        accessorKey: 'user_permissions',
-        header: 'User Permission',
-        size: 200,
-        Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
-          const user_permissions = cell.getValue() as [];
-          return user_permissions.join(',  ')
-        }
-      },
+      // {
+      //   accessorKey: 'user_permissions',
+      //   header: 'User Permission',
+      //   size: 200,
+      //   Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+      //     const user_permissions = cell.getValue() as [];
+      //     return user_permissions.join(',  ')
+      //   }
+      // },
     ],
     []
   );
