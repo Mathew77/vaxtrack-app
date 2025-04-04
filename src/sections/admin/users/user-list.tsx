@@ -194,7 +194,7 @@ const UserList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add User"
+            customRightButtonText="ADD USER"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={userItem}
             headerStyles={{

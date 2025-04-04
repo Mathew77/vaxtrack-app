@@ -13,19 +13,18 @@ import { useFetchNcs, useDeleteNcs } from 'src/hooks/apis/ncs/ncs-hooks';
 
 interface TableRow {
   id?: number;
+  status: string;
   state: string;
   ncs_name: string;
   state_list: string[];
-  utilization_factor: number;
-  storage_capcity: number;  
-  vaccine_volume: number;
+  storage_capcity: number;
 }
 
 interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -58,20 +57,16 @@ function a11yProps(index: number) {
 }
 
 const NcsList: React.FC = () => {
-
   const navigate = useNavigate();
 
-  const {data: ncsList} = useFetchNcs();
-  const deleteNcs = useDeleteNcs()
-
+  const { data: ncsList } = useFetchNcs();
+  const deleteNcs = useDeleteNcs();
 
   const [value, setValue] = useState<number>(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
-  // const zoneList: TableRow[] = [];
 
   const columns = useMemo(
     () => [
@@ -86,18 +81,8 @@ const NcsList: React.FC = () => {
         size: 200,
       },
       {
-        accessorKey: 'utilization_factor',
-        header: 'Utilization Factor',
-        size: 200,
-      },
-      {
         accessorKey: 'storage_capcity',
-        header: 'Storage Capcity',
-        size: 200,
-      },
-      {
-        accessorKey: 'vaccine_volume',
-        header: 'Vaccine Volume',
+        header: 'Storage Capacity',
         size: 200,
       },
       {
@@ -105,8 +90,8 @@ const NcsList: React.FC = () => {
         header: 'State List',
         size: 300,
         Cell: ({ cell }: { cell: { getValue: () => unknown } }) => {
-          const lgas = cell.getValue() as string[];
-          return lgas.join(',  ');
+          const states = cell.getValue() as string[];
+          return states.join(', ');
         },
       },
     ],
@@ -136,23 +121,21 @@ const NcsList: React.FC = () => {
     navigate(`/${type}-setup`);
   };
 
-
-
   const ncsListItem: ActionMenuItem<TableRow>[] = [
     {
-      display: "View",
+      display: 'View',
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: '#1976D2' }} />,
     },
     {
-      display: "Edit",
+      display: 'Edit',
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: '#1976D2' }} />,
     },
     {
-      display: "Delete",
+      display: 'Delete',
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: 'red' }} />,
     },
   ];
 
@@ -161,14 +144,12 @@ const NcsList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="Ncs " {...a11yProps(0)} />
-        
+        <Tab style={{ textTransform: 'none' }} label="National Strategic Cold Store" {...a11yProps(0)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -176,11 +157,11 @@ const NcsList: React.FC = () => {
           <VaxTable
             columns={columns}
             data={ncsList}
-            tableHeader="Ncs List"
+            tableHeader="National Strategic Cold Store List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Ncs"
+            customRightButtonText="ADD NCS"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ncsListItem}
             headerStyles={{
@@ -191,7 +172,6 @@ const NcsList: React.FC = () => {
           />
         </Box>
       </TabPanel>
-
     </>
   );
 };

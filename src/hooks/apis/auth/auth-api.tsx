@@ -3,7 +3,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'http://82.29.173.87:8000/api';
+const BASE_URL = 'https://vaxtracklmd.net/api';
 
 export interface LoginResponse {
   username: string;

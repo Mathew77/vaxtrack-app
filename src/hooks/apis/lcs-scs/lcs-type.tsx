@@ -10,14 +10,6 @@ export interface LcsType {
     contact_person_phone: string;
     contact_person_email: string;
     storage_capcity: number;
-    utilization_factor: number;
-    vaccine_volume: number;
-    doses_vial: number;
-    packing_factor: number; 
-    buffer_stock: number; 
-    max_vial: number; 
-    max_doses: number; 
-    adjusted_max_doses: number; 
 }
 
 

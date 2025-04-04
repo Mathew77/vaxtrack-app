@@ -135,7 +135,9 @@ const handleSubmit = () => {
  return (
    <Container sx={{ mt:2 }}>
     <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-      <Typography variant="h5">Zone Management Setup</Typography>
+      <Typography variant="h5">
+        {isUpdate ? 'Edit Zone Management Setup' : isView ? 'View Zone Management Setup' : 'Zone Management Setup'}
+      </Typography>
       <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/zone-page')}>
         Back
       </Button>

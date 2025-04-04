@@ -36,9 +36,7 @@ export default function NcsSetup() {
     state: "",
     ncs_name: "",
     state_list: [],
-    utilization_factor: 0,
     storage_capcity: 0,
-    vaccine_volume: 0,
   };
 
   const [data, setData] = useState<NCSType>(initialValues);
@@ -54,8 +52,6 @@ export default function NcsSetup() {
         ...ncsData,
         state: ncsData.state || '',
         storage_capacity: ncsData.storage_capacity || 0, 
-        utilization_factor: ncsData.utilization_factor || 0,
-        vaccine_volume: ncsData.vaccine_volume || 0,
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
@@ -80,12 +76,6 @@ export default function NcsSetup() {
     temp.storage_capcity = data.storage_capcity > 0 
         ? '' 
         : 'Storage capacity must be greater than 0'; 
-    temp.utilization_factor = data.utilization_factor >= 75 && data.utilization_factor <= 85
-        ? '' 
-        : 'Utilization factor must be between 75 and 85';
-    temp.vaccine_volume = data.vaccine_volume > 0 
-        ? '' 
-        : 'Vaccine volume must be greater than 0';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -125,11 +115,7 @@ export default function NcsSetup() {
             onSuccess: (response) => {
               toast.success(response?.status || "NCS Updated Successfully");
               navigate('/ncs-page');
-            },
-            onError: (error) => {
-              console.error("Update error:", error);
-              toast.error("Failed to update NCS");
-            },
+            }
           }
         );
       } else {
@@ -139,10 +125,6 @@ export default function NcsSetup() {
             onSuccess: (response) => {
               toast.success(response?.status || "NCS Created Successfully");
               navigate('/ncs-page');
-            },
-            onError: (error) => {
-              console.error("Create error:", error);
-              toast.error("Failed to create NCS");
             },
           }
         );
@@ -158,7 +140,9 @@ export default function NcsSetup() {
   return (
     <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-        <Typography variant="h5">Storage Center Management Setup</Typography>
+        <Typography variant="h5">
+          {isUpdate ? 'Edit National Strategic Cold Store Setup' : isView ? 'View National Strategic Cold Store Setup' : 'National Strategic Cold Store Setup'}
+        </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ncs-page')}>
           Back
         </Button>
@@ -199,7 +183,7 @@ export default function NcsSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="ncs_name">
-            NCS Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            National Strategic Cold Store Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
@@ -212,25 +196,6 @@ export default function NcsSetup() {
             disabled={isView}
             error={!!errors.ncs_name}
             helperText={errors.ncs_name}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="utilization_factor">
-            Utilization Factor (%)
-          </Typography>
-          <TextField
-            fullWidth
-            id="utilization_factor"
-            name="utilization_factor"
-            type="number"
-            value={getDisplayValue(data.utilization_factor)}
-            onChange={handleChange}
-            variant="outlined"
-            disabled={isView}
-            inputProps={{ min: 0 }}
-            error={!!errors.utilization_factor}
-            helperText={errors.utilization_factor}
           />
         </Grid>
 
@@ -250,25 +215,6 @@ export default function NcsSetup() {
             inputProps={{ min: 0 }}
             error={!!errors.storage_capcity}
             helperText={errors.storage_capcity}
-          />
-        </Grid>
-
-        <Grid item xs={6}>
-          <Typography component="label" htmlFor="vaccine_volume">
-            Vaccine Volume
-          </Typography>
-          <TextField
-            fullWidth
-            id="vaccine_volume"
-            name="vaccine_volume"
-            type="number"
-            value={getDisplayValue(data.vaccine_volume)}
-            onChange={handleChange}
-            variant="outlined"
-            disabled={isView}
-            inputProps={{ min: 0 }}
-            error={!!errors.vaccine_volume}
-            helperText={errors.vaccine_volume}
           />
         </Grid>
 

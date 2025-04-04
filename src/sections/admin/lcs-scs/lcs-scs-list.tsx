@@ -90,7 +90,7 @@ const LcsScsList: React.FC = () => {
       {
         accessorKey: 'lga_id',
         header: 'LGA',
-        size: 100,
+        size: 150,
       },
       {
         accessorKey: 'lcs_name',
@@ -126,7 +126,7 @@ const LcsScsList: React.FC = () => {
       },
       {
         accessorKey: 'scs_name',
-        header: 'LCS Name',
+        header: 'SCS Name',
         size: 200,
       },
       {
@@ -226,8 +226,8 @@ const LcsScsList: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="LCS " {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="SCS " {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="Local Cold Chain Store" {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="State Cold Chain Store" {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -235,11 +235,11 @@ const LcsScsList: React.FC = () => {
           <VaxTable
             columns={lscColumns}
             data={lcsList}
-            tableHeader="LCS List"
+            tableHeader="Local Cold Chain Store List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add LCS"
+            customRightButtonText="ADD LCS"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={lcsItem}
             headerStyles={{
@@ -256,11 +256,11 @@ const LcsScsList: React.FC = () => {
           <VaxTable
             columns={scsColumns}
             data={scsList}
-            tableHeader="SCS List"
+            tableHeader="State Cold Chain Store List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add SCS"
+            customRightButtonText="ADD SCS"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={scsItem}
             headerStyles={{

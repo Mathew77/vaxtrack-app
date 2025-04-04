@@ -170,7 +170,7 @@ const RolesPermissionsList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Roles"
+            customRightButtonText="ADD ROLES"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={rolesItem}
             headerStyles={{
@@ -191,7 +191,7 @@ const RolesPermissionsList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Permissions"
+            customRightButtonText="ADD PERMISSIONS"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={actionMenuItems}
             headerStyles={{

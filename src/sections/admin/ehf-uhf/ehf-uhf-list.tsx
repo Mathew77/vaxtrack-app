@@ -240,8 +240,8 @@ const EhfUHFList: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="EHF " {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="UHF " {...a11yProps(1)} />
+        <Tab style={{ textTransform: 'none' }} label="Equipped Health Facility" {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="Unequipped Health Facility" {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -249,11 +249,11 @@ const EhfUHFList: React.FC = () => {
           <VaxTable
             columns={ehfColumns}
             data={ehfList}
-            tableHeader="EHF List"
+            tableHeader="Equipped Health Facility List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add EHF"
+            customRightButtonText="ADD EHF"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ehfItem}
             headerStyles={{
@@ -270,11 +270,11 @@ const EhfUHFList: React.FC = () => {
           <VaxTable
             columns={uhfColumns}
             data={uhfList}
-            tableHeader="UHF List"
+            tableHeader="Unequipped Health Facility List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add UHF"
+            customRightButtonText="ADD UHF"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uhfItem}
             headerStyles={{

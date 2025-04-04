@@ -212,7 +212,9 @@ const initialValues: ThreePlType = {
   return (
     <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-        <Typography variant="h5">3PL Setup</Typography>
+        <Typography variant="h5">
+          {isUpdate ? 'Edit 3PL Setup' : isView ? 'View 3PL Setup' : '3PL Setup'}
+        </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/threepl-page')}>
           Back
         </Button>

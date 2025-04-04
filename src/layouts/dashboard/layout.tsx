@@ -48,9 +48,9 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
     if (storedUsername) {
       setUserName(storedUsername);
       
-      if (storedUsername.includes('admin')) {
+      if (storedUsername.includes('dapo')) {
         setUserRole('admin');
-      } else if (storedUsername.includes('ade')) {
+      } else if (storedUsername.includes('ehf')) {
         setUserRole('ehf');
       } else if (storedUsername.includes('uhf')) {
         setUserRole('uhf');
@@ -113,7 +113,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                 />
               <p ></p>
               <Typography variant="h4" >
-                 Welcome : Abuja General Hospital - {userRole.toUpperCase()}
+                 Welcome :  {userRole.toUpperCase()}
               </Typography>
               </>
             ),

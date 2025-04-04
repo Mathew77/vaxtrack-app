@@ -44,6 +44,8 @@ export default function UhfSetup() {
     ward: '',
     // org_unit: '',
     uhf_name: '',
+    longtitude: "",
+    lagtitude: "",
     contact_person_name: '',
     contact_person_phone: '',
     contact_person_email: '',
@@ -93,6 +95,12 @@ export default function UhfSetup() {
     temp.uhf_name = data.uhf_name 
         ? '' 
         : 'uhf name required';
+    temp.longtitude = data.longtitude 
+        ? '' 
+        : 'Longitude required';
+    temp.lagtitude = data.lagtitude 
+        ? '' 
+        : 'Latitude required';
     temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person naame required';
@@ -165,7 +173,7 @@ export default function UhfSetup() {
     <Container sx={{ mt:2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
         <Typography variant="h5">
-          {isUpdate ? 'Edit UHF' : isView ? 'View UHF' : 'UHF Setup'}
+          {isUpdate ? 'Edit Unequipped Health Facilty' : isView ? 'View Unequipped Health Facilty' : 'Unequipped Health Facilty Setup'}
         </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Back
@@ -210,7 +218,7 @@ export default function UhfSetup() {
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
-              Lga <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Local Government <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
               id="lga"
@@ -305,7 +313,7 @@ export default function UhfSetup() {
 
         <Grid item xs={6}>
             <Typography component="label" htmlFor="uhf_name">
-              UHF Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Unequipped Health Facility Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <TextField
               fullWidth
@@ -324,13 +332,55 @@ export default function UhfSetup() {
             />
           </Grid>
 
+           <Grid item xs={6}>
+              <Typography component="label" htmlFor="longtitude" >
+                Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              </Typography>
+              <TextField
+                fullWidth
+                id="longtitude"
+                name="longtitude"
+                placeholder="Longitude"
+                value={data.longtitude}
+                onChange={handleChange}
+                variant="outlined"
+                disabled={isView}
+                helperText={
+                  errors?.longtitude !== '' ? (
+                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
+                  ) : ''
+                }
+              />
+            </Grid>
+    
+            <Grid item xs={6}>
+              <Typography component="label" htmlFor="lagtitude" >
+                Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              </Typography>
+              <TextField
+                fullWidth
+                id="lagtitude"
+                name="lagtitude"
+                placeholder="Latitude"
+                value={data.lagtitude}
+                onChange={handleChange}
+                variant="outlined"
+                disabled={isView}
+                helperText={
+                  errors?.lagtitude !== '' ? (
+                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
+                  ) : ''
+                }
+              />
+            </Grid>
+
       </Grid>
 
        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
           <Typography
             variant="h5"
           >
-            Contact Information
+            Unequipped Health Facility Contact Information
           </Typography>
     
           <Box >

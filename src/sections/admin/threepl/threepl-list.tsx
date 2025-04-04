@@ -175,7 +175,7 @@ const ThreeplList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add 3PL"
+            customRightButtonText="ADD 3PL"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={threeplItem}
             headerStyles={{

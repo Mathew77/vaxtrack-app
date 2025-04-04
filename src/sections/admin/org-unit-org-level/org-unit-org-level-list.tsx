@@ -233,7 +233,7 @@ const OrgUnitLevelList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Org Unit"
+            customRightButtonText="ADD ORG UNIT"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={orgUnitItem}
             headerStyles={{
@@ -254,7 +254,7 @@ const OrgUnitLevelList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Org Level"
+            customRightButtonText="ADD ORG LEVEL"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={orgListItem}
             headerStyles={{

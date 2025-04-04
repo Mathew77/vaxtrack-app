@@ -163,7 +163,7 @@ const ZoneList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="Add Zone"
+            customRightButtonText="ADD ZONE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={zoneListItem}
             headerStyles={{

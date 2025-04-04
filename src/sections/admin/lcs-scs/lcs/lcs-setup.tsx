@@ -42,14 +42,6 @@ export default function LcsSetup() {
     contact_person_phone: "",
     contact_person_email: "",
     storage_capcity: 0, 
-    utilization_factor: 0,
-    vaccine_volume: 0,
-    doses_vial: 0,
-    packing_factor: 0,
-    buffer_stock: 0,
-    max_vial: 0, 
-    max_doses: 0,
-    adjusted_max_doses: 0,
   }
   
 
@@ -67,15 +59,6 @@ export default function LcsSetup() {
         ...lcsData,
         stat_id: lcsData.stat_id || '',
         lga_id: lcsData.lga_id || '',
-        storage_capcity: lcsData.storage_capcity || 0,
-        utilization_factor: lcsData.utilization_factor || 0,
-        vaccine_volume: lcsData.vaccine_volume || 0,
-        doses_vial: lcsData.doses_vial || 0,
-        packing_factor: lcsData.packing_factor || 0, 
-        buffer_stock: lcsData.buffer_stock || 0,     
-        max_vial: lcsData.max_vial || 0,
-        max_doses: lcsData.max_doses || 0,
-        adjusted_max_doses: lcsData.adjusted_max_doses || 0,
       });
       setSelectedState(lcsData.stat_id || ''); 
       setIsUpdate(state.isUpdate || false);
@@ -86,38 +69,6 @@ export default function LcsSetup() {
   useEffect(() => {
     setCurrentState();
   }, [state]);
-
-  const calculateStorage = () => {
-      const C = data.storage_capcity || 0;
-      const U = (data.utilization_factor || 0) / 100;
-      const D = data.doses_vial || 0;
-      const P = data.packing_factor || 0;
-      const B = (data.buffer_stock || 0) / 100;
-    
-      if (C > 0 && P > 0 && !isView) {
-        const maxVial = ((C * 1000) * U) / P;
-        const maxDoses = maxVial * D;
-        const adjustedMaxDoses = maxDoses * (1 - B);
-    
-        setData((prev) => ({
-          ...prev,
-          max_vial: Math.round(maxVial),
-          max_doses: Math.round(maxDoses),
-          adjusted_max_doses: Math.round(adjustedMaxDoses),
-        }));
-      }
-    };
-  
-    useEffect(() => {
-      if (!isView) calculateStorage();
-    }, [
-      data.storage_capcity,
-      data.utilization_factor,
-      data.vaccine_volume,
-      data.doses_vial,
-      data.packing_factor,
-      data.buffer_stock,
-    ]);
 
 
   const validate = () => {
@@ -149,27 +100,12 @@ export default function LcsSetup() {
     temp.storage_capcity = data.storage_capcity > 0 
         ? '' 
         : 'Storage capacity must be greater than 0';
-    temp.utilization_factor = data.utilization_factor >= 75 && data.utilization_factor <= 85
-        ? ''
-        : 'Utilization factor must be between 75 and 85';
-    temp.vaccine_volume = data.vaccine_volume > 0 
-        ? '' 
-        : 'Vaccine volume must be greater than 0';
-    temp.doses_vial = data.doses_vial > 0 
-        ? '' 
-        : 'Doses per vial must be greater than 0';
-    temp.packing_factor = data.packing_factor > 0 
-        ? '' 
-        : 'Packing factor must be greater than 0';
-    temp.buffer_stock = data.buffer_stock >= 25 && data.buffer_stock <= 50
-      ? ''
-      : 'Buffer stock must be between 25 and 50';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
   };
 
-  const handleSelectChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
   
     setData((prev) => ({
@@ -235,12 +171,13 @@ export default function LcsSetup() {
       }
     }
   };
+  
 
   return (
     <Container sx={{ mt:2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
         <Typography variant="h5">
-          {isUpdate ? 'Edit LCS' : isView ? 'View LCS' : 'LCS Setup'}
+          {isUpdate ? 'Edit Local Cold Chain Store' : isView ? 'View Local Cold Chain Store' : 'Local Cold Chain Store Setup'}
         </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/lcs-scs-page', {state: { activeTab }})}>
           Back
@@ -284,7 +221,7 @@ export default function LcsSetup() {
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="lga_id" sx={{ mb: 1 }}>
-              Lga <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Local Government <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
               id="lga_id"
@@ -315,7 +252,7 @@ export default function LcsSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="lcs_name" >
-            Lcs Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            Local Cold Chain Store Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
@@ -323,7 +260,7 @@ export default function LcsSetup() {
             name="lcs_name"
             placeholder="Lcs Name"
             value={data.lcs_name}
-            onChange={handleSelectChange}
+            onChange={handleInputChange}
             variant="outlined"
             disabled={isView}
             helperText={
@@ -344,7 +281,7 @@ export default function LcsSetup() {
             name="longtitude"
             placeholder="Longitude"
             value={data.longtitude}
-            onChange={handleSelectChange}
+            onChange={handleInputChange}
             variant="outlined"
             disabled={isView}
             helperText={
@@ -365,7 +302,7 @@ export default function LcsSetup() {
             name="lagtitude"
             placeholder="Latitude"
             value={data.lagtitude}
-            onChange={handleSelectChange}
+            onChange={handleInputChange}
             variant="outlined"
             disabled={isView}
             helperText={
@@ -404,158 +341,6 @@ export default function LcsSetup() {
                 />
             </Grid>
 
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="utilization_factor">
-                Utilization Factor (75-85%) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                  fullWidth
-                  id="utilization_factor"
-                  name="utilization_factor"
-                  placeholder="Utilization Factor"
-                  value={getDisplayValue(data.utilization_factor)} 
-                  onChange={handleChange}
-                  inputProps={{ min: 0 }}
-                  variant="outlined"
-                  disabled={isView}
-                  type="number"
-                  helperText={
-                    errors?.utilization_factor ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.utilization_factor}</span>
-                    ) : ''
-                  }
-                />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="vaccine_volume">
-                Vaccine Volume (cm³) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="vaccine_volume"
-                name="vaccine_volume"
-                placeholder="Vaccine Volume"
-                value={getDisplayValue(data.vaccine_volume)} 
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.vaccine_volume ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.vaccine_volume}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="doses_vial">
-                Doses per Vial <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="doses_vial"
-                name="doses_vial"
-                placeholder="Doses per Vial"
-                value={getDisplayValue(data.doses_vial)} 
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.doses_vial ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.doses_vial}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="packing_factor">
-                Packing Factor (cm³ per vial) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="packing_factor"
-                name="packing_factor"
-                placeholder="Packing Factor"
-                value={getDisplayValue(data.packing_factor)} 
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.packing_factor ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.packing_factor}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="buffer_stock">
-                Buffer Stock (25-50%) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="buffer_stock"
-                name="buffer_stock"
-                placeholder="Buffer Stock"
-                value={getDisplayValue(data.buffer_stock)} 
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.buffer_stock ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.buffer_stock}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="max_vial">Max Vials</Typography>
-              <TextField
-                fullWidth
-                id="max_vial"
-                name="max_vial"
-                value={data.max_vial}
-                variant="outlined"
-                disabled
-              
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="max_doses">Max Doses</Typography>
-              <TextField
-                fullWidth
-                id="max_doses"
-                name="max_doses"
-                value={data.max_doses}
-                variant="outlined"
-                disabled
-              
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="adjusted_max_doses">Adjusted Max Doses</Typography>
-              <TextField
-                fullWidth
-                id="adjusted_max_doses"
-                name="adjusted_max_doses"
-                value={data.adjusted_max_doses}
-                variant="outlined"
-                disabled
-              />
-            </Grid>
           </Grid>
         </Box>
       </Box>
@@ -564,7 +349,7 @@ export default function LcsSetup() {
           <Typography
             variant="h5" 
           >
-            Contact Information
+           Local Cold Chain Officer Contact Information
           </Typography>
     
           <Box >
@@ -579,7 +364,7 @@ export default function LcsSetup() {
                   name="contact_person_name"
                   placeholder="Contact Person Name"
                   value={data.contact_person_name}
-                  onChange={handleSelectChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   disabled={isView}
                   helperText={
@@ -600,7 +385,7 @@ export default function LcsSetup() {
                   name="contact_person_phone"
                   placeholder="Phone Number "
                   value={data.contact_person_phone}
-                  onChange={handleSelectChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   disabled={isView}
                   type="tel"
@@ -622,7 +407,7 @@ export default function LcsSetup() {
                   name="contact_person_email"
                   placeholder="Email Address"
                   value={data.contact_person_email}
-                  onChange={handleSelectChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   type="email"
                   disabled={isView}

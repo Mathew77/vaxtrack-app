@@ -52,21 +52,15 @@ export default function EhfSetup() {
     state: '',
     lga: '',
     ward: '',
-    // org_unit: '',
     ehf_name: '',
+    longtitude: "",
+    lagtitude: "",
     uhf_list: [],
     contact_person_name: '',
     contact_person_phone: '',
     contact_person_email: '',
     storage_capcity: 0, 
-    utilization_factor: 0,
-    vaccine_volume: 0,
-    doses_vial: 0,
-    packing_factor: 0,
-    buffer_stock: 0,
-    max_vial: 0, 
-    max_doses: 0,
-    adjusted_max_doses: 0,
+    equipment_model_number: 0
   };
 
   const [data, setData] = useState<EHFType>(initialValues);
@@ -84,14 +78,6 @@ export default function EhfSetup() {
         lga: ehfData.lga || '',
         ward: ehfData.ward || '',
         storage_capcity: ehfData.storage_capcity || 0,
-        utilization_factor: ehfData.utilization_factor || 0,
-        vaccine_volume: ehfData.vaccine_volume || 0,
-        doses_vial: ehfData.doses_vial || 0,
-        packing_factor: ehfData.packing_factor || 0, 
-        buffer_stock: ehfData.buffer_stock || 0,     
-        max_vial: ehfData.max_vial || 0,
-        max_doses: ehfData.max_doses || 0,
-        adjusted_max_doses: ehfData.adjusted_max_doses || 0,
       });
       setSelectedState(ehfData.state || '');
       setSelectedLga(ehfData.lga || '');
@@ -104,37 +90,32 @@ export default function EhfSetup() {
     setCurrentState();
   }, [state]);
 
-  const calculateStorage = () => {
-    const C = data.storage_capcity || 0;
-    const U = (data.utilization_factor || 0) / 100;
-    const D = data.doses_vial || 0;
-    const P = data.packing_factor || 0;
-    const B = (data.buffer_stock || 0) / 100;
+  // const calculateStorage = () => {
+  //   const C = data.storage_capcity || 0;
+  //   const U = (data.utilization_factor || 0) / 100;
+  //   const D = data.doses_vial || 0;
+  //   const P = data.packing_factor || 0;
+  //   const B = (data.buffer_stock || 0) / 100;
   
-    if (C > 0 && P > 0 && !isView) {
-      const maxVial = ((C * 1000) * U) / P;
-      const maxDoses = maxVial * D;
-      const adjustedMaxDoses = maxDoses * (1 - B);
+  //   if (C > 0 && P > 0 && !isView) {
+  //     const maxVial = ((C * 1000) * U) / P;
+  //     const maxDoses = maxVial * D;
+  //     const adjustedMaxDoses = maxDoses * (1 - B);
   
-      setData((prev) => ({
-        ...prev,
-        max_vial: Math.round(maxVial),
-        max_doses: Math.round(maxDoses),
-        adjusted_max_doses: Math.round(adjustedMaxDoses),
-      }));
-    }
-  };
+  //     setData((prev) => ({
+  //       ...prev,
+  //       max_vial: Math.round(maxVial),
+  //       max_doses: Math.round(maxDoses),
+  //       adjusted_max_doses: Math.round(adjustedMaxDoses),
+  //     }));
+  //   }
+  // };
 
-  useEffect(() => {
-    if (!isView) calculateStorage();
-  }, [
-    data.storage_capcity,
-    data.utilization_factor,
-    data.vaccine_volume,
-    data.doses_vial,
-    data.packing_factor,
-    data.buffer_stock,
-  ]);
+  // useEffect(() => {
+  //   if (!isView) calculateStorage();
+  // }, [
+  //   data.storage_capcity,
+  // ]);
 
   const validate = () => {
     let temp = { ...errors };
@@ -147,12 +128,15 @@ export default function EhfSetup() {
     temp.ward = data.ward 
         ? '' 
         : 'Ward is required';
-    // temp.org_unit = data.org_unit 
-    //     ? '' 
-    //     : 'Org unit required';
     temp.ehf_name = data.ehf_name 
         ? '' 
         : 'EHF name required';
+    temp.longtitude = data.longtitude 
+        ? '' 
+        : 'Longitude required';
+    temp.lagtitude = data.lagtitude 
+        ? '' 
+        : 'Latitude required';
     temp.uhf_list = data.uhf_list.length > 0 ? '' : 'UHF required';
 
     temp.contact_person_name = data.contact_person_name 
@@ -167,21 +151,6 @@ export default function EhfSetup() {
     temp.storage_capcity = data.storage_capcity > 0 
         ? '' 
         : 'Storage capacity must be greater than 0';
-    temp.utilization_factor = data.utilization_factor >= 75 && data.utilization_factor <= 85
-        ? ''
-        : 'Utilization factor must be between 75 and 85';
-    temp.vaccine_volume = data.vaccine_volume > 0 
-        ? '' 
-        : 'Vaccine volume must be greater than 0';
-    temp.doses_vial = data.doses_vial > 0 
-        ? '' 
-        : 'Doses per vial must be greater than 0';
-    temp.packing_factor = data.packing_factor > 0 
-        ? '' 
-        : 'Packing factor must be greater than 0';
-    temp.buffer_stock = data.buffer_stock >= 25 && data.buffer_stock <= 50
-      ? ''
-      : 'Buffer stock must be between 25 and 50';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -282,7 +251,9 @@ export default function EhfSetup() {
   return (
     <Container sx={{ mt: 2 }}>
       <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-        <Typography variant="h5">EHF Setup</Typography>
+        <Typography variant="h5">
+          {isUpdate ? 'Edit Equipped Health Facilty' : isView ? 'View Equipped Health Facilty' : 'Equipped Health Facilty Setup'}
+        </Typography>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Back
         </Button>
@@ -324,7 +295,7 @@ export default function EhfSetup() {
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
-              Lga <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Local Government <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
               id="lga_lgaid"
@@ -384,42 +355,10 @@ export default function EhfSetup() {
             )}
           </FormControl>
         </Grid>
-{/* 
-        <Grid item xs={6}>
-          <FormControl sx={{ m: 0, width: '100%' }}>
-            <Typography component="label" htmlFor="org_unit" sx={{ mb: 1 }}>
-              Org Unit <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <Select
-              id="org_unit"
-              name="org_unit"
-              value={data.org_unit}
-              onChange={handleSelectChange}
-              sx={{ width: '100%' }}
-              displayEmpty
-              variant="outlined"
-              disabled={isView}
-            >
-              <MenuItem value="" disabled>
-                Select Org Unit
-              </MenuItem>
-              {orgUnits.map((orgUnit) => (
-                <MenuItem key={`${orgUnit.name}-${orgUnit.id}`} value={orgUnit.id}>
-                  {orgUnit.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors?.org_unit !== '' && (
-              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                {errors?.org_unit}
-              </Typography>
-            )}
-          </FormControl>
-        </Grid> */}
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="ehf_name">
-            EHF Name (Apex / HUB) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            Equipped Health Facilty Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
           </Typography>
           <TextField
             fullWidth
@@ -437,11 +376,52 @@ export default function EhfSetup() {
             }
           />
         </Grid>
+         <Grid item xs={6}>
+            <Typography component="label" htmlFor="longtitude" >
+              Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              id="longtitude"
+              name="longtitude"
+              placeholder="Longitude"
+              value={data.longtitude}
+              onChange={handleInputChange}
+              variant="outlined"
+              disabled={isView}
+              helperText={
+                errors?.longtitude !== '' ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
+                ) : ''
+              }
+            />
+          </Grid>
+  
+          <Grid item xs={6}>
+            <Typography component="label" htmlFor="lagtitude" >
+              Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              id="lagtitude"
+              name="lagtitude"
+              placeholder="Latitude"
+              value={data.lagtitude}
+              onChange={handleInputChange}
+              variant="outlined"
+              disabled={isView}
+              helperText={
+                errors?.lagtitude !== '' ? (
+                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
+                ) : ''
+              }
+            />
+          </Grid>
 
         <Grid item xs={12}> 
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" sx={{ mb: 1 }}>
-              UHF (Cascade / Spoke)<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Unequipped Health Facilty (Cascade / Spoke)<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <DualListBox
               canFilter
@@ -495,152 +475,27 @@ export default function EhfSetup() {
             </Grid>
 
             <Grid item xs={6}>
-              <Typography component="label" htmlFor="utilization_factor">
-                Utilization Factor (75-85%) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              <Typography component="label" htmlFor="equipment_model_number">
+                Cold Chain Equipment Model Number <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
               </Typography>
               <TextField
                   fullWidth
-                  id="utilization_factor"
-                  name="utilization_factor"
-                  value={getDisplayValue(data.utilization_factor)}
+                  id="equipment_model_number"
+                  name="equipment_model_number"
+                  value={getDisplayValue(data.equipment_model_number)}
                   onChange={handleChange}
                   inputProps={{ min: 0 }}
                   variant="outlined"
                   disabled={isView}
                   type="number"
                   helperText={
-                    errors?.utilization_factor ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.utilization_factor}</span>
+                    errors?.equipment_model_number ? (
+                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.equipment_model_number}</span>
                     ) : ''
                   }
                 />
             </Grid>
 
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="vaccine_volume">
-                Vaccine Volume (cm³) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="vaccine_volume"
-                name="vaccine_volume"
-                value={getDisplayValue(data.vaccine_volume)}
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.vaccine_volume ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.vaccine_volume}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="doses_vial">
-                Doses per Vial <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="doses_vial"
-                name="doses_vial"
-                value={getDisplayValue(data.doses_vial)}
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.doses_vial ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.doses_vial}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="packing_factor">
-                Packing Factor (cm³ per vial) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="packing_factor"
-                name="packing_factor"
-                value={getDisplayValue(data.packing_factor)}
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.packing_factor ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.packing_factor}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="buffer_stock">
-                Buffer Stock (25-50%) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                id="buffer_stock"
-                name="buffer_stock"
-                value={getDisplayValue(data.buffer_stock)}
-                onChange={handleChange}
-                inputProps={{ min: 0 }} 
-                variant="outlined"
-                disabled={isView}
-                type="number"
-                helperText={
-                  errors?.buffer_stock ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.buffer_stock}</span>
-                  ) : ''
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="max_vial">Max Vials</Typography>
-              <TextField
-                fullWidth
-                id="max_vial"
-                name="max_vial"
-                value={data.max_vial}
-                variant="outlined"
-                disabled
-             
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="max_doses">Max Doses</Typography>
-              <TextField
-                fullWidth
-                id="max_doses"
-                name="max_doses"
-                value={data.max_doses}
-                variant="outlined"
-                disabled
-             
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <Typography component="label" htmlFor="adjusted_max_doses">Adjusted Max Doses</Typography>
-              <TextField
-                fullWidth
-                id="adjusted_max_doses"
-                name="adjusted_max_doses"
-                value={data.adjusted_max_doses}
-                variant="outlined"
-                disabled
-              />
-            </Grid>
           </Grid>
         </Box>
       </Box>
@@ -648,7 +503,7 @@ export default function EhfSetup() {
       {/* Contact Information Section */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
         <Typography variant="h5">
-          Contact Information
+          Equipped Health Facility Contact Information
         </Typography>
         <Box>
           <Grid container spacing={3}>

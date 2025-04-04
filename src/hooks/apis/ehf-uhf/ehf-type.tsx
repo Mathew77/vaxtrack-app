@@ -5,19 +5,14 @@ export interface EHFType {
   lga: string;
   ward: string;
   ehf_name: string;
+  longtitude: string;
+  lagtitude: string;
   uhf_list: string[];
   contact_person_name: string;
   contact_person_phone: string;
   contact_person_email: string;
   storage_capcity: number;
-  utilization_factor: number;
-  vaccine_volume: number;
-  doses_vial: number;
-  packing_factor: number; 
-  buffer_stock: number; 
-  max_vial: number; 
-  max_doses: number; 
-  adjusted_max_doses: number; 
+  equipment_model_number: number;
 }
 
 export interface StateType {

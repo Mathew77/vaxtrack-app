@@ -8,6 +8,8 @@ export interface UHFType {
     contact_person_phone: string;
     contact_person_email: string;
     uhf_name: string;
+    longtitude: string;
+    lagtitude: string;
 }
 
 export interface StateType {
