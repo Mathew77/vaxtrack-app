@@ -182,7 +182,7 @@ export const navData = [
     roles: ['admin'],
   },
   {
-    title: 'NCS Setup',
+    title: 'NSCS Setup',
     path: '/ncs-page',
     icon: icon('ic-local'),
     roles: ['admin'],
@@ -220,17 +220,17 @@ export const navData = [
   //   icon: icon('ic-lock'),
   //   roles: ['ehf','uhf','lcs','slwg','threepl'],
   // },
-  {
-    title: 'Report',
-    path: '/report',
-    icon: <StackedLineChartIcon />,
-    roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
-  },
+  // {
+  //   title: 'Report',
+  //   path: '/report',
+  //   icon: <StackedLineChartIcon />,
+  //   roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
+  // },
   //test-page
-  {
-    title: 'Test-Page',
-    path: '/test-page',
-    icon: icon('ic-blog'),
-    roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
-  },
+  // {
+  //   title: 'Test-Page',
+  //   path: '/test-page',
+  //   icon: icon('ic-blog'),
+  //   roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
+  // },
 ];
