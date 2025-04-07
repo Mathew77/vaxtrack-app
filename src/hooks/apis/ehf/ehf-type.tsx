@@ -1,4 +1,3 @@
-// ehf-type.tsx
 export interface VaccineFormType {
     status?: string; 
     username?: string;

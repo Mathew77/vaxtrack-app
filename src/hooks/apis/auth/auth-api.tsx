@@ -9,6 +9,12 @@ export interface LoginResponse {
   username: string;
   access: string | null;
   token: string;
+  userdata: {
+    first_name: string;
+    last_name: string;
+    groups: { id: number; name: string }[];
+    user_permissions: { id: number; name: string }[];
+  };
 }
 
 export interface LoginVariables {

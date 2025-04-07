@@ -77,7 +77,8 @@ export default function EhfSetup() {
         state: ehfData.state || '',
         lga: ehfData.lga || '',
         ward: ehfData.ward || '',
-        storage_capcity: ehfData.storage_capcity || 0,
+        storage_capcity: ehfData.storage_capcity ?? 0,
+        equipment_model_number: ehfData.equipment_model_number ?? 0,
       });
       setSelectedState(ehfData.state || '');
       setSelectedLga(ehfData.lga || '');
@@ -148,9 +149,9 @@ export default function EhfSetup() {
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
-    temp.storage_capcity = data.storage_capcity > 0 
-        ? '' 
-        : 'Storage capacity must be greater than 0';
+        temp.storage_capcity = data.storage_capcity != null && data.storage_capcity > 0 
+          ? '' 
+          : 'Storage capacity must be greater than 0';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -189,7 +190,8 @@ export default function EhfSetup() {
     }));
   };
   
-  const getDisplayValue = (value: number): string => {
+  const getDisplayValue = (value: number | null | undefined): string => {
+    if (value === null || value === undefined) return '';
     return value === 0 ? '' : value.toString();
   };
   

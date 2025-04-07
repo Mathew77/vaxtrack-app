@@ -9,7 +9,6 @@ import {
   MenuItem,
   Select,
   FormControl,
-  SelectChangeEvent,
 } from '@mui/material';
 import DualListBox from 'react-dual-listbox';
 import 'react-dual-listbox/lib/react-dual-listbox.css';
@@ -20,7 +19,7 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserType } from 'src/hooks/apis/user/user-types';
-import { useUpsertUser, useFetchOrgUnitLevel, useFetchRoles } from 'src/hooks/apis/user/user-hooks';
+import { useUpsertUser, useFetchRoles } from 'src/hooks/apis/user/user-hooks';
 import { useFetchNcs } from 'src/hooks/apis/ncs/ncs-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
@@ -28,13 +27,6 @@ import { useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { useFetchThreePl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { toast } from 'react-toastify';
-
-interface RoleEntry {
-  roleId: string;
-  roleName: string;
-  selectedItems: string[];
-  healthFacilityType?: string;
-}
 
 export default function UserSetup() {
   const navigate = useNavigate();
@@ -66,16 +58,14 @@ export default function UserSetup() {
     lcs_list: [],
     ehf_list: [],
     uhf_list: [],
-    health_facility_category: null,
+    user_permissions: [],
   };
 
   const [data, setData] = useState<UserType>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof UserType, string>>>({});
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [isView, setIsView] = useState<boolean>(false);
-  const [healthFacilityType, setHealthFacilityType] = useState<string>('');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [roleEntries, setRoleEntries] = useState<RoleEntry[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
 
   const setCurrentState = () => {
@@ -90,51 +80,40 @@ export default function UserSetup() {
         lcs_list: userData.lcs_list || [],
         ehf_list: userData.ehf_list || [],
         uhf_list: userData.uhf_list || [],
-        health_facility_category: userData.health_facility_category || null,
+        user_permissions: userData.user_permissions || [],
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
 
-      const updatedtedRoleEntries: RoleEntry[] = [];
-      userData.groups.forEach((roleId: number) => {
+      if (userData.groups.length > 0) {
+        const roleId = userData.groups[0];
         const role = roles.find((r) => r.id === roleId);
         if (role) {
-          let selectedItems: string[] = [];
+          setSelectedRoleId(role.id.toString());
           switch (role.name) {
             case 'National Level':
-              selectedItems = userData.ncs_list || [];
+              setSelectedItems(userData.ncs_list || []);
               break;
             case 'State Level':
-              selectedItems = userData.scs_list || [];
+              setSelectedItems(userData.scs_list || []);
               break;
             case 'LGA Level':
-              selectedItems = userData.lcs_list || [];
+              setSelectedItems(userData.lcs_list || []);
               break;
-            case 'Health Facility Level':
-              selectedItems =
-                userData.health_facility_category === 'EHF'
-                  ? userData.ehf_list || []
-                  : userData.health_facility_category === 'UHF'
-                  ? userData.uhf_list || []
-                  : [];
+            case 'Equipped Health Facility':
+              setSelectedItems(userData.ehf_list || []);
+              break;
+            case 'Unequipped Health Facility':
+              setSelectedItems(userData.uhf_list || []);
               break;
             case '3PL':
-              selectedItems = userData.threePL_list || [];
+              setSelectedItems(userData.threePL_list || []);
               break;
             default:
-              selectedItems = [];
+              setSelectedItems([]);
           }
-          updatedtedRoleEntries.push({
-            roleId: role.id.toString(),
-            roleName: role.name,
-            selectedItems,
-            ...(role.name === 'Health Facility Level' && {
-              healthFacilityType: userData.health_facility_category || undefined,
-            }),
-          });
         }
-      });
-      setRoleEntries(updatedtedRoleEntries);
+      }
     }
   };
 
@@ -160,7 +139,7 @@ export default function UserSetup() {
     }
     temp.phone_number = data.phone_number ? '' : 'Phone Number is required';
     temp.email = data.email ? '' : 'Email required';
-    temp.groups = roleEntries.length > 0 ? '' : 'Add at least one role';
+    temp.groups = selectedRoleId ? '' : 'Please select a role';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -174,84 +153,47 @@ export default function UserSetup() {
     }));
   };
 
-  const handleRoleSelectChange = (event: SelectChangeEvent<string>) => {
+  const handleRoleSelectChange = (event: any) => {
     const value = event.target.value;
     setSelectedRoleId(value);
-    setSelectedItems([]);
-    if (value !== 'Health Facility Level') setHealthFacilityType('');
+    setSelectedItems([]); 
   };
 
   const handleItemChange = (selected: string[]) => {
     setSelectedItems(selected);
   };
 
-  const handleHealthFacilityTypeChange = (event: SelectChangeEvent<string>) => {
-    setHealthFacilityType(event.target.value);
-    setSelectedItems([]);
-  };
-
-  const handleAddRole = () => {
-    if (!selectedRoleId || selectedItems.length === 0) {
-      alert('Please select a role and at least one item.');
-      return;
-    }
-    const role = roles.find((r) => r.id.toString() === selectedRoleId);
-    if (role) {
-      setRoleEntries((prev) => [
-        ...prev,
-        {
-          roleId: role.id.toString(),
-          roleName: role.name,
-          selectedItems: [...selectedItems],
-          ...(role.name === 'Health Facility Level' && { healthFacilityType }),
-        },
-      ]);
-      setSelectedRoleId('');
-      setSelectedItems([]);
-      setHealthFacilityType('');
-    }
-   
-  };
-
-  const handleDeleteRole = (indexToDelete: number) => {
-    setRoleEntries((prev) => prev.filter((_, index) => index !== indexToDelete));
-  };
-
-  const availableRoles = roles.filter(
-    (role) => !roleEntries.some((entry) => entry.roleId === role.id.toString())
-  );
-
-
-
   const getItemOptions = () => {
     const selectedRole = roles.find((role) => role.id.toString() === selectedRoleId)?.name;
     switch (selectedRole) {
-      case 'National Level':
+      case 'National Strategic Cold Store':
         return ncs
-          .filter((nc) => nc.id !== undefined)
+          .filter((nc) => nc.id !== undefined && nc.id !== null)
           .map((nc) => ({ label: nc.ncs_name, value: nc.id!.toString() }));
-      case 'State Level':
+      case 'State Cold Chain Store':
         return scs
-          .filter((sc) => sc.id !== undefined)
+          .filter((sc) => sc.id !== undefined && sc.id !== null)
           .map((sc) => ({ label: sc.scs_name, value: sc.id!.toString() }));
-      case 'LGA Level':
+      case 'Local Cold Chain Store':
         return lcs
-          .filter((lc) => lc.id !== undefined)
+          .filter((lc) => lc.id !== undefined && lc.id !== null)
           .map((lc) => ({ label: lc.lcs_name, value: lc.id!.toString() }));
-      case 'Health Facility Level':
-        return healthFacilityType === 'EHF'
-          ? ehfs
-              .filter((ehf) => ehf.id !== undefined)
-              .map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }))
-          : healthFacilityType === 'UHF'
-          ? uhfs
-              .filter((uhf) => uhf.id !== undefined)
-              .map((uhf) => ({ label: uhf.uhf_name, value: uhf.id!.toString() }))
-          : [];
+      case 'Equipped Health Facility':
+        return ehfs
+          .filter((ehf) => ehf.id !== undefined && ehf.id !== null)
+          .map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }));
+      case 'Unequipped Health Facility':
+        return uhfs
+          .filter((uhf) => uhf.id !== undefined && uhf.id !== null)
+          .map((uhf) => ({ label: uhf.uhf_name, value: uhf.id!.toString() }));
       case '3PL':
         return threePLs
-          .filter((threepl) => threepl.id !== undefined)
+          .filter((threepl) => threepl.id !== undefined && threepl.id !== null)
           .map((threepl) => ({ label: threepl.threepl_name, value: threepl.id!.toString() }));
+      // case 'Conveyor':
+      //   return threePLs
+      //     .filter((conveyor) => conveyor.id !== undefined && conveyor.id !== null)
+      //     .map((conveyor) => ({ label: conveyor.conveyor_name, value: conveyor.id!.toString() }));
       case 'UNICEF':
         return [];
       default:
@@ -259,72 +201,20 @@ export default function UserSetup() {
     }
   };
 
-  const getSelectedItemsDisplay = (entry: RoleEntry) => {
-    if (!Array.isArray(entry.selectedItems)) return 'No items available';
-    const items = entry.selectedItems;
-    switch (entry.roleName) {
-      case 'National Level':
-        return items
-          .map((id) => ncs.find((nc) => nc.id?.toString() === id)?.ncs_name)
-          .join(', ');
-      case 'State Level':
-        return items
-          .map((id) => scs.find((sc) => sc.id?.toString() === id)?.scs_name)
-          .join(', ');
-      case 'LGA Level':
-        return items
-          .map((id) => lcs.find((lc) => lc.id?.toString() === id)?.lcs_name)
-          .join(', ');
-      case 'Health Facility Level':
-        return entry.healthFacilityType === 'EHF'
-          ? items
-              .map((id) => ehfs.find((ehf) => ehf.id?.toString() === id)?.ehf_name)
-              .join(', ')
-          : entry.healthFacilityType === 'UHF'
-          ? items
-              .map((id) => uhfs.find((uhf) => uhf.id?.toString() === id)?.uhf_name)
-              .join(', ')
-          : 'Unknown Facility Type';
-      case '3PL':
-        return items
-          .map((id) => threePLs.find((threepl) => threepl.id?.toString() === id)?.threepl_name)
-          .join(', ');
-      default:
-        return items.join(', ');
-    }
-  };
-
-
   const handleSubmit = () => {
     if (validate()) {
-      const roleIds = roleEntries.map((entry) => parseInt(entry.roleId));
-      const ncsList = roleEntries
-        .filter((entry) => entry.roleName === 'National Level')
-        .flatMap((entry) => entry.selectedItems);
-      const scsList = roleEntries
-        .filter((entry) => entry.roleName === 'State Level')
-        .flatMap((entry) => entry.selectedItems);
-      const lcsList = roleEntries
-        .filter((entry) => entry.roleName === 'LGA Level')
-        .flatMap((entry) => entry.selectedItems);
-      const ehfList = roleEntries
-        .filter((entry) => entry.roleName === 'Health Facility Level' && entry.healthFacilityType === 'EHF')
-        .flatMap((entry) => entry.selectedItems);
-      const uhfList = roleEntries
-        .filter((entry) => entry.roleName === 'Health Facility Level' && entry.healthFacilityType === 'UHF')
-        .flatMap((entry) => entry.selectedItems);
-      const healthFacilityCategory =
-        roleEntries.find((entry) => entry.roleName === 'Health Facility Level')?.healthFacilityType || null;
+      const role = roles.find((r) => r.id.toString() === selectedRoleId);
+      if (!role) return;
 
       const submitData: UserType = {
         ...data,
-        groups: roleIds,
-        ncs_list: ncsList.length > 0 ? ncsList : undefined,
-        scs_list: scsList.length > 0 ? scsList : undefined,
-        lcs_list: lcsList.length > 0 ? lcsList : undefined,
-        ehf_list: ehfList.length > 0 ? ehfList : undefined,
-        uhf_list: uhfList.length > 0 ? uhfList : undefined,
-        health_facility_category: healthFacilityCategory,
+        groups: [parseInt(selectedRoleId)],
+        ncs_list: role.name === 'National Level' && selectedItems.length > 0 ? selectedItems : undefined,
+        scs_list: role.name === 'State Level' && selectedItems.length > 0 ? selectedItems : undefined,
+        lcs_list: role.name === 'LGA Level' && selectedItems.length > 0 ? selectedItems : undefined,
+        ehf_list: role.name === 'Equipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
+        uhf_list: role.name === 'Unequipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
+        user_permissions: role.permissions ? role.permissions.map((perm) => parseInt(perm, 10)) : [],
       };
 
       if (isUpdate) {
@@ -332,7 +222,7 @@ export default function UserSetup() {
           { id: data.id, data: submitData },
           {
             onSuccess: (response) => {
-              toast.success(response?.status || "User Updated Successfully")
+              toast.success(response?.status || "User Updated Successfully");
               navigate('/user-management');
             },
           }
@@ -342,7 +232,7 @@ export default function UserSetup() {
           { data: submitData },
           {
             onSuccess: (response) => {
-              toast.success(response?.status || "User Created Successfully")
+              toast.success(response?.status || "User Created Successfully");
               navigate('/user-management');
             },
           }
@@ -375,7 +265,7 @@ export default function UserSetup() {
             variant="outlined"
             disabled={isView}
             helperText={
-              errors?.first_name !== '' ? (
+              errors?.first_name ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.first_name}</span>
               ) : ''
             }
@@ -396,7 +286,7 @@ export default function UserSetup() {
             variant="outlined"
             disabled={isView}
             helperText={
-              errors?.last_name !== '' ? (
+              errors?.last_name ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.last_name}</span>
               ) : ''
             }
@@ -417,7 +307,7 @@ export default function UserSetup() {
             variant="outlined"
             disabled={isView}
             helperText={
-              errors?.username !== '' ? (
+              errors?.username ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.username}</span>
               ) : ''
             }
@@ -440,7 +330,7 @@ export default function UserSetup() {
                 onChange={handleChange}
                 variant="outlined"
                 helperText={
-                  errors?.password !== '' ? (
+                  errors?.password ? (
                     <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.password}</span>
                   ) : ''
                 }
@@ -461,7 +351,7 @@ export default function UserSetup() {
                 onChange={handleChange}
                 variant="outlined"
                 helperText={
-                  errors?.confirm_password !== '' ? (
+                  errors?.confirm_password ? (
                     <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.confirm_password}</span>
                   ) : ''
                 }
@@ -484,7 +374,7 @@ export default function UserSetup() {
             variant="outlined"
             disabled={isView}
             helperText={
-              errors?.phone_number !== '' ? (
+              errors?.phone_number ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.phone_number}</span>
               ) : ''
             }
@@ -505,7 +395,7 @@ export default function UserSetup() {
             variant="outlined"
             disabled={isView}
             helperText={
-              errors?.email !== '' ? (
+              errors?.email ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.email}</span>
               ) : ''
             }
@@ -515,7 +405,7 @@ export default function UserSetup() {
         <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="groups">
-              Roles <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Role <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
               id="groups"
@@ -528,43 +418,19 @@ export default function UserSetup() {
               disabled={isView}
             >
               <MenuItem value="">Select Role</MenuItem>
-              {availableRoles.map((role) => (
+              {roles.map((role) => (
                 <MenuItem key={`${role.name}-${role.id}`} value={role.id.toString()}>
                   {role.name}
                 </MenuItem>
               ))}
             </Select>
-            {errors?.groups !== '' && (
+            {errors?.groups && (
               <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
                 {errors?.groups}
               </Typography>
             )}
           </FormControl>
         </Grid>
-
-        {roles.find((role) => role.id.toString() === selectedRoleId)?.name === 'Health Facility Level' && (
-          <Grid item xs={6}>
-            <FormControl sx={{ m: 0, width: '100%' }}>
-              <Typography component="label" htmlFor="health_facility_type">
-                Facility Type <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <Select
-                id="health_facility_type"
-                name="health_facility_type"
-                value={healthFacilityType}
-                onChange={handleHealthFacilityTypeChange}
-                sx={{ width: '100%' }}
-                displayEmpty
-                variant="outlined"
-                disabled={isView}
-              >
-                <MenuItem value="">Select Type</MenuItem>
-                <MenuItem value="EHF">EHF</MenuItem>
-                <MenuItem value="UHF">UHF</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-        )}
 
         {selectedRoleId && (
           <Grid item xs={12}>
@@ -584,111 +450,6 @@ export default function UserSetup() {
               }}
             />
           </Grid>
-        )}
-
-        {selectedRoleId && (
-          <Grid item xs={12}>
-            <Button variant="outlined" color="primary" onClick={handleAddRole} disabled={isView}>
-              Add Role
-            </Button>
-          </Grid>
-        )}
-
-        {roleEntries.length > 0 && (
-        <Grid item xs={12}>
-          <Box sx={{ width: '100%', mt: 2 }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                border: '1px solid #ddd',
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    backgroundColor: '#1976d2',
-                    color: '#fff',
-                  }}
-                >
-                  <th
-                    style={{
-                      padding: '12px',
-                      textAlign: 'left',
-                      borderBottom: '1px solid #ddd',
-                    }}
-                  >
-                    Role Name
-                  </th>
-                  <th
-                    style={{
-                      padding: '12px',
-                      textAlign: 'left',
-                      borderBottom: '1px solid #ddd',
-                    }}
-                  >
-                    Role Informations
-                  </th>
-                  {!isView && (
-                    <th
-                      style={{
-                        padding: '12px',
-                        textAlign: 'left',
-                        borderBottom: '1px solid #ddd',
-                      }}
-                    >
-                      Actions
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {roleEntries.map((entry, index) => (
-                  <tr
-                    key={index}
-                    style={{
-                      backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#fff',
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: '12px',
-                        borderBottom: '1px solid #ddd',
-                      }}
-                    >
-                      {entry.roleName}
-                    </td>
-                    <td
-                      style={{
-                        padding: '12px',
-                        borderBottom: '1px solid #ddd',
-                      }}
-                    >
-                      {getSelectedItemsDisplay(entry)}
-                    </td>
-                    {!isView && (
-                      <td
-                        style={{
-                          padding: '12px',
-                          borderBottom: '1px solid #ddd',
-                        }}
-                      >
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          onClick={() => handleDeleteRole(index)}
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Box>
-        </Grid>
         )}
       </Grid>
 

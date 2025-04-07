@@ -11,8 +11,8 @@ export interface EHFType {
   contact_person_name: string;
   contact_person_phone: string;
   contact_person_email: string;
-  storage_capcity: number;
-  equipment_model_number: number;
+  storage_capcity?: number | null;
+  equipment_model_number?: number | null;
 }
 
 export interface StateType {

@@ -15,12 +15,13 @@ export interface UserType {
   ehf_list?: string[]; 
   uhf_list?: string[];
   health_facility_category?: string | null;
-
+  user_permissions?: number[];
 }
 
   export interface RoleType {
     id: number;
     name: string;
+    permissions: string[]
   }
 
   export interface OrgUnit {

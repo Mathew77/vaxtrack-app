@@ -13,102 +13,134 @@ import { login, LoginResponse, LoginVariables } from '../../hooks/apis/auth/auth
 import { useAuth } from '../../contexts/AuthContext';
 import { apiHelper } from '../../hooks/apis/apiHelper';
 
+
 // ----------------------------------------------------------------------
 
+
 export function SignInView() {
-  const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const { setToken } = useAuth();
-
-  useEffect(() => {
-    const storedUsername = sessionStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
-  }, []);
+ const navigate = useNavigate();
+ const [username, setUsername] = useState('');
+ const [password, setPassword] = useState('');
+ const [showPassword, setShowPassword] = useState(false);
+ const { setToken } = useAuth();
 
 
-  const { mutate: loginUser, status, error } = useMutation<LoginResponse, Error, LoginVariables>({
-    mutationFn: login,
-    onSuccess: (data: LoginResponse) => {
-      setToken(data.access);
-     // apiHelper.setToken(data.access); // Set the token in apiHelper
+ const roleMapping: { [key: string]: string } = {
+   nationalstrategiccoldstore: 'ncs',
+   equippedhealthfacility: 'ehf',
+   unequippedhealthfacility: 'uhf',
+   localcoldchainstore: 'lcs',
+   statecoldchainstore: 'scs',
+   statelogisticsworkinggroup: 'slwg',
+   '3pl': 'threepl',
+   conveyor: 'conveyor',
+   admin: 'admin',
+   guest: 'guest',
+ };
+
+
+ useEffect(() => {
+   const storedUsername = sessionStorage.getItem('username');
+   if (storedUsername) {
+     setUsername(storedUsername);
+   }
+ }, []);
+
+
+ const { mutate: loginUser, status, error } = useMutation<LoginResponse, Error, LoginVariables>({
+   mutationFn: login,
+   onSuccess: (data: LoginResponse) => {
+     setToken(data.access);
      if (data.access) {
        localStorage.setItem('token', data.access);
      }
-      sessionStorage.setItem('username', username);
-      navigate('/admin-home'); // Navigate to the dashboard or home page
-    },
-  });
+     sessionStorage.setItem('username', username);
+     const fullRoleName = data.userdata?.groups[0]?.name
+       .toLowerCase()
+       .replace(/\s+/g, '');
+       console.log(fullRoleName)
+     const mappedRole = roleMapping[fullRoleName] || 'guest';
+     console.log(mappedRole)
+     if (mappedRole) {
+       sessionStorage.setItem('userRole', mappedRole);
+       navigate(`/${mappedRole}-home`);
+     }
+   },
+ });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginUser({ username, password });
-  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
-  };
+ const handleSubmit = (e: React.FormEvent) => {
+   e.preventDefault();
+   loginUser({ username, password });
+ };
 
-  const renderForm = (
-    <Box display="flex" flexDirection="column" alignItems="flex-end">
-      <TextField
-        fullWidth
-        name="email"
-        label="Email address"
-        value={username}
-        InputLabelProps={{ shrink: true }}
-        sx={{ mb: 3 }}
-        onChange={handleChange}
-      />
 
-      <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
-        Forgot password?
-      </Link>
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   setUsername(e.target.value);
+ };
 
-      <TextField
-        fullWidth
-        name="password"
-        label="Password"
-        value={password}
-        InputLabelProps={{ shrink: true }}
-        type={showPassword ? 'text' : 'password'}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 3 }}
-        onChange={(e) => setPassword(e.target.value)}
-      />
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        color="inherit"
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={status === 'pending'}
-      >
-        {status === 'pending' ? 'Signing in...' : 'Sign In'}
-      </LoadingButton>
-      {error && <div style={{ color: 'red' }}>Error: {error.message}</div>}
-    </Box>
-  );
+ const renderForm = (
+   <Box display="flex" flexDirection="column" alignItems="flex-end">
+     <TextField
+       fullWidth
+       name="email"
+       label="Email address"
+       value={username}
+       InputLabelProps={{ shrink: true }}
+       sx={{ mb: 3 }}
+       onChange={handleChange}
+     />
 
-  return (
-    <>
-      <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
-        <Typography variant="h5">Sign in</Typography>
-      </Box>
-      {renderForm}
-    </>
-  );
+
+     <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+       Forgot password?
+     </Link>
+
+
+     <TextField
+       fullWidth
+       name="password"
+       label="Password"
+       value={password}
+       InputLabelProps={{ shrink: true }}
+       type={showPassword ? 'text' : 'password'}
+       InputProps={{
+         endAdornment: (
+           <InputAdornment position="end">
+             <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+               <Iconify icon={showPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+             </IconButton>
+           </InputAdornment>
+         ),
+       }}
+       sx={{ mb: 3 }}
+       onChange={(e) => setPassword(e.target.value)}
+     />
+
+
+     <LoadingButton
+       fullWidth
+       size="large"
+       type="submit"
+       color="inherit"
+       variant="contained"
+       onClick={handleSubmit}
+       disabled={status === 'pending'}
+     >
+       {status === 'pending' ? 'Signing in...' : 'Sign In'}
+     </LoadingButton>
+     {error && <div style={{ color: 'red' }}>Error: {error.message}</div>}
+   </Box>
+ );
+
+
+ return (
+   <>
+     <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
+       <Typography variant="h5">Sign in</Typography>
+     </Box>
+     {renderForm}
+   </>
+ );
 }
