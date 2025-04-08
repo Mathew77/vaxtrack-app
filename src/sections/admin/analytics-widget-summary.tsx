@@ -18,8 +18,8 @@ import { SvgColor } from 'src/components/svg-color';
 
 type Props = CardProps & {
   title: string;
-  total: number;
-  percent: number;
+  total: string;
+  level: string;
   color?: ColorType;
   icon: React.ReactNode;
 
@@ -29,7 +29,7 @@ export function AnalyticsWidgetSummary({
   icon,
   title,
   total,
-  percent,
+  level,
   color = 'primary',
   sx,
   ...other
@@ -48,10 +48,10 @@ export function AnalyticsWidgetSummary({
         alignItems: 'center',
       }}
     >
-      <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
+      {/* <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} /> */}
+      <Iconify width={20} icon={'eva:trending-up-fill'} />
       <Box component="span" sx={{ typography: 'subtitle2' }}>
-        {percent > 0 && '+'}
-        {fPercent(percent)}
+       {level}
       </Box>
     </Box>
   );
@@ -85,7 +85,7 @@ export function AnalyticsWidgetSummary({
       >
         <Box sx={{ flexGrow: 1, minWidth: 112 }}>
           <Box sx={{ mb: 1, typography: 'subtitle2' }}>{title}</Box>
-          <Box sx={{ typography: 'h4' }}>{fShortenNumber(total)}</Box>
+          <Box sx={{ typography: 'h4' }}>{total}</Box>
         </Box>
 
      

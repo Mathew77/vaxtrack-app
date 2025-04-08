@@ -1,99 +1,73 @@
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
-import { _tasks, _posts, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
-
-import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
 import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import Filter from 'src/utils/Filter';
-
+import AnalyticsAntigen from '../analytics-antigen';
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
-
   return (
     <DashboardContent maxWidth="xl">
-       <Filter
-        showState={true}
-        showLga={true}
-        showWard={false}
-         />
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-      </Typography>
+      <Filter showState={true} showLga={false} showWard={false} />
 
+      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
+
+      {/* Summary Cards Row 1 */}
       <Grid container spacing={3}>
-      <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <AnalyticsWidgetSummary
-              title="Total EHF"
-              percent={2.6}
-              total={714000}
-              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
-            />
-          </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Percentage of EHF that have submitted LMD Orders"
+            level="All State"
+            total="78%"
+            icon={<img alt="icon" src="/assets/icons/glass/lmd.svg" />}
+          />
+        </Grid>
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <AnalyticsWidgetSummary
-              title="Total UHF"
-              percent={-0.1}
-              total={1352831}
-              color="secondary"
-              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
-            />
-          </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Percentage of EHF LMD Orders Serviced"
+            level="All State"
+            total="87%"
+            color="secondary"
+            icon={<img alt="icon" src="/assets/icons/glass/lmd4.png" />}
+          />
+        </Grid>
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <AnalyticsWidgetSummary
-              title="Total LCS"
-              percent={1.2}
-              total={982312}
-              color="primary"
-              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
-            />
-          </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Percentage of UHF that have completed forward logistics"
+            level="All State"
+            total="85%"
+            color="primary"
+            icon={<img alt="icon" src="/assets/icons/glass/lmd5.png" />}
+          />
+        </Grid>
 
-          <Grid item xs={12} sm={6} md={2.4}>
-            <AnalyticsWidgetSummary
-              title="Total SCS"
-              percent={2.8}
-              total={1723315}
-              color="warning"
-              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={2.4}>
-            <AnalyticsWidgetSummary
-              title="Total 3PL"
-              percent={3.6}
-              total={234}
-              color="error"
-              icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
-            />
-          </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="Percentage of UHF that have completed Reverse Logistics"
+            level="All State"
+            total="79%"
+            color="warning"
+            icon={<img alt="icon" src="/assets/icons/glass/lmd4.png" />}
+          />
+        </Grid>
       </Grid>
 
-      <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Latest LMD ORDER " list={_timeline} />
-        </Grid>
-        {/* <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
-            }}
-          />
-        </Grid> */}
+      {/* Add spacing between rows */}
 
-        <Grid xs={12} md={6} lg={8}>
+
+      {/* Charts Section */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid item xs={12} md={6} lg={4}>
+          <AnalyticsAntigen />
+        </Grid>
+
+        <Grid item xs={12} md={6} lg={8}>
           <AnalyticsWebsiteVisits
             title="Vaccines Distribution"
             subheader="Monthly % within the year"
@@ -106,54 +80,6 @@ export function OverviewAnalyticsView() {
             }}
           />
         </Grid>
-
-        {/* <Grid xs={12} md={6} lg={8}>
-          <AnalyticsConversionRates
-            title="Conversion rates"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: ['Italy', 'Japan', 'China', 'Canada', 'France'],
-              series: [
-                { name: '2022', data: [44, 55, 41, 64, 22] },
-                { name: '2023', data: [53, 32, 33, 52, 13] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentSubject
-            title="Current subject"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="News" list={_posts.slice(0, 5)} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite
-            title="Traffic by site"
-            list={[
-              { value: 'facebook', label: 'Facebook', total: 323234 },
-              { value: 'google', label: 'Google', total: 341212 },
-              { value: 'linkedin', label: 'Linkedin', total: 411213 },
-              { value: 'twitter', label: 'Twitter', total: 443232 },
-            ]}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsTasks title="Tasks" list={_tasks} />
-        </Grid> */}
       </Grid>
     </DashboardContent>
   );
