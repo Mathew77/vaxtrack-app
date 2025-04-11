@@ -18,7 +18,7 @@ export function OverviewAnalyticsView() {
 
       {/* Summary Cards Row 1 */}
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
           <AnalyticsWidgetSummary
             title="Percentage of EHF that have submitted LMD Orders"
             level="All State"
@@ -27,7 +27,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
           <AnalyticsWidgetSummary
             title="Percentage of EHF LMD Orders Serviced"
             level="All State"
@@ -37,7 +37,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
           <AnalyticsWidgetSummary
             title="Percentage of UHF that have completed forward logistics"
             level="All State"
@@ -47,7 +47,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
           <AnalyticsWidgetSummary
             title="Percentage of UHF that have completed Reverse Logistics"
             level="All State"
@@ -72,10 +72,12 @@ export function OverviewAnalyticsView() {
             title="Vaccines Distribution"
             subheader="Monthly % within the year"
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+              colors: ['#FF6B6B', '#4ECDC4', '#1A73E8'], // Add your custom colors here
+              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
               series: [
-                { name: 'Received', data: [43, 33, 22, 37, 67, 68, 37, 24, 55] },
-                { name: 'Distributed', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
+                { name: 'EHF with stockout', data: [43, 33, 22, 37, 67, 68, 37, 24, 55, 55, 55, 55] },
+                { name: 'EHF with stock below minimum ', data: [51, 70, 47, 67, 40, 37, 24, 70, 24, 55, 55, 55] },
+                { name: 'Delivery in full and on Time', data: [51, 70, 47, 67, 40, 37, 24, 70, 24, 55, 55, 55] },
               ],
             }}
           />
