@@ -117,7 +117,17 @@ export const BcgVaccines = ({
               />
             </Box>
           </Grid>
-
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Days of Stock</InputLabel>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.avgDailyConsumption}
+                onChange={handleInputChange('avgDailyConsumption')}
+              />
+            </Box>
+          </Grid>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Earliest Expiry Dates</InputLabel>

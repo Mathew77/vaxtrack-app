@@ -6,7 +6,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import WelcomeCard  from '../welcome';
 // import VaccineCard  from '../statistics';
 // import TransactionHistory from '../transaction-history'
-import DashboardCards from '../statistics2';
+import VaccineCard from '../statisticd-card';
 import Filter from 'src/utils/Filter';
 
 // ----------------------------------------------------------------------
@@ -19,15 +19,13 @@ export function OverviewAnalyticsView() {
         showLga={true}
         showWard={true}
          />
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        {/* Hi, SCS */}
-      </Typography>
+
       {/* <VaccineCard /> */}
       <br/>
-      <WelcomeCard />
+      {/* <WelcomeCard /> */}
       <br/>
       <br/>
-      <DashboardCards />
+      <VaccineCard />
       <b/>
       <br/>
       {/* <TransactionHistory /> */}

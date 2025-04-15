@@ -45,9 +45,9 @@ export default function VaccineOverview() {
   return (
     <Grid container spacing={3}>
       {/* Total Vaccines */}
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={3}>
         <VaccineCard
-          title="Total Vaccines"
+          title="EHF LMD Orders Submitted"
           total="1.2M"
           icon={<VaccinesIcon fontSize="large" />}
           bgColor="linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)"
@@ -57,9 +57,9 @@ export default function VaccineOverview() {
       </Grid>
 
       {/* Vaccines Distributed */}
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={3}>
         <VaccineCard
-          title="Vaccines Distributed"
+          title="EHF LMD orders serviced"
           total="950K"
           icon={<LocalShippingIcon fontSize="large" />}
           bgColor="linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)"
@@ -69,9 +69,19 @@ export default function VaccineOverview() {
       </Grid>
 
       {/* Pending Vaccine Requests */}
-      <Grid item xs={12} sm={4}>
+      <Grid item xs={12} sm={3}>
         <VaccineCard
-          title="Pending Requests"
+          title="UHF Forward Logistics Completed"
+          total="120K"
+          icon={<PendingActionsIcon fontSize="large" />}
+          bgColor="linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)"
+          textColor="#B71C1C"
+          trend="↘ -0.8%"
+        />
+      </Grid>
+      <Grid item xs={12} sm={3}>
+        <VaccineCard
+          title="EHF with at least one antigen below minimum stock level "
           total="120K"
           icon={<PendingActionsIcon fontSize="large" />}
           bgColor="linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)"

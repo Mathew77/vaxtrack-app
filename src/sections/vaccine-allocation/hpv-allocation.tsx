@@ -5,6 +5,8 @@ import {
   Typography,
   Grid,
   InputLabel,
+  Select,
+  MenuItem, FormControl
 } from '@mui/material';
 import { HpvAllocationData } from 'src/types/allocations/hpv';
 
@@ -71,6 +73,23 @@ export const HpvAllocation = ({
               </Typography>
         
               <Grid container spacing={3}>
+              <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="min-stock">Session</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="min-stock"
+                  //value={formData.belowMinStock}
+                  //onChange={handleInputChange('belowMinStock')}
+                  inputProps={{ name: 'min-stock' }}
+                >
+                  <MenuItem value="">Select</MenuItem>
+                  <MenuItem value="yes">Fixed</MenuItem>
+                  <MenuItem value="no">Outreach</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+        </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <InputLabel>Quantity Requested by UHF</InputLabel>

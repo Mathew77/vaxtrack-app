@@ -1,11 +1,14 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Box, TextField, Typography, Grid, InputLabel } from '@mui/material';
+import { Box, TextField, Typography, Grid, InputLabel,   Select,
+  MenuItem, FormControl} from '@mui/material';
 import { BcgAllocationData } from 'src/types/allocations/bcg';
 
 interface ExtendedBcgAllocationProps {
   initialData?: any;
   onDataChange: (data: any) => void;
 }
+
+
 
 export const BcgAllocation = ({
   initialData,
@@ -65,6 +68,23 @@ export const BcgAllocation = ({
       </Typography>
 
       <Grid container spacing={3}>
+        <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="min-stock">Session</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="min-stock"
+                  //value={formData.belowMinStock}
+                  //onChange={handleInputChange('belowMinStock')}
+                  inputProps={{ name: 'min-stock' }}
+                >
+                  <MenuItem value="">Select</MenuItem>
+                  <MenuItem value="yes">Fixed</MenuItem>
+                  <MenuItem value="no">Outreach</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+        </Grid>
         <Grid item xs={12} sm={6}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <InputLabel>Quantity Requested by UHF</InputLabel>

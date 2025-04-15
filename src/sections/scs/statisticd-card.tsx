@@ -55,7 +55,7 @@ export default function VaccineOverview() {
     <Grid container spacing={2}>
       {[
         {
-          title: 'Antigens below minimum stock level',
+          title: 'EHF LMD Order Received',
           total: '4',
           icon: <VaccinesIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
@@ -63,7 +63,7 @@ export default function VaccineOverview() {
           trend: '↗ +2.6%',
         },
         {
-          title: 'Antigens out of stock ',
+          title: 'EHF LMD Order Serviced',
           total: '4',
           icon: <LocalShippingIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
@@ -71,7 +71,7 @@ export default function VaccineOverview() {
           trend: '↗ +1.2%',
         },
         {
-          title: 'Antigen/device mismatch',
+          title: 'EHF LMD Order Serviced in Full',
           total: '3',
           icon: <PendingActionsIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
@@ -79,23 +79,16 @@ export default function VaccineOverview() {
           trend: '↘ -0.8%',
         },
         {
-          title: 'Antigens with less than 6 months RSL',
+          title: 'EHF with non-functioning CCE EHF',
           total: '10',
           icon: <PendingActionsIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
           textColor: '#E65100',
           trend: '↘ -1.5%',
         },
-        {
-          title: 'Number of Community Vaccine Conveyors engaged ',
-          total: '7',
-          icon: <PendingActionsIcon fontSize="large" />,
-          bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
-          textColor: '#01579B',
-          trend: '↗ +0.4%',
-        },
+        
       ].map((card, index) => (
-        <Grid key={index} item xs={12} sm={6} md={2.4}>
+        <Grid key={index} item xs={12} sm={6} md={3}>
           {/* 5 cards per row: 12 / 5 = 2.4 */}
           <VaccineCard {...card} />
         </Grid>
