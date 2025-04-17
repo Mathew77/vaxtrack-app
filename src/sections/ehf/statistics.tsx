@@ -60,7 +60,7 @@ export default function VaccineOverview() {
           icon: <VaccinesIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
           textColor: '#0D47A1',
-          trend: '↗ +2.6%',
+          trend: '↘  2.6%',
         },
         {
           title: 'Antigens out of stock ',
@@ -68,7 +68,7 @@ export default function VaccineOverview() {
           icon: <LocalShippingIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
           textColor: '#1B5E20',
-          trend: '↗ +1.2%',
+          trend: '↘  1.2%',
         },
         {
           title: 'Antigen/device mismatch',
@@ -76,7 +76,7 @@ export default function VaccineOverview() {
           icon: <PendingActionsIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
           textColor: '#B71C1C',
-          trend: '↘ -0.8%',
+          trend: '↘ 0.8%',
         },
         {
           title: 'Antigens with less than 6 months RSL',
@@ -92,7 +92,8 @@ export default function VaccineOverview() {
           icon: <PendingActionsIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
           textColor: '#01579B',
-          trend: '↗ +0.4%',
+          trend: '↘ +0.4%',
+          //trend: '↗ +0.4%',
         },
       ].map((card, index) => (
         <Grid key={index} item xs={12} sm={6} md={2.4}>

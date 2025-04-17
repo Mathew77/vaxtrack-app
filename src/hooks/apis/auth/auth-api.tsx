@@ -14,6 +14,7 @@ export interface LoginResponse {
     last_name: string;
     groups: { id: number; name: string }[];
     user_permissions: { id: number; name: string }[];
+    email: string;
   };
 }
 

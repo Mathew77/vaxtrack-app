@@ -33,8 +33,8 @@ export const BcgVaccines = ({
     belowMinStock: '',
     aboveMaxStock: '',
     qtyReceived: '',
-    closingBalance: '',
-    postLmdDos: '',
+    // closingBalance: '',
+    // postLmdDos: '',
     diluentPhysicalStock: '',
     diluentMismatchOutcome: '',
     diluentMismatchAdjustedValue: '',
@@ -184,7 +184,7 @@ export const BcgVaccines = ({
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Days of Stock</InputLabel>
               <TextField
@@ -194,7 +194,7 @@ export const BcgVaccines = ({
                 onChange={handleInputChange('daysOfStock')}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -234,7 +234,7 @@ export const BcgVaccines = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
+              <InputLabel>Doses Required to Max</InputLabel>
               <TextField
                 fullWidth
                 variant="outlined"
