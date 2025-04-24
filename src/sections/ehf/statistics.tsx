@@ -2,7 +2,11 @@ import React from 'react';
 import { Grid, Typography, Card, CardContent } from '@mui/material';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
+//import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
+import HourglassDisabledIcon from '@mui/icons-material/HourglassDisabled';
+import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
+import MoneyOffCsredIcon from '@mui/icons-material/MoneyOffCsred';
 
 interface VaccineCardProps {
   title: string;
@@ -65,7 +69,7 @@ export default function VaccineOverview() {
         {
           title: 'Antigens out of stock ',
           total: '4',
-          icon: <LocalShippingIcon fontSize="large" />,
+          icon: <HourglassDisabledIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
           textColor: '#1B5E20',
           trend: '↘  1.2%',
@@ -73,7 +77,7 @@ export default function VaccineOverview() {
         {
           title: 'Antigen/device mismatch',
           total: '3',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <MoneyOffCsredIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
           textColor: '#B71C1C',
           trend: '↘ 0.8%',
@@ -81,7 +85,7 @@ export default function VaccineOverview() {
         {
           title: 'Antigens with less than 6 months RSL',
           total: '10',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <FormatColorFillIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
           textColor: '#E65100',
           trend: '↘ -1.5%',
@@ -89,7 +93,7 @@ export default function VaccineOverview() {
         {
           title: 'Number of Community Vaccine Conveyors engaged ',
           total: '7',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <ConnectWithoutContactIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
           textColor: '#01579B',
           trend: '↘ +0.4%',

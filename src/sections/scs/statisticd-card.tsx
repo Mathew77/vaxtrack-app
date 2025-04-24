@@ -1,8 +1,11 @@
 import React from 'react';
 import { Grid, Typography, Card, CardContent } from '@mui/material';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import HourglassFullIcon from '@mui/icons-material/HourglassFull';
+import RoomServiceIcon from '@mui/icons-material/RoomService';
+import RailwayAlertIcon from '@mui/icons-material/RailwayAlert';
+
+
 
 interface VaccineCardProps {
   title: string;
@@ -65,7 +68,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF LMD Order Serviced',
           total: '4',
-          icon: <LocalShippingIcon fontSize="large" />,
+          icon: <RoomServiceIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
           textColor: '#1B5E20',
           trend: '↗ +1.2%',
@@ -73,7 +76,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF LMD Order Serviced in Full',
           total: '3',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <HourglassFullIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
           textColor: '#B71C1C',
           trend: '↘ -0.8%',
@@ -81,7 +84,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF with non-functioning CCE EHF',
           total: '10',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <RailwayAlertIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
           textColor: '#E65100',
           trend: '↘ -1.5%',

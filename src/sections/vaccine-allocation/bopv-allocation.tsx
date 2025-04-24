@@ -21,7 +21,7 @@ export const BopvAllocation = ({
 }: ExtendedBopvAllocationProps): JSX.Element => {
   const [formData, setFormData] = useState<BopvAllocationData>({
     quantity_requested_by_UHF: '',
-    quantity_dispense_by_EHF: '',
+    quantity_allocated_by_EHF: '',
     dispensed_by: '',
     quantity_received_by_conveyor: '',
     quantity_received_by_UHF: '',
@@ -108,13 +108,13 @@ export const BopvAllocation = ({
     
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Dispensed by EHF</InputLabel>
+                <InputLabel>Quantity Allocated by EHF</InputLabel>
                 <TextField
                   required
                   fullWidth
-                  name="quantity_dispense_by_EHF"
-                  placeholder="Quantity Dispensed by EHF"
-                  value={formData.quantity_dispense_by_EHF}
+                  name="quantity_allocated_by_EHF"
+                  placeholder="Quantity Allocated by EHF"
+                  value={formData.quantity_allocated_by_EHF}
                   onChange={handleChange}
                   variant="outlined"
                   disabled={!isEHF}
@@ -122,7 +122,7 @@ export const BopvAllocation = ({
               </Box>
             </Grid>
     
-            <Grid item xs={12} sm={6}>
+           {/* <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Dispensed By</InputLabel>
                 <TextField
@@ -136,7 +136,7 @@ export const BopvAllocation = ({
                   disabled={!isEHF}
                 />
               </Box>
-            </Grid>
+            </Grid> */} 
           </Grid>
           
           <Grid container spacing={3}>

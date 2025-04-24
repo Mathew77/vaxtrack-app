@@ -3,6 +3,7 @@ import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import HourglassFullIcon from '@mui/icons-material/HourglassFull';
 
 interface VaccineCardProps {
   title: string;

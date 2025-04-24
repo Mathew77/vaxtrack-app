@@ -3,6 +3,7 @@ import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import RemoveRoadIcon from '@mui/icons-material/RemoveRoad';
 
 interface VaccineCardProps {
   title: string;
@@ -60,7 +61,7 @@ export default function VaccineOverview() {
         <VaccineCard
           title="Number of Mismatches"
           total="120K"
-          icon={<PendingActionsIcon fontSize="large" />}
+          icon={<RemoveRoadIcon fontSize="large" />}
           bgColor="linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)"
           textColor="#B71C1C"
           trend="↘ -0.8%"

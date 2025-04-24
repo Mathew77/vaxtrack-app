@@ -1,8 +1,11 @@
 import React from 'react';
 import { Grid, Typography, Card, CardContent } from '@mui/material';
-import VaccinesIcon from '@mui/icons-material/Vaccines';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import RoomServiceIcon from '@mui/icons-material/RoomService';
+import BatteryFullIcon from '@mui/icons-material/BatteryFull';
+import SystemSecurityUpdateWarningIcon from '@mui/icons-material/SystemSecurityUpdateWarning';
 
 interface VaccineCardProps {
   title: string;
@@ -57,7 +60,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF LMD Order Received',
           total: '4',
-          icon: <VaccinesIcon fontSize="large" />,
+          icon: <ReceiptLongIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
           textColor: '#0D47A1',
           trend: '↗ +2.6%',
@@ -65,7 +68,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF LMD Order Serviced',
           total: '4',
-          icon: <LocalShippingIcon fontSize="large" />,
+          icon: <RoomServiceIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
           textColor: '#1B5E20',
           trend: '↗ +1.2%',
@@ -73,7 +76,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF LMD Order Serviced in Full',
           total: '3',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <BatteryFullIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
           textColor: '#B71C1C',
           trend: '↘ -0.8%',
@@ -81,7 +84,7 @@ export default function VaccineOverview() {
         {
           title: 'EHF with non-functioning CCE EHF',
           total: '10',
-          icon: <PendingActionsIcon fontSize="large" />,
+          icon: <SystemSecurityUpdateWarningIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
           textColor: '#E65100',
           trend: '↘ -1.5%',

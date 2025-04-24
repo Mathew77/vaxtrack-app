@@ -6,6 +6,8 @@ import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import Filter from 'src/utils/Filter';
 import AnalyticsAntigen from '../analytics-antigen';
+import SwapHorizontalCircleIcon from '@mui/icons-material/SwapHorizontalCircle';
+import AddTaskIcon from '@mui/icons-material/AddTask';
 
 // ----------------------------------------------------------------------
 
@@ -23,7 +25,8 @@ export function OverviewAnalyticsView() {
             title="Percentage of EHF that have submitted LMD Orders"
             level="All State"
             total="78%"
-            icon={<img alt="icon" src="/assets/icons/glass/lmd.svg" />}
+            icon={<img alt="icon" src="/assets/icons/glass/lmd4.png" />}
+            
           />
         </Grid>
 
@@ -33,7 +36,7 @@ export function OverviewAnalyticsView() {
             level="All State"
             total="87%"
             color="secondary"
-            icon={<img alt="icon" src="/assets/icons/glass/lmd4.png" />}
+            icon={<img alt="icon" src="/assets/icons/glass/lmd.svg" />}
           />
         </Grid>
 
@@ -43,7 +46,7 @@ export function OverviewAnalyticsView() {
             level="All State"
             total="85%"
             color="primary"
-            icon={<img alt="icon" src="/assets/icons/glass/lmd5.png" />}
+            icon={<AddTaskIcon />}
           />
         </Grid>
 
@@ -53,7 +56,7 @@ export function OverviewAnalyticsView() {
             level="All State"
             total="79%"
             color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/lmd4.png" />}
+            icon={<SwapHorizontalCircleIcon fontSize="large" />}
           />
         </Grid>
       </Grid>

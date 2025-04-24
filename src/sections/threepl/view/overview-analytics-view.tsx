@@ -1,4 +1,4 @@
-import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 import { _tasks, _posts, _timeline } from 'src/_mock';
@@ -15,18 +15,16 @@ import Filter from 'src/utils/Filter';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      {/* <Filter /> */}
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        {/* Hi, 3PL & SCS */}
-      </Typography>
-      {/* <VaccineCard /> */}
-      <br/>
-      <LMDOrderCard />
-      <br/>
-      <b/>
-      <LMDOrderPaymentStatus />
-      <br/>
-      <TransactionHistory />
+
+      <Box mt={3}>
+        <LMDOrderCard />
+      </Box>
+      <Box mt={3}>
+        <LMDOrderPaymentStatus />
+      </Box>
+      <Box mt={3}>
+        <TransactionHistory />
+      </Box>
     </DashboardContent>
   );
 }

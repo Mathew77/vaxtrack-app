@@ -1,4 +1,4 @@
-import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 import { _tasks, _posts, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -20,12 +20,9 @@ export function OverviewAnalyticsView() {
         showWard={true}
          />
 
-      {/* <VaccineCard /> */}
-      <br/>
-      {/* <WelcomeCard /> */}
-      <br/>
-      <br/>
-      <VaccineCard />
+      <Box mt={3}>
+        <VaccineCard />
+      </Box>
       <b/>
       <br/>
       {/* <TransactionHistory /> */}
