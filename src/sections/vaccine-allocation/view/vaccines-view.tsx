@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Typography,
@@ -9,11 +9,8 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { format } from 'date-fns';
 
 import { BcgAllocation } from '../bcg-allocation';
 import { MeaslesAllocation } from '../measles-allocation';
@@ -27,11 +24,6 @@ import { PentaAllocation } from '../penta-allocation';
 import { IpvAllocation } from '../ipv-allocation';
 import { PcvAllocation } from '../pcv-allocation';
 import { TdAllocation } from '../td-allocation';
-
-interface VaccineLine {
-  type: string;
-  data: any;
-}
 
 interface VaccineOption {
   value: string;
@@ -56,21 +48,7 @@ const vaccineOptions: VaccineOption[] = [
 
 export function VaccineAllocationList() {
   const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
-  const [availableVaccines, setAvailableVaccines] = useState<VaccineOption[]>(vaccineOptions);
-  const [vaccineLines, setVaccineLines] = useState<VaccineLine[]>([]);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
-
-  // useEffect(() => {
-  //   console.log('Selected Tab:', selectedTab);
-  // }, [selectedTab]);
-
-  const sortVaccinesByOriginalOrder = (vaccines: VaccineOption[]): VaccineOption[] => {
-    return [...vaccines].sort((a, b) => {
-      const indexA = vaccineOptions.findIndex((v) => v.value === a.value);
-      const indexB = vaccineOptions.findIndex((v) => v.value === b.value);
-      return indexA - indexB;
-    });
-  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setSelectedTab(newValue);
@@ -96,42 +74,6 @@ export function VaccineAllocationList() {
     const prevIndex = currentIndex - 1;
     if (prevIndex >= 0) {
       setSelectedTab(vaccineOptions[prevIndex].value);
-    }
-  };
-
-  const handleDone = () => {
-    const newVaccineLines = Object.entries(formDataCollection).map(([type, data]) => ({
-      type,
-      data,
-    }));
-    setVaccineLines((prev) => [...newVaccineLines, ...prev]);
-    setFormDataCollection({});
-    setAvailableVaccines(vaccineOptions);
-    setSelectedTab(vaccineOptions[0].value);
-  };
-
-  const handleDelete = (index: number) => {
-    const deletedVaccine = vaccineLines[index];
-    setVaccineLines((prev) => prev.filter((_, i) => i !== index));
-    const vaccineOption = vaccineOptions.find((v) => v.value === deletedVaccine.type);
-    if (vaccineOption && !availableVaccines.some((v) => v.value === deletedVaccine.type)) {
-      setAvailableVaccines((prev) => sortVaccinesByOriginalOrder([...prev, vaccineOption]));
-    }
-  };
-
-  const handleEdit = (index: number) => {
-    const vaccineToEdit = vaccineLines[index];
-    setVaccineLines((prev) => prev.filter((_, i) => i !== index));
-    setSelectedTab(vaccineToEdit.type);
-    setFormDataCollection((prev) => ({
-      ...prev,
-      [vaccineToEdit.type]: vaccineToEdit.data,
-    }));
-    if (!availableVaccines.some((v) => v.value === vaccineToEdit.type)) {
-      const vaccineOption = vaccineOptions.find((v) => v.value === vaccineToEdit.type);
-      if (vaccineOption) {
-        setAvailableVaccines((prev) => sortVaccinesByOriginalOrder([...prev, vaccineOption]));
-      }
     }
   };
 
@@ -166,7 +108,7 @@ export function VaccineAllocationList() {
                 onChange={handleTabChange}
                 sx={{ '& .MuiTabs-indicator': { backgroundColor: '#1976D2' } }}
               >
-                {availableVaccines.map((vaccine) => (
+                {vaccineOptions.map((vaccine) => (
                   <Tab
                     key={vaccine.value}
                     label={vaccine.label}
@@ -195,7 +137,7 @@ export function VaccineAllocationList() {
             {selectedTab && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {(() => {
-                  const SelectedComponent = availableVaccines.find((v) => v.value === selectedTab)?.component;
+                  const SelectedComponent = vaccineOptions.find((v) => v.value === selectedTab)?.component;
                   return SelectedComponent ? (
                     <>
                       <SelectedComponent
@@ -207,16 +149,16 @@ export function VaccineAllocationList() {
                           display: 'flex',
                           justifyContent: 'flex-start',
                           gap: 2,
-                          mt: 3, 
+                          mt: 3,
                         }}
                       >
                         <Button
                           variant="contained"
                           color="primary"
                           size="large"
-                          onClick={isLastTab ? handleDone : handleNext}
+                          onClick={isLastTab ? () => {} : handleNext}
                         >
-                          {isLastTab ? 'Save' : 'Next'}
+                          {isLastTab ? 'Submit' : 'Next'}
                         </Button>
                         <Button
                           variant="contained"
@@ -231,75 +173,6 @@ export function VaccineAllocationList() {
                     </>
                   ) : null;
                 })()}
-              </Box>
-            )}
-{/* 
-            {availableVaccines.length === 0 && vaccineLines.length === 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  minHeight: 'calc(100vh - 250px)',
-                }}
-              >
-                <VaccinesIcon sx={{ fontSize: 60, color: '#1976D2', mb: 2 }} />
-                <Typography variant="h6" sx={{ color: '#666' }}>
-                  Select a Vaccine to show data
-                </Typography>
-              </Box>
-            )} */}
-
-            {vaccineLines.length > 0 && (
-              <Box>
-                <Paper sx={{ p: 2, borderRadius: 1, boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
-                  <Box sx={{ backgroundColor: '#1976D2', color: 'white', py: 1, px: 2, borderRadius: 1, mb: 2 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={3}>
-                        <Typography sx={{ fontWeight: 'bold' }}>Vaccine Products</Typography>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Typography sx={{ fontWeight: 'bold' }}>Physical Stock</Typography>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Typography sx={{ fontWeight: 'bold' }}>Avg Daily Consumption</Typography>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Typography sx={{ fontWeight: 'bold' }}>Actions</Typography>
-                      </Grid>
-                    </Grid>
-                  </Box>
-
-                  {vaccineLines.map((lines, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        borderBottom: index < vaccineLines.length - 1 ? '1px solid #e0e0e0' : 'none',
-                        py: 1,
-                        px: 2,
-                      }}
-                    >
-                      <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-                        <Grid item xs={3}>
-                          <Typography>{vaccineOptions.find((v) => v.value === lines.type)?.label}</Typography>
-                        </Grid>
-                        <Grid item xs={3}>
-                          <Typography>{lines.data.physicalStock}</Typography>
-                        </Grid>
-                        <Grid item xs={3}>
-                          <Typography>{lines.data.avgDailyConsumption}</Typography>
-                        </Grid>
-                        <Grid item xs={3}>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            <EditIcon sx={{ color: '#1976D2', cursor: 'pointer' }} onClick={() => handleEdit(index)} />
-                            <DeleteIcon sx={{ color: '#d32f2f', cursor: 'pointer' }} onClick={() => handleDelete(index)} />
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  ))}
-                </Paper>
               </Box>
             )}
           </Grid>
