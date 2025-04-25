@@ -54,7 +54,12 @@ export function SignInView() {
      if (data.access) {
        localStorage.setItem('token', data.access);
      }
-     sessionStorage.setItem('username', username);
+      sessionStorage.setItem('username', username);
+      sessionStorage.setItem('firstName', data.userdata?.first_name || '');
+      sessionStorage.setItem('lastName', data.userdata?.last_name || '');
+
+      // sessionStorage.setItem('email', email);
+
      const fullRoleName = data.userdata?.groups[0]?.name
        .toLowerCase()
        .replace(/\s+/g, '');

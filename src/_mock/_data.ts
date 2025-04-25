@@ -13,6 +13,18 @@ import {
 
 // ----------------------------------------------------------------------
 
+export const getMyAccount = () => {
+  const firstName = sessionStorage.getItem('firstName') || '';
+  const lastName = sessionStorage.getItem('lastName') || '';
+  const email = sessionStorage.getItem('email') || '';
+  
+  return {
+    displayName: firstName && lastName ? `${firstName} ${lastName}` : 'Jaydon Frankie',
+    email: email || 'demo@minimals.cc',
+    photoURL: '/assets/images/avatar/avatar-25.webp',
+  };
+};
+
 export const _myAccount = {
   displayName: 'Jaydon Frankie',
   email: 'demo@minimals.cc',

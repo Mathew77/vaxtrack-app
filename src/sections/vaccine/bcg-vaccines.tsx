@@ -16,11 +16,13 @@ import { sectionBorderStyle } from 'src/utils/constants';
 interface ExtendedBcgVaccinesProps {
   initialData?: Partial<BcgVaccineData>;
   onDataChange: (data: BcgVaccineData) => void;
+  hideTitle?: boolean;
 }
 
 export const BcgVaccines = ({
   initialData = {},
   onDataChange,
+  hideTitle = false,
 }: ExtendedBcgVaccinesProps): JSX.Element => {
   const defaultFormData: BcgVaccineData = {
     physicalStock: '',
@@ -74,21 +76,23 @@ export const BcgVaccines = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          mb: 2,
-          border: '1px solid #1976D2',
-          borderRadius: 1,
-          backgroundColor: '#1976D2',
-          color: 'white',
-          padding: 2,
-          textAlign: 'left',
-          width: '100%',
-        }}
-      >
-        BCG Vaccine
-      </Typography>
+      {!hideTitle && (
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            border: '1px solid #1976D2',
+            borderRadius: 1,
+            backgroundColor: '#1976D2',
+            color: 'white',
+            padding: 2,
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          BCG Vaccine
+        </Typography>
+      )}
 
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>BCG Antigen</Typography>
