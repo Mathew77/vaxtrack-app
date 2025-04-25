@@ -16,11 +16,13 @@ import { sectionBorderStyle } from "src/utils/constants";
 interface ExtendedPcvVaccineProps {
   initialData?: Partial<PcvVaccineData>;
   onDataChange: (data: PcvVaccineData) => void;
+  hideTitle?: boolean;
 }
 
 export const PcvVaccine = ({
   initialData = {},
   onDataChange,
+  hideTitle = false,
 }: ExtendedPcvVaccineProps): JSX.Element => {
   const defaultFormData: PcvVaccineData = {
     physicalStock: '',
@@ -76,21 +78,23 @@ export const PcvVaccine = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          mb: 2,
-          border: '1px solid #1976D2',
-          borderRadius: 1,
-          backgroundColor: '#1976D2',
-          color: 'white',
-          padding: 2,
-          textAlign: 'left',
-          width: '100%',
-        }}
-      >
-        PCV Vaccine
-      </Typography>
+      {!hideTitle && (
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            border: '1px solid #1976D2',
+            borderRadius: 1,
+            backgroundColor: '#1976D2',
+            color: 'white',
+            padding: 2,
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          PCV Vaccine
+        </Typography>
+      )}
 
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>PCV Antigen</Typography>
@@ -116,6 +120,18 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
+              />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Days of Stock</InputLabel>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.daysOfStock}
+                onChange={handleInputChange('daysOfStock')}
               />
             </Box>
           </Grid>
@@ -172,18 +188,6 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={formData.daysOfStock}
-                onChange={handleInputChange('daysOfStock')}
               />
             </Box>
           </Grid>

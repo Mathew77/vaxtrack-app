@@ -6,11 +6,13 @@ import { sectionBorderStyle } from "src/utils/constants";
 interface ExtendedRotaVaccineProps {
   initialData?:  Partial<RotaVaccineData>;
   onDataChange: (data: RotaVaccineData) => void;
+  hideTitle?: boolean;
 }
 
 export const RotaVaccine = ({
   initialData = {},
   onDataChange,
+  hideTitle = false,
 }: ExtendedRotaVaccineProps): JSX.Element => {
   const defaultFormData: RotaVaccineData = {
     physicalStock: '',
@@ -58,21 +60,23 @@ export const RotaVaccine = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          mb: 2,
-          border: '1px solid #1976D2',
-          borderRadius: 1,
-          backgroundColor: '#1976D2',
-          color: 'white',
-          padding: 2,
-          textAlign: 'left',
-          width: '100%',
-        }}
-      >
-        Rota Vaccine
-      </Typography>
+      {!hideTitle && (
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            border: '1px solid #1976D2',
+            borderRadius: 1,
+            backgroundColor: '#1976D2',
+            color: 'white',
+            padding: 2,
+            textAlign: 'left',
+            width: '100%',
+          }}
+        >
+          Rota Vaccine
+        </Typography>
+      )}
 
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>Rota Antigen</Typography>
@@ -98,6 +102,18 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
+              />
+            </Box>
+          </Grid>
+
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel>Days of Stock</InputLabel>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.daysOfStock}
+                onChange={handleInputChange('daysOfStock')}
               />
             </Box>
           </Grid>
@@ -157,18 +173,6 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
-              />
-            </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={formData.daysOfStock}
-                onChange={handleInputChange('daysOfStock')}
               />
             </Box>
           </Grid>

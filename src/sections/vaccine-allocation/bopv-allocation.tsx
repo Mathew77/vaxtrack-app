@@ -8,7 +8,13 @@ import {
   Select,
   MenuItem, FormControl
 } from '@mui/material';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { BopvAllocationData } from 'src/types/allocations/bopv';
+import { BopvVaccineData } from 'src/types/vaccines/bopv';
+import { BopvVaccine } from '../vaccine/bopv-vaccines';
 
 interface ExtendedBopvAllocationProps {
   initialData?: any;
@@ -31,65 +37,105 @@ export const BopvAllocation = ({
     ...(initialData || {}),
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const storedUsername = sessionStorage.getItem('username') || '';
-  const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'scs', 'slwg', 'threepl', 'conveyor'];
-  const userRole = allowedRoles.find((role) => storedUsername.toLowerCase().includes(role));
-
-  const isEHF = userRole === 'ehf';
-  const isUHF = userRole === 'uhf';
-  const isConveyor = userRole === 'conveyor';
-
-  useEffect(() => {
-    onDataChange(formData);
-  }, [formData, onDataChange]);
+   const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'scs', 'slwg', 'threepl', 'conveyor'];
+   const userRole = allowedRoles.find((role) => storedUsername.toLowerCase().includes(role));
+ 
+   const isEHF = userRole === 'ehf';
+   const isUHF = userRole === 'uhf';
+   const isConveyor = userRole === 'conveyor';
+ 
+   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+     const { name, value } = e.target;
+     setFormData((prev) => ({
+       ...prev,
+       [name]: value,
+     }));
+   };
+ 
+   useEffect(() => {
+     onDataChange(formData);
+   }, [formData, onDataChange]);
+ 
+   const handleVaccineDataChange = (vaccineData: BopvVaccineData) => {
+     onDataChange({ ...formData, vaccineData });
+   };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-              border: '1px solid #1976D2',
-              borderRadius: 1,
-              backgroundColor: '#1976D2',
-              color: 'white',
-              padding: 2,
-              textAlign: 'left',
-              width: '100%',
-            }}
-          >
-            Bopv Allocation
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 2,
+          border: '1px solid #1976D2',
+          borderRadius: 1,
+          backgroundColor: '#1976D2',
+          color: 'white',
+          padding: 2,
+          textAlign: 'left',
+          width: '100%',
+        }}
+      >
+        Bopv Allocation
+      </Typography>
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+          aria-controls="bcg-vaccine-content"
+          id="bcg-vaccine-header"
+          sx={{
+            backgroundColor: '#1976D2',
+            color: 'white',
+            border: '1px solid #1976D2',
+            borderRadius: 1,
+          }}
+        >
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+            BOPV Vaccine
           </Typography>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'black', mb: 1 }}>
+        </AccordionSummary>
+        <AccordionDetails>
+          <BopvVaccine
+            initialData={initialData?.vaccineData}
+            onDataChange={handleVaccineDataChange}
+            hideTitle={true}
+          />
+        </AccordionDetails>
+      </Accordion>
+      
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+          aria-controls="forward-logistics-content"
+          id="forward-logistics-header"
+          sx={{
+            backgroundColor: '#1976D2',
+            color: 'white',
+            border: '1px solid #1976D2',
+            borderRadius: 1,
+          }}
+        >
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             Forward Logistics
           </Typography>
-    
+        </AccordionSummary>
+        <AccordionDetails>
           <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="min-stock">Session</InputLabel>
-              <FormControl fullWidth>
-                <Select
-                  id="min-stock"
-                  //value={formData.belowMinStock}
-                  //onChange={handleInputChange('belowMinStock')}
-                  inputProps={{ name: 'min-stock' }}
-                >
-                  <MenuItem value="">Select</MenuItem>
-                  <MenuItem value="yes">Fixed</MenuItem>
-                  <MenuItem value="no">Outreach</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-        </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <InputLabel htmlFor="min-stock">Session</InputLabel>
+                <FormControl fullWidth>
+                  <Select
+                    id="min-stock"
+                    inputProps={{ name: 'min-stock' }}
+                  >
+                    <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="yes">Fixed</MenuItem>
+                    <MenuItem value="no">Outreach</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Grid>
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Requested by UHF</InputLabel>
@@ -105,7 +151,6 @@ export const BopvAllocation = ({
                 />
               </Box>
             </Grid>
-    
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Allocated by EHF</InputLabel>
@@ -121,25 +166,6 @@ export const BopvAllocation = ({
                 />
               </Box>
             </Grid>
-    
-           {/* <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Dispensed By</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="dispensed_by"
-                  placeholder="Dispensed By"
-                  value={formData.dispensed_by}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
-            </Grid> */} 
-          </Grid>
-          
-          <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Received by Conveyor</InputLabel>
@@ -155,7 +181,6 @@ export const BopvAllocation = ({
                 />
               </Box>
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Received by UHF</InputLabel>
@@ -172,13 +197,27 @@ export const BopvAllocation = ({
               </Box>
             </Grid>
           </Grid>
-    
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'black', mt: 2, mb: 1 }}>
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+          aria-controls="reverse-logistics-content"
+          id="reverse-logistics-header"
+          sx={{
+            backgroundColor: '#1976D2',
+            color: 'white',
+            border: '1px solid #1976D2',
+            borderRadius: 1,
+          }}
+        >
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             Reverse Logistics
           </Typography>
-    
+        </AccordionSummary>
+        <AccordionDetails>
           <Grid container spacing={3}>
-    
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Returned by UHF (Unopened vial)</InputLabel>
@@ -190,11 +229,10 @@ export const BopvAllocation = ({
                   value={formData.quantity_returned_unopened}
                   onChange={handleChange}
                   variant="outlined"
-                  disabled={!isUHF} 
+                  disabled={!isUHF}
                 />
               </Box>
             </Grid>
-    
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Returned by UHF (Open vial)</InputLabel>
@@ -206,11 +244,10 @@ export const BopvAllocation = ({
                   value={formData.quantity_returned_opened}
                   onChange={handleChange}
                   variant="outlined"
-                  disabled={!isUHF} 
+                  disabled={!isUHF}
                 />
               </Box>
             </Grid>
-    
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <InputLabel>Quantity Returned By</InputLabel>
@@ -222,11 +259,13 @@ export const BopvAllocation = ({
                   value={formData.returned_by}
                   onChange={handleChange}
                   variant="outlined"
-                  disabled={!isUHF} 
+                  disabled={!isUHF}
                 />
               </Box>
             </Grid>
           </Grid>
+        </AccordionDetails>
+      </Accordion>
     </Box>
   );
 };
