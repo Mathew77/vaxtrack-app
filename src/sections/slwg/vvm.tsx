@@ -4,8 +4,8 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
 const stats = [
-  { percentage: 48, value: 38566, label: "Number of EHFs that reported at least one antigen in VVM2", color: "#2E7D67", background: "#2E7D67" },
-  { percentage: 75, value: 55566, label: "Number of EHFs thst reported at least one antigen with less than 6months RSL", color: "#226192", background: "#226192" },
+  { percentage: 20, value: 8, label: "EHF with at least one antigen stocked out", color: "#2E7D67", background: "#2E7D67" },
+  { percentage: 40, value: 12, label: "EHF with non-functioning CCE EHF", color: "#226192", background: "#226192" },
   
 ];
 
@@ -13,7 +13,7 @@ const CCE2: React.FC = () => {
   return (
     <Grid container spacing={2}>
       {stats.map((item, index) => (
-        <Grid item xs={12} key={index}>
+        <Grid item xs={6} key={index}>
           <Card
             elevation={2}
             sx={{

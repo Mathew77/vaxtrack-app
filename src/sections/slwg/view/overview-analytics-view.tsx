@@ -1,32 +1,24 @@
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 import { _tasks, _posts, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import WelcomeCard  from '../welcome';
-import VaccineCard  from '../statistics';
+import CCE2 from '../vvm';
+import cce from '../cce';
 import TransactionHistory from '../transaction-history';
-import Statistics2  from '../statistics2';
+import Statistics from '../statisticd-card';
 import Filter from 'src/utils/Filter';
-
-
-// ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      {/* <Filter /> */}
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        {/* Hi, SLWG */}
-      </Typography>
-      <br/>
-      <WelcomeCard />
-      <br/>
-      <Statistics2 />
-      <b/>
-      <br/>
-      <TransactionHistory />
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 2 }}>
+        <Statistics />
+        <CCE2 />
+        <TransactionHistory />
+      </Box>
     </DashboardContent>
   );
 }

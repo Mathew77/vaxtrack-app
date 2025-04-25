@@ -5,9 +5,9 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
 const stats = [
-  { percentage: 48, value: 12, label: "Number of states with at least one antigen below minimum stock level", color: "#2E7D67", background: "#2E7D67" },
+  { percentage: 48, value: 12, label: "Number of EHF with at least one antigen below minimum stock level", color: "#2E7D67", background: "#2E7D67" },
   { percentage: 75, value: 5, label: "Number of EHF with at least one antigen stocked out", color: "#226192", background: "#226192" },
-  { percentage: 10, value: 20, label: "EHF with at least one antigen stocked out ", color: "#226192", background: "#0B44AE" },
+  // { percentage: 10, value: 20, label: "EHF with at least one antigen stocked out ", color: "#226192", background: "#0B44AE" },
 ];
 
 const AnalyticsAntigen: React.FC = () => {

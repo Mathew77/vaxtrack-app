@@ -9,8 +9,8 @@ export interface BcgVaccineData {
   belowMinStock: string;
   aboveMaxStock: string;
   qtyReceived: string;
-  closingBalance: string;
-  postLmdDos: string;
+  // closingBalance: string;
+  // postLmdDos: string;
   diluentPhysicalStock: string; 
   diluentMismatchOutcome: string;
   diluentMismatchAdjustedValue: string; 

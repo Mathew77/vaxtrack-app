@@ -72,7 +72,7 @@ const NcsList: React.FC = () => {
     () => [
       {
         accessorKey: 'ncs_name',
-        header: 'NCS Name',
+        header: 'NSCS Name',
         size: 200,
       },
       {
@@ -161,7 +161,7 @@ const NcsList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD NCS"
+            customRightButtonText="ADD NSCS"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ncsListItem}
             headerStyles={{

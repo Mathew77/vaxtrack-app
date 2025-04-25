@@ -5,6 +5,8 @@ import {
   Typography,
   Grid,
   InputLabel,
+  Select,
+  MenuItem, FormControl
 } from '@mui/material';
 import { HepbAllocationData } from 'src/types/allocations/hepb';
 
@@ -19,7 +21,7 @@ export const HepbAllocation = ({
 }: ExtendedHepbAllocationProps): JSX.Element => {
   const [formData, setFormData] = useState<HepbAllocationData>({
     quantity_requested_by_UHF: '',
-    quantity_dispense_by_EHF: '',
+    quantity_allocated_by_EHF: '',
     dispensed_by: '',
     quantity_received_by_conveyor: '',
     quantity_received_by_UHF: '',
@@ -71,6 +73,23 @@ export const HepbAllocation = ({
               </Typography>
         
               <Grid container spacing={3}>
+              <Grid item xs={6}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <InputLabel htmlFor="min-stock">Session</InputLabel>
+              <FormControl fullWidth>
+                <Select
+                  id="min-stock"
+                  //value={formData.belowMinStock}
+                  //onChange={handleInputChange('belowMinStock')}
+                  inputProps={{ name: 'min-stock' }}
+                >
+                  <MenuItem value="">Select</MenuItem>
+                  <MenuItem value="yes">Fixed</MenuItem>
+                  <MenuItem value="no">Outreach</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+        </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <InputLabel>Quantity Requested by UHF</InputLabel>
@@ -89,13 +108,13 @@ export const HepbAllocation = ({
         
                 <Grid item xs={12} sm={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <InputLabel>Quantity Dispensed by EHF</InputLabel>
+                    <InputLabel>Quantity Allocated by EHF</InputLabel>
                     <TextField
                       required
                       fullWidth
-                      name="quantity_dispense_by_EHF"
-                      placeholder="Quantity Dispensed by EHF"
-                      value={formData.quantity_dispense_by_EHF}
+                      name="quantity_allocated_by_EHF"
+                      placeholder="Quantity Allocated by EHF"
+                      value={formData.quantity_allocated_by_EHF}
                       onChange={handleChange}
                       variant="outlined"
                       disabled={!isEHF}
@@ -103,7 +122,7 @@ export const HepbAllocation = ({
                   </Box>
                 </Grid>
         
-                <Grid item xs={12} sm={6}>
+                {/* <Grid item xs={12} sm={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <InputLabel>Quantity Dispensed By</InputLabel>
                     <TextField
@@ -117,7 +136,7 @@ export const HepbAllocation = ({
                       disabled={!isEHF}
                     />
                   </Box>
-                </Grid>
+                </Grid> */}
               </Grid>
 
               <Grid container spacing={3}>

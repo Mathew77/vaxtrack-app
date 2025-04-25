@@ -33,8 +33,8 @@ export const MeaslesVaccine = ({
     belowMinStock: '',
     aboveMaxStock: '',
     qtyReceived: '',
-    closingBalance: '',
-    postLmdDos: '',
+    // closingBalance: '',
+    // postLmdDos: '',
     diluentPhysicalStock: '', 
     diluentMismatchOutcome: '',
     diluentMismatchAdjustedValue: '', 
@@ -225,7 +225,7 @@ export const MeaslesVaccine = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Qty Received</InputLabel>
+              <InputLabel>Doses Required to Max</InputLabel>
               <TextField
                 fullWidth
                 variant="outlined"
@@ -235,7 +235,7 @@ export const MeaslesVaccine = ({
             </Box>
           </Grid>
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Closing Balance</InputLabel>
               <TextField
@@ -245,9 +245,9 @@ export const MeaslesVaccine = ({
                 onChange={handleInputChange('closingBalance')}
               />
             </Box>
-          </Grid>
+          </Grid> */}
 
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Post LMD DoS</InputLabel>
               <TextField
@@ -257,7 +257,7 @@ export const MeaslesVaccine = ({
                 onChange={handleInputChange('postLmdDos')}
               />
             </Box>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Box>
 

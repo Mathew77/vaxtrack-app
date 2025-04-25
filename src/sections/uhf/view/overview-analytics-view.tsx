@@ -21,7 +21,7 @@ export function OverviewAnalyticsView() {
       </Typography>
       <VaccineCard />
       <br/>
-      <WelcomeCard />
+      {/* <WelcomeCard /> */}
       <br/>
       <b/>
       <br/>

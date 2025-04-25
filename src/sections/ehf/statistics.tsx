@@ -1,8 +1,12 @@
 import React from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
+import { Grid, Typography, Card, CardContent } from '@mui/material';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
+//import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
+import HourglassDisabledIcon from '@mui/icons-material/HourglassDisabled';
+import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
+import MoneyOffCsredIcon from '@mui/icons-material/MoneyOffCsred';
 
 interface VaccineCardProps {
   title: string;
@@ -15,7 +19,15 @@ interface VaccineCardProps {
 
 const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor, trend }) => {
   return (
-    <Card sx={{ boxShadow: 3, borderRadius: 2, background: bgColor, color: textColor }}>
+    <Card
+      sx={{
+        boxShadow: 3,
+        borderRadius: 2,
+        background: bgColor,
+        color: textColor,
+        height: '100%',
+      }}
+    >
       <CardContent
         sx={{
           display: 'flex',
@@ -24,12 +36,13 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
           justifyContent: 'space-between',
           p: 3,
           position: 'relative',
+          height: '100%',
         }}
       >
         <Typography variant="body2" sx={{ position: 'absolute', top: 10, right: 15, fontWeight: 'bold' }}>
           {trend}
         </Typography>
-        <Box sx={{ fontSize: 40, mb: 1 }}>{icon}</Box>
+        <div style={{ fontSize: 40, marginBottom: 8 }}>{icon}</div>
         <Typography variant="subtitle1" fontWeight="bold">
           {title}
         </Typography>
@@ -43,42 +56,55 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
 
 export default function VaccineOverview() {
   return (
-    <Grid container spacing={3}>
-      {/* Total Vaccines */}
-      <Grid item xs={12} sm={4}>
-        <VaccineCard
-          title="Total Vaccines"
-          total="1.2M"
-          icon={<VaccinesIcon fontSize="large" />}
-          bgColor="linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)"
-          textColor="#0D47A1"
-          trend="↗ +2.6%"
-        />
-      </Grid>
-
-      {/* Vaccines Distributed */}
-      <Grid item xs={12} sm={4}>
-        <VaccineCard
-          title="Vaccines Distributed"
-          total="950K"
-          icon={<LocalShippingIcon fontSize="large" />}
-          bgColor="linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)"
-          textColor="#1B5E20"
-          trend="↗ +1.2%"
-        />
-      </Grid>
-
-      {/* Pending Vaccine Requests */}
-      <Grid item xs={12} sm={4}>
-        <VaccineCard
-          title="Number of Mismatches"
-          total="120K"
-          icon={<PendingActionsIcon fontSize="large" />}
-          bgColor="linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)"
-          textColor="#B71C1C"
-          trend="↘ -0.8%"
-        />
-      </Grid>
+    <Grid container spacing={2}>
+      {[
+        {
+          title: 'Antigens below minimum stock level',
+          total: '4',
+          icon: <VaccinesIcon fontSize="large" />,
+          bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
+          textColor: '#0D47A1',
+          trend: '↘  2.6%',
+        },
+        {
+          title: 'Antigens out of stock ',
+          total: '4',
+          icon: <HourglassDisabledIcon fontSize="large" />,
+          bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
+          textColor: '#1B5E20',
+          trend: '↘  1.2%',
+        },
+        {
+          title: 'Antigen/device mismatch',
+          total: '3',
+          icon: <MoneyOffCsredIcon fontSize="large" />,
+          bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
+          textColor: '#B71C1C',
+          trend: '↘ 0.8%',
+        },
+        {
+          title: 'Antigens with less than 6 months RSL',
+          total: '10',
+          icon: <FormatColorFillIcon fontSize="large" />,
+          bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
+          textColor: '#E65100',
+          trend: '↘ -1.5%',
+        },
+        {
+          title: 'Number of Community Vaccine Conveyors engaged ',
+          total: '7',
+          icon: <ConnectWithoutContactIcon fontSize="large" />,
+          bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
+          textColor: '#01579B',
+          trend: '↘ +0.4%',
+          //trend: '↗ +0.4%',
+        },
+      ].map((card, index) => (
+        <Grid key={index} item xs={12} sm={6} md={2.4}>
+          {/* 5 cards per row: 12 / 5 = 2.4 */}
+          <VaccineCard {...card} />
+        </Grid>
+      ))}
     </Grid>
   );
 }

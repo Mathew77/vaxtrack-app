@@ -22,8 +22,14 @@ export const ColdChainStatus = ({
   initialData = {},
   onDataChange,
 }: ExtendedColdChainProps): JSX.Element => {
+
+  const currentDateTime = new Date();
+const localDateTime = new Date(currentDateTime.getTime() - currentDateTime.getTimezoneOffset() * 60000);
+
+const formattedDateTime = localDateTime.toISOString().slice(0, 16);
+
   const defaultFormData: ColdChainVaccineData = {
-    dateCreated: new Date().toISOString().split('T')[0], 
+    dateCreated: formattedDateTime, 
     equipStatus: '',
     requestType: '',
   };
@@ -55,6 +61,9 @@ export const ColdChainStatus = ({
     });
   };
 
+  const formattedDate = new Date(formData.dateCreated).toLocaleDateString();
+  const formattedTime = new Date(formData.dateCreated).toLocaleTimeString();
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Typography
@@ -81,10 +90,11 @@ export const ColdChainStatus = ({
               <TextField
                 fullWidth
                 variant="outlined"
-                type="date"
+                type="datetime-local" 
                 value={formData.dateCreated}
                 onChange={handleInputChange('dateCreated')}
                 InputLabelProps={{ shrink: true }}
+                disabled
               />
             </Box>
           </Grid>

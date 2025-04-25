@@ -91,13 +91,13 @@ export default function UserSetup() {
         if (role) {
           setSelectedRoleId(role.id.toString());
           switch (role.name) {
-            case 'National Level':
+            case 'National Strategic Cold Store':
               setSelectedItems(userData.ncs_list || []);
               break;
-            case 'State Level':
+            case 'State Cold Chain Store':
               setSelectedItems(userData.scs_list || []);
               break;
-            case 'LGA Level':
+            case 'Local Cold Chain Store':
               setSelectedItems(userData.lcs_list || []);
               break;
             case 'Equipped Health Facility':
@@ -209,9 +209,9 @@ export default function UserSetup() {
       const submitData: UserType = {
         ...data,
         groups: [parseInt(selectedRoleId)],
-        ncs_list: role.name === 'National Level' && selectedItems.length > 0 ? selectedItems : undefined,
-        scs_list: role.name === 'State Level' && selectedItems.length > 0 ? selectedItems : undefined,
-        lcs_list: role.name === 'LGA Level' && selectedItems.length > 0 ? selectedItems : undefined,
+        ncs_list: role.name === 'National Strategic Cold Store' && selectedItems.length > 0 ? selectedItems : undefined,
+        scs_list: role.name === 'State Cold Chain Store' && selectedItems.length > 0 ? selectedItems : undefined,
+        lcs_list: role.name === 'Local Cold Chain Store' && selectedItems.length > 0 ? selectedItems : undefined,
         ehf_list: role.name === 'Equipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
         uhf_list: role.name === 'Unequipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
         user_permissions: role.permissions ? role.permissions.map((perm) => parseInt(perm, 10)) : [],

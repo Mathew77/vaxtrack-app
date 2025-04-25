@@ -6,11 +6,11 @@ import SchoolIcon from "@mui/icons-material/School";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
-const stats = [
-  { count: 6, label: "Antigens in VVM2", icon: <FolderIcon />, color: "#FFD590" },
-  { count: 3, label: "Antigens with less than 6 months RSL", icon: <CheckCircleIcon />, color: "#C3E6C3" },
+// const stats = [
+//   { count: 6, label: "Antigens in VVM2", icon: <FolderIcon />, color: "#FFD590" },
+//   { count: 3, label: "Antigens with less than 6 months RSL", icon: <CheckCircleIcon />, color: "#C3E6C3" },
  
-];
+// ];
 
 const progressStats = [
   { percentage: 73.9, value: 38566, label: "Minimum Stock Level", color: "#4CAF50" },
@@ -20,7 +20,7 @@ const progressStats = [
 const DashboardCards: React.FC = () => {
   return (
     <Grid container spacing={2}>
-      {[...stats, ...progressStats].map((item, index) => (
+      {[ ...progressStats].map((item, index) => (
         <Grid item xs={12} sm={3} key={index}>
           <Card elevation={2} sx={{ borderRadius: 3, display: "flex", alignItems: "center", padding: 2, height: 120 }}>
             {"percentage" in item ? (
@@ -45,31 +45,7 @@ const DashboardCards: React.FC = () => {
                   </Typography>
                 </Box>
               </>
-            ) : (
-              <>
-                <Typography variant="h4" sx={{ fontWeight: "bold", marginRight: 2 }}>
-                  {item.count}
-                </Typography>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    {item.label}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    backgroundColor: item.color,
-                    borderRadius: "50%",
-                    width: 40,
-                    height: 40,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {item.icon}
-                </Box>
-              </>
-            )}
+            ) : ""}
           </Card>
         </Grid>
       ))}

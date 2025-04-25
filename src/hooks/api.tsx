@@ -13,5 +13,5 @@
 
 
 export const url = process.env.NODE_ENV === 'production'
-  ? 'https://api.productionurl.com'
+  ? 'https://vaxtracklmd.net/api/'
   : 'https://vaxtracklmd.net/api/';
