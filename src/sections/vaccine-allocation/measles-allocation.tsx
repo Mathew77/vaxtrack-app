@@ -85,9 +85,9 @@ export const MeaslesAllocation = ({
           aria-controls="bcg-vaccine-content"
           id="bcg-vaccine-header"
           sx={{
-            backgroundColor: '#1976D2',
+            backgroundColor: '#00838F',
             color: 'white',
-            border: '1px solid #1976D2',
+            border: '1px solid #00838F',
             borderRadius: 1,
           }}
         >
@@ -110,9 +110,9 @@ export const MeaslesAllocation = ({
           aria-controls="forward-logistics-content"
           id="forward-logistics-header"
           sx={{
-            backgroundColor: '#1976D2',
+            backgroundColor: '#37474F',
             color: 'white',
-            border: '1px solid #1976D2',
+            border: '1px solid #37474F',
             borderRadius: 1,
           }}
         >
@@ -207,9 +207,9 @@ export const MeaslesAllocation = ({
           aria-controls="reverse-logistics-content"
           id="reverse-logistics-header"
           sx={{
-            backgroundColor: '#1976D2',
+            backgroundColor: '#6B6B6B',
             color: 'white',
-            border: '1px solid #1976D2',
+            border: '1px solid #6B6B6B',
             borderRadius: 1,
           }}
         >
