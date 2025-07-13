@@ -1,65 +1,92 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Typography,
-  Grid,
-  InputLabel,
-  Select,
-  MenuItem, FormControl
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Typography, Grid } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { MenAAllocationData } from 'src/types/allocations/menA';
-import { MenAVaccine } from '../vaccine/menA-vaccines';
-import { MenAVaccineData } from 'src/types/vaccines/menA';
 
 interface ExtendedMenAAllocationProps {
-  initialData?: any;
-  onDataChange: (data: any) => void;
+  initialData?: Partial<MenAAllocationData>;
+  onDataChange: (data: MenAAllocationData) => void;
+  status?: number; 
+  key?: string;
+  isView: boolean;
+  isUpdate: boolean;
 }
 
 export const MenAAllocation = ({
-  initialData,
+  initialData = {},
   onDataChange,
+  status = 1, 
+  isView = false,
+  isUpdate = false,
 }: ExtendedMenAAllocationProps): JSX.Element => {
-  const [formData, setFormData] = useState<MenAAllocationData>({
-    quantity_requested_by_UHF: '',
-    quantity_allocated_by_EHF: '',
-    dispensed_by: '',
-    quantity_received_by_conveyor: '',
-    quantity_received_by_UHF: '',
-    quantity_returned_unopened: '',
-    quantity_returned_opened: '',
-    returned_by: '',
-    ...(initialData || {}),
-  });
-
-  const storedUsername = sessionStorage.getItem('username') || '';
-  const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'scs', 'slwg', 'threepl', 'conveyor'];
-  const userRole = allowedRoles.find((role) => storedUsername.toLowerCase().includes(role));
-
-  const isEHF = userRole === 'ehf';
-  const isUHF = userRole === 'uhf';
-  const isConveyor = userRole === 'conveyor';
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const defaultFormData: MenAAllocationData = {
+    menAVaccineAllocated: '',
+    menADiluentAllocated: '',
+    menA05mlSyringeAllocated: '',
+    menA5mlSyringeAllocated: '',
+    menAVaccineRequested: '',
+    menADiluentRequested: '',
+    menA05mlSyringeRequested: '',
+    menA5mlSyringeRequested: '',
+    menAVaccineReturned: '',
+    menADiluentReturned: '',
+    menA05mlSyringeReturned: '',
+    menA5mlSyringeReturned: '',
+    menAVaccineReceived: '',
+    menADiluentReceived: '',
+    menA05mlSyringeReceived: '',
+    menA5mlSyringeReceived: '',
+    menAVaccineConveyorDelivered: '',
+    menADiluentConveyorDelivered: '',
+    menA05mlSyringeConveyorDelivered: '',
+    menA5mlSyringeConveyorDelivered: '',
+    menAVaccineConveyorReturned: '',
+    menADiluentConveyorReturned: '',
+    menA05mlSyringeConveyorReturned: '',
+    menA5mlSyringeConveyorReturned: '',
   };
+
+  const [formData, setFormData] = useState<MenAAllocationData>(() => ({
+    ...defaultFormData,
+    ...initialData,
+  }));
 
   useEffect(() => {
-    onDataChange(formData);
-  }, [formData, onDataChange]);
+    setFormData((prev) => {
+      const newFormData = { ...defaultFormData, ...initialData };
+      if (JSON.stringify(prev) !== JSON.stringify(newFormData)) {
+        return newFormData;
+      }
+      return prev;
+    });
+  }, [initialData]);
 
-  const handleVaccineDataChange = (vaccineData: MenAVaccineData) => {
-    onDataChange({ ...formData, vaccineData });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newFormData = { ...prev, [name]: value };
+      onDataChange(newFormData);
+      return newFormData;
+    });
   };
+
+  const userRole = sessionStorage.getItem('userRole');
+  // console.log(userRole);
+  const isUHF = userRole === 'uhf';
+  const isEHF = userRole === 'ehf';
+  const isConveyor = userRole === 'conveyor';
+  const isThreePl = userRole === 'threepl'
+
+  const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
+  const canEditEHFAllocation = isEHF && status === 2 && (isUpdate || !isView);
+  const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
+  const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
+  const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
+  const canEditEHFReceived = isEHF && status === 6 && (isUpdate || !isView);
+  const isReverseLogisticsEnabled = status >= 3;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -78,31 +105,7 @@ export const MenAAllocation = ({
       >
         MenA Allocation
       </Typography>
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-          aria-controls="bcg-vaccine-content"
-          id="bcg-vaccine-header"
-          sx={{
-            backgroundColor: '#00838F',
-            color: 'white',
-            border: '1px solid #00838F',
-            borderRadius: 1,
-          }}
-        >
-          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            MenA Vaccine
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <MenAVaccine
-            initialData={initialData?.vaccineData}
-            onDataChange={handleVaccineDataChange}
-            hideTitle={true}
-          />
-        </AccordionDetails>
-      </Accordion>
-      
+
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
@@ -121,86 +124,230 @@ export const MenAAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel htmlFor="min-stock">Session</InputLabel>
-                <FormControl fullWidth>
-                  <Select
-                    id="min-stock"
-                    inputProps={{ name: 'min-stock' }}
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="yes">Fixed</MenuItem>
-                    <MenuItem value="no">Outreach</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                MenA Vaccine Requested by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAVaccineRequested"
+                      value={formData.menAVaccineRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menADiluentRequested"
+                      value={formData.menADiluentRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA05mlSyringeRequested"
+                      value={formData.menA05mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA5mlSyringeRequested"
+                      value={formData.menA5mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Requested by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_requested_by_UHF"
-                  placeholder="Quantity Requested by UHF"
-                  value={formData.quantity_requested_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                MenA Vaccine Allocated by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAVaccineAllocated"
+                      value={formData.menAVaccineAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menADiluentAllocated"
+                      value={formData.menADiluentAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA05mlSyringeAllocated"
+                      value={formData.menA05mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA5mlSyringeAllocated"
+                      value={formData.menA5mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Allocated by EHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_allocated_by_EHF"
-                  placeholder="Quantity Allocated by EHF"
-                  value={formData.quantity_allocated_by_EHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by Conveyor</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_conveyor"
-                  placeholder="Quantity Received by Conveyor"
-                  value={formData.quantity_received_by_conveyor}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isConveyor}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_UHF"
-                  placeholder="Quantity Received by UHF"
-                  value={formData.quantity_received_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                MenA Vaccine Delivered by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAVaccineConveyorDelivered"
+                      value={formData.menAVaccineConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menADiluentConveyorDelivered"
+                      value={formData.menADiluentConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA05mlSyringeConveyorDelivered"
+                      value={formData.menA05mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA5mlSyringeConveyorDelivered"
+                      value={formData.menA5mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
 
-      <Accordion>
+      <Accordion disabled={!isReverseLogisticsEnabled}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="reverse-logistics-content"
@@ -218,50 +365,224 @@ export const MenAAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Unopened vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_unopened"
-                  placeholder="Quantity Returned by UHF (Unopened vial)"
-                  value={formData.quantity_returned_unopened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                MenA Vaccine Returned by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAVaccineReturned"
+                      value={formData.menAVaccineReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menADiluentReturned"
+                      value={formData.menADiluentReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA05mlSyringeReturned"
+                      value={formData.menA05mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA5mlSyringeReturned"
+                      value={formData.menA5mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Open vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_opened"
-                  placeholder="Quantity Returned by UHF (Open vial)"
-                  value={formData.quantity_returned_opened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                MenA Vaccine Returned by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAVaccineConveyorReturned"
+                      value={formData.menAVaccineConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menADiluentConveyorReturned"
+                      value={formData.menADiluentConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA05mlSyringeConveyorReturned"
+                      value={formData.menA05mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA5mlSyringeConveyorReturned"
+                      value={formData.menA5mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned By</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="returned_by"
-                  placeholder="Returned By"
-                  value={formData.returned_by}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                MenA Vaccine Received by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAVaccineReceived"
+                      value={formData.menAVaccineReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menADiluentReceived"
+                      value={formData.menADiluentReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA05mlSyringeReceived"
+                      value={formData.menA05mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>MenA 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menA5mlSyringeReceived"
+                      value={formData.menA5mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>

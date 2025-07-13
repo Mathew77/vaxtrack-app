@@ -16,39 +16,58 @@ import { sectionBorderStyle } from "src/utils/constants";
 interface ExtendedColdChainProps {
   initialData?: Partial<ColdChainVaccineData>;
   onDataChange: (data: ColdChainVaccineData) => void;
+  isView?: boolean;
+  isEdit?: boolean;
+  declineComment?: string;
+  setDeclineComment?: (comment: string) => void;
+  showDeclineComment?: boolean;
 }
 
 export const ColdChainStatus = ({
   initialData = {},
   onDataChange,
+  isView = false,
+  declineComment = '',
+  setDeclineComment,
+  showDeclineComment = false
 }: ExtendedColdChainProps): JSX.Element => {
 
   const currentDateTime = new Date();
-const localDateTime = new Date(currentDateTime.getTime() - currentDateTime.getTimezoneOffset() * 60000);
-
-const formattedDateTime = localDateTime.toISOString().slice(0, 16);
+  const localDateTime = new Date(currentDateTime.getTime() - currentDateTime.getTimezoneOffset() * 60000);
+  const formattedDateTime = localDateTime.toISOString().slice(0, 16);
 
   const defaultFormData: ColdChainVaccineData = {
-    dateCreated: formattedDateTime, 
+    dateCreated: formattedDateTime,
     equipStatus: '',
     requestType: '',
   };
 
-  const [formData, setFormData] = useState<ColdChainVaccineData>(() => ({
-    ...defaultFormData,
-    ...initialData,
-  }));
+  const [formData, setFormData] = useState<ColdChainVaccineData>(() => {
+    const mergedData = {
+      dateCreated: initialData.dateCreated || formattedDateTime,
+      equipStatus: initialData.equipStatus || '',
+      requestType: initialData.requestType || '',
+    };
+    console.log('ColdChainStatus initial formData:', mergedData);
+    return mergedData;
+  });
 
- 
   useEffect(() => {
+    console.log('ColdChainStatus useEffect - initialData:', initialData);
+    const newFormData = {
+      dateCreated: initialData.dateCreated || formattedDateTime,
+      equipStatus: initialData.equipStatus || '',
+      requestType: initialData.requestType || '',
+    };
     setFormData((prev) => {
-      const newFormData = { ...defaultFormData, ...initialData };
       if (JSON.stringify(prev) !== JSON.stringify(newFormData)) {
+        console.log('ColdChainStatus updating formData:', newFormData);
         return newFormData;
       }
       return prev;
     });
-  }, [initialData]);
+    onDataChange(newFormData);
+  }, [initialData, formattedDateTime, onDataChange]);
 
   const handleInputChange = (field: keyof ColdChainVaccineData) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
@@ -56,16 +75,22 @@ const formattedDateTime = localDateTime.toISOString().slice(0, 16);
     const value = event.target.value as string;
     setFormData((prev) => {
       const newFormData = { ...prev, [field]: value };
+      console.log('ColdChainStatus input changed:', newFormData);
       onDataChange(newFormData);
       return newFormData;
     });
   };
 
-  const formattedDate = new Date(formData.dateCreated).toLocaleDateString();
-  const formattedTime = new Date(formData.dateCreated).toLocaleTimeString();
+  const handleDeclineCommentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (setDeclineComment) {
+      setDeclineComment(event.target.value);
+    }
+  };
+
+  console.log('ColdChainStatus formData before render:', formData);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Typography
         variant="h6"
         sx={{
@@ -90,11 +115,11 @@ const formattedDateTime = localDateTime.toISOString().slice(0, 16);
               <TextField
                 fullWidth
                 variant="outlined"
-                type="datetime-local" 
+                type="datetime-local"
                 value={formData.dateCreated}
                 onChange={handleInputChange('dateCreated')}
                 InputLabelProps={{ shrink: true }}
-                disabled
+                disabled 
               />
             </Box>
           </Grid>
@@ -108,6 +133,7 @@ const formattedDateTime = localDateTime.toISOString().slice(0, 16);
                   value={formData.equipStatus}
                   onChange={handleInputChange('equipStatus')}
                   inputProps={{ name: 'equipStatus' }}
+                  disabled={isView} 
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="functional">Functional</MenuItem>
@@ -126,6 +152,7 @@ const formattedDateTime = localDateTime.toISOString().slice(0, 16);
                   value={formData.requestType}
                   onChange={handleInputChange('requestType')}
                   inputProps={{ name: 'requestType' }}
+                  disabled={isView} 
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="emergency">Emergency</MenuItem>
@@ -134,6 +161,23 @@ const formattedDateTime = localDateTime.toISOString().slice(0, 16);
               </FormControl>
             </Box>
           </Grid>
+
+          {showDeclineComment && (
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <InputLabel htmlFor="declineComment">Decline Comment</InputLabel>
+                <TextField
+                  id="declineComment"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={declineComment}
+                  onChange={handleDeclineCommentChange}
+                  placeholder="Enter reason for declining (required if declining)"
+                />
+              </Box>
+            </Grid>
+          )}
         </Grid>
       </Box>
     </Box>

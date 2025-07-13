@@ -1,10 +1,26 @@
 export interface BcgAllocationData {
-  quantity_requested_by_UHF: string;
-  quantity_allocated_by_EHF: string;
-  dispensed_by: string;
-  quantity_received_by_conveyor: string;
-  quantity_received_by_UHF: string;
-  quantity_returned_unopened: string;
-  quantity_returned_opened: string;
-  returned_by: string;
-  }
+  bcgVaccineAllocated: string;
+  bcgDiluentAllocated: string;
+  bcg005mlSyringeAllocated: string;
+  bcg2mlSyringeAllocated: string;
+  bcgVaccineRequested: string;
+  bcgDiluentRequested: string;
+  bcg005mlSyringeRequested: string;
+  bcg2mlSyringeRequested: string;
+  bcgVaccineReturned: string;
+  bcgDiluentReturned: string;
+  bcg005mlSyringeReturned: string;
+  bcg2mlSyringeReturned: string;
+  bcgVaccineReceived: string;
+  bcgDiluentReceived: string;
+  bcg005mlSyringeReceived: string;
+  bcg2mlSyringeReceived: string;
+  bcgVaccineConveyorDelivered: string;
+  bcgDiluentConveyorDelivered: string;
+  bcg005mlSyringeConveyorDelivered: string;
+  bcg2mlSyringeConveyorDelivered: string;
+  bcgVaccineConveyorReturned: string;
+  bcgDiluentConveyorReturned: string;
+  bcg005mlSyringeConveyorReturned: string;
+  bcg2mlSyringeConveyorReturned: string;
+}

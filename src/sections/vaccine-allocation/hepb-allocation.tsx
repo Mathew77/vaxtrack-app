@@ -1,65 +1,80 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Typography,
-  Grid,
-  InputLabel,
-  Select,
-  MenuItem, FormControl
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Typography, Grid } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { HepbAllocationData } from 'src/types/allocations/hepb';
-import { HepBVaccineData } from 'src/types/vaccines/hepB';
-import { HepbVaccine } from '../vaccine/hepb-vaccines';
+import { HepBAllocationData } from 'src/types/allocations/hepb';
 
-interface ExtendedHepbAllocationProps {
-  initialData?: any;
-  onDataChange: (data: any) => void;
+interface ExtendedHepBAllocationProps {
+  initialData?: Partial<HepBAllocationData>;
+  onDataChange: (data: HepBAllocationData) => void;
+  status?: number; 
+  key?: string;
+  isView: boolean;
+  isUpdate: boolean;
 }
 
-export const HepbAllocation = ({
-  initialData,
+export const HepBAllocation = ({
+  initialData = {},
   onDataChange,
-}: ExtendedHepbAllocationProps): JSX.Element => {
-  const [formData, setFormData] = useState<HepbAllocationData>({
-    quantity_requested_by_UHF: '',
-    quantity_allocated_by_EHF: '',
-    dispensed_by: '',
-    quantity_received_by_conveyor: '',
-    quantity_received_by_UHF: '',
-    quantity_returned_unopened: '',
-    quantity_returned_opened: '',
-    returned_by: '',
-    ...(initialData || {}),
-  });
-
-  const storedUsername = sessionStorage.getItem('username') || '';
-  const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'scs', 'slwg', 'threepl', 'conveyor'];
-  const userRole = allowedRoles.find((role) => storedUsername.toLowerCase().includes(role));
-
-  const isEHF = userRole === 'ehf';
-  const isUHF = userRole === 'uhf';
-  const isConveyor = userRole === 'conveyor';
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  status = 1,
+  isView = false,
+  isUpdate = false,
+}: ExtendedHepBAllocationProps): JSX.Element => {
+  const defaultFormData: HepBAllocationData = {
+    hepBVaccineAllocated: '',
+    hepB05mlSyringeAllocated: '',
+    hepBVaccineRequested: '',
+    hepB05mlSyringeRequested: '',
+    hepBVaccineReturned: '',
+    hepB05mlSyringeReturned: '',
+    hepBVaccineReceived: '',
+    hepB05mlSyringeReceived: '',
+    hepBVaccineConveyorDelivered: '',
+    hepB05mlSyringeConveyorDelivered: '',
+    hepBVaccineConveyorReturned: '',
+    hepB05mlSyringeConveyorReturned: '',
   };
+
+  const [formData, setFormData] = useState<HepBAllocationData>(() => ({
+    ...defaultFormData,
+    ...initialData,
+  }));
 
   useEffect(() => {
-    onDataChange(formData);
-  }, [formData, onDataChange]);
+    setFormData((prev) => {
+      const newFormData = { ...defaultFormData, ...initialData };
+      if (JSON.stringify(prev) !== JSON.stringify(newFormData)) {
+        return newFormData;
+      }
+      return prev;
+    });
+  }, [initialData]);
 
-  const handleVaccineDataChange = (vaccineData: HepBVaccineData) => {
-    onDataChange({ ...formData, vaccineData });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newFormData = { ...prev, [name]: value };
+      onDataChange(newFormData);
+      return newFormData;
+    });
   };
+
+  const userRole = sessionStorage.getItem('userRole');
+  // console.log(userRole);
+  const isUHF = userRole === 'uhf';
+  const isEHF = userRole === 'ehf';
+  const isConveyor = userRole === 'conveyor';
+  const isThreePl = userRole === 'threepl'
+
+  const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
+  const canEditEHFAllocation = isEHF && status === 2 && (isUpdate || !isView);
+  const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
+  const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
+  const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
+  const canEditEHFReceived = isEHF && status === 6 && (isUpdate || !isView);
+  const isReverseLogisticsEnabled = status >= 3;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -76,33 +91,9 @@ export const HepbAllocation = ({
           width: '100%',
         }}
       >
-        Hepb Allocation
+        HepB Allocation
       </Typography>
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-          aria-controls="bcg-vaccine-content"
-          id="bcg-vaccine-header"
-          sx={{
-            backgroundColor: '#00838F',
-            color: 'white',
-            border: '1px solid #00838F',
-            borderRadius: 1,
-          }}
-        >
-          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            Hepb Vaccine
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <HepbVaccine
-            initialData={initialData?.vaccineData}
-            onDataChange={handleVaccineDataChange}
-            hideTitle={true}
-          />
-        </AccordionDetails>
-      </Accordion>
-      
+
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
@@ -121,86 +112,146 @@ export const HepbAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel htmlFor="min-stock">Session</InputLabel>
-                <FormControl fullWidth>
-                  <Select
-                    id="min-stock"
-                    inputProps={{ name: 'min-stock' }}
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="yes">Fixed</MenuItem>
-                    <MenuItem value="no">Outreach</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                HepB Vaccine Requested by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBVaccineRequested"
+                      value={formData.hepBVaccineRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepB05mlSyringeRequested"
+                      value={formData.hepB05mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Requested by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_requested_by_UHF"
-                  placeholder="Quantity Requested by UHF"
-                  value={formData.quantity_requested_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                HepB Vaccine Allocated by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBVaccineAllocated"
+                      value={formData.hepBVaccineAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepB05mlSyringeAllocated"
+                      value={formData.hepB05mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Allocated by EHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_allocated_by_EHF"
-                  placeholder="Quantity Allocated by EHF"
-                  value={formData.quantity_allocated_by_EHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by Conveyor</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_conveyor"
-                  placeholder="Quantity Received by Conveyor"
-                  value={formData.quantity_received_by_conveyor}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isConveyor}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_UHF"
-                  placeholder="Quantity Received by UHF"
-                  value={formData.quantity_received_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                HepB Vaccine Delivered by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBVaccineConveyorDelivered"
+                      value={formData.hepBVaccineConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepB05mlSyringeConveyorDelivered"
+                      value={formData.hepB05mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
 
-      <Accordion>
+      <Accordion disabled={!isReverseLogisticsEnabled}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="reverse-logistics-content"
@@ -218,50 +269,140 @@ export const HepbAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Unopened vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_unopened"
-                  placeholder="Quantity Returned by UHF (Unopened vial)"
-                  value={formData.quantity_returned_unopened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                HepB Vaccine Returned by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBVaccineReturned"
+                      value={formData.hepBVaccineReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepB05mlSyringeReturned"
+                      value={formData.hepB05mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Open vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_opened"
-                  placeholder="Quantity Returned by UHF (Open vial)"
-                  value={formData.quantity_returned_opened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                HepB Vaccine Returned by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBVaccineConveyorReturned"
+                      value={formData.hepBVaccineConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepB05mlSyringeConveyorReturned"
+                      value={formData.hepB05mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned By</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="returned_by"
-                  placeholder="Returned By"
-                  value={formData.returned_by}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                HepB Vaccine Received by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBVaccineReceived"
+                      value={formData.hepBVaccineReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>HepB 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepB05mlSyringeReceived"
+                      value={formData.hepB05mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>

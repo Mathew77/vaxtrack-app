@@ -193,7 +193,7 @@ export const navData = [
     title: 'Vaccine Request',
     path: '/vaccine-page',
     icon: <MenuBookIcon />,
-    roles: ['ehf', 'lcs', 'scs', 'threepl'],
+    roles: ['ehf', 'lcs', 'scs', 'threepl', 'slwg'],
   },
   // {
   //   title: 'Vaccine Allocation',
@@ -204,9 +204,9 @@ export const navData = [
   // },
   {
     title: 'Vaccine Allocation',
-    path: '/vaccine-conveyor-page',
+    path: '/vaccine-allocation-page',
     icon: icon('ic-community'),
-    roles: ['conveyor', 'ehf', 'uhf'],
+    roles: ['conveyor', 'ehf', 'uhf', 'threepl'],
   },
   {
     title: 'WayBill / Invoice',

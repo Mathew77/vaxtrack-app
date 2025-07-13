@@ -1,10 +1,26 @@
 export interface MeaslesAllocationData {
-  quantity_requested_by_UHF: string;
-  quantity_allocated_by_EHF: string;
-  dispensed_by: string;
-  quantity_received_by_conveyor: string;
-  quantity_received_by_UHF: string;
-  quantity_returned_unopened: string;
-  quantity_returned_opened: string;
-  returned_by: string;
-  }
+  measlesVaccineAllocated: string;
+  measlesDiluentAllocated: string;
+  measles05mlSyringeAllocated: string;
+  measles2mlSyringeAllocated: string;
+  measlesVaccineRequested: string;
+  measlesDiluentRequested: string;
+  measles05mlSyringeRequested: string;
+  measles2mlSyringeRequested: string;
+  measlesVaccineReturned: string;
+  measlesDiluentReturned: string;
+  measles05mlSyringeReturned: string;
+  measles2mlSyringeReturned: string;
+  measlesVaccineReceived: string;
+  measlesDiluentReceived: string;
+  measles05mlSyringeReceived: string;
+  measles2mlSyringeReceived: string;
+  measlesVaccineConveyorDelivered: string;
+  measlesDiluentConveyorDelivered: string;
+  measles05mlSyringeConveyorDelivered: string;
+  measles2mlSyringeConveyorDelivered: string;
+  measlesVaccineConveyorReturned: string;
+  measlesDiluentConveyorReturned: string;
+  measles05mlSyringeConveyorReturned: string;
+  measles2mlSyringeConveyorReturned: string;
+}

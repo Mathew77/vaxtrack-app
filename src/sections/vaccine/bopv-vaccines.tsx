@@ -17,12 +17,14 @@ interface ExtendedBopvVaccineProps {
   initialData?: Partial<BopvVaccineData>;
   onDataChange: (data: BopvVaccineData) => void;
   hideTitle?: boolean;
+  isView?: boolean;
 }
 
 export const BopvVaccine = ({
   initialData = {},
   onDataChange,
   hideTitle = false,
+  isView = false,
 }: ExtendedBopvVaccineProps): JSX.Element => {
   const defaultFormData: BopvVaccineData = {
     physicalStock: '',
@@ -101,6 +103,7 @@ export const BopvVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -113,6 +116,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -125,6 +129,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -139,6 +144,7 @@ export const BopvVaccine = ({
                 value={formData.expiryDate}
                 onChange={handleInputChange('expiryDate')}
                 InputLabelProps={{ shrink: true }}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -151,6 +157,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -164,6 +171,7 @@ export const BopvVaccine = ({
                   value={formData.vvm2}
                   onChange={handleInputChange('vvm2')}
                   inputProps={{ name: 'vvm2' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -181,6 +189,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -194,6 +203,7 @@ export const BopvVaccine = ({
                   value={formData.belowMinStock}
                   onChange={handleInputChange('belowMinStock')}
                   inputProps={{ name: 'min-stock' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -212,6 +222,7 @@ export const BopvVaccine = ({
                   value={formData.aboveMaxStock}
                   onChange={handleInputChange('aboveMaxStock')}
                   inputProps={{ name: 'max-stock' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -229,6 +240,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -271,6 +283,7 @@ export const BopvVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.dropperPhysicalStock}
                 onChange={handleInputChange('dropperPhysicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -283,6 +296,7 @@ export const BopvVaccine = ({
                   value={formData.dropperMismatchOutcome}
                   onChange={handleInputChange('dropperMismatchOutcome')}
                   inputProps={{ name: 'dropper-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -299,6 +313,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.dropperMismatchAdjustedValue}
                 onChange={handleInputChange('dropperMismatchAdjustedValue')}
+                disabled={isView}
               />
             </Box>
           </Grid>

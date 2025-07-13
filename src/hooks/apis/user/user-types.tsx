@@ -16,6 +16,7 @@ export interface UserType {
   uhf_list?: string[];
   health_facility_category?: string | null;
   user_permissions?: number[];
+  state: string;
 }
 
   export interface RoleType {
@@ -28,4 +29,16 @@ export interface UserType {
     id:  number;
     name: string;
   }
+
+  export interface StateOption {
+  id: string;
+  name: string;
+  // ehf_list?: EhfFacility[];
+}
+
+// interface EhfFacility {
+//   id: string;
+//   name: string;
+//   stat_id: string;
+// }
   

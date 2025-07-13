@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiHelper } from '../apiHelper';
-import { UserType,RoleType, OrgUnit } from './user-types';
+import { UserType,RoleType, OrgUnit, StateOption } from './user-types';
 import { url } from '../../api';
 import { PermissionType } from '../roles-permissions/permissions-type';
 
@@ -89,3 +89,19 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+  export const useFetchStates = () => {
+    return useQuery({
+      queryKey: ['states'],
+      queryFn: async (): Promise<StateOption[]> => {
+        const response = await apiHelper.getResource<any[]>(
+          `${url}v1/states/`
+        );
+        return response.map((item, index) => ({
+          id: item.state || `state-${index}`,
+          name: item.state, 
+          ehf_list: item.ehf_list || [], 
+        }));
+      },
+    });
+  };

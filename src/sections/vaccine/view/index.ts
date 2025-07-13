@@ -1,1 +1,1 @@
-export * from './vaccines-view'
+export * from './vaccines-request-view'

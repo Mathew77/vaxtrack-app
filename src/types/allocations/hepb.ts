@@ -1,11 +1,14 @@
-export interface HepbAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+export interface HepBAllocationData {
+  hepBVaccineAllocated: string;
+  hepB05mlSyringeAllocated: string;
+  hepBVaccineRequested: string;
+  hepB05mlSyringeRequested: string;
+  hepBVaccineReturned: string;
+  hepB05mlSyringeReturned: string;
+  hepBVaccineReceived: string;
+  hepB05mlSyringeReceived: string;
+  hepBVaccineConveyorDelivered: string;
+  hepB05mlSyringeConveyorDelivered: string;
+  hepBVaccineConveyorReturned: string;
+  hepB05mlSyringeConveyorReturned: string;
+}

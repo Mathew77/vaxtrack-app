@@ -7,12 +7,14 @@ interface ExtendedRotaVaccineProps {
   initialData?:  Partial<RotaVaccineData>;
   onDataChange: (data: RotaVaccineData) => void;
   hideTitle?: boolean;
+  isView: boolean;
 }
 
 export const RotaVaccine = ({
   initialData = {},
   onDataChange,
   hideTitle = false,
+  isView = false
 }: ExtendedRotaVaccineProps): JSX.Element => {
   const defaultFormData: RotaVaccineData = {
     physicalStock: '',
@@ -90,6 +92,7 @@ export const RotaVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -102,6 +105,7 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -114,6 +118,7 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -128,6 +133,7 @@ export const RotaVaccine = ({
                 value={formData.expiryDate}
                 onChange={handleInputChange('expiryDate')}
                 InputLabelProps={{ shrink: true }}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -140,6 +146,7 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -157,6 +164,7 @@ export const RotaVaccine = ({
                   inputProps={{
                     name: 'vvm2',
                   }}
+                  disabled={isView}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -173,6 +181,7 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -188,6 +197,7 @@ export const RotaVaccine = ({
                   inputProps={{
                     name: 'min-stock',
                   }}
+                  disabled={isView}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -207,6 +217,7 @@ export const RotaVaccine = ({
                   inputProps={{
                     name: 'max-stock',
                   }}
+                  disabled={isView}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -223,6 +234,7 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -265,6 +277,7 @@ export const RotaVaccine = ({
                 placeholder="Physical Stock Balance" 
                 value={formData.dropperPhysicalStock}
                 onChange={handleInputChange('dropperPhysicalStock')}
+                disabled={isView}
                 />
             </Box>
           </Grid>
@@ -278,6 +291,7 @@ export const RotaVaccine = ({
                   value={formData.dropperMismatchOutcome}
                   onChange={handleInputChange('dropperMismatchOutcome')}
                   inputProps={{ name: 'dropper-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -294,7 +308,8 @@ export const RotaVaccine = ({
                 fullWidth 
                 variant="outlined"
                 value={formData.dropperMismatchAdjustedValue}
-                onChange={handleInputChange('dropperMismatchAdjustedValue')}                
+                onChange={handleInputChange('dropperMismatchAdjustedValue')}  
+                disabled={isView}              
               />
             </Box>
           </Grid>

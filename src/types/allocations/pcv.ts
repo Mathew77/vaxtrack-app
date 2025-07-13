@@ -1,11 +1,14 @@
 export interface PcvAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  pcvVaccineAllocated: string;
+  pcv05mlSyringeAllocated: string;
+  pcvVaccineRequested: string;
+  pcv05mlSyringeRequested: string;
+  pcvVaccineReturned: string;
+  pcv05mlSyringeReturned: string;
+  pcvVaccineReceived: string;
+  pcv05mlSyringeReceived: string;
+  pcvVaccineConveyorDelivered: string;
+  pcv05mlSyringeConveyorDelivered: string;
+  pcvVaccineConveyorReturned: string;
+  pcv05mlSyringeConveyorReturned: string;
+}

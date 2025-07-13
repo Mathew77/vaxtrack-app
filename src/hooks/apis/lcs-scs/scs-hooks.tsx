@@ -57,3 +57,15 @@ export const useDeleteScs = () => {
     },
   });
 };
+
+export const useFetchLcsEhf = () => {
+  return useQuery<SCSType[], Error>({
+    queryKey: ['lcs-ehf'],
+    queryFn: async () => {
+      const response = await apiHelper.getResource<ApiResponse<SCSType[]>>(
+        `${url}v1/ehf/`
+      );
+      return response.data;
+    },
+  });
+}

@@ -1,57 +1,98 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Box, TextField, Typography, Grid, InputLabel, Select, MenuItem, FormControl } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Typography, Grid } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { BcgAllocationData } from 'src/types/allocations/bcg';
-import { BcgVaccineData } from 'src/types/vaccines/bcg';
-import { BcgVaccines } from '../vaccine/bcg-vaccines';
+import { useFetchUsers } from 'src/hooks/apis/user/user-hooks';
 
 interface ExtendedBcgAllocationProps {
-  initialData?: any;
-  onDataChange: (data: any) => void;
+  initialData?: Partial<BcgAllocationData>;
+  onDataChange: (data: BcgAllocationData) => void;
+  status?: number; 
+  key?: string;
+  isView?: boolean;
+  isUpdate?: boolean;
 }
 
 export const BcgAllocation = ({
-  initialData,
+  initialData = {},
   onDataChange,
+  status = 1,
+  isView = false, 
+  isUpdate = false
 }: ExtendedBcgAllocationProps): JSX.Element => {
-  const [formData, setFormData] = useState<BcgAllocationData>({
-    quantity_requested_by_UHF: '',
-    quantity_allocated_by_EHF: '',
-    dispensed_by: '',
-    quantity_received_by_conveyor: '',
-    quantity_received_by_UHF: '',
-    quantity_returned_unopened: '',
-    quantity_returned_opened: '',
-    returned_by: '',
-    ...(initialData || {}),
-  });
 
-  const storedUsername = sessionStorage.getItem('username') || '';
-  const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'scs', 'slwg', 'threepl', 'conveyor'];
-  const userRole = allowedRoles.find((role) => storedUsername.toLowerCase().includes(role));
+  const userPermission = useFetchUsers()
 
-  const isEHF = userRole === 'ehf';
-  const isUHF = userRole === 'uhf';
-  const isConveyor = userRole === 'conveyor';
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const defaultFormData: BcgAllocationData = {
+    bcgVaccineAllocated: '',
+    bcgDiluentAllocated: '',
+    bcg005mlSyringeAllocated: '',
+    bcg2mlSyringeAllocated: '',
+    bcgVaccineRequested: '',
+    bcgDiluentRequested: '',
+    bcg005mlSyringeRequested: '',
+    bcg2mlSyringeRequested: '',
+    bcgVaccineReturned: '',
+    bcgDiluentReturned: '',
+    bcg005mlSyringeReturned: '',
+    bcg2mlSyringeReturned: '',
+    bcgVaccineReceived: '',
+    bcgDiluentReceived: '',
+    bcg005mlSyringeReceived: '',
+    bcg2mlSyringeReceived: '',
+    bcgVaccineConveyorDelivered: '',
+    bcgDiluentConveyorDelivered: '',
+    bcg005mlSyringeConveyorDelivered: '',
+    bcg2mlSyringeConveyorDelivered: '',
+    bcgVaccineConveyorReturned: '',
+    bcgDiluentConveyorReturned: '',
+    bcg005mlSyringeConveyorReturned: '',
+    bcg2mlSyringeConveyorReturned: '',
   };
+
+  const [formData, setFormData] = useState<BcgAllocationData>(() => ({
+    ...defaultFormData,
+    ...initialData,
+  }));
 
   useEffect(() => {
-    onDataChange(formData);
-  }, [formData, onDataChange]);
+    setFormData((prev) => {
+      const newFormData = { ...defaultFormData, ...initialData };
+      if (JSON.stringify(prev) !== JSON.stringify(newFormData)) {
+        return newFormData;
+      }
+      return prev;
+    });
+  }, [initialData]);
 
-  const handleVaccineDataChange = (vaccineData: BcgVaccineData) => {
-    onDataChange({ ...formData, vaccineData });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newFormData = { ...prev, [name]: value };
+      onDataChange(newFormData);
+      return newFormData;
+    });
   };
+
+
+  const userRole = sessionStorage.getItem('userRole');
+  // console.log(userRole);
+  const isUHF = userRole === 'uhf';
+  const isEHF = userRole === 'ehf';
+  const isConveyor = userRole === 'conveyor';
+  const isThreePl = userRole === 'threepl'
+
+  const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
+  const canEditEHFAllocation = isEHF && status === 2 && (isUpdate || !isView);
+  const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
+  const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
+  const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
+  const canEditEHFReceived = isEHF && status === 6 && (isUpdate || !isView);
+  const isReverseLogisticsEnabled = status >= 3;
+
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -74,31 +115,6 @@ export const BcgAllocation = ({
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-          aria-controls="bcg-vaccine-content"
-          id="bcg-vaccine-header"
-          sx={{
-            backgroundColor: '#00838F',
-            color: 'white',
-            border: '1px solid #00838F',
-            borderRadius: 1,
-          }}
-        >
-          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            BCG Vaccine
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <BcgVaccines
-            initialData={initialData?.vaccineData}
-            onDataChange={handleVaccineDataChange}
-            hideTitle={true}
-          />
-        </AccordionDetails>
-      </Accordion>
-
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"
           id="forward-logistics-header"
           sx={{
@@ -113,87 +129,231 @@ export const BcgAllocation = ({
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel htmlFor="min-stock">Session</InputLabel>
-                <FormControl fullWidth>
-                  <Select
-                    id="min-stock"
-                    inputProps={{ name: 'min-stock' }}
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="yes">Fixed</MenuItem>
-                    <MenuItem value="no">Outreach</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+          <Grid container spacing={3}> 
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                BCG Vaccine Requested by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgVaccineRequested"
+                      value={formData.bcgVaccineRequested}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgDiluentRequested"
+                      value={formData.bcgDiluentRequested}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 0.05ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg005mlSyringeRequested"
+                      value={formData.bcg005mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 2ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg2mlSyringeRequested"
+                      value={formData.bcg2mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Requested by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_requested_by_UHF"
-                  placeholder="Quantity Requested by UHF"
-                  value={formData.quantity_requested_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                BCG Vaccine Allocated by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgVaccineAllocated"
+                      value={formData.bcgVaccineAllocated}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgDiluentAllocated"
+                      value={formData.bcgDiluentAllocated}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 0.05ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg005mlSyringeAllocated"
+                      value={formData.bcg005mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 2ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg2mlSyringeAllocated"
+                      value={formData.bcg2mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Allocated by EHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_allocated_by_EHF"
-                  placeholder="Quantity Allocated by EHF"
-                  value={formData.quantity_allocated_by_EHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by Conveyor</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_conveyor"
-                  placeholder="Quantity Received by Conveyor"
-                  value={formData.quantity_received_by_conveyor}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isConveyor}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_UHF"
-                  placeholder="Quantity Received by UHF"
-                  value={formData.quantity_received_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                BCG Vaccine Delivered by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgVaccineConveyorDelivered"
+                      value={formData.bcgVaccineConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgDiluentConveyorDelivered"
+                      value={formData.bcgDiluentConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 0.05ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg005mlSyringeConveyorDelivered"
+                      value={formData.bcg005mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 2ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg2mlSyringeConveyorDelivered"
+                      value={formData.bcg2mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
 
-      <Accordion>
+      <Accordion disabled={!isReverseLogisticsEnabled}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="reverse-logistics-content"
@@ -211,55 +371,228 @@ export const BcgAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Unopened vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_unopened"
-                  placeholder="Quantity Returned by UHF (Unopened vial)"
-                  value={formData.quantity_returned_unopened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                BCG Vaccine Returned by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgVaccineReturned"
+                      value={formData.bcgVaccineReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgDiluentReturned"
+                      value={formData.bcgDiluentReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 0.05ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg005mlSyringeReturned"
+                      value={formData.bcg005mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 2ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg2mlSyringeReturned"
+                      value={formData.bcg2mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Open vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_opened"
-                  placeholder="Quantity Returned by UHF (Open vial)"
-                  value={formData.quantity_returned_opened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                BCG Vaccine Returned by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgVaccineConveyorReturned"
+                      value={formData.bcgVaccineConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgDiluentConveyorReturned"
+                      value={formData.bcgDiluentConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 0.05ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg005mlSyringeConveyorReturned"
+                      value={formData.bcg005mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 2ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg2mlSyringeConveyorReturned"
+                      value={formData.bcg2mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned By</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="returned_by"
-                  placeholder="Returned By"
-                  value={formData.returned_by}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                BCG Vaccine Received by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgVaccineReceived"
+                      value={formData.bcgVaccineReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcgDiluentReceived"
+                      value={formData.bcgDiluentReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 0.05ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg005mlSyringeReceived"
+                      value={formData.bcg005mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>BCG 2ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bcg2mlSyringeReceived"
+                      value={formData.bcg2mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
-
     </Box>
   );
 };

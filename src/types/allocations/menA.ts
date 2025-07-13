@@ -1,11 +1,26 @@
 export interface MenAAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  menAVaccineAllocated: string;
+  menADiluentAllocated: string;
+  menA05mlSyringeAllocated: string;
+  menA5mlSyringeAllocated: string;
+  menAVaccineRequested: string;
+  menADiluentRequested: string;
+  menA05mlSyringeRequested: string;
+  menA5mlSyringeRequested: string;
+  menAVaccineReturned: string;
+  menADiluentReturned: string;
+  menA05mlSyringeReturned: string;
+  menA5mlSyringeReturned: string;
+  menAVaccineReceived: string;
+  menADiluentReceived: string;
+  menA05mlSyringeReceived: string;
+  menA5mlSyringeReceived: string;
+  menAVaccineConveyorDelivered: string;
+  menADiluentConveyorDelivered: string;
+  menA05mlSyringeConveyorDelivered: string;
+  menA5mlSyringeConveyorDelivered: string;
+  menAVaccineConveyorReturned: string;
+  menADiluentConveyorReturned: string;
+  menA05mlSyringeConveyorReturned: string;
+  menA5mlSyringeConveyorReturned: string;
+}

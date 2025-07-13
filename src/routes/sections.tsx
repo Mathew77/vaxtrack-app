@@ -21,7 +21,7 @@ export const AdminHome = lazy(() => import('src/pages/admin/home'));
 export const EhfHome = lazy(() => import('src/pages/ehf/home'));
 export const ConveyorHome = lazy(() => import('src/pages/conveyor/home'));
 // export const ConveyorAllocation = lazy(() => import('src/pages/conveyor-allocation'));
-export const VaccineConveyorPage = lazy(() => import('src/pages/vaccine-conveyor/index'));
+export const VaccineAllocationPage = lazy(() => import('src/pages/vaccine-allocation/index'));
 export const WayBillInvoicePage = lazy(() => import('src/pages/invoice/index'));
 
 export const LcsHome = lazy(() => import('src/pages/lcs/home'));
@@ -69,6 +69,9 @@ export const OrgLevelSetup = lazy(() => import('src/sections/admin/org-unit-org-
 export const NcsSetup = lazy(() => import('src/sections/admin/ncs/ncs-setup'));
 
 export const WayBillDetails = lazy(() => import('src/sections/invoice/waybill-details'));
+
+export const VaccineView = lazy(() => import('src/sections/vaccine-allocation/view/vaccines-view'));
+export const VaccineRequestForm = lazy(() => import('src/sections/vaccine/view/vaccines-request-view'));
 
 
 //Test page
@@ -136,7 +139,7 @@ export function Router() {
         { path: 'slwg-home', element: <SlwgHome /> },
         { path: 'threepl-home', element: <ThreeplHome /> },
         { path: 'conveyor-home', element: <ConveyorHome /> },
-        { path: 'vaccine-conveyor-page', element: <VaccineConveyorPage /> },
+        { path: 'vaccine-allocation-page', element: <VaccineAllocationPage /> },
         { path: 'scs-home', element: <ScsHome /> },
         //Admin route menu and components
         { path: 'ehf-setup', element: <EhfSetup /> },
@@ -168,6 +171,9 @@ export function Router() {
         { path: 'ncs-setup', element: <NcsSetup /> },
 
         { path: 'waybill-details', element: <WayBillDetails /> },
+
+        {path: 'vaccine-view', element: <VaccineView />},
+        {path: 'vaccine-request-view', element: <VaccineRequestForm />},
 
 
         //TestPage

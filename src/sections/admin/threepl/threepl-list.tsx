@@ -95,7 +95,13 @@ const ThreeplList: React.FC = () => {
       {
         accessorKey: "threepl_name",
         header: "3PL Name",
-        size: 200,
+        size: 250,
+        Cell: ({ row }: { row: { original: TableRow } }) => {
+          const threeplName = row.original.threepl_name;
+          const ehfList = row.original.ehf_list || [];
+          const ehfNames = ehfList.length > 0 ? ehfList.join(', ') : '';
+          return ehfNames ? `${threeplName} - ( ${ehfNames} )` : threeplName;
+        },
       },
       {
         accessorKey: "ehf_list",

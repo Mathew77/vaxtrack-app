@@ -15,8 +15,14 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { SCSType } from 'src/hooks/apis/lcs-scs/scs-type';
-import { useFetchStates, useUpsertScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
+import { useFetchLcsEhf, useFetchStates, useUpsertScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 import { toast } from 'react-toastify';
+import DualListBox from 'react-dual-listbox';
+import 'react-dual-listbox/lib/react-dual-listbox.css';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 
 
 export default function ScsSetup() {
@@ -28,23 +34,26 @@ export default function ScsSetup() {
 
   const { data: states = [] } = useFetchStates();
   const  upsertScs = useUpsertScs();
+   const { data: ehfList = [] } = useFetchLcsEhf();
 
     const initialValues: SCSType = {
-        status: '',
-        stat_id: '',
-        scs_name: '',
-        contact_person_name: '',
-        contact_person_phone: '',
-        contact_person_email: '',
-        longtitude: '',
-        lagtitude: '', 
-        storage_capcity: 0, 
+      status: '',
+      stat_id: '',
+      scs_name: '',
+      contact_person_name: '',
+      contact_person_phone: '',
+      contact_person_email: '',
+      longtitude: '',
+      lagtitude: '', 
+      storage_capcity: 0, 
+      ehf_list: []
     };
 
   const [data, setData] = useState<SCSType>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof SCSType, string>>>({});
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [isView, setIsView] = useState<boolean>(false);
+  const [filteredEhf, setFilteredEHF] = useState<any[]>([]);
 
   const setCurrentState = () => {
     if (state?.data) {
@@ -54,6 +63,7 @@ export default function ScsSetup() {
         ...scsData,
         stat_id: scsData.stat_id || '',
         storage_capcity: scsData.storage_capcity || 0,
+        ehf_list: scsData.ehf_list || '',
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
@@ -63,6 +73,15 @@ export default function ScsSetup() {
   useEffect(() => {
     setCurrentState();
   }, [state]);
+
+  useEffect(() => {
+    if (data.stat_id && ehfList.length > 0) {
+      const filtered = ehfList.filter((ehf: any) => ehf.state === data.stat_id);
+      setFilteredEHF(filtered);
+    } else {
+      setFilteredEHF([]);
+    }
+  }, [data.stat_id, ehfList]);
     
   // const calculateStorage = () => {
   //   const C = data.storage_capcity || 0;
@@ -123,6 +142,10 @@ export default function ScsSetup() {
     temp.storage_capcity = data.storage_capcity > 0 
         ? '' 
         : 'Storage capacity must be greater than 0';
+
+    temp.ehf_list = (data.ehf_list?.length ?? 0) > 0 
+      ? '' 
+      : 'At least one EHF must be selected';
     
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -137,10 +160,19 @@ export default function ScsSetup() {
 
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
       const { name, value } = event.target;
-      setData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+
+      if (name === 'stat_id') {
+        setData((prev) => ({
+          ...prev,
+          [name]: value,
+          ehf_list: name === 'stat_id' ? [] : prev.ehf_list,
+        }));
+      } else {
+        setData((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
+      }
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,6 +180,13 @@ export default function ScsSetup() {
       setData((prev) => ({
         ...prev,
         [name]: value, 
+      }));
+    };
+
+    const handleEhfChange = (selected: string[]) => {
+      setData((prev) => ({
+        ...prev,
+        ehf_list: selected,
       }));
     };
       
@@ -167,6 +206,18 @@ export default function ScsSetup() {
   const getDisplayValue = (value: number): string => {
     return value === 0 ? '' : value.toString();
   };
+
+  const ehfOptions = filteredEhf.map((ehf) => ({
+    value: ehf.id?.toString() || '',
+    label: ehf.name || ehf.ehf_name || `EHF ${ehf.id}`,
+  }));
+
+  const handleEHFChange = (selected: string[]) => {
+      setData((prev) => ({
+        ...prev,
+        ehf_list: selected
+      }));
+    };
 
   const handleSubmit = () => {
     if (validate()) {
@@ -237,6 +288,38 @@ export default function ScsSetup() {
             </FormControl>
         </Grid>
 
+        {/* <Grid item xs={6}>
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="ehf_list">
+              Equipped Health Facility (EHF) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="ehf_list"
+              name="ehf_list"
+              value={data.ehf_list}
+              onChange={handleSelectChange}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined"
+              disabled={isView || !data.stat_id}
+            >
+              <MenuItem value="" disabled>
+                {'Select EHF'}
+              </MenuItem>
+              {filteredEhf.map((ehf) => (
+                <MenuItem key={ehf.id} value={ehf.id}>
+                  {ehf.name || ehf.ehf_name || `EHF ${ehf.id}`}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors?.ehf_list !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.ehf_list}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid> */}
+
         <Grid item xs={6}>
           <Typography component="label" htmlFor="scs_name">
             State Cold Chain Store Name<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -298,9 +381,37 @@ export default function ScsSetup() {
               ) : ''
             }
           />
-        </Grid>
+        </Grid>  
 
       </Grid>
+
+         <Grid item xs={6}>
+             <FormControl sx={{ mt: 4, width: '100%' }}> 
+                <Typography component="label" htmlFor="ehf_list">
+              Equipped Health Facility (EHF) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <DualListBox
+              canFilter
+              options={ehfOptions}
+              onChange={handleEHFChange}
+              selected={data.ehf_list}
+              className="dual-listbox-custom"
+              alignActions="middle" 
+              disabled={isView}
+              icons={{
+                  moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
+                  moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                  moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                  moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
+                }}
+            />
+            {errors?.ehf_list !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.ehf_list}
+              </Typography>
+            )}
+              </FormControl>
+        </Grid>   
 
        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
         <Typography variant="h5">Vaccine Storage Capacity</Typography>

@@ -19,7 +19,7 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserType } from 'src/hooks/apis/user/user-types';
-import { useUpsertUser, useFetchRoles } from 'src/hooks/apis/user/user-hooks';
+import { useUpsertUser, useFetchRoles, useFetchStates } from 'src/hooks/apis/user/user-hooks';
 import { useFetchNcs } from 'src/hooks/apis/ncs/ncs-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
@@ -42,6 +42,7 @@ export default function UserSetup() {
   const { data: ehfs = [] } = useFetchEHF();
   const { data: uhfs = [] } = useFetchUHF();
   const { data: threePLs = [] } = useFetchThreePl();
+   const { data: states = [] } = useFetchStates();
 
   const initialValues: UserType = {
     status: '',
@@ -59,6 +60,7 @@ export default function UserSetup() {
     ehf_list: [],
     uhf_list: [],
     user_permissions: [],
+    state: '',
   };
 
   const [data, setData] = useState<UserType>(initialValues);
@@ -67,6 +69,8 @@ export default function UserSetup() {
   const [isView, setIsView] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
+  const [selectedScsId, setSelectedScsId] = useState<string>(''); 
+  const [selectedStateId, setSelectedStateId] = useState<string>('');
 
   const setCurrentState = () => {
     if (state?.data) {
@@ -84,6 +88,7 @@ export default function UserSetup() {
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
+      setSelectedStateId(userData.state || '')
 
       if (userData.groups.length > 0) {
         const roleId = userData.groups[0];
@@ -109,8 +114,12 @@ export default function UserSetup() {
             case '3PL':
               setSelectedItems(userData.threePL_list || []);
               break;
+              case 'State Logistic Working Group':
+              setSelectedScsId(userData.scs_list?.[0] || ''); 
+              break;
             default:
               setSelectedItems([]);
+              setSelectedScsId('');
           }
         }
       }
@@ -140,6 +149,31 @@ export default function UserSetup() {
     temp.phone_number = data.phone_number ? '' : 'Phone Number is required';
     temp.email = data.email ? '' : 'Email required';
     temp.groups = selectedRoleId ? '' : 'Please select a role';
+    if (isEhfRole() && !data.state) {
+    temp.state = 'Please select a state';
+    } else {
+      temp.state = '';
+    }
+
+    const selectedRole = roles.find((role) => role.id.toString() === selectedRoleId)?.name;
+    if (selectedRole === 'State Logistics Working Group' && !selectedScsId) {
+      temp.scs_list = 'Please select a State Cold Chain Store';
+    } else if (
+      selectedRole &&
+      [
+        'National Strategic Cold Store',
+        'State Cold Chain Store',
+        'Local Cold Chain Store',
+        'Equipped Health Facility',
+        'Unequipped Health Facility',
+        '3PL',
+      ].includes(selectedRole) &&
+      selectedItems.length === 0
+    ) {
+      temp.scs_list = `Please select at least one ${getSelectedLists()}`;
+    } else {
+      temp.scs_list = '';
+    }
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -157,48 +191,104 @@ export default function UserSetup() {
     const value = event.target.value;
     setSelectedRoleId(value);
     setSelectedItems([]); 
+    setSelectedScsId('');
+    setSelectedStateId('');
   };
 
   const handleItemChange = (selected: string[]) => {
     setSelectedItems(selected);
   };
 
-  const getItemOptions = () => {
+  const handleScsChange = (event: any) => {
+    setSelectedScsId(event.target.value);
+  };
+  const handleStateChange = (event: any) => {
+    const value = event.target.value;
+    setSelectedStateId(value);
+    setSelectedItems([]); 
+    setData((prev) => ({
+      ...prev,
+      state: value,
+    }));
+  }
+
+   const getItemOptions = () => {
+  const selectedRole = roles.find((role) => role.id.toString() === selectedRoleId)?.name;
+
+  switch (selectedRole) {
+    case 'National Strategic Cold Store':
+      return ncs
+        .filter((nc) => nc.id !== undefined && nc.id !== null)
+        .map((nc) => ({ label: nc.ncs_name, value: nc.id!.toString() }));
+
+    case 'State Cold Chain Store':
+      return scs
+        .filter((sc) => sc.id !== undefined && sc.id !== null)
+        .map((sc) => ({ label: sc.scs_name, value: sc.id!.toString() }));
+
+    case 'Local Cold Chain Store':
+      return lcs
+        .filter((lc) => lc.id !== undefined && lc.id !== null)
+        .map((lc) => ({ label: lc.lcs_name, value: lc.id!.toString() }));
+
+    case 'Equipped Health Facility':
+      if (selectedStateId) {
+        return ehfs
+          .filter((ehf) => ehf.state === selectedStateId && ehf.id !== undefined && ehf.id !== null)
+          .map((ehf) => ({ label: ehf.ehf_name || ehf.ehf_name, value: ehf.id!.toString() }));
+      }
+      return ehfs
+        .filter((ehf) => ehf.id !== undefined && ehf.id !== null)
+        .map((ehf) => ({ label: ehf.ehf_name || ehf.ehf_name, value: ehf.id!.toString() }));
+
+    case 'Unequipped Health Facility':
+      return uhfs
+        .filter((uhf) => uhf.id !== undefined && uhf.id !== null)
+        .map((uhf) => ({ label: uhf.uhf_name, value: uhf.id!.toString() }));
+
+    case '3PL':
+      return threePLs
+        .filter((threepl) => threepl.id !== undefined && threepl.id !== null)
+        .map((threepl) => {
+          const ehfList = threepl.ehf_list || [];
+          const ehfNames = ehfList.length > 0 ? ehfList.join(', ') : '';
+          const label = ehfNames ? `${threepl.threepl_name} - ( ${ehfNames} )` : threepl.threepl_name;
+          return { label, value: threepl.id!.toString() };
+        });
+
+    case 'UNICEF':
+      return [];
+
+    default:
+      return [];
+  }
+};
+
+  const getSelectedLists = () => {
     const selectedRole = roles.find((role) => role.id.toString() === selectedRoleId)?.name;
     switch (selectedRole) {
       case 'National Strategic Cold Store':
-        return ncs
-          .filter((nc) => nc.id !== undefined && nc.id !== null)
-          .map((nc) => ({ label: nc.ncs_name, value: nc.id!.toString() }));
+        return 'Select National Strategic Cold Stores';
       case 'State Cold Chain Store':
-        return scs
-          .filter((sc) => sc.id !== undefined && sc.id !== null)
-          .map((sc) => ({ label: sc.scs_name, value: sc.id!.toString() }));
+        return 'Select State Cold Chain Stores';
       case 'Local Cold Chain Store':
-        return lcs
-          .filter((lc) => lc.id !== undefined && lc.id !== null)
-          .map((lc) => ({ label: lc.lcs_name, value: lc.id!.toString() }));
+        return 'Select Local Cold Chain Stores';
       case 'Equipped Health Facility':
-        return ehfs
-          .filter((ehf) => ehf.id !== undefined && ehf.id !== null)
-          .map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }));
+        return 'Select Equipped Health Facilities';
       case 'Unequipped Health Facility':
-        return uhfs
-          .filter((uhf) => uhf.id !== undefined && uhf.id !== null)
-          .map((uhf) => ({ label: uhf.uhf_name, value: uhf.id!.toString() }));
+        return 'Select Unequipped Health Facilities';
       case '3PL':
-        return threePLs
-          .filter((threepl) => threepl.id !== undefined && threepl.id !== null)
-          .map((threepl) => ({ label: threepl.threepl_name, value: threepl.id!.toString() }));
-      // case 'Conveyor':
-      //   return threePLs
-      //     .filter((conveyor) => conveyor.id !== undefined && conveyor.id !== null)
-      //     .map((conveyor) => ({ label: conveyor.conveyor_name, value: conveyor.id!.toString() }));
-      case 'UNICEF':
-        return [];
+        return 'Select 3PLs';
+      // case 'State Logistic Working Group':
+      //   return 'Select State Cold Chain Store';
       default:
-        return [];
+        return '';
     }
+  };
+
+  const isEhfRole = () => {
+    const selectedRole = roles.find((role) => role.id.toString() === selectedRoleId)?.name;
+    return selectedRole === 'Equipped Health Facility';
   };
 
   const handleSubmit = () => {
@@ -210,7 +300,12 @@ export default function UserSetup() {
         ...data,
         groups: [parseInt(selectedRoleId)],
         ncs_list: role.name === 'National Strategic Cold Store' && selectedItems.length > 0 ? selectedItems : undefined,
-        scs_list: role.name === 'State Cold Chain Store' && selectedItems.length > 0 ? selectedItems : undefined,
+        scs_list:
+          role.name === 'State Cold Chain Store' && selectedItems.length > 0
+            ? selectedItems
+            : role.name === 'State Logistics Working Group' && selectedScsId
+            ? [selectedScsId]
+            : undefined,
         lcs_list: role.name === 'Local Cold Chain Store' && selectedItems.length > 0 ? selectedItems : undefined,
         ehf_list: role.name === 'Equipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
         uhf_list: role.name === 'Unequipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
@@ -432,23 +527,80 @@ export default function UserSetup() {
           </FormControl>
         </Grid>
 
+        {isEhfRole() && (
+          <Grid item xs={6}>
+            <FormControl sx={{ m: 0, width: '100%' }}>
+              <Typography component="label" htmlFor="state_select">
+                Select State (Optional)
+              </Typography>
+              <Select
+                id="state_select"
+                name="state_select"
+                value={selectedStateId}
+                onChange={handleStateChange}
+                sx={{ width: '100%' }}
+                displayEmpty
+                variant="outlined"
+                disabled={isView}
+              >
+                <MenuItem value="">All States</MenuItem>
+                {states.map((state) => (
+                  <MenuItem key={`state-${state.id}`} value={state.id}>
+                    {state.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        )}
+
         {selectedRoleId && (
           <Grid item xs={12}>
             <Typography component="label">
-              Select Items <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              {getSelectedLists()} <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
-            <DualListBox
-              options={getItemOptions()}
-              selected={selectedItems}
-              onChange={handleItemChange}
-              disabled={isView}
-              icons={{
-                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
-                moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
-                moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
-                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
-              }}
-            />
+            {roles.find((role) => role.id.toString() === selectedRoleId)?.name === 'State Logistics Working Group' ? (
+              <FormControl sx={{ m: 0, width: '48%' }}>
+                <Select
+                  id="scs_select"
+                  name="scs_select"
+                  value={selectedScsId}
+                  onChange={handleScsChange}
+                  sx={{ width: '100%' }}
+                  displayEmpty
+                  variant="outlined"
+                  disabled={isView}
+                >
+                  <MenuItem value="">Select State Cold Chain Store</MenuItem>
+                  {scs
+                    .filter((sc) => sc.id !== undefined && sc.id !== null)
+                    .map((sc) => (
+                      <MenuItem key={`scs-${sc.id}`} value={sc.id!.toString()}>
+                        {sc.scs_name}
+                      </MenuItem>
+                    ))}
+                </Select>
+                {errors?.scs_list && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.scs_list}
+                  </Typography>
+                )}
+              </FormControl>
+            ) : (
+              <DualListBox
+                canFilter
+                options={getItemOptions()}
+                selected={selectedItems}
+                onChange={handleItemChange}
+                disabled={isView}
+                icons={{
+                  moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                  moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                  moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                  moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
+                }}
+              />
+            )}
           </Grid>
         )}
       </Grid>

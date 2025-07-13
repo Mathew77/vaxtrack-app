@@ -50,6 +50,9 @@ export function SignInView() {
  const { mutate: loginUser, status, error } = useMutation<LoginResponse, Error, LoginVariables>({
    mutationFn: login,
    onSuccess: (data: LoginResponse) => {
+    //   console.log('Login successful:', JSON.stringify(data, null, 2));
+    //  console.log('Access Token:', data.userdata.groups[0]?.name);
+    //  console.log('Username:', data.userdata);
      setToken(data.access);
      if (data.access) {
        localStorage.setItem('token', data.access);
@@ -57,6 +60,11 @@ export function SignInView() {
       sessionStorage.setItem('username', username);
       sessionStorage.setItem('firstName', data.userdata?.first_name || '');
       sessionStorage.setItem('lastName', data.userdata?.last_name || '');
+      sessionStorage.setItem('ehf_list', JSON.stringify(data.userdata?.ehf_list || []));
+      sessionStorage.setItem('uhf_list', JSON.stringify(data.userdata?.uhf_list || []));
+      sessionStorage.setItem('ncs_list', JSON.stringify(data.userdata?.ncs_list || []));
+      sessionStorage.setItem('scs_list', JSON.stringify(data.userdata?.scs_list || []));
+      sessionStorage.setItem('lcs_list', JSON.stringify(data.userdata?.lcs_list || []));
 
       // sessionStorage.setItem('email', email);
 

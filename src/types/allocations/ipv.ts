@@ -1,11 +1,14 @@
 export interface IpvAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  ipvVaccineAllocated: string;
+  ipv05mlSyringeAllocated: string;
+  ipvVaccineRequested: string;
+  ipv05mlSyringeRequested: string;
+  ipvVaccineReturned: string;
+  ipv05mlSyringeReturned: string;
+  ipvVaccineReceived: string;
+  ipv05mlSyringeReceived: string;
+  ipvVaccineConveyorDelivered: string;
+  ipv05mlSyringeConveyorDelivered: string;
+  ipvVaccineConveyorReturned: string;
+  ipv05mlSyringeConveyorReturned: string;
+}

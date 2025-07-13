@@ -40,6 +40,7 @@ export default function RolesSetup() {
     status: '',
     name: '',
     fk_org_unit_level_id: '',
+    org_unit_level_name: '',
     permissions: [],
   };
 
@@ -72,6 +73,9 @@ export default function RolesSetup() {
     temp.fk_org_unit_level_id = data.fk_org_unit_level_id 
       ? '' 
       : 'Org Unit level is required';
+      temp.org_unit_level_name = data.org_unit_level_name
+      ? ''
+      : 'Org Unit level name is required';
     temp.permissions = data.permissions.length > 0 
       ? '' 
       : 'Permissions required';

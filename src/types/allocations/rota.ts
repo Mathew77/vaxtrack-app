@@ -1,11 +1,14 @@
 export interface RotaAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  rotaVaccineAllocated: string;
+  rotaDropperAllocated: string;
+  rotaVaccineRequested: string;
+  rotaDropperRequested: string;
+  rotaVaccineReturned: string;
+  rotaDropperReturned: string;
+  rotaVaccineReceived: string;
+  rotaDropperReceived: string;
+  rotaVaccineConveyorDelivered: string;
+  rotaDropperConveyorDelivered: string;
+  rotaVaccineConveyorReturned: string;
+  rotaDropperConveyorReturned: string;
+}

@@ -1,4 +1,4 @@
-import { VaccineRequestList } from "src/sections/vaccine/view";
+import VaccineRequestList from "src/sections/vaccine/view/vaccine-request-list";
 
 
 

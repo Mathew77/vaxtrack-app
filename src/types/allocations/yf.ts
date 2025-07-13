@@ -1,11 +1,26 @@
 export interface YfAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  yfVaccineAllocated: string;
+  yfDiluentAllocated: string;
+  yf05mlSyringeAllocated: string;
+  yf5mlSyringeAllocated: string;
+  yfVaccineRequested: string;
+  yfDiluentRequested: string;
+  yf05mlSyringeRequested: string;
+  yf5mlSyringeRequested: string;
+  yfVaccineReturned: string;
+  yfDiluentReturned: string;
+  yf05mlSyringeReturned: string;
+  yf5mlSyringeReturned: string;
+  yfVaccineReceived: string;
+  yfDiluentReceived: string;
+  yf05mlSyringeReceived: string;
+  yf5mlSyringeReceived: string;
+  yfVaccineConveyorDelivered: string;
+  yfDiluentConveyorDelivered: string;
+  yf05mlSyringeConveyorDelivered: string;
+  yf5mlSyringeConveyorDelivered: string;
+  yfVaccineConveyorReturned: string;
+  yfDiluentConveyorReturned: string;
+  yf05mlSyringeConveyorReturned: string;
+  yf5mlSyringeConveyorReturned: string;
+}

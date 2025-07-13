@@ -1,11 +1,14 @@
 export interface TdAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  tdVaccineAllocated: string;
+  td05mlSyringeAllocated: string;
+  tdVaccineRequested: string;
+  td05mlSyringeRequested: string;
+  tdVaccineReturned: string;
+  td05mlSyringeReturned: string;
+  tdVaccineReceived: string;
+  td05mlSyringeReceived: string;
+  tdVaccineConveyorDelivered: string;
+  td05mlSyringeConveyorDelivered: string;
+  tdVaccineConveyorReturned: string;
+  td05mlSyringeConveyorReturned: string;
+}

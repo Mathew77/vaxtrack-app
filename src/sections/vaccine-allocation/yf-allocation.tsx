@@ -1,65 +1,92 @@
-import React, { useState, ChangeEvent, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Typography,
-  Grid,
-  InputLabel,
-  Select,
-  MenuItem, FormControl
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Typography, Grid } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { YfAllocationData } from 'src/types/allocations/yf';
-import { YfVaccine } from '../vaccine/yf-vaccines';
-import { YFVaccineData } from 'src/types/vaccines/yf';
 
 interface ExtendedYfAllocationProps {
-  initialData?: any;
-  onDataChange: (data: any) => void;
+  initialData?: Partial<YfAllocationData>;
+  onDataChange: (data: YfAllocationData) => void;
+  status?: number; 
+  key?: string;
+  isView: boolean; 
+  isUpdate: boolean; 
 }
 
 export const YfAllocation = ({
-  initialData,
+  initialData = {},
   onDataChange,
+  status = 1,
+  isView = false,
+  isUpdate = false,
 }: ExtendedYfAllocationProps): JSX.Element => {
-  const [formData, setFormData] = useState<YfAllocationData>({
-    quantity_requested_by_UHF: '',
-    quantity_allocated_by_EHF: '',
-    dispensed_by: '',
-    quantity_received_by_conveyor: '',
-    quantity_received_by_UHF: '',
-    quantity_returned_unopened: '',
-    quantity_returned_opened: '',
-    returned_by: '',
-    ...(initialData || {}),
-  });
+  const defaultFormData: YfAllocationData = {
+    yfVaccineAllocated: '',
+    yfDiluentAllocated: '',
+    yf05mlSyringeAllocated: '',
+    yf5mlSyringeAllocated: '',
+    yfVaccineRequested: '',
+    yfDiluentRequested: '',
+    yf05mlSyringeRequested: '',
+    yf5mlSyringeRequested: '',
+    yfVaccineReturned: '',
+    yfDiluentReturned: '',
+    yf05mlSyringeReturned: '',
+    yf5mlSyringeReturned: '',
+    yfVaccineReceived: '',
+    yfDiluentReceived: '',
+    yf05mlSyringeReceived: '',
+    yf5mlSyringeReceived: '',
+    yfVaccineConveyorDelivered: '',
+    yfDiluentConveyorDelivered: '',
+    yf05mlSyringeConveyorDelivered: '',
+    yf5mlSyringeConveyorDelivered: '',
+    yfVaccineConveyorReturned: '',
+    yfDiluentConveyorReturned: '',
+    yf05mlSyringeConveyorReturned: '',
+    yf5mlSyringeConveyorReturned: '',
+  };
 
-  const storedUsername = sessionStorage.getItem('username') || '';
-      const allowedRoles = ['admin', 'ehf', 'uhf', 'lcs', 'scs', 'slwg', 'threepl', 'conveyor'];
-      const userRole = allowedRoles.find((role) => storedUsername.toLowerCase().includes(role));
-    
-      const isEHF = userRole === 'ehf';
-      const isUHF = userRole === 'uhf';
-      const isConveyor = userRole === 'conveyor';
-    
-      const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-          ...prev,
-          [name]: value,
-        }));
-      };
-    
-      useEffect(() => {
-        onDataChange(formData);
-      }, [formData, onDataChange]);
-    
-      const handleVaccineDataChange = (vaccineData: YFVaccineData) => {
-        onDataChange({ ...formData, vaccineData });
-      };
+  const [formData, setFormData] = useState<YfAllocationData>(() => ({
+    ...defaultFormData,
+    ...initialData,
+  }));
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const newFormData = { ...defaultFormData, ...initialData };
+      if (JSON.stringify(prev) !== JSON.stringify(newFormData)) {
+        return newFormData;
+      }
+      return prev;
+    });
+  }, [initialData]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newFormData = { ...prev, [name]: value };
+      onDataChange(newFormData);
+      return newFormData;
+    });
+  };
+
+  const userRole = sessionStorage.getItem('userRole');
+  // console.log(userRole);
+  const isUHF = userRole === 'uhf';
+  const isEHF = userRole === 'ehf';
+  const isConveyor = userRole === 'conveyor';
+  const isThreePl = userRole === 'threepl'
+
+  const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
+  const canEditEHFAllocation = isEHF && status === 2 && (isUpdate || !isView);
+  const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
+  const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
+  const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
+  const canEditEHFReceived = isEHF && status === 6 && (isUpdate || !isView);
+  const isReverseLogisticsEnabled = status >= 3;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -76,33 +103,9 @@ export const YfAllocation = ({
           width: '100%',
         }}
       >
-        Yf Allocation
+        YF Allocation
       </Typography>
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
-          aria-controls="bcg-vaccine-content"
-          id="bcg-vaccine-header"
-          sx={{
-            backgroundColor: '#00838F',
-            color: 'white',
-            border: '1px solid #00838F',
-            borderRadius: 1,
-          }}
-        >
-          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            YF Vaccine
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <YfVaccine
-            initialData={initialData?.vaccineData}
-            onDataChange={handleVaccineDataChange}
-            hideTitle={true}
-          />
-        </AccordionDetails>
-      </Accordion>
-      
+
       <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
@@ -121,86 +124,230 @@ export const YfAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel htmlFor="min-stock">Session</InputLabel>
-                <FormControl fullWidth>
-                  <Select
-                    id="min-stock"
-                    inputProps={{ name: 'min-stock' }}
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="yes">Fixed</MenuItem>
-                    <MenuItem value="no">Outreach</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                YF Vaccine Requested by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfVaccineRequested"
+                      value={formData.yfVaccineRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfDiluentRequested"
+                      value={formData.yfDiluentRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf05mlSyringeRequested"
+                      value={formData.yf05mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf5mlSyringeRequested"
+                      value={formData.yf5mlSyringeRequested}
+                      onChange={handleChange}
+                      disabled={!canEditUHFRequest}
+                      required={canEditUHFRequest}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Requested by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_requested_by_UHF"
-                  placeholder="Quantity Requested by UHF"
-                  value={formData.quantity_requested_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                YF Vaccine Allocated by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfVaccineAllocated"
+                      value={formData.yfVaccineAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfDiluentAllocated"
+                      value={formData.yfDiluentAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf05mlSyringeAllocated"
+                      value={formData.yf05mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf5mlSyringeAllocated"
+                      value={formData.yf5mlSyringeAllocated}
+                      onChange={handleChange}
+                      disabled={!canEditEHFAllocation}
+                      required={canEditEHFAllocation}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Allocated by EHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_allocated_by_EHF"
-                  placeholder="Quantity Allocated by EHF"
-                  value={formData.quantity_allocated_by_EHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isEHF}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by Conveyor</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_conveyor"
-                  placeholder="Quantity Received by Conveyor"
-                  value={formData.quantity_received_by_conveyor}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isConveyor}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Received by UHF</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_received_by_UHF"
-                  placeholder="Quantity Received by UHF"
-                  value={formData.quantity_received_by_UHF}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                YF Vaccine Delivered by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfVaccineConveyorDelivered"
+                      value={formData.yfVaccineConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfDiluentConveyorDelivered"
+                      value={formData.yfDiluentConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf05mlSyringeConveyorDelivered"
+                      value={formData.yf05mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf5mlSyringeConveyorDelivered"
+                      value={formData.yf5mlSyringeConveyorDelivered}
+                      onChange={handleChange}
+                      disabled={!canEditConveyorDelivered}
+                      required={canEditConveyorDelivered}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>
       </Accordion>
 
-      <Accordion>
+      <Accordion disabled={!isReverseLogisticsEnabled}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="reverse-logistics-content"
@@ -218,50 +365,224 @@ export const YfAllocation = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Unopened vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_unopened"
-                  placeholder="Quantity Returned by UHF (Unopened vial)"
-                  value={formData.quantity_returned_unopened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                YF Vaccine Returned by UHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfVaccineReturned"
+                      value={formData.yfVaccineReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfDiluentReturned"
+                      value={formData.yfDiluentReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf05mlSyringeReturned"
+                      value={formData.yf05mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf5mlSyringeReturned"
+                      value={formData.yf5mlSyringeReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditUHFReturned}
+                      required={canEditUHFReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned by UHF (Open vial)</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="quantity_returned_opened"
-                  placeholder="Quantity Returned by UHF (Open vial)"
-                  value={formData.quantity_returned_opened}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                YF Vaccine Returned by Conveyor/3PL
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfVaccineConveyorReturned"
+                      value={formData.yfVaccineConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfDiluentConveyorReturned"
+                      value={formData.yfDiluentConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf05mlSyringeConveyorReturned"
+                      value={formData.yf05mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf5mlSyringeConveyorReturned"
+                      value={formData.yf5mlSyringeConveyorReturned}
+                      onChange={handleChange}
+                      disabled={isView || !canEditConveyorReturned}
+                      required={canEditConveyorReturned}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel>Quantity Returned By</InputLabel>
-                <TextField
-                  required
-                  fullWidth
-                  name="returned_by"
-                  placeholder="Returned By"
-                  value={formData.returned_by}
-                  onChange={handleChange}
-                  variant="outlined"
-                  disabled={!isUHF}
-                />
-              </Box>
+            <Grid item xs={12}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'black',
+                  paddingBottom: 1,
+                  textAlign: 'left',
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 1,
+                }}
+              >
+                YF Vaccine Received by EHF
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Vaccine</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfVaccineReceived"
+                      value={formData.yfVaccineReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF Diluent</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yfDiluentReceived"
+                      value={formData.yfDiluentReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 0.5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf05mlSyringeReceived"
+                      value={formData.yf05mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>YF 5ml Syringe</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="yf5mlSyringeReceived"
+                      value={formData.yf5mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </AccordionDetails>

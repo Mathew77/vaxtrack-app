@@ -18,12 +18,14 @@ interface ExtendedYFVaccineProps {
   initialData?: Partial<YFVaccineData>;
   onDataChange: (data: YFVaccineData) => void;
   hideTitle?: boolean;
+  isView: boolean;
 }
 
 export const YfVaccine = ({
   initialData = {},
   onDataChange,
-  hideTitle
+  hideTitle,
+  isView = false
 }: ExtendedYFVaccineProps): JSX.Element => {
   const defaultFormData: YFVaccineData = {
     physicalStock: '',
@@ -108,6 +110,7 @@ export const YfVaccine = ({
                 placeholder="Physical Stock Balance" 
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -120,6 +123,7 @@ export const YfVaccine = ({
                 variant="outlined" 
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -132,6 +136,7 @@ export const YfVaccine = ({
                 variant="outlined" 
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -146,6 +151,7 @@ export const YfVaccine = ({
                 value={formData.expiryDate}
                 onChange={handleInputChange('expiryDate')}
                 InputLabelProps={{ shrink: true }}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -158,6 +164,7 @@ export const YfVaccine = ({
                 variant="outlined"
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -175,6 +182,7 @@ export const YfVaccine = ({
                   inputProps={{
                     name: 'vvm2',
                   }}
+                  disabled={isView}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -191,6 +199,7 @@ export const YfVaccine = ({
                 variant="outlined" 
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -206,6 +215,7 @@ export const YfVaccine = ({
                   inputProps={{
                     name: 'min-stock',
                   }}
+                  disabled={isView}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -225,6 +235,7 @@ export const YfVaccine = ({
                   inputProps={{
                     name: 'max-stock',
                   }}
+                  disabled={isView}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -241,6 +252,7 @@ export const YfVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -283,6 +295,7 @@ export const YfVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.diluentPhysicalStock}
                 onChange={handleInputChange('diluentPhysicalStock')} 
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -295,6 +308,7 @@ export const YfVaccine = ({
                   value={formData.diluentMismatchOutcome}
                   onChange={handleInputChange('diluentMismatchOutcome')}
                   inputProps={{ name: 'diluent-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -311,6 +325,7 @@ export const YfVaccine = ({
                 variant="outlined" 
                 value={formData.diluentMismatchAdjustedValue}
                 onChange={handleInputChange('diluentMismatchAdjustedValue')} 
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -329,6 +344,7 @@ export const YfVaccine = ({
                   placeholder="Physical Stock Balance"
                   value={formData.twoMlSyringePhysicalStock}
                   onChange={handleInputChange('twoMlSyringePhysicalStock')} 
+                  disabled={isView}
                     />
               </Box>
             </Grid>
@@ -341,6 +357,7 @@ export const YfVaccine = ({
                     value={formData.twoMlSyringeMismatchOutcome}
                     onChange={handleInputChange('twoMlSyringeMismatchOutcome')}
                     inputProps={{ name: '2ml-mis-match' }}
+                    disabled={isView}
                   >
                     <MenuItem value="">Select</MenuItem>
                     <MenuItem value="yes">Yes</MenuItem>
@@ -357,6 +374,7 @@ export const YfVaccine = ({
                   variant="outlined" 
                   value={formData.twoMlSyringeMismatchAdjustedValue}
                   onChange={handleInputChange('twoMlSyringeMismatchAdjustedValue')} 
+                  disabled={isView}
                   />
               </Box>
             </Grid>
@@ -375,6 +393,7 @@ export const YfVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.halfMlSyringePhysicalStock}
                 onChange={handleInputChange('halfMlSyringePhysicalStock')} 
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -387,6 +406,7 @@ export const YfVaccine = ({
                   value={formData.halfMlSyringeMismatchOutcome}
                   onChange={handleInputChange('halfMlSyringeMismatchOutcome')}
                   inputProps={{ name: '0.5ml-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -403,6 +423,7 @@ export const YfVaccine = ({
                 variant="outlined"
                 value={formData.halfMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
+                disabled={isView}
               />
             </Box>
           </Grid>

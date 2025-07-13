@@ -1,7 +1,8 @@
 export interface RoleType {
     id?:  number;
     name: string;
-    fk_org_unit_level_id: string; 
+    fk_org_unit_level_id: string;
+    org_unit_level_name: string;
     permissions: string[]; 
     status: string;
   }

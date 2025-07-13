@@ -9,6 +9,7 @@ export interface SCSType {
     longtitude: string; 
     lagtitude: string;  
     storage_capcity: number;
+    ehf_list?: string[];
   }
 
   export interface StateType {

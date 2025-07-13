@@ -15,6 +15,7 @@ interface TableRow {
   id?: string | number;
   name: string;
   fk_org_unit_level_id: string
+  org_unit_level_name: string;
   permissions: string[]
 }
 
@@ -81,7 +82,12 @@ const RolesPermissionsList: React.FC = () => {
       },
       {
         accessorKey: 'fk_org_unit_level_id',
-        header: 'Organisation Level',
+        header: 'Organisation Level ID',
+        size: 200,
+      },
+      {
+        accessorKey: 'org_unit_level_name',
+        header: 'Organisation Level Name',
         size: 200,
       },
     ],

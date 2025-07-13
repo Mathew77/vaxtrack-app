@@ -12,6 +12,10 @@
 // export default api;
 
 
+// export const url = process.env.NODE_ENV === 'production'
+//   ? 'https://vaxtracklmd.net/api/'
+//   : 'https://vaxtracklmd.net/api/';
+
 export const url = process.env.NODE_ENV === 'production'
-  ? 'https://vaxtracklmd.net/api/'
-  : 'https://vaxtracklmd.net/api/';
+  ? 'http://127.0.0.1:8000/api/'
+  : 'http://127.0.0.1:8000/api/';

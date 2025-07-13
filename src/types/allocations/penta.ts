@@ -1,11 +1,14 @@
 export interface PentaAllocationData {
-    quantity_requested_by_UHF: string;
-    quantity_allocated_by_EHF: string;
-    dispensed_by: string;
-    quantity_received_by_conveyor: string;
-    quantity_received_by_UHF: string;
-    quantity_returned_unopened: string;
-    quantity_returned_opened: string;
-    returned_by: string;
-    }
-  
+  pentaVaccineAllocated: string;
+  penta05mlSyringeAllocated: string;
+  pentaVaccineRequested: string;
+  penta05mlSyringeRequested: string;
+  pentaVaccineReturned: string;
+  penta05mlSyringeReturned: string;
+  pentaVaccineReceived: string;
+  penta05mlSyringeReceived: string;
+  pentaVaccineConveyorDelivered: string;
+  penta05mlSyringeConveyorDelivered: string;
+  pentaVaccineConveyorReturned: string;
+  penta05mlSyringeConveyorReturned: string;
+}

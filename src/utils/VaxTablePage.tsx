@@ -16,10 +16,10 @@ import { Button } from 'react-bootstrap';
 import { ReactElement, ReactNode, CSSProperties } from 'react';
 
 export interface ActionMenuItem<TData extends MRT_RowData> {
-  display: string;
+  display: string | ((row: TData) => string);
   icon?: ReactElement;
   handleClick?: (row: TData) => void;
-  disabled?: boolean;
+  disabled?: boolean | ((row: TData) => boolean);
 }
 
 interface VaxTableProps<TData extends MRT_RowData> {
@@ -154,18 +154,29 @@ const VaxTable = <TData extends MRT_RowData>({
     enableRowActions: actionMenuItems.length > 0,
     positionActionsColumn: 'last',
     renderRowActionMenuItems: ({ row }) =>
-      actionMenuItems.map((item, index) => (
-        <MenuItem
-          disabled={item.disabled || false}
-          sx={{ display: 'flex', alignItems: 'center' }}
-          id={`${item.display}:${index}`}
-          key={`${item.display}:${index}`}
-          onClick={() => (item.handleClick ? item.handleClick(row.original) : undefined)}
-        >
-          {item.icon && <span style={{ marginRight: '10px', color: '#0B795F' }}>{item.icon}</span>}
-          <span>{item.display}</span>
-        </MenuItem>
-      )),
+      actionMenuItems.map((item, index) => {
+
+        const displayText = typeof item.display === 'function' 
+          ? item.display(row.original) 
+          : item.display;
+        
+        const isDisabled = typeof item.disabled === 'function' 
+          ? item.disabled(row.original) 
+          : (item.disabled || false);
+
+        return (
+          <MenuItem
+            disabled={isDisabled}
+            sx={{ display: 'flex', alignItems: 'center' }}
+            id={`${displayText}:${index}`}
+            key={`${displayText}:${index}`}
+            onClick={() => (item.handleClick ? item.handleClick(row.original) : undefined)}
+          >
+            {item.icon && <span style={{ marginRight: '10px', color: '#0B795F' }}>{item.icon}</span>}
+            <span>{displayText}</span>
+          </MenuItem>
+        );
+      }),
   });
 
   return <MaterialReactTable table={table} />;

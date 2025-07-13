@@ -11,10 +11,10 @@ type ApiResponse<T> = {
 
 export const useFetchLcs = () => {
     return useQuery<LcsType[], Error>({
-        queryKey: ['lcco'],
+        queryKey: ['lcs'],
         queryFn: async () => {
             const response = await apiHelper.getResource<ApiResponse<LcsType[]>>(
-                `${url}v1/lcco/`
+                `${url}v1/lcs/`
             )
             return response.data
         } 
@@ -51,10 +51,10 @@ export const useUpsertLcs = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id?: number; data: Partial<LcsType> | Omit<LcsType, 'id'> }) =>
       id
-        ? apiHelper.putResource<LcsType>(`${url}v1/lcco/${id}/`, data)
-        : apiHelper.postResource<LcsType>(`${url}v1/lcco/`, data),
+        ? apiHelper.putResource<LcsType>(`${url}v1/lcs/${id}/`, data)
+        : apiHelper.postResource<LcsType>(`${url}v1/lcs/`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lcco'] });
+      queryClient.invalidateQueries({ queryKey: ['lcs'] });
     },
   });
 };
@@ -64,9 +64,9 @@ export const useDeleteLcs = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => 
-      apiHelper.deleteResource<void>(`${url}v1/lcco/${id}/`),
+      apiHelper.deleteResource<void>(`${url}v1/lcs/${id}/`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lcco'] });
+      queryClient.invalidateQueries({ queryKey: ['lcs'] });
     },
   });
 };

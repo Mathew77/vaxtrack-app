@@ -17,12 +17,14 @@ interface ExtendedPcvVaccineProps {
   initialData?: Partial<PcvVaccineData>;
   onDataChange: (data: PcvVaccineData) => void;
   hideTitle?: boolean;
+  isView: boolean;
 }
 
 export const PcvVaccine = ({
   initialData = {},
   onDataChange,
   hideTitle = false,
+  isView = false
 }: ExtendedPcvVaccineProps): JSX.Element => {
   const defaultFormData: PcvVaccineData = {
     physicalStock: '',
@@ -108,6 +110,7 @@ export const PcvVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -120,6 +123,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -132,6 +136,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -146,6 +151,7 @@ export const PcvVaccine = ({
                 value={formData.expiryDate}
                 onChange={handleInputChange('expiryDate')}
                 InputLabelProps={{ shrink: true }}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -158,6 +164,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -171,6 +178,7 @@ export const PcvVaccine = ({
                   value={formData.vvm2}
                   onChange={handleInputChange('vvm2')}
                   inputProps={{ name: 'vvm2' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -188,6 +196,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -201,6 +210,7 @@ export const PcvVaccine = ({
                   value={formData.belowMinStock}
                   onChange={handleInputChange('belowMinStock')}
                   inputProps={{ name: 'min-stock' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -219,6 +229,7 @@ export const PcvVaccine = ({
                   value={formData.aboveMaxStock}
                   onChange={handleInputChange('aboveMaxStock')}
                   inputProps={{ name: 'max-stock' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -236,6 +247,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -278,6 +290,7 @@ export const PcvVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.diluentPhysicalStock}
                 onChange={handleInputChange('diluentPhysicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -290,6 +303,7 @@ export const PcvVaccine = ({
                   value={formData.diluentMismatchOutcome}
                   onChange={handleInputChange('diluentMismatchOutcome')}
                   inputProps={{ name: 'diluent-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -306,6 +320,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.diluentMismatchAdjustedValue}
                 onChange={handleInputChange('diluentMismatchAdjustedValue')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -324,6 +339,7 @@ export const PcvVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.fiveMlSyringePhysicalStock}
                 onChange={handleInputChange('fiveMlSyringePhysicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -336,6 +352,7 @@ export const PcvVaccine = ({
                   value={formData.fiveMlSyringeMismatchOutcome}
                   onChange={handleInputChange('fiveMlSyringeMismatchOutcome')}
                   inputProps={{ name: '5ml-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -352,6 +369,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.fiveMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('fiveMlSyringeMismatchAdjustedValue')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -370,6 +388,7 @@ export const PcvVaccine = ({
                 placeholder="Physical Stock Balance"
                 value={formData.halfMlSyringePhysicalStock}
                 onChange={handleInputChange('halfMlSyringePhysicalStock')}
+                disabled={isView}
               />
             </Box>
           </Grid>
@@ -382,6 +401,7 @@ export const PcvVaccine = ({
                   value={formData.halfMlSyringeMismatchOutcome}
                   onChange={handleInputChange('halfMlSyringeMismatchOutcome')}
                   inputProps={{ name: '0.5ml-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -398,6 +418,7 @@ export const PcvVaccine = ({
                 variant="outlined"
                 value={formData.halfMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
+                disabled={isView}
               />
             </Box>
           </Grid>
