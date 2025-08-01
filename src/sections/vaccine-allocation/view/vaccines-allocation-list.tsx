@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../utils/VaxTablePage';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-// Import MRT_Cell type for table cell typing
 import type { MRT_Cell } from 'material-react-table';
 import { useNavigate } from 'react-router-dom';
 import { useFetchThreePl, useDeleteThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
@@ -69,6 +68,11 @@ const VaccineAllocationList: React.FC = () => {
   const deleteAllocation = useDeleteAllocation();
 
   const [value, setValue] = useState<number>(0);
+
+  const userRole = sessionStorage.getItem('userRole');
+
+  const isEHF = userRole === 'ehf';
+  const isThreePL = userRole === 'threepl'
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -244,10 +248,10 @@ const VaccineAllocationList: React.FC = () => {
             columns={columns}
             data={transformedAllocationList}
             tableHeader="Vaccine Allocation - Summary Page"
-            customRightButton
+            customRightButton={!isEHF}
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD Vaccine Allocation"
+            customRightButtonText={isThreePL? "Request Vaccine Allocation": "Add Vaccine Allocation"}
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={allocationItem}
             headerStyles={{

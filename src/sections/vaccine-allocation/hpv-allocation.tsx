@@ -225,6 +225,7 @@ export const HpvAllocation = ({
                       variant="outlined"
                       name="hpvVaccineConveyorDelivered"
                       value={formData.hpvVaccineConveyorDelivered}
+                      onChange={handleChange}
                       disabled={!canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
                     />
@@ -238,6 +239,7 @@ export const HpvAllocation = ({
                       variant="outlined"
                       name="hpv05mlSyringeConveyorDelivered"
                       value={formData.hpv05mlSyringeConveyorDelivered}
+                      onChange={handleChange}
                       disabled={!canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
                     />

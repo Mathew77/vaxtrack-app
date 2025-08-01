@@ -8,7 +8,6 @@
     decline_comment?: string;
     product_detail_request: Array<{
       type: string;
-      vaccine_status: number; 
       [key: string]: any; 
     }>;
   }

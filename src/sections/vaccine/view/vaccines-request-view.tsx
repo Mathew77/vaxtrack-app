@@ -40,6 +40,17 @@ interface VaccineRequestFormProps {
   initialData?: VaccineFormType;
 }
 
+const convertVaccineStatusToNumber = (status: string | number | undefined): number => {
+  if (typeof status === 'string') {
+    return parseInt(status, 10) || 0;
+  }
+  return typeof status === 'number' ? status : 0;
+};
+
+const convertVaccineStatusToString = (status: string | number | undefined): string => {
+  return String(status || 0);
+};
+
 const vaccineOptions: VaccineOption[] = [
   { value: 'bcg', label: 'BCG Vaccine', component: BcgVaccines },
   { value: 'measles', label: 'Measles Vaccine', component: MeaslesVaccine },
@@ -87,7 +98,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
   const [declineComment, setDeclineComment] = useState<string>('');
   const [showDeclineComment, setShowDeclineComment] = useState<boolean>(false);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false); // Track if form has been submitted
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false); 
 
   const userEhfList = useMemo(() => {
     try {
@@ -152,14 +163,9 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
-    const updatedProductDetailRequests = initialData?.product_detail_request?.map((item: any) => ({
-      ...item,
-      vaccine_status: 1,
-    })) || [];
-
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 1,
-      product_detail_request: updatedProductDetailRequests,
+      vaccine_status: 1, 
+      product_detail_request: initialData?.product_detail_request || [],
       requested_by: initialData?.requested_by || username,
     };
 
@@ -168,7 +174,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       {
         onSuccess: () => {
           toast.success('Vaccine request approved successfully');
-          setIsSubmitted(true); // Mark as submitted
+          setIsSubmitted(true); 
           navigate('/vaccine-page');
         },
         onError: (error: any) => {
@@ -203,16 +209,10 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
-    const updatedProductDetailRequests = initialData?.product_detail_request?.map((item: any) => ({
-      ...item,
-      vaccine_status: 2,
-      decline_comment: declineComment,
-    })) || [];
-
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 2,
+      vaccine_status: 2, 
       decline_comment: declineComment,
-      product_detail_request: updatedProductDetailRequests,
+      product_detail_request: initialData?.product_detail_request || [],
       requested_by: initialData?.requested_by || username,
     };
 
@@ -221,7 +221,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       {
         onSuccess: () => {
           toast.success('Vaccine request declined successfully');
-          setIsSubmitted(true); // Mark as submitted
+          setIsSubmitted(true); 
           navigate('/vaccine-page');
         },
         onError: (error: any) => {
@@ -245,14 +245,9 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
-    const updatedProductDetailRequests = initialData?.product_detail_request?.map((item: any) => ({
-      ...item,
-      vaccine_status: 3, // In Progress
-    })) || [];
-
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 3,
-      product_detail_request: updatedProductDetailRequests,
+      vaccine_status: 3, 
+      product_detail_request: initialData?.product_detail_request || [],
       requested_by: initialData?.requested_by || username,
     };
 
@@ -261,7 +256,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       {
         onSuccess: () => {
           toast.success('Order picked successfully');
-          setIsSubmitted(true); // Mark as submitted
+          setIsSubmitted(true); 
           navigate('/vaccine-page');
         },
         onError: (error: any) => {
@@ -291,12 +286,12 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
     const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
       type,
-      vaccine_status: 0,
       ...data,
     }));
 
     const payload: VaccineFormType = {
       ehf_id: ehfId,
+      vaccine_status: 0, 
       product_detail_request: productDetailRequests,
       requested_by: username,
     };
@@ -308,7 +303,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
             ? 'Vaccine Request Submitted Successfully'
             : response?.status || 'Vaccine Request Submitted'
         );
-        setIsSubmitted(true); // Mark as submitted
+        setIsSubmitted(true); 
         navigate('/vaccine-page');
       },
       onError: (error: any) => {
@@ -324,22 +319,13 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
   const userRole = useMemo(() => sessionStorage.getItem('userRole') || '', []);
   const isThreePL = userRole === 'threepl';
-  const isSSC = userRole === 'ssc';
-  const isApproved = initialData?.product_detail_request?.some(
-    (item: any) => item.vaccine_status === 1
-  );
+  const isSSC = userRole === 'scs';
 
-  const isDeclined = initialData?.product_detail_request?.some(
-    (item: any) => item.vaccine_status === 2
-  );
-
-  const isPicked = initialData?.product_detail_request?.some(
-    (item: any) => item.vaccine_status === 3
-  );
-
-  const isCompleted = initialData?.product_detail_request?.some(
-    (item: any) => item.vaccine_status === 4
-  );
+  const vaccineStatusNumber = convertVaccineStatusToNumber(initialData?.vaccine_status);
+  const isApproved = vaccineStatusNumber === 1;
+  const isDeclined = vaccineStatusNumber === 2;
+  const isPicked = vaccineStatusNumber === 3;
+  const isCompleted = vaccineStatusNumber === 4;
 
   const isFinalState = isDeclined || isPicked || isCompleted;
   
@@ -411,7 +397,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
            {selectedTab && (
             <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-              {/* Show Pick Order button for ThreePL users on approved requests - only on last tab */}
+     
               {isView && isThreePL && isApproved && isLastTab && !isPicked && !isCompleted ? (
                 <Button
                   variant="contained"
@@ -422,7 +408,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                 >
                   Pick Order
                 </Button>
-              ) : /* Show Approve/Decline buttons ONLY for SLWG users on last tab */
+              ) : 
               isView && userRole === 'slwg' && isLastTab && !isApproved && !isDeclined && !isPicked && !isCompleted ? (
                 <>
                   <Button
@@ -446,7 +432,6 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                 </>
               ) : null}
 
-              {/* Show status message if already processed */}
               {isView && isLastTab && (isApproved || isDeclined || isPicked || isCompleted) && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {isApproved && !isPicked && !isCompleted && (
@@ -472,10 +457,8 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                 </Box>
               )}
 
-              {/* Show Next/Back buttons for non-view mode OR view mode navigation */}
               {(!isView || (isView && !isLastTab)) && (
                 <>
-                  {/* Next/Submit button logic */}
                   {!isView || (isView && !isLastTab) ? (
                     <Button
                       variant="contained"

@@ -3,14 +3,48 @@ import React from "react";
 import { Card, CardContent, Typography, Grid, Box } from "@mui/material";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import { useFetchAntigenStockSummary } from "src/hooks/apis/dashboards/admin/admin-dashboard-hook";
 
-const stats = [
-  { percentage: 48, value: 12, label: "Number of EHF with at least one antigen below minimum stock level", color: "#2E7D67", background: "#2E7D67" },
-  { percentage: 75, value: 5, label: "Number of EHF with at least one antigen stocked out", color: "#226192", background: "#226192" },
-  // { percentage: 10, value: 20, label: "EHF with at least one antigen stocked out ", color: "#226192", background: "#0B44AE" },
+
+interface Stat {
+  percentage: number;
+  value: number;
+  label: string;
+  color: string;
+  background: string;
+}
+
+
+const AnalyticsAntigen: React.FC<{ selectedState?: string }> = ({ selectedState = "All State" }) => {
+  const { data: stockSummary, isLoading } = useFetchAntigenStockSummary();
+  
+
+  if (!stockSummary) {
+    return (
+      <Typography variant="body1" color="textSecondary">
+        No antigen stock data available
+      </Typography>
+    );
+  }
+
+ const stats: Stat[] = [
+  {
+    percentage: stockSummary.below_min_stock.percentage,
+    value: stockSummary.below_min_stock.count,
+    label: "Number of EHF with at least one antigen below minimum stock level",
+    color: "#2E7D67",
+    background: "#2E7D67",
+  },
+  {
+    percentage: stockSummary.out_of_stock.percentage,
+    value: stockSummary.out_of_stock.count,
+    label: "Number of EHF with at least one antigen stocked out",
+    color: "#226192",
+    background: "#226192",
+  },
 ];
 
-const AnalyticsAntigen: React.FC = () => {
+
   return (
     <Grid container spacing={2}>
       {stats.map((item, index) => (
@@ -30,7 +64,7 @@ const AnalyticsAntigen: React.FC = () => {
             <Box sx={{ width: 80, height: 80, marginRight: 3 }}>
               <CircularProgressbar
                 value={item.percentage}
-                text={`${item.percentage}%`}
+                text={`${Math.round(item.percentage)}%`}
                 styles={buildStyles({
                   pathColor: item.color,
                   textColor: "white",

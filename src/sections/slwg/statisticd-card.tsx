@@ -6,6 +6,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import RoomServiceIcon from '@mui/icons-material/RoomService';
 import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import SystemSecurityUpdateWarningIcon from '@mui/icons-material/SystemSecurityUpdateWarning';
+import { useFetchScsDashboard } from 'src/hooks/apis/dashboards/scs/scs-dashboard-hook';
 
 interface VaccineCardProps {
   title: string;
@@ -54,12 +55,23 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
 };
 
 export default function VaccineOverview() {
+
+  const { data } = useFetchScsDashboard();
+
+  if (!data) {
+    return (
+      <Typography variant="body1" color="textSecondary">
+        No data available
+      </Typography>
+    );
+  }
+
   return (
     <Grid container spacing={2}>
       {[
         {
           title: 'EHF LMD Order Received',
-          total: '4',
+          total: (data.Total_EHF_LMD_Order_Received || 0).toString(),
           icon: <ReceiptLongIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
           textColor: '#0D47A1',
@@ -67,7 +79,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'EHF LMD Order Serviced',
-          total: '4',
+          total: (data.Total_EHF_LMD_Order_Serviced || 0).toString(),
           icon: <RoomServiceIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
           textColor: '#1B5E20',
@@ -75,7 +87,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'EHF LMD Order Serviced in Full',
-          total: '3',
+          total: (data.Total_EHF_LMD_Order_Serviced_in_Full || 0).toString(),
           icon: <BatteryFullIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
           textColor: '#B71C1C',
@@ -83,7 +95,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'EHF with non-functioning CCE EHF',
-          total: '10',
+          total: (data.Total_EHF_with_non_functioning_CCE || 0).toString(),
           icon: <SystemSecurityUpdateWarningIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
           textColor: '#E65100',

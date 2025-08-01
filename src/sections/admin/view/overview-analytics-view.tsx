@@ -8,10 +8,43 @@ import Filter from 'src/utils/Filter';
 import AnalyticsAntigen from '../analytics-antigen';
 import SwapHorizontalCircleIcon from '@mui/icons-material/SwapHorizontalCircle';
 import AddTaskIcon from '@mui/icons-material/AddTask';
+import { useFetchAdminLogisticsStockSummary, useFetchAntigenMonthlyStock } from 'src/hooks/apis/dashboards/admin/admin-dashboard-hook';
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+
+  
+
+  const { data: dashboardData } = useFetchAdminLogisticsStockSummary();
+  const { data: monthlyStockData } = useFetchAntigenMonthlyStock();
+
+   if (!dashboardData || !monthlyStockData) {
+    return (
+      <DashboardContent maxWidth="xl">
+        <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+          No data available
+        </Typography>
+      </DashboardContent>
+    );
+  }
+
+  const chartSeries = [
+    {
+      name: "EHF with stockout",
+      data: monthlyStockData.map((item) => item.out_of_stock_count),
+    },
+    {
+      name: "EHF with stock below minimum",
+      data: monthlyStockData.map((item) => item.below_min_count),
+    },
+    {
+      name: "EHF with stock above maximum",
+      data: monthlyStockData.map((item) => item.above_max_count),
+    },
+  ];
+
+
   return (
     <DashboardContent maxWidth="xl">
       <Filter showState={true} showLga={false} showWard={false} />
@@ -24,7 +57,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Percentage of EHF that have submitted LMD Orders"
             level="All State"
-            total="78%"
+            total={`${dashboardData.percentage_ehf_lmd_orders}%`}
             icon={<img alt="icon" src="/assets/icons/glass/lmd4.png" />}
             
           />
@@ -34,7 +67,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Percentage of EHF LMD Orders Serviced"
             level="All State"
-            total="87%"
+            total={`${dashboardData.percentage_ehf_lmd_orders_serviced}%`}
             color="secondary"
             icon={<img alt="icon" src="/assets/icons/glass/lmd.svg" />}
           />
@@ -44,7 +77,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Percentage of UHF that have completed forward logistics"
             level="All State"
-            total="85%"
+            total={`${dashboardData.percentage_uhf_forward_logistics}%`}
             color="primary"
             icon={<AddTaskIcon />}
           />
@@ -54,7 +87,7 @@ export function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Percentage of UHF that have completed Reverse Logistics"
             level="All State"
-            total="79%"
+            total={`${dashboardData.percentage_uhf_forward_logistics}%`}
             color="warning"
             icon={<SwapHorizontalCircleIcon fontSize="large" />}
           />
@@ -73,15 +106,11 @@ export function OverviewAnalyticsView() {
         <Grid item xs={12} md={6} lg={8}>
           <AnalyticsWebsiteVisits
             title="Vaccines Distribution"
-            subheader="Monthly % within the year"
+            subheader="Monthly counts within the year"
             chart={{
-              colors: ['#FF6B6B', '#4ECDC4', '#1A73E8'], // Add your custom colors here
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-              series: [
-                { name: 'EHF with stockout', data: [43, 33, 22, 37, 67, 68, 37, 24, 55, 55, 55, 55] },
-                { name: 'EHF with stock below minimum ', data: [51, 70, 47, 67, 40, 37, 24, 70, 24, 55, 55, 55] },
-                { name: 'Delivery in full and on Time', data: [51, 70, 47, 67, 40, 37, 24, 70, 24, 55, 55, 55] },
-              ],
+              colors: ['#FF6B6B', '#4ECDC4', '#1A73E8'],
+              categories: monthlyStockData.map((item) => item.month),
+              series: chartSeries,
             }}
           />
         </Grid>

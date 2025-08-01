@@ -8,6 +8,7 @@ import GradingIcon from '@mui/icons-material/Grading';
 import DeckIcon from '@mui/icons-material/Deck';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
+import { useFetchUhfDashboard } from 'src/hooks/apis/dashboards/uhf/uhf-dashboard-hook';
 
 interface VaccineCardProps {
   title: string;
@@ -55,13 +56,26 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
   );
 };
 
+
 export default function VaccineOverview() {
+
+  const { data } = useFetchUhfDashboard();
+
+  if (!data) {
+    return (
+      <Typography variant="body1" color="textSecondary">
+        No data available
+      </Typography>
+    );
+  }
+
+
   return (
     <Grid container spacing={2}>
       {[
         {
           title: 'Successful Deliveries Received for Fixed Sessions',
-          total: '4',
+          total: (data?.total_fixed_sessions_delivered ?? 0).toString(),
           icon: <CheckCircleIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
           textColor: '#0D47A1',
@@ -69,7 +83,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'Successful Reverse Logistics Completed Fixed Sessions',
-          total: '4',
+          total: (data?.total_fixed_sessions_completed ?? 0).toString(),
           icon: <GradingIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
           textColor: '#1B5E20',
@@ -77,7 +91,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'Successful Deliveries Received for Outreach Sessions',
-          total: '3',
+          total: (data?.total_outreach_sessions_delivered ?? 0).toString(),
           icon: <DeckIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
           textColor: '#B71C1C',
@@ -85,7 +99,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'Successful Reverse Logistics Completed for Outreach Sessions',
-          total: '10',
+          total: (data?.total_outreach_sessions_completed ?? 0).toString(),
           icon: <PublishedWithChangesIcon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
           textColor: '#E65100',
@@ -93,7 +107,7 @@ export default function VaccineOverview() {
         },
         {
           title: 'Number of Community Vaccine Conveyors engaged ',
-          total: '7',
+          total: (data?.total_threepl_count ?? 0).toString(),
           icon: <Diversity3Icon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
           textColor: '#01579B',

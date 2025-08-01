@@ -24,7 +24,6 @@ interface VaccineRequestTableRow {
   updated_at?: string;
   product_detail_request: Array<{
     type: string;
-    vaccine_status: number;
     [key: string]: any;
   }>;
 }
@@ -34,6 +33,18 @@ interface TabPanelProps {
   value: number;
   index: number;
 }
+
+
+const convertVaccineStatusToNumber = (status: string | number | undefined): number => {
+  if (typeof status === 'string') {
+    return parseInt(status, 10) || 0;
+  }
+  return typeof status === 'number' ? status : 0;
+};
+
+const convertVaccineStatusToString = (status: string | number | undefined): string => {
+  return String(status || 0);
+};
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -70,9 +81,8 @@ const statusDisplayMap: { [key: number]: string } = {
   1: 'Vaccine Approved by SLWG',
   2: 'Vaccine Declined by SLWG',
   3: 'Vaccine Picked by ThreePL',
-  4: 'Order Completed', 
+  4: 'Order Completed',
 };
-
 
 const VaccineRequestList: React.FC = () => {
   const navigate = useNavigate();
@@ -89,7 +99,7 @@ const VaccineRequestList: React.FC = () => {
     setValue(newValue);
   };
 
-   const userRole = useMemo(() => {
+  const userRole = useMemo(() => {
     return sessionStorage.getItem('userRole') || '';
   }, []);
 
@@ -97,8 +107,12 @@ const VaccineRequestList: React.FC = () => {
   const isThreePL = userRole === 'threepl';
   const isSSC = userRole === 'scs';
 
+  console.log('User Role:', userRole);
+  console.log('User Role:', isSLWG);
+  console.log('User Role:', isThreePL);
+  console.log('User Role:', isSSC);
 
-   // Get SCS list from session storage
+  // Get SCS list from session storage
   const userScsList = useMemo(() => {
     try {
       const scsListData = sessionStorage.getItem('scs_list');
@@ -113,7 +127,6 @@ const VaccineRequestList: React.FC = () => {
     }
   }, []);
 
-  
   const userScsId = userScsList[0];
 
   const userScsState = useMemo(() => {
@@ -133,7 +146,7 @@ const VaccineRequestList: React.FC = () => {
     return [];
   }, [isSLWG, userScsState, ehfs]);
 
-   const userEhfList = useMemo(() => {
+  const userEhfList = useMemo(() => {
     try {
       const ehfListData = sessionStorage.getItem('ehf_list');
       if (ehfListData) {
@@ -147,20 +160,17 @@ const VaccineRequestList: React.FC = () => {
     }
   }, []);
 
-   const userEhfId = userEhfList[0]?.toString() || '';
+  const userEhfId = userEhfList[0]?.toString() || '';
 
-   const filteredVaccineRequests = useMemo(() => {
+  const filteredVaccineRequests = useMemo(() => {
     let baseFilteredRequests: VaccineFormType[] = [];
 
     if (isSLWG) {
-      // For SLWG users, show requests from all EHFs in their state
       if (allowedEhfIds.length === 0) return [];
-      
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => 
         allowedEhfIds.includes(String(request.ehf_id))
       );
     } else {
-      // For regular users, show requests from their specific EHF
       if (!userEhfId) {
         baseFilteredRequests = vaccineRequests;
       } else {
@@ -170,48 +180,44 @@ const VaccineRequestList: React.FC = () => {
       }
     }
 
-    // Additional filtering for threepl and ssc users
     if (isThreePL || isSSC) {
       return baseFilteredRequests.filter((request: VaccineFormType) => {
-        return request.product_detail_request?.some(
-          (product: any) => product.vaccine_status === 1 || product.vaccine_status === 3
-        );
+        const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
+        return statusNumber === 1 || statusNumber === 3;
       });
     }
 
     return baseFilteredRequests;
   }, [vaccineRequests, isSLWG, allowedEhfIds, userEhfId, isThreePL, isSSC]);
 
-   const transformedVaccineRequests: VaccineRequestTableRow[] = useMemo(() => {
-    
+  const transformedVaccineRequests: VaccineRequestTableRow[] = useMemo(() => {
     return filteredVaccineRequests.map((request: VaccineFormType) => {
       return {
         id: request.id,
         ehf_id: String(request.ehf_id),
         requested_by: request.requested_by,
-        vaccine_status: request.product_detail_request[0]?.vaccine_status ?? 0,
+        vaccine_status: convertVaccineStatusToNumber(request.vaccine_status),
         product_detail_request: request.product_detail_request || [],
       };
     });
-  }, [filteredVaccineRequests, isSLWG, allowedEhfIds, userEhfId]);
-
+  }, [filteredVaccineRequests]);
 
   const handleView = (data: VaccineRequestTableRow) => {
-  const initialData = {
-    id: data.id,
-    ehf_id: String(data.ehf_id),
-    requested_by: data.requested_by,
-    product_detail_request: data.product_detail_request || [],
-    vaccine_status: data.vaccine_status,
-  } as VaccineFormType;
-  navigate(`/vaccine-request-view`, {
-    state: {
-      initialData,
-      isView: true,
-      editId: data.id?.toString(),
-    },
-  });
-};
+    const initialData = {
+      id: data.id,
+      ehf_id: String(data.ehf_id),
+      requested_by: data.requested_by,
+      product_detail_request: data.product_detail_request || [],
+      vaccine_status: data.vaccine_status, 
+    } as VaccineFormType;
+    navigate(`/vaccine-request-view`, {
+      state: {
+        initialData,
+        isView: true,
+        editId: data.id?.toString(),
+      },
+    });
+  };
 
   const handleDelete = (data: VaccineRequestTableRow) => {
     if (data.id) {
@@ -232,32 +238,32 @@ const VaccineRequestList: React.FC = () => {
 
   const columns = useMemo(
     () => [
-        {
-          accessorKey: "id",
-          header: "Request ID",
-          size: 100,
+      {
+        accessorKey: "id",
+        header: "Request ID",
+        size: 100,
+      },
+      {
+        accessorKey: 'ehf_id',
+        header: 'EHF ID',
+        size: 100,
+        Cell: ({ cell }: { cell: MRT_Cell<VaccineRequestTableRow, unknown> }) => {
+          const ehfId = cell.getValue() as string | number | undefined;
+          return ehfId ? String(ehfId) : 'N/A';
         },
-         {
-          accessorKey: 'ehf_id',
-          header: 'EHF ID',
-          size: 100,
-          Cell: ({ cell }: { cell: MRT_Cell<VaccineRequestTableRow, unknown> }) => {
-            const ehfId = cell.getValue() as string | number | undefined;
-            return ehfId ? String(ehfId) : 'N/A';
-          },
+      },
+      {
+        accessorKey: 'vaccine_status',
+        header: 'Status',
+        size: 200,
+        Cell: ({ cell }: { cell: MRT_Cell<VaccineRequestTableRow, unknown> }) => {
+          const statusValue = Number(cell.getValue());
+          return statusDisplayMap[statusValue] || `Unknown Status (${statusValue})`;
         },
-         {
-          accessorKey: 'vaccine_status',
-          header: 'Status',
-          size: 200, 
-          Cell: ({ cell }: { cell: MRT_Cell<VaccineRequestTableRow, unknown> }) => {
-            const statusValue = Number(cell.getValue()); 
-            return statusDisplayMap[statusValue] || `Unknown Status (${statusValue})`;
-          },
-        },
-      ],
+      },
+    ],
     []
-    );
+  );
 
   const actionMenuItems: ActionMenuItem<VaccineRequestTableRow>[] = [
     {
@@ -265,11 +271,6 @@ const VaccineRequestList: React.FC = () => {
       handleClick: handleView,
       icon: <FaEye style={{ color: "#1976D2" }} />,
     },
-    // {
-    //   display: "Edit",
-    //   handleClick: handleEdit,
-    //   icon: <EditOutlinedIcon sx={{ color: '#1976D2' }} />,
-    // },
     {
       display: "Delete",
       handleClick: handleDelete,

@@ -1,7 +1,25 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
+import { useFetchForwardReverseLogisticsEhf } from 'src/hooks/apis/dashboards/ehf/ehf-dashboard-hook';
 
 const ForwardReverseChart = () => {
+
+  const { data } = useFetchForwardReverseLogisticsEhf();
+
+  if (!data || !data.monthly_logistics) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <p>No forward and reverse logistics data available</p>
+      </div>
+    );
+  }
+
+  const monthlyData = data.monthly_logistics;
+  const months = Object.keys(monthlyData);
+
+  const forwardLogisticsData = months.map(month => monthlyData[month].forward_logistics);
+  const reverseLogisticsData = months.map(month => monthlyData[month].reverse_logistics);
+
   const options: ApexCharts.ApexOptions = {
     chart: {
       type: 'bar',
@@ -19,11 +37,11 @@ const ForwardReverseChart = () => {
       enabled: false,
     },
     xaxis: {
-      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      categories: months,
     },
     yaxis: {
       title: {
-        text: 'Facilities (%)',
+        text: 'Logistics Count',
       },
     },
     colors: ['#1976D2', '#FF9800'], // blue and orange
@@ -34,16 +52,23 @@ const ForwardReverseChart = () => {
       text: 'Forward vs Reverse Logistics',
       align: 'left',
     },
+    tooltip: {
+      y: {
+        formatter: function (val) {
+          return val.toString();
+        }
+      }
+    }
   };
 
   const series = [
     {
       name: 'Forward Logistics',
-      data: [65, 70, 78, 80, 72, 68, 65, 70, 78, 80, 72, 68],
+      data: forwardLogisticsData,
     },
     {
-      name: 'Reverse Logistics',
-      data: [55, 60, 65, 70, 58, 62, 65, 70, 78, 80, 72, 68],
+      name: 'Reverse Logistics', 
+      data: reverseLogisticsData,
     },
   ];
 
