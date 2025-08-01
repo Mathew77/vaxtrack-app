@@ -17,7 +17,7 @@ export function OverviewAnalyticsView() {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 2 }}>
         <Statistics />
         <CCE2 />
-        <TransactionHistory />
+        {/* <TransactionHistory /> */}
       </Box>
     </DashboardContent>
   );

@@ -23,7 +23,7 @@ export function OverviewAnalyticsView() {
         <LMDOrderPaymentStatus />
       </Box>
       <Box mt={3}>
-        <TransactionHistory />
+        {/* <TransactionHistory /> */}
       </Box>
     </DashboardContent>
   );

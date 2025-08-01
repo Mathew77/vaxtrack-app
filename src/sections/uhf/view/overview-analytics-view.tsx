@@ -25,7 +25,7 @@ export function OverviewAnalyticsView() {
       <br/>
       <b/>
       <br/>
-      <TransactionHistory />
+      {/* <TransactionHistory /> */}
     </DashboardContent>
   );
 }
