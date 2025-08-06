@@ -300,7 +300,7 @@ const VaccineRequestList: React.FC = () => {
             customRightButton={userEhfId}
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD Vaccine Allocation"
+            customRightButtonText="ADD Vaccine Request"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={actionMenuItems}
             headerStyles={{

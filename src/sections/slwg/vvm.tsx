@@ -14,7 +14,7 @@ const CCE2: React.FC = () => {
     <Grid container spacing={2}>
       {stats.map((item, index) => (
         <Grid item xs={6} key={index}>
-          <Card
+          {/* <Card
             elevation={2}
             sx={{
               borderRadius: 3,
@@ -45,7 +45,7 @@ const CCE2: React.FC = () => {
                 {item.label}
               </Typography>
             </Box>
-          </Card>
+          </Card> */}
         </Grid>
       ))}
     </Grid>
