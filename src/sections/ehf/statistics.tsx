@@ -15,10 +15,10 @@ interface VaccineCardProps {
   icon: React.ReactNode;
   bgColor: string;
   textColor: string;
-  trend: string;
+  // trend: string;
 }
 
-const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor, trend }) => {
+const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor }) => {
   return (
     <Card
       sx={{
@@ -40,9 +40,9 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
           height: '100%',
         }}
       >
-        <Typography variant="body2" sx={{ position: 'absolute', top: 10, right: 15, fontWeight: 'bold' }}>
+        {/* <Typography variant="body2" sx={{ position: 'absolute', top: 10, right: 15, fontWeight: 'bold' }}>
           {trend}
-        </Typography>
+        </Typography> */}
         <div style={{ fontSize: 40, marginBottom: 8 }}>{icon}</div>
         <Typography variant="subtitle1" fontWeight="bold">
           {title}
@@ -73,7 +73,7 @@ export default function VaccineOverview() {
       icon: <VaccinesIcon fontSize="large" />,
       bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
       textColor: '#0D47A1',
-      trend: '↘ 2.6%', 
+      // trend: '↘ 2.6%', 
     },
     {
       title: 'Antigens out of stock',
@@ -81,7 +81,7 @@ export default function VaccineOverview() {
       icon: <HourglassDisabledIcon fontSize="large" />,
       bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
       textColor: '#1B5E20',
-      trend: '↘ 1.2%',
+      // trend: '↘ 1.2%',
     },
     {
       title: 'Antigen/device mismatch',
@@ -89,7 +89,7 @@ export default function VaccineOverview() {
       icon: <MoneyOffCsredIcon fontSize="large" />,
       bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
       textColor: '#B71C1C',
-      trend: '↘ 0.8%', 
+      // trend: '↘ 0.8%', 
     },
     {
       title: 'Antigens with less than 6 months RSL',
@@ -97,7 +97,7 @@ export default function VaccineOverview() {
       icon: <FormatColorFillIcon fontSize="large" />,
       bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
       textColor: '#E65100',
-      trend: '↘ -1.5%',
+      // trend: '↘ -1.5%',
     },
     {
       title: 'Number of Community Vaccine Conveyors engaged',
@@ -105,7 +105,7 @@ export default function VaccineOverview() {
       icon: <ConnectWithoutContactIcon fontSize="large" />,
       bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',
       textColor: '#01579B',
-      trend: '↘ +0.4%', 
+      // trend: '↘ +0.4%', 
     },
   ];
 

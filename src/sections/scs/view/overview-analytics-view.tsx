@@ -14,11 +14,11 @@ import Filter from 'src/utils/Filter';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-       <Filter
+       {/* <Filter
         showState={false}
         showLga={true}
         showWard={true}
-         />
+         /> */}
 
       <Box mt={3}>
         <VaccineCard />

@@ -47,7 +47,7 @@ export function OverviewAnalyticsView() {
 
   return (
     <DashboardContent maxWidth="xl">
-      <Filter showState={true} showLga={false} showWard={false} />
+      {/* <Filter showState={true} showLga={false} showWard={false} /> */}
 
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
 
