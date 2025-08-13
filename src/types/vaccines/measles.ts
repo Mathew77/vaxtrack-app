@@ -14,9 +14,9 @@ export interface MeaslesVaccineData {
   diluentPhysicalStock: string; 
   diluentMismatchOutcome: string;
   diluentMismatchAdjustedValue: string; 
-  fiveMlSyringePhysicalStock: string; 
-  fiveMlSyringeMismatchOutcome: string;
-  fiveMlSyringeMismatchAdjustedValue: string; 
+  twoMlSyringePhysicalStock: string; 
+  twoMlSyringeMismatchOutcome: string;
+  twoMlSyringeMismatchAdjustedValue: string; 
   halfMlSyringePhysicalStock: string; 
   halfMlSyringeMismatchOutcome: string;
   halfMlSyringeMismatchAdjustedValue: string; 

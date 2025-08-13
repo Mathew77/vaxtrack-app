@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   TextField,
-  FormControl,
-  Grid,
-  Typography,
   Box,
+  Typography,
+  Grid,
+  FormControl,
   InputLabel,
   Select,
   MenuItem,
   SelectChangeEvent,
-} from '@mui/material';
-import { BcgVaccineData } from '../../types/vaccines/bcg';
-import { sectionBorderStyle } from 'src/utils/constants';
+} from "@mui/material";
+import { MalariaVaccineData } from "src/types/vaccines/malaria";
+import { sectionBorderStyle } from "src/utils/constants";
 
-interface ExtendedBcgVaccinesProps {
-  initialData?: Partial<BcgVaccineData>;
-  onDataChange: (data: BcgVaccineData) => void;
+interface ExtendedTdVaccineProps {
+  initialData?: Partial<MalariaVaccineData>;
+  onDataChange: (data: MalariaVaccineData) => void;
   hideTitle?: boolean;
-  isView?: boolean; 
+  isView: boolean;
 }
 
-export const BcgVaccines = ({
+export const MalariaVaccine = ({
   initialData = {},
   onDataChange,
   hideTitle = false,
-  isView = false, 
-}: ExtendedBcgVaccinesProps): JSX.Element => {
-  const defaultFormData: BcgVaccineData = {
+  isView = false
+}: ExtendedTdVaccineProps): JSX.Element => {
+  const defaultFormData: MalariaVaccineData = {
     physicalStock: '',
     avgDailyConsumption: '',
     expiryDate: '',
@@ -42,15 +42,15 @@ export const BcgVaccines = ({
     diluentPhysicalStock: '',
     diluentMismatchOutcome: '',
     diluentMismatchAdjustedValue: '',
-    twoMlSyringePhysicalStock: '',
-    twoMlSyringeMismatchOutcome: '',
-    twoMlSyringeMismatchAdjustedValue: '',
+    fiveMlSyringePhysicalStock: '',
+    fiveMlSyringeMismatchOutcome: '',
+    fiveMlSyringeMismatchAdjustedValue: '',
     halfMlSyringePhysicalStock: '',
     halfMlSyringeMismatchOutcome: '',
     halfMlSyringeMismatchAdjustedValue: '',
-};
+  };
 
-  const [formData, setFormData] = useState<BcgVaccineData>(() => ({
+  const [formData, setFormData] = useState<MalariaVaccineData>(() => ({
     ...defaultFormData,
     ...initialData,
   }));
@@ -103,47 +103,13 @@ export const BcgVaccines = ({
     return adjustedValue.toString();
   };
 
-  const calculate2mlSyringeMismatch = (antigenStock: string, syringeStock: string) => {
-
-    if (!antigenStock.trim() || !syringeStock.trim()) {
-      return { outcome: '', adjustedValue: '' };
-    }
-
-    const antigenValue = parseFloat(antigenStock) || 0;
-    const syringeValue = parseFloat(syringeStock) || 0;
-    const syringeCapacity = 20; 
-
-
-    if (antigenValue === 0 && syringeValue === 0) {
-      return { outcome: '', adjustedValue: '' };
-    }
-
-    const syringeTotalCapacity = syringeValue * syringeCapacity;
-    const adjustedValue = Math.round((antigenValue - syringeTotalCapacity) / syringeCapacity);
-
-    let outcome = '';
-    if (antigenValue > syringeTotalCapacity) {
-      outcome = 'deficit'; 
-    } else if (antigenValue < syringeTotalCapacity) {
-      outcome = 'excess'; 
-    } else {
-      outcome = 'none'; 
-    }
-
-    return {
-      outcome,
-      adjustedValue: adjustedValue.toString()
-    };
-  };
-  
-
-  const handleInputChange = (field: keyof BcgVaccineData) => (
+  const handleInputChange = (field: keyof MalariaVaccineData) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
   ) => {
     const value = event.target.value as string;
     setFormData((prev) => {
       const newFormData = { ...prev, [field]: value };
-  
+
       if (field === 'physicalStock' || field === 'avgDailyConsumption') {
         const psb = parseFloat(field === 'physicalStock' ? value : newFormData.physicalStock) || 0;
         const adc = parseFloat(field === 'avgDailyConsumption' ? value : newFormData.avgDailyConsumption) || 0;
@@ -169,21 +135,11 @@ export const BcgVaccines = ({
         newFormData.diluentMismatchOutcome = calculateMismatchOutcome(antigenStock, diluentStock);
         newFormData.diluentMismatchAdjustedValue = calculateDiluentMismatchAdjustedValue(antigenStock, diluentStock);
       }
-
-       if (field === 'physicalStock' || field === 'twoMlSyringePhysicalStock') {
-        const antigenStock = field === 'physicalStock' ? value : newFormData.physicalStock;
-        const syringeStock = field === 'twoMlSyringePhysicalStock' ? value : newFormData.twoMlSyringePhysicalStock;
-        
-        const syringeResult = calculate2mlSyringeMismatch(antigenStock, syringeStock);
-        newFormData.twoMlSyringeMismatchOutcome = syringeResult.outcome;
-        newFormData.twoMlSyringeMismatchAdjustedValue = syringeResult.adjustedValue;
-      }
-
-      onDataChange(newFormData);
+      
+      onDataChange(newFormData); 
       return newFormData;
     });
   };
-
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -201,12 +157,12 @@ export const BcgVaccines = ({
             width: '100%',
           }}
         >
-          BCG Vaccine
+          Malaria Vaccine
         </Typography>
       )}
-
+      
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>BCG Antigen</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Malaria Antigen</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -234,6 +190,7 @@ export const BcgVaccines = ({
               />
             </Box>
           </Grid>
+
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Days of Stock</InputLabel>
@@ -242,10 +199,11 @@ export const BcgVaccines = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
-                disabled={true} 
+                disabled={true}
               />
             </Box>
           </Grid>
+
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Earliest Expiry Dates</InputLabel>
@@ -306,18 +264,6 @@ export const BcgVaccines = ({
             </Box>
           </Grid>
 
-          {/* <Grid item xs={6}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel>Days of Stock</InputLabel>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={formData.daysOfStock}
-                onChange={handleInputChange('daysOfStock')}
-              />
-            </Box>
-          </Grid> */}
-
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel htmlFor="min-stock">Below Min Stock Level</InputLabel>
@@ -347,7 +293,6 @@ export const BcgVaccines = ({
                   onChange={handleInputChange('aboveMaxStock')}
                   inputProps={{ name: 'max-stock' }}
                   disabled={true}
-                  // sx={{ backgroundColor: '#f5f5f5' }} 
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -397,17 +342,17 @@ export const BcgVaccines = ({
       </Box>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>BCG Diluent</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>Malaria Diluent</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                variant="outlined"
                 placeholder="Physical Stock Balance"
                 value={formData.diluentPhysicalStock}
-                onChange={handleInputChange('diluentPhysicalStock')} 
+                onChange={handleInputChange('diluentPhysicalStock')}
                 disabled={isView}
               />
             </Box>
@@ -434,49 +379,48 @@ export const BcgVaccines = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Mismatch adjusted Value</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                variant="outlined"
                 value={formData.diluentMismatchAdjustedValue}
-                onChange={handleInputChange('diluentMismatchAdjustedValue')} 
+                onChange={handleInputChange('diluentMismatchAdjustedValue')}
                 disabled={true}
-                />
+              />
             </Box>
           </Grid>
         </Grid>
       </Box>
 
-      <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
+      {/* <Box sx={sectionBorderStyle}>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>5ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                variant="outlined"
                 placeholder="Physical Stock Balance"
-                value={formData.twoMlSyringePhysicalStock}
-                onChange={handleInputChange('twoMlSyringePhysicalStock')} 
+                value={formData.fiveMlSyringePhysicalStock}
+                onChange={handleInputChange('fiveMlSyringePhysicalStock')}
                 disabled={isView}
-                 />
+              />
             </Box>
           </Grid>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="2ml-mis-match">Mismatch outcome</InputLabel>
+              <InputLabel htmlFor="5ml-mis-match">Mismatch outcome</InputLabel>
               <FormControl fullWidth>
                 <Select
-                  id="2ml-mis-match"
-                  value={formData.twoMlSyringeMismatchOutcome}
-                  onChange={handleInputChange('twoMlSyringeMismatchOutcome')}
-                  inputProps={{ name: '2ml-mis-match' }}
-                  disabled={true}
+                  id="5ml-mis-match"
+                  value={formData.fiveMlSyringeMismatchOutcome}
+                  onChange={handleInputChange('fiveMlSyringeMismatchOutcome')}
+                  inputProps={{ name: '5ml-mis-match' }}
+                  disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
-                  <MenuItem value="deficit">2mlS Deficit</MenuItem>
-                  <MenuItem value="excess">2mlS Excess</MenuItem>
-                  <MenuItem value="none">None</MenuItem>
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -484,30 +428,30 @@ export const BcgVaccines = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Mismatch adjusted Value</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
-                value={formData.twoMlSyringeMismatchAdjustedValue}
-                onChange={handleInputChange('twoMlSyringeMismatchAdjustedValue')} 
-                disabled={true}
-                />
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={formData.fiveMlSyringeMismatchAdjustedValue}
+                onChange={handleInputChange('fiveMlSyringeMismatchAdjustedValue')}
+                disabled={isView}
+              />
             </Box>
           </Grid>
         </Grid>
-      </Box>
+      </Box> */}
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.05ml Syringe</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Physical Stock Balance</InputLabel>
-              <TextField 
-                fullWidth 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                variant="outlined"
                 placeholder="Physical Stock Balance"
                 value={formData.halfMlSyringePhysicalStock}
-                onChange={handleInputChange('halfMlSyringePhysicalStock')} 
+                onChange={handleInputChange('halfMlSyringePhysicalStock')}
                 disabled={isView}
               />
             </Box>
@@ -533,11 +477,11 @@ export const BcgVaccines = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <InputLabel>Mismatch adjusted Value</InputLabel>
-              <TextField 
-                fullWidth 
+              <TextField
+                fullWidth
                 variant="outlined"
                 value={formData.halfMlSyringeMismatchAdjustedValue}
-                onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')} 
+                onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
                 disabled={isView}
               />
             </Box>

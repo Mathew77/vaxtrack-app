@@ -56,6 +56,44 @@ export const MenAVaccine = ({
        return prev;
      });
    }, [initialData]);
+
+   const calculateMismatchOutcome = (antigenStock: string, diluentStock: string): string => {
+  
+    if (!antigenStock.trim() || !diluentStock.trim()) {
+      return '';
+    }
+
+    const antigenValue = parseFloat(antigenStock) || 0;
+    const diluentValue = parseFloat(diluentStock) || 0;
+
+     if (antigenValue === 0 && diluentValue === 0) {
+      return '';
+    }
+
+    if (diluentValue === antigenValue) {
+      return 'none'; 
+    } else if (diluentValue > antigenValue) {
+      return 'excess'; 
+    } else {
+      return 'deficit'; 
+    }
+  };
+
+  const calculateDiluentMismatchAdjustedValue = (antigenStock: string, diluentStock: string): string => {
+    if (!antigenStock.trim() || !diluentStock.trim()) {
+      return '';
+    }
+
+    const antigenValue = parseFloat(antigenStock) || 0;
+    const diluentValue = parseFloat(diluentStock) || 0;
+
+    if (antigenValue === 0 && diluentValue === 0) {
+      return '';
+    }
+
+    const adjustedValue = antigenValue - diluentValue;
+    return adjustedValue.toString();
+  };
  
    const handleInputChange = (field: keyof MenAVaccineData) => (
      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
@@ -63,6 +101,33 @@ export const MenAVaccine = ({
      const value = event.target.value as string;
      setFormData((prev) => {
        const newFormData = { ...prev, [field]: value };
+
+        if (field === 'physicalStock' || field === 'avgDailyConsumption') {
+          const psb = parseFloat(field === 'physicalStock' ? value : newFormData.physicalStock) || 0;
+          const adc = parseFloat(field === 'avgDailyConsumption' ? value : newFormData.avgDailyConsumption) || 0;
+          
+          if (adc > 0) {
+          const daysOfStock = Math.floor(psb / adc);
+          newFormData.daysOfStock = daysOfStock.toString();
+          
+      
+          newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
+          newFormData.aboveMaxStock = daysOfStock > 70 ? 'yes' : 'no';
+          } else {
+            newFormData.daysOfStock = '';
+            newFormData.belowMinStock = '';
+            newFormData.aboveMaxStock = '';
+          }
+        }
+
+        if (field === 'physicalStock' || field === 'diluentPhysicalStock') {
+          const antigenStock = field === 'physicalStock' ? value : newFormData.physicalStock;
+          const diluentStock = field === 'diluentPhysicalStock' ? value : newFormData.diluentPhysicalStock;
+          
+          newFormData.diluentMismatchOutcome = calculateMismatchOutcome(antigenStock, diluentStock);
+          newFormData.diluentMismatchAdjustedValue = calculateDiluentMismatchAdjustedValue(antigenStock, diluentStock);
+        }
+        
        onDataChange(newFormData);
        return newFormData;
      });
@@ -126,7 +191,7 @@ export const MenAVaccine = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>
@@ -162,7 +227,7 @@ export const MenAVaccine = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 
-              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is antigen in VVM stage2 ?</InputLabel>
 
               <FormControl fullWidth>
                 <Select
@@ -174,8 +239,9 @@ export const MenAVaccine = ({
                   }}
                   disabled={isView}
                 >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="">Select</MenuItem>
+                  <MenuItem value="stage-1">Stage 1</MenuItem>
+                  <MenuItem value="stage-2">Stage 2</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -205,7 +271,7 @@ export const MenAVaccine = ({
                   inputProps={{
                     name: 'min-stock',
                   }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -225,7 +291,7 @@ export const MenAVaccine = ({
                   inputProps={{
                     name: 'max-stock',
                   }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -298,11 +364,12 @@ export const MenAVaccine = ({
                   value={formData.diluentMismatchOutcome}
                   onChange={handleInputChange('diluentMismatchOutcome')}
                   inputProps={{ name: 'diluent-mis-match' }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="">Select</MenuItem>
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="deficit">Deficit Diluent</MenuItem>
+                  <MenuItem value="excess">Excess Diluent</MenuItem>
+                  <MenuItem value="none">None</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -315,7 +382,7 @@ export const MenAVaccine = ({
                 variant="outlined" 
                 value={formData.diluentMismatchAdjustedValue}
                 onChange={handleInputChange('diluentMismatchAdjustedValue')}
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>

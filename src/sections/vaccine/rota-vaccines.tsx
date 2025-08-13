@@ -29,6 +29,9 @@ export const RotaVaccine = ({
     qtyReceived: '',
     // closingBalance: '',
     // postLmdDos: '',
+    halfMlSyringePhysicalStock: '',
+    halfMlSyringeMismatchOutcome: '',
+    halfMlSyringeMismatchAdjustedValue: '',
     dropperPhysicalStock: '', 
     dropperMismatchOutcome: '',
     dropperMismatchAdjustedValue: '', 
@@ -48,13 +51,34 @@ export const RotaVaccine = ({
         return prev;
       });
     }, [initialData]);
+
   
     const handleInputChange = (field: keyof RotaVaccineData) => (
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
     ) => {
       const value = event.target.value as string;
       setFormData((prev) => {
-        const newFormData = { ...prev, [field]: value };
+      const newFormData = { ...prev, [field]: value };
+
+      if (field === 'physicalStock' || field === 'avgDailyConsumption') {
+        const psb = parseFloat(field === 'physicalStock' ? value : newFormData.physicalStock) || 0;
+        const adc = parseFloat(field === 'avgDailyConsumption' ? value : newFormData.avgDailyConsumption) || 0;
+        
+        if (adc > 0) {
+        const daysOfStock = Math.floor(psb / adc);
+        newFormData.daysOfStock = daysOfStock.toString();
+        
+    
+        newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
+        newFormData.aboveMaxStock = daysOfStock > 70 ? 'yes' : 'no';
+        } else {
+          newFormData.daysOfStock = '';
+          newFormData.belowMinStock = '';
+          newFormData.aboveMaxStock = '';
+        }
+      }
+
+
         onDataChange(newFormData);
         return newFormData;
       });
@@ -118,7 +142,7 @@ export const RotaVaccine = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>
@@ -154,7 +178,7 @@ export const RotaVaccine = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 
-              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is antigen in VVM stage2 ?</InputLabel>
 
               <FormControl fullWidth>
                 <Select
@@ -166,8 +190,9 @@ export const RotaVaccine = ({
                   }}
                   disabled={isView}
                 >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="">Select</MenuItem>
+                  <MenuItem value="stage-1">Stage 1</MenuItem>
+                  <MenuItem value="stage-2">Stage 2</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -197,7 +222,7 @@ export const RotaVaccine = ({
                   inputProps={{
                     name: 'min-stock',
                   }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -217,7 +242,7 @@ export const RotaVaccine = ({
                   inputProps={{
                     name: 'max-stock',
                   }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -264,6 +289,55 @@ export const RotaVaccine = ({
           </Grid> */}
         </Grid>
       </Box>
+
+       <Box sx={sectionBorderStyle}>
+          <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <InputLabel>Physical Stock Balance</InputLabel>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Physical Stock Balance"
+                  value={formData.halfMlSyringePhysicalStock}
+                  onChange={handleInputChange('halfMlSyringePhysicalStock')}
+                  disabled={isView}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <InputLabel htmlFor="0.5ml-mis-match">Mismatch outcome</InputLabel>
+                <FormControl fullWidth>
+                  <Select
+                    id="0.5ml-mis-match"
+                    value={formData.halfMlSyringeMismatchOutcome}
+                    onChange={handleInputChange('halfMlSyringeMismatchOutcome')}
+                    inputProps={{ name: '0.5ml-mis-match' }}
+                    disabled={isView}
+                  >
+                    <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="yes">Yes</MenuItem>
+                    <MenuItem value="no">No</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <InputLabel>Mismatch adjusted Value</InputLabel>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  value={formData.halfMlSyringeMismatchAdjustedValue}
+                  onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
+                  disabled={isView}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
 
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>Dropper</Typography>

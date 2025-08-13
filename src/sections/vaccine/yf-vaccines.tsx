@@ -43,9 +43,9 @@ export const YfVaccine = ({
     diluentPhysicalStock: '',
     diluentMismatchOutcome: '',
     diluentMismatchAdjustedValue: '',
-    twoMlSyringePhysicalStock: '',
-    twoMlSyringeMismatchOutcome: '',
-    twoMlSyringeMismatchAdjustedValue: '',
+    fiveMlSyringePhysicalStock: '',
+    fiveMlSyringeMismatchOutcome: '',
+    fiveMlSyringeMismatchAdjustedValue: '',
     halfMlSyringePhysicalStock: '',
     halfMlSyringeMismatchOutcome: '',
     halfMlSyringeMismatchAdjustedValue: '',
@@ -65,6 +65,44 @@ export const YfVaccine = ({
         return prev;
       });
     }, [initialData]);
+
+    const calculateMismatchOutcome = (antigenStock: string, diluentStock: string): string => {
+  
+    if (!antigenStock.trim() || !diluentStock.trim()) {
+        return '';
+      }
+
+      const antigenValue = parseFloat(antigenStock) || 0;
+      const diluentValue = parseFloat(diluentStock) || 0;
+
+      if (antigenValue === 0 && diluentValue === 0) {
+        return '';
+      }
+
+      if (diluentValue === antigenValue) {
+        return 'none'; 
+      } else if (diluentValue > antigenValue) {
+        return 'excess'; 
+      } else {
+        return 'deficit'; 
+      }
+    };
+
+    const calculateDiluentMismatchAdjustedValue = (antigenStock: string, diluentStock: string): string => {
+    if (!antigenStock.trim() || !diluentStock.trim()) {
+      return '';
+    }
+
+    const antigenValue = parseFloat(antigenStock) || 0;
+    const diluentValue = parseFloat(diluentStock) || 0;
+
+    if (antigenValue === 0 && diluentValue === 0) {
+      return '';
+    }
+
+    const adjustedValue = antigenValue - diluentValue;
+    return adjustedValue.toString();
+  };
   
     const handleInputChange = (field: keyof YFVaccineData) => (
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
@@ -72,6 +110,34 @@ export const YfVaccine = ({
       const value = event.target.value as string;
       setFormData((prev) => {
         const newFormData = { ...prev, [field]: value };
+
+          if (field === 'physicalStock' || field === 'avgDailyConsumption') {
+          const psb = parseFloat(field === 'physicalStock' ? value : newFormData.physicalStock) || 0;
+          const adc = parseFloat(field === 'avgDailyConsumption' ? value : newFormData.avgDailyConsumption) || 0;
+          
+          if (adc > 0) {
+          const daysOfStock = Math.floor(psb / adc);
+          newFormData.daysOfStock = daysOfStock.toString();
+          
+      
+          newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
+          newFormData.aboveMaxStock = daysOfStock > 70 ? 'yes' : 'no';
+          } else {
+            newFormData.daysOfStock = '';
+            newFormData.belowMinStock = '';
+            newFormData.aboveMaxStock = '';
+          }
+        }
+
+        if (field === 'physicalStock' || field === 'diluentPhysicalStock') {
+          const antigenStock = field === 'physicalStock' ? value : newFormData.physicalStock;
+          const diluentStock = field === 'diluentPhysicalStock' ? value : newFormData.diluentPhysicalStock;
+          
+          newFormData.diluentMismatchOutcome = calculateMismatchOutcome(antigenStock, diluentStock);
+          newFormData.diluentMismatchAdjustedValue = calculateDiluentMismatchAdjustedValue(antigenStock, diluentStock);
+        }
+
+    
         onDataChange(newFormData);
         return newFormData;
       });
@@ -136,7 +202,7 @@ export const YfVaccine = ({
                 variant="outlined" 
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>
@@ -172,7 +238,7 @@ export const YfVaccine = ({
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 
-              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is antigen in VVM stage2 ?</InputLabel>
 
               <FormControl fullWidth>
                 <Select
@@ -184,8 +250,9 @@ export const YfVaccine = ({
                   }}
                   disabled={isView}
                 >
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="">Select</MenuItem>
+                  <MenuItem value="stage-1">Stage 1</MenuItem>
+                  <MenuItem value="stage-2">Stage 2</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -215,7 +282,7 @@ export const YfVaccine = ({
                   inputProps={{
                     name: 'min-stock',
                   }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -235,7 +302,7 @@ export const YfVaccine = ({
                   inputProps={{
                     name: 'max-stock',
                   }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="yes">Yes</MenuItem>
                   <MenuItem value="no">No</MenuItem>
@@ -308,11 +375,12 @@ export const YfVaccine = ({
                   value={formData.diluentMismatchOutcome}
                   onChange={handleInputChange('diluentMismatchOutcome')}
                   inputProps={{ name: 'diluent-mis-match' }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="">Select</MenuItem>
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="deficit">Deficit Diluent</MenuItem>
+                  <MenuItem value="excess">Excess Diluent</MenuItem>
+                  <MenuItem value="none">None</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -325,7 +393,7 @@ export const YfVaccine = ({
                 variant="outlined" 
                 value={formData.diluentMismatchAdjustedValue}
                 onChange={handleInputChange('diluentMismatchAdjustedValue')} 
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>
@@ -333,7 +401,7 @@ export const YfVaccine = ({
       </Box>
 
       <Box sx={sectionBorderStyle}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>2ml Syringe</Typography>
+        <Typography variant="subtitle1" sx={{ mb: 2 }}>5ml Syringe</Typography>
         <Grid container spacing={3}>
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -342,21 +410,21 @@ export const YfVaccine = ({
                   fullWidth 
                   variant="outlined" 
                   placeholder="Physical Stock Balance"
-                  value={formData.twoMlSyringePhysicalStock}
-                  onChange={handleInputChange('twoMlSyringePhysicalStock')} 
+                  value={formData.fiveMlSyringePhysicalStock}
+                  onChange={handleInputChange('fiveMlSyringePhysicalStock')} 
                   disabled={isView}
                     />
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <InputLabel htmlFor="2ml-mis-match">Mismatch outcome</InputLabel>
+                <InputLabel htmlFor="5ml-mis-match">Mismatch outcome</InputLabel>
                 <FormControl fullWidth>
                   <Select
-                    id="2ml-mis-match"
-                    value={formData.twoMlSyringeMismatchOutcome}
-                    onChange={handleInputChange('twoMlSyringeMismatchOutcome')}
-                    inputProps={{ name: '2ml-mis-match' }}
+                    id="5ml-mis-match"
+                    value={formData.fiveMlSyringeMismatchOutcome}
+                    onChange={handleInputChange('fiveMlSyringeMismatchOutcome')}
+                    inputProps={{ name: '5ml-mis-match' }}
                     disabled={isView}
                   >
                     <MenuItem value="">Select</MenuItem>
@@ -372,8 +440,8 @@ export const YfVaccine = ({
                 <TextField 
                   fullWidth 
                   variant="outlined" 
-                  value={formData.twoMlSyringeMismatchAdjustedValue}
-                  onChange={handleInputChange('twoMlSyringeMismatchAdjustedValue')} 
+                  value={formData.fiveMlSyringeMismatchAdjustedValue}
+                  onChange={handleInputChange('fiveMlSyringeMismatchAdjustedValue')} 
                   disabled={isView}
                   />
               </Box>

@@ -1,4 +1,4 @@
-export interface RotaVaccineData {
+export interface MalariaVaccineData {
     physicalStock: string;
     avgDailyConsumption: string;
     expiryDate: string;
@@ -11,10 +11,14 @@ export interface RotaVaccineData {
     qtyReceived: string;
     // closingBalance: string;
     // postLmdDos: string;
-    halfMlSyringePhysicalStock: string;
+    diluentPhysicalStock: string; 
+    diluentMismatchOutcome: string;
+    diluentMismatchAdjustedValue: string;
+    fiveMlSyringePhysicalStock: string; 
+    fiveMlSyringeMismatchOutcome: string;
+    fiveMlSyringeMismatchAdjustedValue: string;
+    halfMlSyringePhysicalStock: string; 
     halfMlSyringeMismatchOutcome: string;
     halfMlSyringeMismatchAdjustedValue: string;
-    dropperPhysicalStock: string; 
-    dropperMismatchOutcome: string;
-    dropperMismatchAdjustedValue: string; 
   }
+  

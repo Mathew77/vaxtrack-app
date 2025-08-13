@@ -64,7 +64,25 @@ export const BopvVaccine = ({
   ) => {
     const value = event.target.value as string;
     setFormData((prev) => {
-      const newFormData = { ...prev, [field]: value };
+    const newFormData = { ...prev, [field]: value };
+    
+    if (field === 'physicalStock' || field === 'avgDailyConsumption') {
+      const psb = parseFloat(field === 'physicalStock' ? value : newFormData.physicalStock) || 0;
+      const adc = parseFloat(field === 'avgDailyConsumption' ? value : newFormData.avgDailyConsumption) || 0;
+      
+      if (adc > 0) {
+      const daysOfStock = Math.floor(psb / adc);
+      newFormData.daysOfStock = daysOfStock.toString();
+      
+  
+      newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
+      newFormData.aboveMaxStock = daysOfStock > 70 ? 'yes' : 'no';
+      } else {
+        newFormData.daysOfStock = '';
+        newFormData.belowMinStock = '';
+        newFormData.aboveMaxStock = '';
+      }
+    }
       onDataChange(newFormData); 
       return newFormData;
     });
@@ -129,7 +147,7 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>
@@ -164,7 +182,7 @@ export const BopvVaccine = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">Is the Antigen in VVM2</InputLabel>
+              <InputLabel htmlFor="vvm2">Is antigen in VVM stage2 ?</InputLabel>
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
@@ -174,8 +192,8 @@ export const BopvVaccine = ({
                   disabled={isView}
                 >
                   <MenuItem value="">Select</MenuItem>
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
+                  <MenuItem value="stage-1">Stage 1</MenuItem>
+                  <MenuItem value="stage-2">Stage 2</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -203,7 +221,7 @@ export const BopvVaccine = ({
                   value={formData.belowMinStock}
                   onChange={handleInputChange('belowMinStock')}
                   inputProps={{ name: 'min-stock' }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -222,7 +240,7 @@ export const BopvVaccine = ({
                   value={formData.aboveMaxStock}
                   onChange={handleInputChange('aboveMaxStock')}
                   inputProps={{ name: 'max-stock' }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>

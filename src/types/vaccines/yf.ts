@@ -14,9 +14,9 @@ export interface YFVaccineData {
     diluentPhysicalStock: string; 
     diluentMismatchOutcome: string;
     diluentMismatchAdjustedValue: string; 
-    twoMlSyringePhysicalStock: string; 
-    twoMlSyringeMismatchOutcome: string;
-    twoMlSyringeMismatchAdjustedValue: string;
+    fiveMlSyringePhysicalStock: string; 
+    fiveMlSyringeMismatchOutcome: string;
+    fiveMlSyringeMismatchAdjustedValue: string;
     halfMlSyringePhysicalStock: string;
     halfMlSyringeMismatchOutcome: string;
     halfMlSyringeMismatchAdjustedValue: string; 

@@ -29,6 +29,7 @@ import { IpvVaccine } from '../ipv-vaccines';
 import { PcvVaccine } from '../pcv-vaccines';
 import { TdVaccine } from '../td-vaccines';
 import { ColdChainStatus } from '../cold-chain';
+import { MalariaVaccine } from '../malaria-vaccines';
 
 interface VaccineOption {
   value: string;
@@ -53,7 +54,7 @@ const convertVaccineStatusToString = (status: string | number | undefined): stri
 
 const vaccineOptions: VaccineOption[] = [
   { value: 'bcg', label: 'BCG Vaccine', component: BcgVaccines },
-  { value: 'measles', label: 'Measles Vaccine', component: MeaslesVaccine },
+  { value: 'measles', label: 'Measles & Rubella Vaccine', component: MeaslesVaccine },
   { value: 'yf', label: 'YF Vaccine', component: YfVaccine },
   { value: 'menA', label: 'MenA Vaccine', component: MenAVaccine },
   { value: 'rota', label: 'Rota Vaccine', component: RotaVaccine },
@@ -63,6 +64,7 @@ const vaccineOptions: VaccineOption[] = [
   { value: 'penta', label: 'Penta Vaccine', component: PentaVaccine },
   { value: 'ipv', label: 'IPV Vaccine', component: IpvVaccine },
   { value: 'pcv', label: 'PCV Vaccine', component: PcvVaccine },
+  { value: 'malaria', label: 'Malaria Vaccine', component: MalariaVaccine},
   { value: 'td', label: 'Td Vaccine', component: TdVaccine },
   { value: 'cold-chain', label: 'Cold Chain Status', component: ColdChainStatus },
 ];
