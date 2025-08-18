@@ -290,7 +290,7 @@ export const RotaVaccine = ({
         </Grid>
       </Box>
 
-       <Box sx={sectionBorderStyle}>
+       {/* <Box sx={sectionBorderStyle}>
           <Typography variant="subtitle1" sx={{ mb: 2 }}>0.5ml Syringe</Typography>
           <Grid container spacing={3}>
             <Grid item xs={6}>
@@ -337,7 +337,7 @@ export const RotaVaccine = ({
               </Box>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
 
       <Box sx={sectionBorderStyle}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>Dropper</Typography>

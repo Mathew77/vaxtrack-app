@@ -87,7 +87,7 @@ export const ColdChainStatus = ({
     }
   };
 
-  console.log('ColdChainStatus formData before render:', formData);
+  // console.log('ColdChainStatus formData before render:', formData);
 
   return (
      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

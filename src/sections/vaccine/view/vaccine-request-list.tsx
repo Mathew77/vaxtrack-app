@@ -14,6 +14,7 @@ import { useFetchRequest, useDeleteVaccineRequest, useFetchUsers, useFetchEHF } 
 import { VaccineFormType } from 'src/hooks/apis/ehf/ehf-type';
 import { toast } from 'react-toastify';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
+import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 
 interface VaccineRequestTableRow {
   id?: number;
@@ -78,10 +79,12 @@ function a11yProps(index: number) {
 
 const statusDisplayMap: { [key: number]: string } = {
   0: 'Vaccine Requested by EHF',
-  1: 'Vaccine Approved by SLWG',
-  2: 'Vaccine Declined by SLWG',
-  3: 'Vaccine Picked by ThreePL',
-  4: 'Order Completed',
+  1: 'Vaccine Approved by LCS',
+  2: 'Vaccine Declined by LCS', 
+  3: 'Vaccine Approved by SLWG',
+  4: 'Vaccine Declined by SLWG',
+  5: 'Vaccine Picked by ThreePL',
+  6: 'Order Completed',
 };
 
 const VaccineRequestList: React.FC = () => {
@@ -92,6 +95,7 @@ const VaccineRequestList: React.FC = () => {
   const { data: users = [] } = useFetchUsers();
   const { data: ehfs = [] } = useFetchEHF();
   const { data: scs = [] } = useFetchScs();
+  const { data: lcs = [] } = useFetchLcs();
 
   const [value, setValue] = useState<number>(0);
 
@@ -106,11 +110,13 @@ const VaccineRequestList: React.FC = () => {
   const isSLWG = userRole === 'slwg';
   const isThreePL = userRole === 'threepl';
   const isSSC = userRole === 'scs';
+  const isEHF = userRole === 'ehf';
+  const isLCS = userRole === 'lcs';
 
-  console.log('User Role:', userRole);
-  console.log('User Role:', isSLWG);
-  console.log('User Role:', isThreePL);
-  console.log('User Role:', isSSC);
+  // console.log('User Role:', userRole);
+  // console.log('User Role:', isSLWG);
+  // console.log('User Role:', isThreePL);
+  // console.log('User Role:', isSSC);
 
   // Get SCS list from session storage
   const userScsList = useMemo(() => {
@@ -136,7 +142,40 @@ const VaccineRequestList: React.FC = () => {
     return userScs?.stat_id || null;
   }, [userScsId, scs]);
 
-  const allowedEhfIds = useMemo(() => {
+  const userLcsList = useMemo(() => {
+    try {
+      const lcsListData = sessionStorage.getItem('lcs_list');
+      if (lcsListData) {
+        const parsed = JSON.parse(lcsListData);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      return [];
+    } catch (error) {
+      console.error('Error parsing lcs_list from session storage:', error);
+      return [];
+    }
+  }, []);
+
+  const userLcsId = userLcsList[0]?.toString() || '';
+
+  const userLcsState = useMemo(() => {
+    if (!userLcsId || !lcs.length) return null;
+    
+    const userLcs = lcs.find((lcsItem: any) => lcsItem.id?.toString() === userLcsId?.toString());
+    return userLcs?.stat_id || null;
+  }, [userLcsId, lcs]);
+
+  // const allowedEhfIds = useMemo(() => {
+  //   if (isSLWG && userScsState) {
+  //     return ehfs
+  //       .filter((ehf: any) => ehf.state === userScsState)
+  //       .map((ehf: any) => ehf.id?.toString())
+  //       .filter((id: any): id is string => !!id);
+  //   }
+  //   return [];
+  // }, [isSLWG, userScsState, ehfs]);
+
+  const allowedSlwgEhfIds = useMemo(() => {
     if (isSLWG && userScsState) {
       return ehfs
         .filter((ehf: any) => ehf.state === userScsState)
@@ -145,6 +184,26 @@ const VaccineRequestList: React.FC = () => {
     }
     return [];
   }, [isSLWG, userScsState, ehfs]);
+
+  const allowedLcsEhfIds = useMemo(() => {
+    if (isLCS && userLcsState) {
+      return ehfs
+        .filter((ehf: any) => ehf.state === userLcsState)
+        .map((ehf: any) => ehf.id?.toString())
+        .filter((id: any): id is string => !!id);
+    }
+    return [];
+  }, [isLCS, userLcsState, ehfs]);
+
+  const allowedScsEhfIds = useMemo(() => {
+    if (isSSC && userScsState) {
+      return ehfs
+        .filter((ehf: any) => ehf.state === userScsState)
+        .map((ehf: any) => ehf.id?.toString())
+        .filter((id: any): id is string => !!id);
+    }
+    return [];
+  }, [isSSC, userScsState, ehfs]);
 
   const userEhfList = useMemo(() => {
     try {
@@ -165,30 +224,56 @@ const VaccineRequestList: React.FC = () => {
   const filteredVaccineRequests = useMemo(() => {
     let baseFilteredRequests: VaccineFormType[] = [];
 
-    if (isSLWG) {
-      if (allowedEhfIds.length === 0) return [];
+    if (isLCS) {
+      if (allowedLcsEhfIds.length === 0) return [];
+      baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
+        const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
+        return allowedLcsEhfIds.includes(String(request.ehf_id)) && 
+          (statusNumber === 0 || statusNumber === 1 || statusNumber === 2 || 
+            statusNumber === 3 || statusNumber === 4 || statusNumber === 5 || statusNumber === 6);
+      });
+    } else if (isSLWG) {
+      if (allowedSlwgEhfIds.length === 0) return [];
+      baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
+        const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
+        return allowedSlwgEhfIds.includes(String(request.ehf_id)) && 
+          (statusNumber === 1 || statusNumber === 3 || statusNumber === 4 || 
+            statusNumber === 5 || statusNumber === 6);
+      });
+    } else if (isSSC) {
+      if (allowedScsEhfIds.length === 0) return [];
+      baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
+        const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
+        return allowedScsEhfIds.includes(String(request.ehf_id)) && 
+              (statusNumber === 3 || statusNumber === 4 || statusNumber === 5 || statusNumber === 6);
+      });
+    } else if (isThreePL) {
+      baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
+        const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
+        return statusNumber === 3 || statusNumber === 5 || statusNumber === 6;
+      });
+    } else if (isEHF) {
+      if (!userEhfId) return [];
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => 
-        allowedEhfIds.includes(String(request.ehf_id))
+        String(request.ehf_id) === userEhfId
       );
     } else {
-      if (!userEhfId) {
-        baseFilteredRequests = vaccineRequests;
-      } else {
-        baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => 
-          String(request.ehf_id) === userEhfId
-        );
-      }
-    }
-
-    if (isThreePL || isSSC) {
-      return baseFilteredRequests.filter((request: VaccineFormType) => {
-        const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
-        return statusNumber === 1 || statusNumber === 3;
-      });
+      baseFilteredRequests = vaccineRequests;
     }
 
     return baseFilteredRequests;
-  }, [vaccineRequests, isSLWG, allowedEhfIds, userEhfId, isThreePL, isSSC]);
+  }, [
+    vaccineRequests, 
+    isLCS, 
+    isSLWG, 
+    isSSC, 
+    isThreePL, 
+    isEHF, 
+    allowedLcsEhfIds, 
+    allowedSlwgEhfIds, 
+    allowedScsEhfIds, 
+    userEhfId
+  ]);
 
   const transformedVaccineRequests: VaccineRequestTableRow[] = useMemo(() => {
     return filteredVaccineRequests.map((request: VaccineFormType) => {
@@ -219,8 +304,8 @@ const VaccineRequestList: React.FC = () => {
     });
   };
 
-  const handleDelete = (data: VaccineRequestTableRow) => {
-    if (data.id) {
+   const handleDelete = (data: VaccineRequestTableRow) => {
+    if ((isEHF) && data.id) {
       deleteVaccineRequest.mutate(data.id, {
         onSuccess: () => {
           toast.success('Vaccine request deleted successfully');
@@ -229,6 +314,8 @@ const VaccineRequestList: React.FC = () => {
           toast.error('Failed to delete vaccine request');
         },
       });
+    } else {
+      toast.error('You are not authorized to delete this request or the request cannot be deleted');
     }
   };
 
@@ -265,18 +352,42 @@ const VaccineRequestList: React.FC = () => {
     []
   );
 
-  const actionMenuItems: ActionMenuItem<VaccineRequestTableRow>[] = [
-    {
-      display: "View / Approve",
-      handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />,
-    },
-    {
-      display: "Delete",
-      handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
-    },
-  ];
+  const actionMenuItems: ActionMenuItem<VaccineRequestTableRow>[] = useMemo(() => {
+    const items: ActionMenuItem<VaccineRequestTableRow>[] = [];
+
+    if (isEHF) {
+      items.push({
+        display: "View",
+        handleClick: handleView,
+        icon: <FaEye style={{ color: "#1976D2" }} />,
+      });
+      items.push({
+        display: "Delete",
+        handleClick: handleDelete,
+        icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
+      });
+    } else if (isSLWG) {
+      items.push({
+        display: "View / Approve",
+        handleClick: handleView,
+        icon: <FaEye style={{ color: "#1976D2" }} />,
+      });
+    } else if (isThreePL) {
+      items.push({
+        display: "View",
+        handleClick: handleView,
+        icon: <FaEye style={{ color: "#1976D2" }} />,
+      });
+    } else {
+      items.push({
+        display: "View",
+        handleClick: handleView,
+        icon: <FaEye style={{ color: "#1976D2" }} />,
+      });
+    }
+
+    return items;
+  }, [isEHF, isSLWG, isThreePL]);
 
   return (
     <>

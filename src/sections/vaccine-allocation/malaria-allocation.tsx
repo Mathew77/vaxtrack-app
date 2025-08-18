@@ -4,52 +4,52 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { MeaslesAllocationData } from 'src/types/allocations/measles';
+import { MalariaAllocationData } from 'src/types/allocations/malaria';
 
-interface ExtendedMeaslesAllocationProps {
-  initialData?: Partial<MeaslesAllocationData>;
-  onDataChange: (data: MeaslesAllocationData) => void;
+interface ExtendedMalariaAllocationProps {
+  initialData?: Partial<MalariaAllocationData>;
+  onDataChange: (data: MalariaAllocationData) => void;
   status?: number; 
   key?: string;
   isView?: boolean;
   isUpdate?: boolean;
 }
 
-export const MeaslesAllocation = ({
+export const MalariaAllocation = ({
   initialData = {},
   onDataChange,
   status = 1,
   isView = false,
   isUpdate = false,
-}: ExtendedMeaslesAllocationProps): JSX.Element => {
-  const defaultFormData: MeaslesAllocationData = {
-    measlesVaccineAllocated: '',
-    measlesDiluentAllocated: '',
-    measles05mlSyringeAllocated: '',
-    measles2mlSyringeAllocated: '',
-    measlesVaccineRequested: '',
-    measlesDiluentRequested: '',
-    measles05mlSyringeRequested: '',
-    measles2mlSyringeRequested: '',
-    measlesVaccineReturned: '',
-    measlesDiluentReturned: '',
-    measles05mlSyringeReturned: '',
-    measles2mlSyringeReturned: '',
-    measlesVaccineReceived: '',
-    measlesDiluentReceived: '',
-    measles05mlSyringeReceived: '',
-    measles2mlSyringeReceived: '',
-    measlesVaccineConveyorDelivered: '',
-    measlesDiluentConveyorDelivered: '',
-    measles05mlSyringeConveyorDelivered: '',
-    measles2mlSyringeConveyorDelivered: '',
-    measlesVaccineConveyorReturned: '',
-    measlesDiluentConveyorReturned: '',
-    measles05mlSyringeConveyorReturned: '',
-    measles2mlSyringeConveyorReturned: '',
+}: ExtendedMalariaAllocationProps): JSX.Element => {
+  const defaultFormData: MalariaAllocationData = {
+    malariaVaccineAllocated: '',
+    malariaDiluentAllocated: '',
+    malaria05mlSyringeAllocated: '',
+    malaria2mlSyringeAllocated: '',
+    malariaVaccineRequested: '',
+    malariaDiluentRequested: '',
+    malaria05mlSyringeRequested: '',
+    malaria2mlSyringeRequested: '',
+    malariaVaccineReturned: '',
+    malariaDiluentReturned: '',
+    malaria05mlSyringeReturned: '',
+    malaria2mlSyringeReturned: '',
+    malariaVaccineReceived: '',
+    malariaDiluentReceived: '',
+    malaria05mlSyringeReceived: '',
+    malaria2mlSyringeReceived: '',
+    malariaVaccineConveyorDelivered: '',
+    malariaDiluentConveyorDelivered: '',
+    malaria05mlSyringeConveyorDelivered: '',
+    malaria2mlSyringeConveyorDelivered: '',
+    malariaVaccineConveyorReturned: '',
+    malariaDiluentConveyorReturned: '',
+    malaria05mlSyringeConveyorReturned: '',
+    malaria2mlSyringeConveyorReturned: '',
   };
 
-  const [formData, setFormData] = useState<MeaslesAllocationData>(() => ({
+  const [formData, setFormData] = useState<MalariaAllocationData>(() => ({
     ...defaultFormData,
     ...initialData,
   }));
@@ -103,7 +103,7 @@ export const MeaslesAllocation = ({
           width: '100%',
         }}
       >
-        Measles & Rubella Allocation
+        Malaria Allocation
       </Typography>
 
       <Accordion>
@@ -136,17 +136,17 @@ export const MeaslesAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Measles & Rubella Vaccine Requested by UHF
+                Malaria Vaccine Requested by UHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Vaccine</Typography>
+                    <Typography>Malaria Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesVaccineRequested"
-                      value={formData.measlesVaccineRequested}
+                      name="malariaVaccineRequested"
+                      value={formData.malariaVaccineRequested}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFRequest}
                       required={canEditUHFRequest}
@@ -155,12 +155,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Diluent</Typography>
+                    <Typography>Malaria Diluent</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesDiluentRequested"
-                      value={formData.measlesDiluentRequested}
+                      name="malariaDiluentRequested"
+                      value={formData.malariaDiluentRequested}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFRequest}
                       required={canEditUHFRequest}
@@ -169,12 +169,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 0.5ml Syringe</Typography>
+                    <Typography>Malaria 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles05mlSyringeRequested"
-                      value={formData.measles05mlSyringeRequested}
+                      name="malaria05mlSyringeRequested"
+                      value={formData.malaria05mlSyringeRequested}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFRequest}
                       required={canEditUHFRequest}
@@ -183,12 +183,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 2ml Syringe</Typography>
+                    <Typography>Malaria 2ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles2mlSyringeRequested"
-                      value={formData.measles2mlSyringeRequested}
+                      name="malaria2mlSyringeRequested"
+                      value={formData.malaria2mlSyringeRequested}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFRequest}
                       required={canEditUHFRequest}
@@ -209,17 +209,17 @@ export const MeaslesAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Measles & Rubella Vaccine Allocated by EHF
+                Malaria Vaccine Allocated by EHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Vaccine</Typography>
+                    <Typography>Malaria Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesVaccineAllocated"
-                      value={formData.measlesVaccineAllocated}
+                      name="malariaVaccineAllocated"
+                      value={formData.malariaVaccineAllocated}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFAllocation}
                       required={canEditEHFAllocation}
@@ -228,12 +228,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Diluent</Typography>
+                    <Typography>Malaria Diluent</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesDiluentAllocated"
-                      value={formData.measlesDiluentAllocated}
+                      name="malariaDiluentAllocated"
+                      value={formData.malariaDiluentAllocated}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFAllocation}
                       required={canEditEHFAllocation}
@@ -242,12 +242,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 0.5ml Syringe</Typography>
+                    <Typography>Malaria 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles05mlSyringeAllocated"
-                      value={formData.measles05mlSyringeAllocated}
+                      name="malaria05mlSyringeAllocated"
+                      value={formData.malaria05mlSyringeAllocated}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFAllocation}
                       required={canEditEHFAllocation}
@@ -256,12 +256,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 2ml Syringe</Typography>
+                    <Typography>Malaria 2ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles2mlSyringeAllocated"
-                      value={formData.measles2mlSyringeAllocated}
+                      name="malaria2mlSyringeAllocated"
+                      value={formData.malaria2mlSyringeAllocated}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFAllocation}
                       required={canEditEHFAllocation}
@@ -282,17 +282,17 @@ export const MeaslesAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Measles & Rubella Vaccine Delivered by Conveyor/3PL
+                Malaria Vaccine Delivered by Conveyor/3PL
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Vaccine</Typography>
+                    <Typography>Malaria Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesVaccineConveyorDelivered"
-                      value={formData.measlesVaccineConveyorDelivered}
+                      name="malariaVaccineConveyorDelivered"
+                      value={formData.malariaVaccineConveyorDelivered}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
@@ -301,12 +301,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Diluent</Typography>
+                    <Typography>Malaria Diluent</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesDiluentConveyorDelivered"
-                      value={formData.measlesDiluentConveyorDelivered}
+                      name="malariaDiluentConveyorDelivered"
+                      value={formData.malariaDiluentConveyorDelivered}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
@@ -315,12 +315,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 0.5ml Syringe</Typography>
+                    <Typography>Malaria 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles05mlSyringeConveyorDelivered"
-                      value={formData.measles05mlSyringeConveyorDelivered}
+                      name="malaria05mlSyringeConveyorDelivered"
+                      value={formData.malaria05mlSyringeConveyorDelivered}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
@@ -329,12 +329,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 2ml Syringe</Typography>
+                    <Typography>Malaria 2ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles2mlSyringeConveyorDelivered"
-                      value={formData.measles2mlSyringeConveyorDelivered}
+                      name="malaria2mlSyringeConveyorDelivered"
+                      value={formData.malaria2mlSyringeConveyorDelivered}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
@@ -377,17 +377,17 @@ export const MeaslesAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Measles & Rubella Vaccine Returned by UHF
+                Malaria Vaccine Returned by UHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Vaccine</Typography>
+                    <Typography>Malaria Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesVaccineReturned"
-                      value={formData.measlesVaccineReturned}
+                      name="malariaVaccineReturned"
+                      value={formData.malariaVaccineReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
@@ -396,12 +396,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Diluent</Typography>
+                    <Typography>Malaria Diluent</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesDiluentReturned"
-                      value={formData.measlesDiluentReturned}
+                      name="malariaDiluentReturned"
+                      value={formData.malariaDiluentReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
@@ -410,12 +410,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 0.5ml Syringe</Typography>
+                    <Typography>Malaria 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles05mlSyringeReturned"
-                      value={formData.measles05mlSyringeReturned}
+                      name="malaria05mlSyringeReturned"
+                      value={formData.malaria05mlSyringeReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
@@ -424,12 +424,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 2ml Syringe</Typography>
+                    <Typography>Malaria 2ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles2mlSyringeReturned"
-                      value={formData.measles2mlSyringeReturned}
+                      name="malaria2mlSyringeReturned"
+                      value={formData.malaria2mlSyringeReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
@@ -450,17 +450,17 @@ export const MeaslesAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Measles & Rubella Vaccine Returned by Conveyor/3PL
+                Malaria Vaccine Returned by Conveyor/3PL
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Vaccine</Typography>
+                    <Typography>Malaria Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesVaccineConveyorReturned"
-                      value={formData.measlesVaccineConveyorReturned}
+                      name="malariaVaccineConveyorReturned"
+                      value={formData.malariaVaccineConveyorReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
@@ -469,12 +469,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Diluent</Typography>
+                    <Typography>Malaria Diluent</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesDiluentConveyorReturned"
-                      value={formData.measlesDiluentConveyorReturned}
+                      name="malariaDiluentConveyorReturned"
+                      value={formData.malariaDiluentConveyorReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
@@ -483,12 +483,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 0.5ml Syringe</Typography>
+                    <Typography>Malaria 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles05mlSyringeConveyorReturned"
-                      value={formData.measles05mlSyringeConveyorReturned}
+                      name="malaria05mlSyringeConveyorReturned"
+                      value={formData.malaria05mlSyringeConveyorReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
@@ -497,12 +497,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 2ml Syringe</Typography>
+                    <Typography>Malaria 2ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles2mlSyringeConveyorReturned"
-                      value={formData.measles2mlSyringeConveyorReturned}
+                      name="malaria2mlSyringeConveyorReturned"
+                      value={formData.malaria2mlSyringeConveyorReturned}
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
@@ -523,17 +523,17 @@ export const MeaslesAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Measles & Rubella Vaccine Received by EHF
+                Malaria Vaccine Received by EHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Vaccine</Typography>
+                    <Typography>Malaria Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesVaccineReceived"
-                      value={formData.measlesVaccineReceived}
+                      name="malariaVaccineReceived"
+                      value={formData.malariaVaccineReceived}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
@@ -542,12 +542,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella Diluent</Typography>
+                    <Typography>Malaria Diluent</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measlesDiluentReceived"
-                      value={formData.measlesDiluentReceived}
+                      name="malariaDiluentReceived"
+                      value={formData.malariaDiluentReceived}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
@@ -556,12 +556,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 0.5ml Syringe</Typography>
+                    <Typography>Malaria 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles05mlSyringeReceived"
-                      value={formData.measles05mlSyringeReceived}
+                      name="malaria05mlSyringeReceived"
+                      value={formData.malaria05mlSyringeReceived}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
@@ -570,12 +570,12 @@ export const MeaslesAllocation = ({
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Measles & Rubella 2ml Syringe</Typography>
+                    <Typography>Malaria 2ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
-                      name="measles2mlSyringeReceived"
-                      value={formData.measles2mlSyringeReceived}
+                      name="malaria2mlSyringeReceived"
+                      value={formData.malaria2mlSyringeReceived}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}

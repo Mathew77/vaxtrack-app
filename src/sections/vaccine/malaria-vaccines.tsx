@@ -13,7 +13,7 @@ import {
 import { MalariaVaccineData } from "src/types/vaccines/malaria";
 import { sectionBorderStyle } from "src/utils/constants";
 
-interface ExtendedTdVaccineProps {
+interface ExtendedMalariaVaccineProps {
   initialData?: Partial<MalariaVaccineData>;
   onDataChange: (data: MalariaVaccineData) => void;
   hideTitle?: boolean;
@@ -25,7 +25,7 @@ export const MalariaVaccine = ({
   onDataChange,
   hideTitle = false,
   isView = false
-}: ExtendedTdVaccineProps): JSX.Element => {
+}: ExtendedMalariaVaccineProps): JSX.Element => {
   const defaultFormData: MalariaVaccineData = {
     physicalStock: '',
     avgDailyConsumption: '',

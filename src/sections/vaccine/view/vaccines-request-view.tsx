@@ -43,7 +43,8 @@ interface VaccineRequestFormProps {
 
 const convertVaccineStatusToNumber = (status: string | number | undefined): number => {
   if (typeof status === 'string') {
-    return parseInt(status, 10) || 0;
+    const parsed = parseInt(status, 10);
+    return isNaN(parsed) ? 0 : parsed;
   }
   return typeof status === 'number' ? status : 0;
 };
@@ -56,6 +57,7 @@ const vaccineOptions: VaccineOption[] = [
   { value: 'bcg', label: 'BCG Vaccine', component: BcgVaccines },
   { value: 'measles', label: 'Measles & Rubella Vaccine', component: MeaslesVaccine },
   { value: 'yf', label: 'YF Vaccine', component: YfVaccine },
+  { value: 'malaria', label: 'Malaria Vaccine', component: MalariaVaccine},
   { value: 'menA', label: 'MenA Vaccine', component: MenAVaccine },
   { value: 'rota', label: 'Rota Vaccine', component: RotaVaccine },
   { value: 'bopv', label: 'BOPV Vaccine', component: BopvVaccine },
@@ -64,7 +66,6 @@ const vaccineOptions: VaccineOption[] = [
   { value: 'penta', label: 'Penta Vaccine', component: PentaVaccine },
   { value: 'ipv', label: 'IPV Vaccine', component: IpvVaccine },
   { value: 'pcv', label: 'PCV Vaccine', component: PcvVaccine },
-  { value: 'malaria', label: 'Malaria Vaccine', component: MalariaVaccine},
   { value: 'td', label: 'Td Vaccine', component: TdVaccine },
   { value: 'cold-chain', label: 'Cold Chain Status', component: ColdChainStatus },
 ];
@@ -152,7 +153,8 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     }
   };
 
-  const handleApprove = () => {
+
+  const handleLcsApprove = () => {
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
       toast.error('No request ID found.');
@@ -166,7 +168,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     }
 
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 1, 
+      vaccine_status: 1,
       product_detail_request: initialData?.product_detail_request || [],
       requested_by: initialData?.requested_by || username,
     };
@@ -175,19 +177,19 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       { id, data: payload },
       {
         onSuccess: () => {
-          toast.success('Vaccine request approved successfully');
-          setIsSubmitted(true); 
+          toast.success('Vaccine request approved by LCS successfully');
+          setIsSubmitted(true);
           navigate('/vaccine-page');
         },
         onError: (error: any) => {
           toast.error('Failed to approve vaccine request');
-          console.error('Approval error:', error);
+          console.error('LCS Approval error:', error);
         },
       }
     );
   };
 
-  const handleDecline = () => {
+  const handleLcsDecline = () => {
     if (!showDeclineComment) {
       setShowDeclineComment(true);
       setSelectedTab('cold-chain');
@@ -222,13 +224,95 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       { id, data: payload },
       {
         onSuccess: () => {
-          toast.success('Vaccine request declined successfully');
-          setIsSubmitted(true); 
+          toast.success('Vaccine request declined by LCS successfully');
+          setIsSubmitted(true);
           navigate('/vaccine-page');
         },
         onError: (error: any) => {
           toast.error('Failed to decline vaccine request');
-          console.error('Decline error:', error);
+          console.error('LCS Decline error:', error);
+        },
+      }
+    );
+  };
+
+  const handleSlwgApprove = () => {
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 3, 
+      product_detail_request: initialData?.product_detail_request || [],
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request approved by SLWG successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to approve vaccine request');
+          console.error('SLWG Approval error:', error);
+        },
+      }
+    );
+  };
+
+  const handleSlwgDecline = () => {
+    if (!showDeclineComment) {
+      setShowDeclineComment(true);
+      setSelectedTab('cold-chain');
+      return;
+    }
+
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    if (!declineComment.trim()) {
+      toast.error('Please provide a comment for declining the request.');
+      return;
+    }
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 4, 
+      decline_comment: declineComment,
+      product_detail_request: initialData?.product_detail_request || [],
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request declined by SLWG successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to decline vaccine request');
+          console.error('SLWG Decline error:', error);
         },
       }
     );
@@ -248,7 +332,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     }
 
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 3, 
+      vaccine_status: 5, 
       product_detail_request: initialData?.product_detail_request || [],
       requested_by: initialData?.requested_by || username,
     };
@@ -324,12 +408,31 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   const isSSC = userRole === 'scs';
 
   const vaccineStatusNumber = convertVaccineStatusToNumber(initialData?.vaccine_status);
-  const isApproved = vaccineStatusNumber === 1;
-  const isDeclined = vaccineStatusNumber === 2;
-  const isPicked = vaccineStatusNumber === 3;
-  const isCompleted = vaccineStatusNumber === 4;
+  
 
+  const isPending = vaccineStatusNumber === 0;
+  const isLcsApproved = vaccineStatusNumber === 1;
+  const isLcsDeclined = vaccineStatusNumber === 2;
+  const isSlwgApproved = vaccineStatusNumber === 3;
+  const isSlwgDeclined = vaccineStatusNumber === 4;
+  const isPicked = vaccineStatusNumber === 5;
+  const isCompleted = vaccineStatusNumber === 6;
+
+  const isApproved = isSlwgApproved;
+  const isDeclined = isLcsDeclined || isSlwgDeclined;
   const isFinalState = isDeclined || isPicked || isCompleted;
+
+  const getStatusMessage = () => {
+    if (isLcsApproved) return { text: "✓ Request approved by LCS", color: "success.main" };
+    if (isLcsDeclined) return { text: "✗ Request declined by LCS", color: "error.main" };
+    if (isSlwgApproved) return { text: "✓ Request approved by SLWG", color: "success.main" };
+    if (isSlwgDeclined) return { text: "✗ Request declined by SLWG", color: "error.main" };
+    if (isPicked) return { text: "Order has been picked by 3PL", color: "primary.main" };
+    if (isCompleted) return { text: "✓ Order completed", color: "success.main" };
+    return null;
+  };
+
+  const statusMessage = getStatusMessage();
   
 
   return (
@@ -398,70 +501,81 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
             )}
 
            {selectedTab && (
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-     
-              {isView && isThreePL && isApproved && isLastTab && !isPicked && !isCompleted ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={handlePickOrder}
-                  disabled={updateVaccineRequest.isPending || isSubmitted}
-                >
-                  Pick Order
-                </Button>
-              ) : 
-              isView && userRole === 'slwg' && isLastTab && !isApproved && !isDeclined && !isPicked && !isCompleted ? (
-                <>
-                  <Button
-                    variant="contained"
-                    color="success"
-                    size="large"
-                    onClick={handleApprove}
-                    disabled={updateVaccineRequest.isPending || isSubmitted}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    size="large"
-                    onClick={handleDecline}
-                    disabled={updateVaccineRequest.isPending || isSubmitted}
-                  >
-                    {showDeclineComment ? 'Confirm Decline' : 'Decline'}
-                  </Button>
-                </>
-              ) : null}
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
 
-              {isView && isLastTab && (isApproved || isDeclined || isPicked || isCompleted) && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {isApproved && !isPicked && !isCompleted && (
-                    <Typography variant="body2" color="success.main">
-                      ✓ Request has been approved
-                    </Typography>
-                  )}
-                  {isDeclined && (
-                    <Typography variant="body2" color="error.main">
-                      ✗ Request has been declined
-                    </Typography>
-                  )}
-                  {isPicked && (
-                    <Typography variant="body2" color="primary.main">
-                      Order has been picked By 3PL
-                    </Typography>
-                  )}
-                  {isCompleted && (
-                    <Typography variant="body2" color="success.main">
-                      ✓ Order completed
-                    </Typography>
-                  )}
-                </Box>
-              )}
+                {isView && isLastTab && (
+                  <>
+                    {isThreePL && isSlwgApproved && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        onClick={handlePickOrder}
+                        disabled={updateVaccineRequest.isPending || isSubmitted}
+                      >
+                        Pick Order
+                      </Button>
+                    )}
 
-              {(!isView || (isView && !isLastTab)) && (
-                <>
-                  {!isView || (isView && !isLastTab) ? (
+                    {userRole === 'lcs' && isPending && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={handleLcsApprove}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="large"
+                          onClick={handleLcsDecline}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          {showDeclineComment ? 'Confirm Decline' : 'Decline'}
+                        </Button>
+                      </>
+                    )}
+
+                    {userRole === 'slwg' && isLcsApproved && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={handleSlwgApprove}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="large"
+                          onClick={handleSlwgDecline}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          {showDeclineComment ? 'Confirm Decline' : 'Decline'}
+                        </Button>
+                      </>
+                    )}
+
+
+                    {statusMessage && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2" color={statusMessage.color}>
+                          {statusMessage.text}
+                        </Typography>
+                      </Box>
+                    )}
+                  </>
+                )}
+
+                {(!isView || (isView && !isLastTab)) && (
+                  <>
                     <Button
                       variant="contained"
                       color="primary"
@@ -477,23 +591,21 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                         ? 'Submit'
                         : 'Next'}
                     </Button>
-                  ) : null}
 
-                  {/* Back button */}
-                  {!isFirstTab && (
-                    <Button
-                      variant="contained"
-                      color="inherit"
-                      size="large"
-                      onClick={handleBack}
-                    >
-                      Back
-                    </Button>
-                  )}
-                </>
-              )}
-            </Box>
-          )}
+                    {!isFirstTab && (
+                      <Button
+                        variant="contained"
+                        color="inherit"
+                        size="large"
+                        onClick={handleBack}
+                      >
+                        Back
+                      </Button>
+                    )}
+                  </>
+                )}
+              </Box>
+            )}
           </Grid>
         </Grid>
       </Container>

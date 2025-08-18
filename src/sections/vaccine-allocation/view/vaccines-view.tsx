@@ -32,6 +32,7 @@ import { IpvAllocation } from '../ipv-allocation';
 import { PcvAllocation } from '../pcv-allocation';
 import { TdAllocation } from '../td-allocation';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { MalariaAllocation } from '../malaria-allocation';
 
 interface VaccineOption {
   value: string;
@@ -41,8 +42,9 @@ interface VaccineOption {
 
 const vaccineOptions: VaccineOption[] = [
   { value: 'bcg', label: 'BCG Allocation', component: BcgAllocation },
-  { value: 'measles', label: 'Measles Allocation', component: MeaslesAllocation },
+  { value: 'measles', label: 'Measles & Rubella Allocation', component: MeaslesAllocation },
   { value: 'yf', label: 'YF Allocation', component: YfAllocation },
+  { value: 'malaria', label: 'Malaria Allocation', component: MalariaAllocation },
   { value: 'menA', label: 'MenA Allocation', component: MenAAllocation },
   { value: 'rota', label: 'Rota Allocation', component: RotaAllocation },
   { value: 'hpv', label: 'HPV Allocation', component: HpvAllocation },

@@ -11,7 +11,7 @@ import Filter from 'src/utils/Filter';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      <Filter showState={false} showLga={false} showWard={true} />
+      {/* <Filter showState={false} showLga={false} showWard={true} /> */}
 
       <Box mt={3}>
         <VaccineCard />
@@ -24,9 +24,9 @@ export function OverviewAnalyticsView() {
         <DashboardCards />
       </Box>
 
-      <Box mt={3}>
+      {/* <Box mt={3}>
         <TransactionHistory />
-      </Box>
+      </Box> */}
     </DashboardContent>
   );
 }
