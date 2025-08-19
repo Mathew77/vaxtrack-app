@@ -10,6 +10,7 @@ import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined
 import { useNavigate } from 'react-router-dom';
 import { useFetchUsers, useDeleteUser } from 'src/hooks/apis/user/user-hooks';
 import { FaEye } from 'react-icons/fa';
+import { UserType } from 'src/hooks/apis/user/user-types';
 
 interface TableRow {
   id?: number;
@@ -19,6 +20,7 @@ interface TableRow {
   email: string;
   phone_number: string;
   groups: number[];
+  role_names: string[];
 }
 
 interface TabPanelProps {
@@ -70,6 +72,11 @@ const UserList: React.FC = () => {
     setValue(newValue);
   };
 
+  const transformedUserList: TableRow[] = userList.map((user: UserType) => ({
+    ...user,
+    role_names: user.role_names || [], 
+  }));
+
   const rolesList: TableRow[] = [];
   const permissionsList: TableRow[] = [];
 
@@ -100,20 +107,29 @@ const UserList: React.FC = () => {
         header: 'Phone Number',
         size: 200,
       },
+      // {
+      //   accessorKey: 'org_unit',
+      //   header: 'Org. Unit',
+      //   size: 200,
+      // },
       {
-        accessorKey: 'org_unit',
-        header: 'Org. Unit',
-        size: 200,
-      },
-      {
-        accessorKey: 'groups',
-        header: 'Role',
+        accessorKey: 'role_names',
+        header: 'Role Names',
         size: 200,
         Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
           const group = cell.getValue() as [];
           return group.join(',  ')
         }
       },
+      // {
+      //   accessorKey: 'groups',
+      //   header: 'Role',
+      //   size: 200,
+      //   Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+      //     const group = cell.getValue() as [];
+      //     return group.join(',  ')
+      //   }
+      // },
       // {
       //   accessorKey: 'user_permissions',
       //   header: 'User Permission',
@@ -189,7 +205,7 @@ const UserList: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={userList}
+            data={transformedUserList}
             tableHeader="User Management List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}

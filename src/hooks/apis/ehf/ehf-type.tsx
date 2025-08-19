@@ -2,6 +2,7 @@
     id?: number;
     status?: string;
     username?: string;
+    ehf_name?: string;
     ehf_id?: string;
     requested_by: string;
     vaccine_status?: number;
@@ -17,6 +18,7 @@
   type: string;
   ehf_id: number;
   uhf_id: number;
+  uhf_name: string; 
   request_id: string;
   status: number;
   username: string;

@@ -18,6 +18,7 @@ interface TableRow {
   id?: number;
   request_id: string;
   uhf_id: number;
+  uhf_name: string;
   ehf_id: number;
   status: number;
   state: string;
@@ -90,6 +91,7 @@ const VaccineAllocationList: React.FC = () => {
         request_id: 'N/A',
         uhf_id: 0,
         ehf_id: 0,
+        uhf_name: 'N/A',
         state: 'N/A',
         lga: 'N/A',
         status: 0,
@@ -99,11 +101,17 @@ const VaccineAllocationList: React.FC = () => {
     const firstDetail = allocation.vaccines_allocation_detail[0];
 
     const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
+    let uhfName = firstDetail.uhf_name || 'Unknown UHF';
+      if (!firstDetail.uhf_name) {
+        const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
+        uhfName = uhf?.uhf_name || 'Unknown UHF';
+      }
 
     return {
       id: allocation.id,
       request_id: firstDetail.request_id,
       uhf_id: firstDetail.uhf_id,
+      uhf_name: uhfName,
       ehf_id: firstDetail.ehf_id,
       state: firstDetail.state,
       lga: firstDetail.lga,
@@ -145,12 +153,20 @@ const VaccineAllocationList: React.FC = () => {
         header: "Request ID",
         size: 250,
       },
-      
       {
-        accessorKey: "uhf_id",
+        accessorKey: "uhf_name",
         header: "UHF Name",
-        size: 150,
+        size: 200,
+        Cell: ({ cell }: { cell: MRT_Cell<TableRow, unknown> }) => {
+          const uhfName = cell.getValue() as string;
+          return uhfName || 'Unknown UHF';
+        },
       },
+      // {
+      //   accessorKey: "uhf_id",
+      //   header: "UHF ID",
+      //   size: 150,
+      // },
       {
         accessorKey: "state",
         header: "State",

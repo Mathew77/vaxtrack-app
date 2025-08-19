@@ -17,6 +17,7 @@ export interface UserType {
   health_facility_category?: string | null;
   user_permissions?: number[];
   state: string;
+  role_names?: string[];
 }
 
   export interface RoleType {

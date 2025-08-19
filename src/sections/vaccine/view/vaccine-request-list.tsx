@@ -18,6 +18,7 @@ import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 
 interface VaccineRequestTableRow {
   id?: number;
+  ehf_name: string;
   ehf_id: string;
   requested_by: string;
   vaccine_status: number;
@@ -279,6 +280,7 @@ const VaccineRequestList: React.FC = () => {
     return filteredVaccineRequests.map((request: VaccineFormType) => {
       return {
         id: request.id,
+        ehf_name: String(request.ehf_name || 'Unknown EHF'),
         ehf_id: String(request.ehf_id),
         requested_by: request.requested_by,
         vaccine_status: convertVaccineStatusToNumber(request.vaccine_status),
@@ -331,14 +333,23 @@ const VaccineRequestList: React.FC = () => {
         size: 100,
       },
       {
-        accessorKey: 'ehf_id',
-        header: 'EHF ID',
-        size: 100,
+        accessorKey: 'ehf_name',
+        header: 'EHF Name',
+        size: 200,
         Cell: ({ cell }: { cell: MRT_Cell<VaccineRequestTableRow, unknown> }) => {
-          const ehfId = cell.getValue() as string | number | undefined;
-          return ehfId ? String(ehfId) : 'N/A';
+          const ehfName = cell.getValue() as string | undefined;
+          return ehfName || 'Unknown EHF';
         },
       },
+      // {
+      //   accessorKey: 'ehf_id',
+      //   header: 'EHF ID',
+      //   size: 100,
+      //   Cell: ({ cell }: { cell: MRT_Cell<VaccineRequestTableRow, unknown> }) => {
+      //     const ehfId = cell.getValue() as string | number | undefined;
+      //     return ehfId ? String(ehfId) : 'N/A';
+      //   },
+      // },
       {
         accessorKey: 'vaccine_status',
         header: 'Status',
@@ -366,7 +377,13 @@ const VaccineRequestList: React.FC = () => {
         handleClick: handleDelete,
         icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
       });
-    } else if (isSLWG) {
+    } else if (isLCS) {
+        items.push({
+          display: "View / Approve",
+          handleClick: handleView,
+          icon: <FaEye style={{ color: "#1976D2" }} />,
+        });
+      }  else if (isSLWG) {
       items.push({
         display: "View / Approve",
         handleClick: handleView,
@@ -374,7 +391,7 @@ const VaccineRequestList: React.FC = () => {
       });
     } else if (isThreePL) {
       items.push({
-        display: "View",
+        display: "View / Pick",
         handleClick: handleView,
         icon: <FaEye style={{ color: "#1976D2" }} />,
       });
