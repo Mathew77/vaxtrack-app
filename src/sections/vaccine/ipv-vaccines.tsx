@@ -235,7 +235,7 @@ export const IpvVaccine = ({
 
           <Grid item xs={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <InputLabel htmlFor="vvm2">Is antigen in VVM stage2 ?</InputLabel>
+              <InputLabel htmlFor="vvm2">VVM Stage</InputLabel>
               <FormControl fullWidth>
                 <Select
                   id="vvm2"
