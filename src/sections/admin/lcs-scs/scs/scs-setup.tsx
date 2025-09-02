@@ -23,6 +23,7 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import { useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
 
 export default function ScsSetup() {
@@ -34,20 +35,24 @@ export default function ScsSetup() {
 
   const { data: states = [] } = useFetchStates();
   const  upsertScs = useUpsertScs();
-   const { data: ehfList = [] } = useFetchLcsEhf();
+  const { data: ehfList = [] } = useFetchLcsEhf();
 
-    const initialValues: SCSType = {
-      status: '',
-      stat_id: '',
-      scs_name: '',
-      contact_person_name: '',
-      contact_person_phone: '',
-      contact_person_email: '',
-      longtitude: '',
-      lagtitude: '', 
-      storage_capcity: 0, 
-      ehf_list: []
-    };
+  const { data: vaccineStorageEquipment = [] } = useVaccineStorage();
+  
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+
+  const initialValues: SCSType = {
+    status: '',
+    stat_id: '',
+    scs_name: '',
+    contact_person_name: '',
+    contact_person_phone: '',
+    contact_person_email: '',
+    longtitude: '',
+    lagtitude: '', 
+    storage_capcity: '', 
+    ehf_list: []
+  };
 
   const [data, setData] = useState<SCSType>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof SCSType, string>>>({});
@@ -62,11 +67,17 @@ export default function ScsSetup() {
         ...initialValues,
         ...scsData,
         stat_id: scsData.stat_id || '',
-        storage_capcity: scsData.storage_capcity || 0,
         ehf_list: scsData.ehf_list || '',
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
+
+      if (scsData.storage_capcity) {
+        const equipment = vaccineStorageEquipment.find(eq => eq.code === scsData.storage_capcity);
+        if (equipment) {
+          setSelectedEquipment(equipment);
+        }
+      }
     }
   };
 
@@ -82,6 +93,22 @@ export default function ScsSetup() {
       setFilteredEHF([]);
     }
   }, [data.stat_id, ehfList]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setData((prev) => ({
+            ...prev,
+            longtitude: longitude.toString(),
+            lagtitude: latitude.toString(),
+          }));
+        } );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  }, []);
     
   // const calculateStorage = () => {
   //   const C = data.storage_capcity || 0;
@@ -133,15 +160,15 @@ export default function ScsSetup() {
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
-    temp.longtitude = data.longtitude 
-        ? '' 
-        : 'Longitude is required';
-    temp.lagtitude = data.lagtitude 
-        ? '' 
-        : 'Latitude is required';
-    temp.storage_capcity = data.storage_capcity > 0 
-        ? '' 
-        : 'Storage capacity must be greater than 0';
+    // temp.longtitude = data.longtitude 
+    //     ? '' 
+    //     : 'Longitude is required';
+    // temp.lagtitude = data.lagtitude 
+    //     ? '' 
+    //     : 'Latitude is required';
+    temp.storage_capcity = data.storage_capcity && data.storage_capcity.trim() !== ''
+      ? '' 
+      : 'Storage equipment is required';
 
     temp.ehf_list = (data.ehf_list?.length ?? 0) > 0 
       ? '' 
@@ -183,11 +210,30 @@ export default function ScsSetup() {
       }));
     };
 
-    const handleEhfChange = (selected: string[]) => {
-      setData((prev) => ({
-        ...prev,
-        ehf_list: selected,
-      }));
+    // const handleEhfChange = (selected: string[]) => {
+    //   setData((prev) => ({
+    //     ...prev,
+    //     ehf_list: selected,
+    //   }));
+    // };
+
+    const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
+        const selectedCode = event.target.value;
+        const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode); 
+        
+        if (equipment) {
+          setSelectedEquipment(equipment); 
+          setData((prev) => ({
+            ...prev,
+            storage_capcity: equipment.code, 
+          }));
+        } else {
+          setSelectedEquipment(null); 
+          setData((prev) => ({
+            ...prev,
+            storage_capcity: '',
+          }));
+        }
     };
       
     
@@ -343,7 +389,7 @@ export default function ScsSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="longtitude" >
-            Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            Longitude
           </Typography>
           <TextField
             fullWidth
@@ -353,7 +399,7 @@ export default function ScsSetup() {
             value={data.longtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={isView}
+            disabled={true}
             helperText={
               errors?.longtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
@@ -364,7 +410,7 @@ export default function ScsSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="lagtitude" >
-            Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            Latitude
           </Typography>
           <TextField
             fullWidth
@@ -374,7 +420,7 @@ export default function ScsSetup() {
             value={data.lagtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={isView}
+            disabled={true}
             helperText={
               errors?.lagtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
@@ -410,7 +456,12 @@ export default function ScsSetup() {
                 {errors?.ehf_list}
               </Typography>
             )}
-              </FormControl>
+            {data.stat_id && filteredEhf.length === 0 &&  ehfList.length > 0 ?(
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                No EHFs available for the selected state.
+              </Typography>
+            ): null}
+            </FormControl>
         </Grid>   
 
        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
@@ -418,25 +469,35 @@ export default function ScsSetup() {
         <Box>
           <Grid container spacing={3}>
             <Grid item xs={6}>
-              <Typography component="label" htmlFor="storage_capcity">
-                Storage Capacity (liters) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                  fullWidth
-                  id="storage_capcity"
-                  name="storage_capcity"
-                  value={getDisplayValue(data.storage_capcity)} 
-                  onChange={handleChange}
-                  inputProps={{ min: 0 }}
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="storage_equipment" sx={{ mb: 1 }}>
+                  Storage Equipment <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <Select
+                  id="storage_equipment"
+                  name="storage_equipment"
+                  value={selectedEquipment?.code || ''}
+                  onChange={handleEquipmentChange}
+                  sx={{ width: '100%' }}
+                  displayEmpty
                   variant="outlined"
                   disabled={isView}
-                  type="number"
-                  helperText={
-                    errors?.storage_capcity ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.storage_capcity}</span>
-                    ) : ''
-                  }
-                />
+                >
+                  <MenuItem value="" disabled>
+                    Select Storage Equipment
+                  </MenuItem>
+                  {vaccineStorageEquipment.map((equipment) => (
+                    <MenuItem key={equipment.code} value={equipment.code}>
+                      {equipment.description} - {equipment.liters_minustwenty}L
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors?.storage_capcity !== '' && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.storage_capcity}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
 
           </Grid>

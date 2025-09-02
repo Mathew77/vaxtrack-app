@@ -3,7 +3,7 @@ export interface EHFType {
   status: string;
   state: string;
   lga: string;
-  ward: string;
+  // ward: string;
   ehf_name: string;
   longtitude: string;
   lagtitude: string;
@@ -11,8 +11,8 @@ export interface EHFType {
   contact_person_name: string;
   contact_person_phone: string;
   contact_person_email: string;
-  storage_capcity?: number | null;
-  equipment_model_number?: number | null;
+  storage_capcity?: string;
+  equipment_model_number?: string;
 }
 
 export interface StateType {
@@ -30,4 +30,16 @@ export interface WardType {
 export interface OrgUnit {
   id: string | number;
   name: string;
+}
+
+export interface VaccineStorageType {
+  id: number;
+  description: string;
+  make: string;
+  model: string;
+  code: string;
+  type: string;
+  liters_plusfive: string;
+  liters_minustwenty: string;
+  remark: string;
 }

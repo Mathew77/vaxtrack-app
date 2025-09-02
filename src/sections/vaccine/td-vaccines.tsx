@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { TdVaccineData } from "src/types/vaccines/td";
 import { sectionBorderStyle } from "src/utils/constants";
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedTdVaccineProps {
   initialData?: Partial<TdVaccineData>;
@@ -117,6 +118,9 @@ export const TdVaccine = ({
         if (adc > 0) {
         const daysOfStock = Math.floor(psb / adc);
         newFormData.daysOfStock = daysOfStock.toString();
+
+        const dosesRequiredToMax = 70 - daysOfStock;
+        newFormData.qtyReceived = dosesRequiredToMax.toString();
         
     
         newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
@@ -174,6 +178,8 @@ export const TdVaccine = ({
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -187,6 +193,8 @@ export const TdVaccine = ({
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -200,6 +208,8 @@ export const TdVaccine = ({
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
                 disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -228,6 +238,8 @@ export const TdVaccine = ({
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -260,6 +272,8 @@ export const TdVaccine = ({
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -310,7 +324,9 @@ export const TdVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
-                disabled={isView}
+                disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -354,6 +370,8 @@ export const TdVaccine = ({
                 value={formData.diluentPhysicalStock}
                 onChange={handleInputChange('diluentPhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -385,6 +403,8 @@ export const TdVaccine = ({
                 value={formData.diluentMismatchAdjustedValue}
                 onChange={handleInputChange('diluentMismatchAdjustedValue')}
                 disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -453,6 +473,8 @@ export const TdVaccine = ({
                 value={formData.halfMlSyringePhysicalStock}
                 onChange={handleInputChange('halfMlSyringePhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -483,6 +505,8 @@ export const TdVaccine = ({
                 value={formData.halfMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>

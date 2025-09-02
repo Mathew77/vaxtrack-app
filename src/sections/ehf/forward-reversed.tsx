@@ -1,10 +1,50 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 import { useFetchForwardReverseLogisticsEhf } from 'src/hooks/apis/dashboards/ehf/ehf-dashboard-hook';
+import Skeleton from '@mui/material/Skeleton';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import { DashboardContent } from 'src/layouts/dashboard';
+
+
+const SkeletonLoader = () => (
+  <DashboardContent maxWidth="xl">
+    <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
+    
+    <Grid container spacing={3}>
+      {[1, 2, 3, 4].map((item) => (
+        <Grid item xs={12} sm={6} md={3} key={item}>
+          <Card sx={{ p: 3 }}>
+            <Skeleton variant="rectangular" width={40} height={40} sx={{ mb: 2 }} />
+            <Skeleton variant="text" sx={{ fontSize: '1rem' }} />
+            <Skeleton variant="text" sx={{ fontSize: '2rem', width: '60%' }} />
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+
+    <Grid container spacing={3} sx={{ mt: 1 }}>
+      <Grid item xs={12} md={6} lg={4}>
+        <Skeleton variant="rectangular" height={300} />
+      </Grid>
+      <Grid item xs={12} md={6} lg={8}>
+        <Skeleton variant="rectangular" height={300} />
+      </Grid>
+    </Grid>
+  </DashboardContent>
+);
 
 const ForwardReverseChart = () => {
 
-  const { data } = useFetchForwardReverseLogisticsEhf();
+  const { data, isLoading: forwardReverseLogistic } = useFetchForwardReverseLogisticsEhf();
+
+  const isLoading = forwardReverseLogistic;
+
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
 
   if (!data || !data.monthly_logistics) {
     return (

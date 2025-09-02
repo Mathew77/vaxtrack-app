@@ -5,6 +5,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { IpvAllocationData } from 'src/types/allocations/ipv';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedIpvAllocationProps {
   initialData?: Partial<IpvAllocationData>;
@@ -138,6 +139,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditUHFRequest}
                       required={canEditUHFRequest}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -152,6 +155,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditUHFRequest}
                       required={canEditUHFRequest}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -183,6 +188,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditEHFAllocation}
                       required={canEditEHFAllocation}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -197,6 +204,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditEHFAllocation}
                       required={canEditEHFAllocation}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -228,6 +237,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -242,6 +253,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -295,6 +308,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -309,6 +324,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -340,6 +357,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -354,6 +373,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -385,6 +406,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -399,6 +422,8 @@ export const IpvAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>

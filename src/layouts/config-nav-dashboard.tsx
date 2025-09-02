@@ -79,7 +79,7 @@ export const navData = [
   
   //3PL & SCS  Menu
   {
-    title: '3PL & SCS Dashboard',
+    title: 'Dashboard',
     path: '/threepl-home',
     icon: icon('ic-analytics'),
     roles: ['threepl'],
@@ -175,12 +175,12 @@ export const navData = [
     icon: icon('ic-org'),
     roles: ['admin'],
   },
-  {
-    title: 'Zone Management',
-    path: '/zone-page',
-    icon: icon('ic-zone'),
-    roles: ['admin'],
-  },
+  // {
+  //   title: 'Zone Management',
+  //   path: '/zone-page',
+  //   icon: icon('ic-zone'),
+  //   roles: ['admin'],
+  // },
   {
     title: 'NSCS Setup',
     path: '/ncs-page',
@@ -208,12 +208,12 @@ export const navData = [
     icon: icon('ic-community'),
     roles: ['conveyor', 'ehf', 'uhf', 'threepl'],
   },
-  {
-    title: 'WayBill / Invoice',
-    path: '/waybill-invoice-page',
-    icon: <StackedLineChartIcon />,
-    roles: ['threepl'],
-  },
+  // {
+  //   title: 'WayBill / Invoice',
+  //   path: '/waybill-invoice-page',
+  //   icon: <StackedLineChartIcon />,
+  //   roles: ['threepl'],
+  // },
   // {
   //   title: 'Table Page',
   //   path: '/table',

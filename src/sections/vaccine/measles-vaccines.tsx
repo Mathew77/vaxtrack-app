@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { MeaslesVaccineData } from 'src/types/vaccines/measles';
 import { sectionBorderStyle } from 'src/utils/constants';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedMeaslesVaccineProps {
   initialData?: Partial<MeaslesVaccineData>;
@@ -151,6 +152,9 @@ export const MeaslesVaccine = ({
         if (adc > 0) {
         const daysOfStock = Math.floor(psb / adc);
         newFormData.daysOfStock = daysOfStock.toString();
+
+        const dosesRequiredToMax = 70 - daysOfStock;
+        newFormData.qtyReceived = dosesRequiredToMax.toString();
         
     
         newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
@@ -217,6 +221,8 @@ export const MeaslesVaccine = ({
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -230,6 +236,8 @@ export const MeaslesVaccine = ({
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -243,6 +251,8 @@ export const MeaslesVaccine = ({
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
                 disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -271,6 +281,8 @@ export const MeaslesVaccine = ({
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -303,6 +315,8 @@ export const MeaslesVaccine = ({
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -353,7 +367,9 @@ export const MeaslesVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
-                disabled={isView}
+                disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -398,6 +414,8 @@ export const MeaslesVaccine = ({
                 value={formData.diluentPhysicalStock}
                 onChange={handleInputChange('diluentPhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
                 />
             </Box>
           </Grid>
@@ -448,6 +466,8 @@ export const MeaslesVaccine = ({
                 value={formData.twoMlSyringePhysicalStock}
                 onChange={handleInputChange('twoMlSyringePhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -498,6 +518,8 @@ export const MeaslesVaccine = ({
                 value={formData.halfMlSyringePhysicalStock}
                 onChange={handleInputChange('halfMlSyringePhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
                 />
             </Box>
           </Grid>
@@ -528,6 +550,8 @@ export const MeaslesVaccine = ({
                 value={formData.halfMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>

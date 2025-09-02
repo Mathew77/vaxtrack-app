@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { BcgVaccineData } from '../../types/vaccines/bcg';
 import { sectionBorderStyle } from 'src/utils/constants';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedBcgVaccinesProps {
   initialData?: Partial<BcgVaccineData>;
@@ -135,6 +136,39 @@ export const BcgVaccines = ({
       adjustedValue: adjustedValue.toString()
     };
   };
+
+  const calculateHalfMlSyringeMismatch = (antigenStock: string, syringeStock: string) => {
+    if (!antigenStock.trim() || !syringeStock.trim()) {
+      return { outcome: '', adjustedValue: '' };
+    }
+
+    const antigenValue = parseFloat(antigenStock) || 0;
+    const syringeValue = parseFloat(syringeStock) || 0;
+
+    if (antigenValue === 0 && syringeValue === 0) {
+      return { outcome: '', adjustedValue: '' };
+    }
+
+    const syringeBaseValue = syringeValue / 1.1;
+    
+    const adjustedValue = antigenValue - syringeBaseValue;
+    
+    let outcome = '';
+    let adjustedValueDisplay = '';
+    
+    if (Math.abs(adjustedValue) < 0.01) { 
+      outcome = 'no'; 
+      adjustedValueDisplay = 'none';
+    } else {
+      outcome = 'yes'; 
+      adjustedValueDisplay = adjustedValue < 0 ? 'deficient' : 'excess';
+    }
+
+    return {
+      outcome,
+      adjustedValue: adjustedValueDisplay
+    };
+  };
   
 
   const handleInputChange = (field: keyof BcgVaccineData) => (
@@ -151,6 +185,9 @@ export const BcgVaccines = ({
         if (adc > 0) {
         const daysOfStock = Math.floor(psb / adc);
         newFormData.daysOfStock = daysOfStock.toString();
+
+        const dosesRequiredToMax = 70 - daysOfStock;
+        newFormData.qtyReceived = dosesRequiredToMax.toString();
         
     
         newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
@@ -177,6 +214,15 @@ export const BcgVaccines = ({
         const syringeResult = calculate2mlSyringeMismatch(antigenStock, syringeStock);
         newFormData.twoMlSyringeMismatchOutcome = syringeResult.outcome;
         newFormData.twoMlSyringeMismatchAdjustedValue = syringeResult.adjustedValue;
+      }
+
+       if (field === 'physicalStock' || field === 'halfMlSyringePhysicalStock') {
+        const antigenStock = field === 'physicalStock' ? value : newFormData.physicalStock;
+        const syringeStock = field === 'halfMlSyringePhysicalStock' ? value : newFormData.halfMlSyringePhysicalStock;
+        
+        const halfMlResult = calculateHalfMlSyringeMismatch(antigenStock, syringeStock);
+        newFormData.halfMlSyringeMismatchOutcome = halfMlResult.outcome;
+        newFormData.halfMlSyringeMismatchAdjustedValue = halfMlResult.adjustedValue;
       }
 
       onDataChange(newFormData);
@@ -218,6 +264,8 @@ export const BcgVaccines = ({
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -231,6 +279,8 @@ export const BcgVaccines = ({
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -243,6 +293,8 @@ export const BcgVaccines = ({
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
                 disabled={true} 
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -270,6 +322,8 @@ export const BcgVaccines = ({
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -302,6 +356,8 @@ export const BcgVaccines = ({
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -365,7 +421,9 @@ export const BcgVaccines = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
-                disabled={isView}
+                disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -409,6 +467,8 @@ export const BcgVaccines = ({
                 value={formData.diluentPhysicalStock}
                 onChange={handleInputChange('diluentPhysicalStock')} 
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -459,6 +519,8 @@ export const BcgVaccines = ({
                 value={formData.twoMlSyringePhysicalStock}
                 onChange={handleInputChange('twoMlSyringePhysicalStock')} 
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
                  />
             </Box>
           </Grid>
@@ -509,6 +571,8 @@ export const BcgVaccines = ({
                 value={formData.halfMlSyringePhysicalStock}
                 onChange={handleInputChange('halfMlSyringePhysicalStock')} 
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -521,7 +585,7 @@ export const BcgVaccines = ({
                   value={formData.halfMlSyringeMismatchOutcome}
                   onChange={handleInputChange('halfMlSyringeMismatchOutcome')}
                   inputProps={{ name: '0.5ml-mis-match' }}
-                  disabled={isView}
+                  disabled={true}
                 >
                   <MenuItem value="">Select</MenuItem>
                   <MenuItem value="yes">Yes</MenuItem>
@@ -538,7 +602,7 @@ export const BcgVaccines = ({
                 variant="outlined"
                 value={formData.halfMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')} 
-                disabled={isView}
+                disabled={true}
               />
             </Box>
           </Grid>

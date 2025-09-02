@@ -5,6 +5,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TdAllocationData } from 'src/types/allocations/td';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedTdAllocationProps {
   initialData?: Partial<TdAllocationData>;
@@ -91,7 +92,7 @@ export const TdAllocation = ({
           width: '100%',
         }}
       >
-        Td Allocation
+        TD Allocation
       </Typography>
 
       <Accordion>
@@ -124,12 +125,12 @@ export const TdAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Td Vaccine Requested by UHF
+                TD Vaccine Requested by UHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td Vaccine</Typography>
+                    <Typography>TD Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -138,12 +139,14 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditUHFRequest}
                       required={canEditUHFRequest}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td 0.5ml Syringe</Typography>
+                    <Typography>TD 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -152,6 +155,8 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditUHFRequest}
                       required={canEditUHFRequest}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -169,12 +174,12 @@ export const TdAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Td Vaccine Allocated by EHF
+                TD Vaccine Allocated by EHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td Vaccine</Typography>
+                    <Typography>TD Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -183,12 +188,14 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditEHFAllocation}
                       required={canEditEHFAllocation}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td 0.5ml Syringe</Typography>
+                    <Typography>TD 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -197,6 +204,8 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditEHFAllocation}
                       required={canEditEHFAllocation}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -214,12 +223,12 @@ export const TdAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Td Vaccine Delivered by Conveyor/3PL
+                TD Vaccine Delivered by Conveyor/3PL
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td Vaccine</Typography>
+                    <Typography>TD Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -228,12 +237,14 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td 0.5ml Syringe</Typography>
+                    <Typography>TD 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -242,6 +253,8 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={!canEditConveyorDelivered}
                       required={canEditConveyorDelivered}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -281,12 +294,12 @@ export const TdAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Td Vaccine Returned by UHF
+                TD Vaccine Returned by UHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td Vaccine</Typography>
+                    <Typography>TD Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -295,12 +308,14 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td 0.5ml Syringe</Typography>
+                    <Typography>TD 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -309,6 +324,8 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditUHFReturned}
                       required={canEditUHFReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -326,12 +343,12 @@ export const TdAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Td Vaccine Returned by Conveyor/3PL
+                TD Vaccine Returned by Conveyor/3PL
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td Vaccine</Typography>
+                    <Typography>TD Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -340,12 +357,14 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td 0.5ml Syringe</Typography>
+                    <Typography>TD 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -354,6 +373,8 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditConveyorReturned}
                       required={canEditConveyorReturned}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
@@ -371,12 +392,12 @@ export const TdAllocation = ({
                   borderRadius: 1,
                 }}
               >
-                Td Vaccine Received by EHF
+                TD Vaccine Received by EHF
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td Vaccine</Typography>
+                    <Typography>TD Vaccine</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -385,12 +406,14 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography>Td 0.5ml Syringe</Typography>
+                    <Typography>TD 0.5ml Syringe</Typography>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -399,6 +422,7 @@ export const TdAllocation = ({
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
+                      type='number'
                     />
                   </Box>
                 </Grid>

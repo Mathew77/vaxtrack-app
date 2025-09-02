@@ -53,7 +53,7 @@ const vaccineOptions: VaccineOption[] = [
   { value: 'penta', label: 'Penta Allocation', component: PentaAllocation },
   { value: 'ipv', label: 'IPV Allocation', component: IpvAllocation },
   { value: 'pcv', label: 'PCV Allocation', component: PcvAllocation },
-  { value: 'td', label: 'Td Allocation', component: TdAllocation },
+  { value: 'td', label: 'TD Allocation', component: TdAllocation },
 ];
 
 export default function VaccineView() {
@@ -208,6 +208,8 @@ export default function VaccineView() {
 
       const payload: VaccineAllocationType = { vaccines_allocation_detail };
 
+      console.log('Payload being sent:', JSON.stringify(payload, null, 2));
+
       setStatus(newStatus);
 
       createAllocation.mutate(
@@ -226,7 +228,7 @@ export default function VaccineView() {
             navigate('/vaccine-allocation-page');
           },
           onError: (error: any) => {
-            toast.error(error?.response?.data?.message || 'Failed to update vaccine allocation');
+            toast.error(error?.response?.data?.message || 'Failed to create vaccine allocation');
           },
         }
       );
@@ -353,6 +355,15 @@ export default function VaccineView() {
                   )}
 
                   <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                      <Button
+                          variant="contained"
+                          color="inherit"
+                          size="large"
+                          onClick={handleBack}
+                          disabled={isFirstTab}
+                      >
+                          Back
+                      </Button>
                       {!isView && (
                         <Button
                           variant="contained"
@@ -364,15 +375,7 @@ export default function VaccineView() {
                           {isLastTab ? (isUpdate ? 'Update' : 'Submit') : 'Next'}
                         </Button>
                       )}
-                      <Button
-                          variant="contained"
-                          color="inherit"
-                          size="large"
-                          onClick={handleBack}
-                          disabled={isFirstTab}
-                      >
-                          Back
-                      </Button>
+                    
                   </Box>
                 </Grid>
             </Grid>

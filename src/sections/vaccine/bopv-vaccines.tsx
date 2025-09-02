@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { BopvVaccineData } from "src/types/vaccines/bopv";
 import { sectionBorderStyle } from "src/utils/constants";
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedBopvVaccineProps {
   initialData?: Partial<BopvVaccineData>;
@@ -73,6 +74,9 @@ export const BopvVaccine = ({
       if (adc > 0) {
       const daysOfStock = Math.floor(psb / adc);
       newFormData.daysOfStock = daysOfStock.toString();
+
+      const dosesRequiredToMax = 70 - daysOfStock;
+      newFormData.qtyReceived = dosesRequiredToMax.toString();
       
   
       newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
@@ -122,6 +126,8 @@ export const BopvVaccine = ({
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -135,6 +141,8 @@ export const BopvVaccine = ({
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -148,6 +156,8 @@ export const BopvVaccine = ({
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
                 disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -176,6 +186,8 @@ export const BopvVaccine = ({
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -208,6 +220,8 @@ export const BopvVaccine = ({
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -258,7 +272,9 @@ export const BopvVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
-                disabled={isView}
+                disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -302,6 +318,8 @@ export const BopvVaccine = ({
                 value={formData.dropperPhysicalStock}
                 onChange={handleInputChange('dropperPhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -332,6 +350,8 @@ export const BopvVaccine = ({
                 value={formData.dropperMismatchAdjustedValue}
                 onChange={handleInputChange('dropperMismatchAdjustedValue')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>

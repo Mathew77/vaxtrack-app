@@ -92,6 +92,7 @@ export const useFetchPermissions = () => {
        const response = await apiHelper.getResource<ApiResponse<PermissionType[]>>(
          `${url}v1/permission/`
        );
+      //  console.log('Fetched permissions:', response.data); 
        return response.data;
      },
    });

@@ -576,6 +576,17 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
                 {(!isView || (isView && !isLastTab)) && (
                   <>
+
+                    {!isFirstTab && (
+                      <Button
+                        variant="contained"
+                        color="inherit"
+                        size="large"
+                        onClick={handleBack}
+                      >
+                        Back
+                      </Button>
+                    )}
                     <Button
                       variant="contained"
                       color="primary"
@@ -592,16 +603,6 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                         : 'Next'}
                     </Button>
 
-                    {!isFirstTab && (
-                      <Button
-                        variant="contained"
-                        color="inherit"
-                        size="large"
-                        onClick={handleBack}
-                      >
-                        Back
-                      </Button>
-                    )}
                   </>
                 )}
               </Box>

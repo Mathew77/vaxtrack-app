@@ -12,6 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import { login, LoginResponse, LoginVariables } from '../../hooks/apis/auth/auth-api';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiHelper } from '../../hooks/apis/apiHelper';
+import { RouterLink } from 'src/routes/components';
 
 
 // ----------------------------------------------------------------------
@@ -50,6 +51,7 @@ export function SignInView() {
  const { mutate: loginUser, status, error } = useMutation<LoginResponse, Error, LoginVariables>({
    mutationFn: login,
    onSuccess: (data: LoginResponse) => {
+    
     //   console.log('Login successful:', JSON.stringify(data, null, 2));
     //  console.log('Access Token:', data.userdata.groups[0]?.name);
     //  console.log('Username:', data.userdata);
@@ -65,6 +67,7 @@ export function SignInView() {
       sessionStorage.setItem('ncs_list', JSON.stringify(data.userdata?.ncs_list || []));
       sessionStorage.setItem('scs_list', JSON.stringify(data.userdata?.scs_list || []));
       sessionStorage.setItem('lcs_list', JSON.stringify(data.userdata?.lcs_list || []));
+      sessionStorage.setItem('email', data.userdata?.email || '');
 
       // sessionStorage.setItem('email', email);
 
@@ -94,11 +97,11 @@ export function SignInView() {
 
 
  const renderForm = (
-   <Box display="flex" flexDirection="column" alignItems="flex-end">
+   <Box display="flex" flexDirection="column" alignItems="center">
      <TextField
        fullWidth
        name="email"
-       label="Email address"
+       label="Username"
        value={username}
        InputLabelProps={{ shrink: true }}
        sx={{ mb: 3 }}
@@ -106,9 +109,9 @@ export function SignInView() {
      />
 
 
-     <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+     {/* <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
        Forgot password?
-     </Link>
+     </Link> */}
 
 
      <TextField
@@ -144,6 +147,14 @@ export function SignInView() {
        {status === 'pending' ? 'Signing in...' : 'Sign In'}
      </LoadingButton>
      {error && <div style={{ color: 'red' }}>Error: {error.message}</div>}
+      <Link
+        component={RouterLink}
+        href="#"
+        color="inherit"
+        sx={{ typography: 'subtitle2', mt : 1 }}
+      >
+        Need help?
+      </Link>
    </Box>
  );
 
@@ -151,6 +162,18 @@ export function SignInView() {
  return (
    <>
      <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
+      <Typography
+        variant="h4" 
+        fontWeight="bold"
+        sx={{
+          letterSpacing: 1,
+          color: 'primary.main',
+          textTransform: 'uppercase',
+          textShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        VAXTRACK
+      </Typography>
        <Typography variant="h5">Sign in</Typography>
      </Box>
      {renderForm}

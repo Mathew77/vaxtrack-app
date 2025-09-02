@@ -21,7 +21,7 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { EHFType } from 'src/hooks/apis/ehf-uhf/ehf-type';
-import { useFetchStates, useFetchLgas, useFetchWards, useUpsertEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchStates, useFetchLgas, useFetchWards, useUpsertEHF, useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
 
@@ -36,22 +36,25 @@ export default function EhfSetup() {
   const upsertEHF = useUpsertEHF();
 
   const {data: states = [] } = useFetchStates();
+  const { data: vaccineStorageEquipment = [] } = useVaccineStorage();
   
   const [selectedState, setSelectedState] = useState('');
   const { data: lgas = [] } = useFetchLgas(selectedState);
 
   const [selectedLga, setSelectedLga] = useState('');
-  const { data: wards = [] } = useFetchWards(selectedLga);
+  // const { data: wards = [] } = useFetchWards(selectedLga);
 
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const { data: uhfs = [] } = useFetchUHF();
 
+   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+
   const initialValues: EHFType = {
     status: '',
     state: '',
     lga: '',
-    ward: '',
+    // ward: '',
     ehf_name: '',
     longtitude: "",
     lagtitude: "",
@@ -59,8 +62,8 @@ export default function EhfSetup() {
     contact_person_name: '',
     contact_person_phone: '',
     contact_person_email: '',
-    storage_capcity: 0, 
-    equipment_model_number: 0
+    storage_capcity: '', 
+    equipment_model_number: '',
   };
 
   const [data, setData] = useState<EHFType>(initialValues);
@@ -77,19 +80,42 @@ export default function EhfSetup() {
         state: ehfData.state || '',
         lga: ehfData.lga || '',
         ward: ehfData.ward || '',
-        storage_capcity: ehfData.storage_capcity ?? 0,
-        equipment_model_number: ehfData.equipment_model_number ?? 0,
+        storage_capcity: ehfData.storage_capcity ?? null,
+        equipment_model_number: ehfData.equipment_model_number ?? null,
       });
       setSelectedState(ehfData.state || '');
       setSelectedLga(ehfData.lga || '');
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
+
+      if (ehfData.storage_capcity) {
+        const equipment = vaccineStorageEquipment.find(eq => eq.code === ehfData.storage_capcity);
+        if (equipment) {
+          setSelectedEquipment(equipment);
+        }
+      }
     }
   };
 
   useEffect(() => {
     setCurrentState();
-  }, [state]);
+  }, [state, vaccineStorageEquipment]);
+
+   useEffect(() => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setData((prev) => ({
+              ...prev,
+              longtitude: longitude.toString(),
+              lagtitude: latitude.toString(),
+            }));
+          } );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    }, []);
 
   // const calculateStorage = () => {
   //   const C = data.storage_capcity || 0;
@@ -126,18 +152,18 @@ export default function EhfSetup() {
     temp.lga = data.lga 
         ? '' 
         : 'Lga is required';
-    temp.ward = data.ward 
-        ? '' 
-        : 'Ward is required';
+    // temp.ward = data.ward 
+    //     ? '' 
+    //     : 'Ward is required';
     temp.ehf_name = data.ehf_name 
         ? '' 
         : 'EHF name required';
-    temp.longtitude = data.longtitude 
-        ? '' 
-        : 'Longitude required';
-    temp.lagtitude = data.lagtitude 
-        ? '' 
-        : 'Latitude required';
+    // temp.longtitude = data.longtitude 
+    //     ? '' 
+    //     : 'Longitude required';
+    // temp.lagtitude = data.lagtitude 
+    //     ? '' 
+    //     : 'Latitude required';
     temp.uhf_list = data.uhf_list.length > 0 ? '' : 'UHF required';
 
     temp.contact_person_name = data.contact_person_name 
@@ -149,17 +175,27 @@ export default function EhfSetup() {
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
-        temp.storage_capcity = data.storage_capcity != null && data.storage_capcity > 0 
-          ? '' 
-          : 'Storage capacity must be greater than 0';
+    temp.storage_capcity = data.storage_capcity && data.storage_capcity.trim() !== ''
+        ? '' 
+        : 'Storage equipment is required';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
   };
 
-  const uhfOptions = uhfs.map(uhf => ({
-    value: uhf.id?.toString() || '', 
-    label: uhf.uhf_name 
+  // const uhfOptions = uhfs.map(uhf => ({
+  //   value: uhf.id?.toString() || '', 
+  //   label: uhf.uhf_name 
+  // }));
+
+  const uhfOptions = uhfs.filter(uhf => {
+    if (uhf.state !== data.state) return false;
+    if (data.lga && uhf.lga !== data.lga) return false;
+    return true;
+  })
+  .map(uhf => ({
+    value: uhf.id?.toString() || '',
+    label: uhf.uhf_name,
   }));
 
   const handleSelectChange = (event: SelectChangeEvent<string>) => {
@@ -177,6 +213,27 @@ export default function EhfSetup() {
       [name]: value, 
     }));
   };
+
+  const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
+  const selectedCode = event.target.value;
+  const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode);
+  
+  if (equipment) {
+    setSelectedEquipment(equipment);
+    setData((prev) => ({
+      ...prev,
+      storage_capcity: equipment.code, 
+      equipment_model_number: equipment.model,
+    }));
+  } else {
+    setSelectedEquipment(null);
+    setData((prev) => ({
+      ...prev,
+      storage_capcity: '',
+      equipment_model_number: '',
+    }));
+  }
+};
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -205,6 +262,16 @@ export default function EhfSetup() {
         lga_id: '',
       }));
     };
+
+     const handleLgaChange = (e: SelectChangeEvent<string>) => {
+        const lga = e.target.value;
+        setSelectedLga(lga);
+  
+        setData((prev) => ({
+          ...prev,
+          lga: lga, 
+        }));
+      };
   
     const GetWards = (event: SelectChangeEvent<string>) => {
       const lga = event.target.value;
@@ -303,7 +370,7 @@ export default function EhfSetup() {
               id="lga_lgaid"
               name="lga"
               value={data.lga}
-              onChange={GetWards}
+              onChange={handleLgaChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
@@ -326,7 +393,7 @@ export default function EhfSetup() {
           </FormControl>
         </Grid>
 
-        <Grid item xs={6}>
+        {/* <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
               Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -356,7 +423,7 @@ export default function EhfSetup() {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="ehf_name">
@@ -380,7 +447,7 @@ export default function EhfSetup() {
         </Grid>
          <Grid item xs={6}>
             <Typography component="label" htmlFor="longtitude" >
-              Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Longitude
             </Typography>
             <TextField
               fullWidth
@@ -390,7 +457,7 @@ export default function EhfSetup() {
               value={data.longtitude}
               onChange={handleInputChange}
               variant="outlined"
-              disabled={isView}
+              disabled={true}
               helperText={
                 errors?.longtitude !== '' ? (
                   <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
@@ -401,7 +468,7 @@ export default function EhfSetup() {
   
           <Grid item xs={6}>
             <Typography component="label" htmlFor="lagtitude" >
-              Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              Latitude
             </Typography>
             <TextField
               fullWidth
@@ -411,7 +478,7 @@ export default function EhfSetup() {
               value={data.lagtitude}
               onChange={handleInputChange}
               variant="outlined"
-              disabled={isView}
+              disabled={true}
               helperText={
                 errors?.lagtitude !== '' ? (
                   <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
@@ -445,6 +512,15 @@ export default function EhfSetup() {
                 {errors?.uhf_list}
               </Typography>
             )}
+            {uhfOptions.length === 0 ? (
+            <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+              {data.state && !data.lga
+                ? 'No UHFs found in this state.'
+                : data.state && data.lga
+                ? 'No UHFs available in this LGA.'
+                : 'Please select a State to load UHFs.'}
+            </Typography>
+            ) : null}
           </FormControl>
         </Grid>
       </Grid>
@@ -455,48 +531,65 @@ export default function EhfSetup() {
         <Box>
           <Grid container spacing={3}>
             <Grid item xs={6}>
-              <Typography component="label" htmlFor="storage_capcity">
-                Storage Capacity (liters) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                  fullWidth
-                  id="storage_capcity"
-                  name="storage_capcity"
-                  value={getDisplayValue(data.storage_capcity)}
-                  onChange={handleChange}
-                  inputProps={{ min: 0 }}
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="storage_equipment" sx={{ mb: 1 }}>
+                  Storage Equipment <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <Select
+                  id="storage_equipment"
+                  name="storage_equipment"
+                  value={selectedEquipment?.code || ''}
+                  onChange={handleEquipmentChange}
+                  sx={{ width: '100%' }}
+                  displayEmpty
                   variant="outlined"
                   disabled={isView}
-                  type="number"
-                  helperText={
-                    errors?.storage_capcity ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.storage_capcity}</span>
-                    ) : ''
-                  }
-                />
+                >
+                  <MenuItem value="" disabled>
+                    Select Storage Equipment
+                  </MenuItem>
+                  {vaccineStorageEquipment.map((equipment) => (
+                    <MenuItem key={equipment.code} value={equipment.code}>
+                      {equipment.description} - {equipment.liters_minustwenty}L
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors?.storage_capcity !== '' && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.storage_capcity}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
 
             <Grid item xs={6}>
               <Typography component="label" htmlFor="equipment_model_number">
-                Cold Chain Equipment Model Number <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                Cold Chain Equipment Model Number
               </Typography>
               <TextField
-                  fullWidth
-                  id="equipment_model_number"
-                  name="equipment_model_number"
-                  value={getDisplayValue(data.equipment_model_number)}
-                  onChange={handleChange}
-                  inputProps={{ min: 0 }}
-                  variant="outlined"
-                  disabled={isView}
-                  type="number"
-                  helperText={
-                    errors?.equipment_model_number ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.equipment_model_number}</span>
-                    ) : ''
-                  }
-                />
+                fullWidth
+                id="equipment_model_number"
+                name="equipment_model_number"
+                value={selectedEquipment?.model || ''}
+                variant="outlined"
+                disabled={true}
+                placeholder="Model will auto-populate when equipment is selected"
+              />
             </Grid>
+{/* 
+            <Grid item xs={6}>
+              <Typography component="label" htmlFor="storage_display">
+                Storage Capacity (liters)
+              </Typography>
+              <TextField
+                fullWidth
+                id="storage_display"
+                name="storage_display"
+                value={selectedEquipment?.liters_minustwenty || ''}
+                variant="outlined"
+                disabled={true}
+              />
+            </Grid> */}
 
           </Grid>
         </Box>

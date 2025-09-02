@@ -46,19 +46,19 @@ export const useFetchStates = () => {
     });
   };
 
-  export const useFetchWards = (lga: string) => {
-    return useQuery({
-      queryKey: ['wards', lga],
-      queryFn: async (): Promise<WardType[]> => {
-        if (!lga) return []; 
-        const response = await apiHelper.getResource<WardType[]>(
-          `${url}v1/wards/?lga=${lga}`
-        );
-        return response;
-      },
-      enabled: !!lga, 
-    });
-  };    
+  // export const useFetchWards = (lga: string) => {
+  //   return useQuery({
+  //     queryKey: ['wards', lga],
+  //     queryFn: async (): Promise<WardType[]> => {
+  //       if (!lga) return []; 
+  //       const response = await apiHelper.getResource<WardType[]>(
+  //         `${url}v1/wards/?lga=${lga}`
+  //       );
+  //       return response;
+  //     },
+  //     enabled: !!lga, 
+  //   });
+  // };    
 
     // export const useFetchOrgUnits = () => {
     //     return useQuery<OrgUnit[], Error>({

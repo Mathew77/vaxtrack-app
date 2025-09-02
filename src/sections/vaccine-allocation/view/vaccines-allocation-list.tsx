@@ -238,11 +238,15 @@ const VaccineAllocationList: React.FC = () => {
       handleClick: handleEdit,
       icon: <EditOutlinedIcon sx={{ color: '#1976D2' }} />,
     },
-    {
-      display: "Delete",
-      handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
-    },
+    ...(userRole !== "ehf"
+    ? [
+        {
+          display: "Delete",
+          handleClick: handleDelete,
+          icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
+        },
+      ]
+    : []),
   ];
 
   return (
@@ -267,7 +271,7 @@ const VaccineAllocationList: React.FC = () => {
             customRightButton={!isEHF}
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText={isThreePL? "Request Vaccine Allocation": "Add Vaccine Allocation"}
+            customRightButtonText={"REQUEST VACCINE ALLOCATION"}
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={allocationItem}
             headerStyles={{

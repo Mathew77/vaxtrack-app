@@ -161,7 +161,7 @@ const NcsList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD NSCS"
+            customRightButtonText="ADD NATIONAL STRATEGIC COLD STORE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ncsListItem}
             headerStyles={{

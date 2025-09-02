@@ -24,7 +24,7 @@
   username: string;
   state: string;
   lga: string;
-  [key: string]: string | number;
+  [key: string]: any;
 }
 
 export interface VaccineAllocationType {
@@ -40,3 +40,11 @@ export interface UHFType {
     state: string;
     lga: string;
   }
+
+
+  // export interface EHFType {
+  //   id: number;
+  //   name: string;
+  //   ehf_name: string; 
+  //   state: string;
+  // }

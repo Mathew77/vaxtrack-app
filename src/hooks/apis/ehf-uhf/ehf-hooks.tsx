@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiHelper } from "../apiHelper";
 import { url } from "src/hooks/api";
-import { LgaType, StateType, EHFType, WardType, OrgUnit  } from "./ehf-type";
+import { LgaType, StateType, EHFType, WardType, OrgUnit, VaccineStorageType  } from "./ehf-type";
 
 type ApiResponse<T> = {
     status: string;
@@ -94,3 +94,19 @@ export const useFetchStates = () => {
         },
       });
     };
+
+
+  // http://127.0.0.1:8000/api/v1/pqs-equipment/
+
+  export const useVaccineStorage = () => {
+    return useQuery({
+      queryKey: ['vaccine-storage'],
+      queryFn: async (): Promise<VaccineStorageType[]> => {
+        const response = await apiHelper.getResource<ApiResponse<VaccineStorageType[]>>(
+            `${url}v1/pqs-equipment/`
+        );
+        return response.data;
+      },
+    });
+  };
+  

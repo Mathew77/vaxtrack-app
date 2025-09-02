@@ -14,7 +14,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { UHFType } from 'src/hooks/apis/ehf-uhf/uhf-type';
-import { useFetchStates, useFetchLgas, useFetchWards, useUpsertUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { useFetchStates, useFetchLgas, useUpsertUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
 
 
@@ -31,7 +31,7 @@ export default function UhfSetup() {
   const { data: lgas = [] } = useFetchLgas(selectedState);
 
   const [selectedLga, setSelectedLga] = useState('');
-  const { data: wards = [] } = useFetchWards(selectedLga);
+  // const { data: wards = [] } = useFetchWards(selectedLga);
 
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
@@ -41,7 +41,7 @@ export default function UhfSetup() {
     status: '',
     state: '',
     lga: '',
-    ward: '',
+    // ward: '',
     // org_unit: '',
     uhf_name: '',
     longtitude: "",
@@ -65,7 +65,7 @@ export default function UhfSetup() {
           ...uhfData,
           state: uhfData.state || '',
           lga: uhfData.lga || '',
-          ward: uhfData.ward || ''
+          // ward: uhfData.ward || ''
         });
         setSelectedState(uhfData.state || ''); 
         setSelectedLga(uhfData.lga || ''); 
@@ -73,10 +73,27 @@ export default function UhfSetup() {
         setIsView(state.isView || false);
       }
     };
+    
   
     useEffect(() => {
       setCurrentState();
     }, [state]);
+
+     useEffect(() => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setData((prev) => ({
+              ...prev,
+              longtitude: longitude.toString(),
+              lagtitude: latitude.toString(),
+            }));
+          } );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    }, []);
 
   const validate = () => {
     let temp = { ...errors };
@@ -86,21 +103,21 @@ export default function UhfSetup() {
     temp.lga = data.lga 
         ? '' 
         : 'Lga is required';
-    temp.ward = data.ward 
-        ? '' 
-        : 'Ward is required';
+    // temp.ward = data.ward 
+    //     ? '' 
+    //     : 'Ward is required';
     // temp.org_unit = data.org_unit 
     //     ? '' 
     //     : 'Org unit required';
     temp.uhf_name = data.uhf_name 
         ? '' 
         : 'uhf name required';
-    temp.longtitude = data.longtitude 
-        ? '' 
-        : 'Longitude required';
-    temp.lagtitude = data.lagtitude 
-        ? '' 
-        : 'Latitude required';
+    // temp.longtitude = data.longtitude 
+    //     ? '' 
+    //     : 'Longitude required';
+    // temp.lagtitude = data.lagtitude 
+    //     ? '' 
+    //     : 'Latitude required';
     temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person naame required';
@@ -129,20 +146,31 @@ export default function UhfSetup() {
     setData((prev) => ({
       ...prev,
       state: state,
-      lga_id: '',
+      // lga_id: '',
     }));
   };
 
-   const GetWards = (event: SelectChangeEvent<string>) => {
-      const lga = event.target.value;
-      setSelectedLga(lga)
-      setData((prev) => ({ 
-        ...prev, 
-        lga: lga,
-        ward: ''
+   const handleLgaChange = (e: SelectChangeEvent<string>) => {
+      const lga = e.target.value;
+      setSelectedLga(lga);
+
+      setData((prev) => ({
+        ...prev,
+        lga: lga, 
       }));
     };
+  
 
+  //  const GetWards = (event: SelectChangeEvent<string>) => {
+  //     const lga = event.target.value;
+  //     setSelectedLga(lga)
+  //     setData((prev) => ({ 
+  //       ...prev, 
+  //       lga: lga,
+  //       ward: ''
+  //     }));
+  //   };
+  
     const handleSubmit = () => {
       if (validate()) {
         if (isUpdate) {
@@ -224,7 +252,7 @@ export default function UhfSetup() {
               id="lga"
               name="lga"
               value={data.lga}
-              onChange={GetWards}
+              onChange={handleLgaChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
@@ -247,7 +275,7 @@ export default function UhfSetup() {
           </FormControl>
         </Grid>
 
-        <Grid item xs={6}>
+        {/* <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="ward" sx={{ mb: 1 }}>
               Ward <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -277,7 +305,7 @@ export default function UhfSetup() {
               </Typography>
             )}
           </FormControl>
-        </Grid>
+        </Grid> */}
 
         {/* <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
@@ -334,7 +362,7 @@ export default function UhfSetup() {
 
            <Grid item xs={6}>
               <Typography component="label" htmlFor="longtitude" >
-                Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                Longitude 
               </Typography>
               <TextField
                 fullWidth
@@ -344,18 +372,18 @@ export default function UhfSetup() {
                 value={data.longtitude}
                 onChange={handleChange}
                 variant="outlined"
-                disabled={isView}
-                helperText={
-                  errors?.longtitude !== '' ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
-                  ) : ''
-                }
+                disabled={true}
+                // helperText={
+                //   errors?.longtitude !== '' ? (
+                //     <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
+                //   ) : ''
+                // }
               />
             </Grid>
     
             <Grid item xs={6}>
               <Typography component="label" htmlFor="lagtitude" >
-                Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                Latitude
               </Typography>
               <TextField
                 fullWidth
@@ -365,12 +393,12 @@ export default function UhfSetup() {
                 value={data.lagtitude}
                 onChange={handleChange}
                 variant="outlined"
-                disabled={isView}
-                helperText={
-                  errors?.lagtitude !== '' ? (
-                    <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
-                  ) : ''
-                }
+                disabled={true}
+                // helperText={
+                //   errors?.lagtitude !== '' ? (
+                //     <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
+                //   ) : ''
+                // }
               />
             </Grid>
 

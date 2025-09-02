@@ -8,7 +8,7 @@ export interface SCSType {
     contact_person_email?: string;
     longtitude: string; 
     lagtitude: string;  
-    storage_capcity: number;
+    storage_capcity: string;
     ehf_list?: string[];
   }
 

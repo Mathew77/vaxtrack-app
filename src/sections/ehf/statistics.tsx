@@ -8,6 +8,8 @@ import HourglassDisabledIcon from '@mui/icons-material/HourglassDisabled';
 import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
 import MoneyOffCsredIcon from '@mui/icons-material/MoneyOffCsred';
 import { useFetchAntigenEhfStock } from 'src/hooks/apis/dashboards/ehf/ehf-dashboard-hook';
+import { DashboardContent } from 'src/layouts/dashboard';
+import Skeleton from '@mui/material/Skeleton';
 
 interface VaccineCardProps {
   title: string;
@@ -17,6 +19,34 @@ interface VaccineCardProps {
   textColor: string;
   // trend: string;
 }
+
+const SkeletonLoader = () => (
+  <DashboardContent maxWidth="xl">
+    <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
+    
+    <Grid container spacing={3}>
+      {[1, 2, 3, 4].map((item) => (
+        <Grid item xs={12} sm={6} md={3} key={item}>
+          <Card sx={{ p: 3 }}>
+            <Skeleton variant="rectangular" width={40} height={40} sx={{ mb: 2 }} />
+            <Skeleton variant="text" sx={{ fontSize: '1rem' }} />
+            <Skeleton variant="text" sx={{ fontSize: '2rem', width: '60%' }} />
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+
+    <Grid container spacing={3} sx={{ mt: 1 }}>
+      <Grid item xs={12} md={6} lg={4}>
+        <Skeleton variant="rectangular" height={300} />
+      </Grid>
+      <Grid item xs={12} md={6} lg={8}>
+        <Skeleton variant="rectangular" height={300} />
+      </Grid>
+    </Grid>
+  </DashboardContent>
+);
+
 
 const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor }) => {
   return (
@@ -56,15 +86,14 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
 };
 
 export default function VaccineOverview() {
-  const { data, isLoading, error } = useFetchAntigenEhfStock();
+  const { data, isLoading:  allAntigenStocks } = useFetchAntigenEhfStock();
+ 
+  const isLoading = allAntigenStocks;
 
-  if (!data) {
-    return (
-      <Alert severity="warning">
-        No antigen stock data available
-      </Alert>
-    );
+  if (isLoading) {
+    return <SkeletonLoader />;
   }
+
 
   const cards = [
     {

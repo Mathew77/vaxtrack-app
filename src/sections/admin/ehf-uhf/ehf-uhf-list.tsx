@@ -16,7 +16,7 @@ interface TableRow {
   id?: number;
   state?: string;
   lga?: string;
-  ward?: string;
+  // ward?: string;
   contact_person_name?: string;
   contact_person_phone?: string;
   contact_person_email?: string;
@@ -95,11 +95,11 @@ const EhfUHFList: React.FC = () => {
         header: 'LGA',
         size: 120,
       },
-      {
-        accessorKey: 'ward',
-        header: 'Ward',
-        size: 120,
-      },
+      // {
+      //   accessorKey: 'ward',
+      //   header: 'Ward',
+      //   size: 120,
+      // },
       {
         accessorKey: 'ehf_name',
         header: 'EHF Name',
@@ -136,11 +136,11 @@ const EhfUHFList: React.FC = () => {
         header: 'LGA',
         size: 120,
       },
-      {
-        accessorKey: 'ward',
-        header: 'Ward',
-        size: 120,
-      },
+      // {
+      //   accessorKey: 'ward',
+      //   header: 'Ward',
+      //   size: 120,
+      // },
       {
         accessorKey: 'uhf_name',
         header: 'UHF Name',
@@ -253,7 +253,7 @@ const EhfUHFList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD EHF"
+            customRightButtonText="ADD EQUIPPED HEALTH FACILITY"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ehfItem}
             headerStyles={{
@@ -274,7 +274,7 @@ const EhfUHFList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD UHF"
+            customRightButtonText="ADD UNEQUIPPED HEALTH FACILITY"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uhfItem}
             headerStyles={{

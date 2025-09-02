@@ -16,6 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { LcsType } from 'src/hooks/apis/lcs-scs/lcs-type';
 import { useFetchLgas, useFetchStates, useUpsertLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 import { toast } from 'react-toastify';
+import { useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
 
 
@@ -30,6 +31,9 @@ export default function LcsSetup() {
   const [selectedState, setSelectedState] = useState('');
   const { data: lgas = [] } = useFetchLgas(selectedState);
   const upsertLcs = useUpsertLcs()
+  const { data: vaccineStorageEquipment = [] } = useVaccineStorage();
+
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
   const initialValues: LcsType = {
     status: "",
@@ -41,7 +45,7 @@ export default function LcsSetup() {
     contact_person_name: "",
     contact_person_phone: "",
     contact_person_email: "",
-    storage_capcity: 0, 
+    storage_capcity: "", 
   }
   
 
@@ -63,12 +67,35 @@ export default function LcsSetup() {
       setSelectedState(lcsData.stat_id || ''); 
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
+
+      if (lcsData.storage_capcity) {
+        const equipment = vaccineStorageEquipment.find(eq => eq.code === lcsData.storage_capcity);
+        if (equipment) {
+          setSelectedEquipment(equipment);
+        }
+      }
     }
   };
 
   useEffect(() => {
     setCurrentState();
-  }, [state]);
+  }, [state, vaccineStorageEquipment]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setData((prev) => ({
+            ...prev,
+            longtitude: longitude.toString(),
+            lagtitude: latitude.toString(),
+          }));
+        } );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  }, []);
 
 
   const validate = () => {
@@ -82,12 +109,12 @@ export default function LcsSetup() {
     temp.lcs_name = data.lcs_name 
         ? '' 
         : 'Lcs name required';
-    temp.longtitude = data.longtitude 
-        ? '' 
-        : 'Longitude required';
-    temp.lagtitude = data.lagtitude 
-        ? '' 
-        : 'Latitude required';
+    // temp.longtitude = data.longtitude 
+    //     ? '' 
+    //     : 'Longitude required';
+    // temp.lagtitude = data.lagtitude 
+    //     ? '' 
+    //     : 'Latitude required';
     temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person naame required';
@@ -97,9 +124,9 @@ export default function LcsSetup() {
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
-    temp.storage_capcity = data.storage_capcity > 0 
+    temp.storage_capcity = data.storage_capcity && data.storage_capcity.trim() !== ''
         ? '' 
-        : 'Storage capacity must be greater than 0';
+        : 'Storage equipment is required';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -112,6 +139,25 @@ export default function LcsSetup() {
       ...prev,
       [name]: value, 
     }));
+  };
+
+  const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
+    const selectedCode = event.target.value;
+    const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode); 
+    
+    if (equipment) {
+      setSelectedEquipment(equipment); 
+      setData((prev) => ({
+        ...prev,
+        storage_capcity: equipment.code, 
+      }));
+    } else {
+      setSelectedEquipment(null); 
+      setData((prev) => ({
+        ...prev,
+        storage_capcity: '',
+      }));
+    }
   };
   
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,7 +319,7 @@ export default function LcsSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="longtitude" >
-            Longitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            Longitude
           </Typography>
           <TextField
             fullWidth
@@ -283,7 +329,7 @@ export default function LcsSetup() {
             value={data.longtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={isView}
+            disabled={true}
             helperText={
               errors?.longtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
@@ -294,7 +340,7 @@ export default function LcsSetup() {
 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="lagtitude" >
-            Latitude <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            Latitude
           </Typography>
           <TextField
             fullWidth
@@ -304,7 +350,7 @@ export default function LcsSetup() {
             value={data.lagtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={isView}
+            disabled={true}
             helperText={
               errors?.lagtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
@@ -320,25 +366,35 @@ export default function LcsSetup() {
         <Box>
           <Grid container spacing={3}>
             <Grid item xs={6}>
-              <Typography component="label" htmlFor="storage_capcity">
-                Storage Capacity (liters) <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-              </Typography>
-              <TextField
-                  fullWidth
-                  id="storage_capcity"
-                  name="storage_capcity"
-                  value={getDisplayValue(data.storage_capcity)} 
-                  onChange={handleChange}
-                  inputProps={{ min: 0 }}
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="storage_equipment" sx={{ mb: 1 }}>
+                  Storage Equipment <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                </Typography>
+                <Select
+                  id="storage_equipment"
+                  name="storage_equipment"
+                  value={selectedEquipment?.code || ''}
+                  onChange={handleEquipmentChange}
+                  sx={{ width: '100%' }}
+                  displayEmpty
                   variant="outlined"
                   disabled={isView}
-                  type="number"
-                  helperText={
-                    errors?.storage_capcity ? (
-                      <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.storage_capcity}</span>
-                    ) : ''
-                  }
-                />
+                >
+                  <MenuItem value="" disabled>
+                    Select Storage Equipment
+                  </MenuItem>
+                  {vaccineStorageEquipment.map((equipment) => (
+                    <MenuItem key={equipment.code} value={equipment.code}>
+                      {equipment.description} - {equipment.liters_minustwenty}L
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors?.storage_capcity !== '' && (
+                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                    {errors?.storage_capcity}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
 
           </Grid>

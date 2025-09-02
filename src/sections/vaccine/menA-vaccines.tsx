@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { TextField, Box, Typography, Grid, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { MenAVaccineData } from "src/types/vaccines/menA"; 
 import { sectionBorderStyle } from "src/utils/constants";
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface ExtendedMenAVaccineProps {
   initialData?:  Partial<MenAVaccineData>;
@@ -109,6 +110,9 @@ export const MenAVaccine = ({
           if (adc > 0) {
           const daysOfStock = Math.floor(psb / adc);
           newFormData.daysOfStock = daysOfStock.toString();
+
+          const dosesRequiredToMax = 70 - daysOfStock;
+          newFormData.qtyReceived = dosesRequiredToMax.toString();
           
       
           newFormData.belowMinStock = daysOfStock < 60 ? 'yes' : 'no';
@@ -166,6 +170,8 @@ export const MenAVaccine = ({
                 value={formData.physicalStock}
                 onChange={handleInputChange('physicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -179,6 +185,8 @@ export const MenAVaccine = ({
                 value={formData.avgDailyConsumption}
                 onChange={handleInputChange('avgDailyConsumption')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -192,6 +200,8 @@ export const MenAVaccine = ({
                 value={formData.daysOfStock}
                 onChange={handleInputChange('daysOfStock')}
                 disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -220,6 +230,8 @@ export const MenAVaccine = ({
                 value={formData.batchNo}
                 onChange={handleInputChange('batchNo')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -256,6 +268,8 @@ export const MenAVaccine = ({
                 value={formData.numberImmunized}
                 onChange={handleInputChange('numberImmunized')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -308,7 +322,9 @@ export const MenAVaccine = ({
                 variant="outlined"
                 value={formData.qtyReceived}
                 onChange={handleInputChange('qtyReceived')}
-                disabled={isView}
+                disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -352,6 +368,8 @@ export const MenAVaccine = ({
                 value={formData.diluentPhysicalStock}
                 onChange={handleInputChange('diluentPhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
                 />
             </Box>
           </Grid>
@@ -383,6 +401,8 @@ export const MenAVaccine = ({
                 value={formData.diluentMismatchAdjustedValue}
                 onChange={handleInputChange('diluentMismatchAdjustedValue')}
                 disabled={true}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -402,6 +422,8 @@ export const MenAVaccine = ({
                 value={formData.fiveMlSyringePhysicalStock}
                 onChange={handleInputChange('fiveMlSyringePhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>
@@ -432,7 +454,9 @@ export const MenAVaccine = ({
                 value={formData.fiveMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('fiveMlSyringeMismatchAdjustedValue')}
                 disabled={isView}
-                />
+                type='number'
+                onKeyDown={preventInvalidKeys}
+              />
             </Box>
           </Grid>
         </Grid>
@@ -451,6 +475,8 @@ export const MenAVaccine = ({
                 value={formData.halfMlSyringePhysicalStock}
                 onChange={handleInputChange('halfMlSyringePhysicalStock')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
                 />
             </Box>
           </Grid>
@@ -481,6 +507,8 @@ export const MenAVaccine = ({
                 value={formData.halfMlSyringeMismatchAdjustedValue}
                 onChange={handleInputChange('halfMlSyringeMismatchAdjustedValue')}
                 disabled={isView}
+                type='number'
+                onKeyDown={preventInvalidKeys}
               />
             </Box>
           </Grid>

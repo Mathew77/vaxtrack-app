@@ -3,7 +3,7 @@ export interface UHFType {
     status: string;
     state: string;
     lga: string;
-    ward: string;
+    // ward?: string; 
     contact_person_name: string;
     contact_person_phone: string;
     contact_person_email: string;

@@ -106,6 +106,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
             {userAccount.displayName}
           </Typography>
 
+         
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
             {userAccount.email}
           </Typography>
@@ -150,7 +151,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
 
         <MenuItem 
           onClick={handleLogout} 
-          sx={{ py: 1, px: 2, mt: 1, borderRadius: 0.75 }}
+          sx={{ py: 1, px: 2, mt: 1, borderRadius: 0.75, color: 'red' }}
         >
           Logout
         </MenuItem>

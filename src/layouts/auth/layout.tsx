@@ -50,30 +50,30 @@ export function AuthLayout({ sx, children, header }: AuthLayoutProps) {
                 This is an info Alert.
               </Alert>
             ),
-            leftArea: (
-              <Typography
-                variant="h4" 
-                fontWeight="bold"
-                sx={{
-                  letterSpacing: 1,
-                  color: 'primary.main',
-                  textTransform: 'uppercase',
-                  textShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
-                }}
-              >
-                VAXTRACK
-              </Typography>
-            ),
-            rightArea: (
-              <Link
-                component={RouterLink}
-                href="#"
-                color="inherit"
-                sx={{ typography: 'subtitle2' }}
-              >
-                Need help?
-              </Link>
-            ),
+            // leftArea: (
+            //   <Typography
+            //     variant="h4" 
+            //     fontWeight="bold"
+            //     sx={{
+            //       letterSpacing: 1,
+            //       color: 'primary.main',
+            //       textTransform: 'uppercase',
+            //       textShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
+            //     }}
+            //   >
+            //     VAXTRACK
+            //   </Typography>
+            // ),
+            // rightArea: (
+            //   <Link
+            //     component={RouterLink}
+            //     href="#"
+            //     color="inherit"
+            //     sx={{ typography: 'subtitle2' }}
+            //   >
+            //     Need help?
+            //   </Link>
+            // ),
           }}
         />
       }

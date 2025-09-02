@@ -9,7 +9,7 @@ export interface LcsType {
     contact_person_name: string;
     contact_person_phone: string;
     contact_person_email: string;
-    storage_capcity: number;
+    storage_capcity: string;
 }
 
 

@@ -239,7 +239,7 @@ const LcsScsList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD LCS"
+            customRightButtonText="ADD LOCAL COLD CHAIN STORE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={lcsItem}
             headerStyles={{
@@ -260,7 +260,7 @@ const LcsScsList: React.FC = () => {
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
-            customRightButtonText="ADD SCS"
+            customRightButtonText="ADD STATE COLD CHAIN STORE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={scsItem}
             headerStyles={{

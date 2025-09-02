@@ -9,6 +9,8 @@ import DeckIcon from '@mui/icons-material/Deck';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 import { useFetchUhfDashboard } from 'src/hooks/apis/dashboards/uhf/uhf-dashboard-hook';
+import { DashboardContent } from 'src/layouts/dashboard';
+import Skeleton from '@mui/material/Skeleton';
 
 interface VaccineCardProps {
   title: string;
@@ -18,6 +20,33 @@ interface VaccineCardProps {
   textColor: string;
   // trend: string;
 }
+
+const SkeletonLoader = () => (
+  <DashboardContent maxWidth="xl">
+    <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
+    
+    <Grid container spacing={3}>
+      {[1, 2, 3, 4].map((item) => (
+        <Grid item xs={12} sm={6} md={3} key={item}>
+          <Card sx={{ p: 3 }}>
+            <Skeleton variant="rectangular" width={40} height={40} sx={{ mb: 2 }} />
+            <Skeleton variant="text" sx={{ fontSize: '1rem' }} />
+            <Skeleton variant="text" sx={{ fontSize: '2rem', width: '60%' }} />
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+
+    <Grid container spacing={3} sx={{ mt: 1 }}>
+      <Grid item xs={12} md={6} lg={4}>
+        <Skeleton variant="rectangular" height={300} />
+      </Grid>
+      <Grid item xs={12} md={6} lg={8}>
+        <Skeleton variant="rectangular" height={300} />
+      </Grid>
+    </Grid>
+  </DashboardContent>
+);
 
 const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor }) => {
   return (
@@ -59,7 +88,13 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
 
 export default function VaccineOverview() {
 
-  const { data } = useFetchUhfDashboard();
+  const { data, isLoading: isAllUhfStocks } = useFetchUhfDashboard();
+
+  const isLoading = isAllUhfStocks;
+
+  if (isLoading) {
+    return <SkeletonLoader />;
+  }
 
   if (!data) {
     return (
@@ -106,7 +141,7 @@ export default function VaccineOverview() {
           // trend: '↘ -1.5%',
         },
         {
-          title: 'Number of Community Vaccine Conveyors engaged ',
+          title: 'Number of Community Vaccine Conveyors engaged',
           total: (data?.total_threepl_count ?? 0).toString(),
           icon: <Diversity3Icon fontSize="large" />,
           bgColor: 'linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%)',

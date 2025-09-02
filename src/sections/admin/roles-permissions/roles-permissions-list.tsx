@@ -9,14 +9,14 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaEye } from 'react-icons/fa';
-import { useDeleteRole, useFetchRoles } from 'src/hooks/apis/roles-permissions/roles-hook';
+import { useDeleteRole, useFetchPermissions, useFetchRoles } from 'src/hooks/apis/roles-permissions/roles-hook';
 
 interface TableRow {
   id?: string | number;
   name: string;
-  fk_org_unit_level_id: string
-  org_unit_level_name: string;
-  permissions: string[]
+  // fk_org_unit_level_id: string
+  // org_unit_level_name: string;
+  // permissions: string[]
 }
 
 interface TabPanelProps {
@@ -64,51 +64,48 @@ const RolesPermissionsList: React.FC = () => {
   const [value, setValue] = useState<number>(initialTab);
 
   const { data: rolesList = [] } = useFetchRoles();
-  const deleteRole = useDeleteRole()
+  const deleteRole = useDeleteRole();
+  const { data: permissionsList = [] } = useFetchPermissions();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   // const rolesList: TableRow[] = [];
-  const permissionsList: TableRow[] = [];
+  // const permissionsList: TableRow[] = [];
 
-  const columns = useMemo(
+  const rolesColumn = useMemo(
     () => [
       {
         accessorKey: 'name',
         header: 'Name',
         size: 100,
       },
-      {
-        accessorKey: 'fk_org_unit_level_id',
-        header: 'Organisation Level ID',
-        size: 200,
-      },
-      {
-        accessorKey: 'org_unit_level_name',
-        header: 'Organisation Level Name',
-        size: 200,
-      },
+      // {
+      //   accessorKey: 'fk_org_unit_level_id',
+      //   header: 'Organisation Level ID',
+      //   size: 200,
+      // },
+      // {
+      //   accessorKey: 'org_unit_level_name',
+      //   header: 'Organisation Level Name',
+      //   size: 200,
+      // },
     ],
     []
   );
 
+  const permissionColumns = useMemo(
+      () => [
+        {
+          accessorKey: 'name',
+          header: 'Name',
+          size: 100,
+        },
+      ],
+      []
+    );
 
-  const actionMenuItems: ActionMenuItem<TableRow>[] = [
-    {
-      display: 'View',
-
-    },
-    {
-      display: 'Edit',
-      icon: <EditOutlinedIcon />,
-    },
-    {
-      display: 'Delete',
-      icon: <DeleteForeverOutlinedIcon />,
-    },
-  ];
 
   const getTabType = () => (value === 0 ? 'role' : 'permission');
 
@@ -127,10 +124,12 @@ const RolesPermissionsList: React.FC = () => {
       deleteRole.mutate(data.id);
     }
   };
+  
 
   const handleAddNew = () => {
     navigate(`/${getTabType()}-setup`, {state: { activeTab: value }});
   };
+  
 
   const rolesItem: ActionMenuItem<TableRow>[] = [
     {
@@ -147,6 +146,27 @@ const RolesPermissionsList: React.FC = () => {
       display: "Delete",
       handleClick: handleDelete,
       icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+    },
+  ];
+
+  const permissionItem: ActionMenuItem<TableRow>[] = [
+    {
+      display: "View",
+      handleClick: handleView,
+      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      disabled: true,
+    },
+    {
+      display: "Edit",
+      handleClick: handleEdit,
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      disabled: true,
+    },
+    {
+      display: "Delete",
+      handleClick: handleDelete,
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      disabled: true,
     },
   ];
 
@@ -170,7 +190,7 @@ const RolesPermissionsList: React.FC = () => {
       <TabPanel value={value} index={0}>
         <Box>
           <VaxTable
-            columns={columns}
+            columns={rolesColumn}
             data={rolesList}
             tableHeader="Roles List"
             customRightButton
@@ -191,15 +211,15 @@ const RolesPermissionsList: React.FC = () => {
       <TabPanel value={value} index={1}>
         <Box>
           <VaxTable
-            columns={columns}
+            columns={permissionColumns}
             data={permissionsList}
             tableHeader="Permissions List"
-            customRightButton
+            customRightButton={false}
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD PERMISSIONS"
             customRightButtonCallBackFunction={handleAddNew}
-            actionMenuItems={actionMenuItems}
+            actionMenuItems={permissionItem}
             headerStyles={{
               backgroundColor: '#1976D2',
               color: 'white',
