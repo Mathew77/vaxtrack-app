@@ -16,7 +16,7 @@ export interface UserType {
   uhf_list?: string[];
   health_facility_category?: string | null;
   user_permissions?: number[];
-  state: string;
+  state: string[];
   role_names?: string[];
 }
 

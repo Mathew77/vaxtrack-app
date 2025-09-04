@@ -27,6 +27,7 @@ import { useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { useFetchThreePl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { toast } from 'react-toastify';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 export default function UserSetup() {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ export default function UserSetup() {
     ehf_list: [],
     uhf_list: [],
     user_permissions: [],
-    state: '',
+    state: [],
   };
 
   const [data, setData] = useState<UserType>(initialValues);
@@ -85,10 +86,11 @@ export default function UserSetup() {
         ehf_list: userData.ehf_list || [],
         uhf_list: userData.uhf_list || [],
         user_permissions: userData.user_permissions || [],
+        state: userData.state || [], 
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
-      setSelectedStateId(userData.state || '')
+      setSelectedStateId(userData.state && userData.state.length > 0 ? userData.state[0] : '');
 
       if (userData.groups.length > 0) {
         const roleId = userData.groups[0];
@@ -146,10 +148,15 @@ export default function UserSetup() {
       temp.password = '';
       temp.confirm_password = '';
     }
-    temp.phone_number = data.phone_number ? '' : 'Phone Number is required';
+    // temp.phone_number = data.phone_number ? '' : 'Phone Number is required';
+    temp.phone_number = data.phone_number
+      ? data.phone_number.length === 11
+        ? ''
+        : 'Phone number must be exactly 11 digits'
+      : 'Phone number is required';
     temp.email = data.email ? '' : 'Email required';
     temp.groups = selectedRoleId ? '' : 'Please select a role';
-    if (isEhfRole() && !data.state) {
+    if (isEhfRole() && (!data.state || data.state.length === 0)) {
     temp.state = 'Please select a state';
     } else {
       temp.state = '';
@@ -187,6 +194,12 @@ export default function UserSetup() {
     }));
   };
 
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      const numericValue = value.replace(/[^0-9]/g, '').slice(0, 11);
+      setData((prev) => ({ ...prev, phone_number: numericValue }));
+    };
+
   const handleRoleSelectChange = (event: any) => {
     const value = event.target.value;
     setSelectedRoleId(value);
@@ -208,7 +221,7 @@ export default function UserSetup() {
     setSelectedItems([]); 
     setData((prev) => ({
       ...prev,
-      state: value,
+      state: value ? [value] : [],
     }));
   }
 
@@ -465,9 +478,12 @@ export default function UserSetup() {
             name="phone_number"
             placeholder="Phone Number"
             value={data.phone_number}
-            onChange={handleChange}
+            onChange={handlePhoneChange}
             variant="outlined"
             disabled={isView}
+            type="text"
+            inputProps={{ inputMode: 'numeric', maxLength: 11 }}
+            onKeyDown={preventInvalidKeys}
             helperText={
               errors?.phone_number ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.phone_number}</span>
@@ -606,11 +622,11 @@ export default function UserSetup() {
       </Grid>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 2 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} disabled={isView}>
-          Submit
-        </Button>
         <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/user-management')}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit} disabled={isView}>
+          Submit
         </Button>
       </Box>
     </Container>

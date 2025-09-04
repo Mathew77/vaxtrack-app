@@ -22,6 +22,7 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import { useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
 export default function NcsSetup() {
   const navigate = useNavigate();
@@ -31,12 +32,15 @@ export default function NcsSetup() {
   const { data: states = [] } = useFetchStates();
   const upsertNcs = useUpsertNcs();
 
+  const { data: vaccineStorageEquipment = [] } = useVaccineStorage();
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+
   const initialValues: NCSType = {
     status: "",
     state: "",
     ncs_name: "",
     state_list: [],
-    storage_capcity: 0,
+    storage_capcity: "",
   };
 
   const [data, setData] = useState<NCSType>(initialValues);
@@ -55,12 +59,19 @@ export default function NcsSetup() {
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
+
+      if (ncsData.storage_capcity) {
+        const equipment = vaccineStorageEquipment.find(eq => eq.code === ncsData.storage_capcity);
+        if (equipment) {
+          setSelectedEquipment(equipment);
+        }
+      }
     }
   };
 
   useEffect(() => {
     setCurrentState();
-  }, [state]);
+  }, [state, vaccineStorageEquipment]);
 
   const validate = () => {
     let temp = { ...errors };
@@ -73,9 +84,9 @@ export default function NcsSetup() {
     temp.state_list = data.state_list.length > 0 
         ? '' 
         : 'At least one state must be selected';
-    temp.storage_capcity = data.storage_capcity > 0 
+    temp.storage_capcity = data.storage_capcity && data.storage_capcity.trim() !== ''
         ? '' 
-        : 'Storage capacity must be greater than 0'; 
+        : 'Storage equipment is required';
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
@@ -105,6 +116,25 @@ export default function NcsSetup() {
       state_list: selected,
     }));
   };
+
+  const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
+    const selectedCode = event.target.value;
+    const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode); 
+    
+      if (equipment) {
+        setSelectedEquipment(equipment); 
+        setData((prev) => ({
+          ...prev,
+          storage_capcity: equipment.code, 
+        }));
+      } else {
+        setSelectedEquipment(null); 
+        setData((prev) => ({
+          ...prev,
+          storage_capcity: '',
+        }));
+      }
+   };
 
   const handleSubmit = () => {
     if (validate()) {
@@ -200,22 +230,35 @@ export default function NcsSetup() {
         </Grid>
 
         <Grid item xs={6}>
-          <Typography component="label" htmlFor="storage_capcity">
-            Storage Capacity
-          </Typography>
-          <TextField
-            fullWidth
-            id="storage_capcity"
-            name="storage_capcity"
-            type="number"
-            value={getDisplayValue(data.storage_capcity)}
-            onChange={handleChange}
-            variant="outlined"
-            disabled={isView}
-            inputProps={{ min: 0 }}
-            error={!!errors.storage_capcity}
-            helperText={errors.storage_capcity}
-          />
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="storage_equipment" sx={{ mb: 1 }}>
+              Storage Equipment <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="storage_equipment"
+              name="storage_equipment"
+              value={selectedEquipment?.code || ''}
+              onChange={handleEquipmentChange}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined"
+              disabled={isView}
+            >
+              <MenuItem value="" disabled>
+                Select Storage Equipment
+              </MenuItem>
+              {vaccineStorageEquipment.map((equipment) => (
+                <MenuItem key={equipment.code} value={equipment.code}>
+                  {equipment.description} - {equipment.liters_minustwenty}L
+                </MenuItem>
+              ))}
+            </Select>
+            {errors?.storage_capcity !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.storage_capcity}
+              </Typography>
+            )}
+          </FormControl>
         </Grid>
 
         <Grid item xs={12}>
@@ -246,11 +289,11 @@ export default function NcsSetup() {
       </Grid>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 2 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
         <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ncs-page')}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+          Submit
         </Button>
       </Box>
     </Container>

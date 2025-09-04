@@ -24,6 +24,8 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import { useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
+// import { useFetchHFAList } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 
 
 export default function ScsSetup() {
@@ -37,7 +39,10 @@ export default function ScsSetup() {
   const  upsertScs = useUpsertScs();
   const { data: ehfList = [] } = useFetchLcsEhf();
 
+  const [selectedState, setSelectedState] = useState('');
+
   const { data: vaccineStorageEquipment = [] } = useVaccineStorage();
+  // const { data: hfaList = [], isLoading: hfaLoading} = useFetchHFAList(selectedState)
   
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
@@ -63,12 +68,14 @@ export default function ScsSetup() {
   const setCurrentState = () => {
     if (state?.data) {
       const scsData = state.data;
+      // setSelectedState(scsData.stat_id || '');
       setData({
         ...initialValues,
         ...scsData,
         stat_id: scsData.stat_id || '',
         ehf_list: scsData.ehf_list || '',
       });
+      
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
 
@@ -153,10 +160,12 @@ export default function ScsSetup() {
         : 'Scs is required';
     temp.contact_person_name = data.contact_person_name 
         ? '' 
-        : 'Contact person naame required';
-    temp.contact_person_phone = data.contact_person_phone 
-        ? '' 
-        : 'Contact person phone required';
+        : 'Contact person name required';
+    temp.contact_person_phone = data.contact_person_phone
+      ? data.contact_person_phone.length === 11
+        ? ''
+        : 'Phone number must be exactly 11 digits'
+      : 'Phone number is required';
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
@@ -218,23 +227,23 @@ export default function ScsSetup() {
     // };
 
     const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
-        const selectedCode = event.target.value;
-        const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode); 
-        
-        if (equipment) {
-          setSelectedEquipment(equipment); 
-          setData((prev) => ({
-            ...prev,
-            storage_capcity: equipment.code, 
-          }));
-        } else {
-          setSelectedEquipment(null); 
-          setData((prev) => ({
-            ...prev,
-            storage_capcity: '',
-          }));
-        }
-    };
+      const selectedCode = event.target.value;
+      const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode); 
+      
+      if (equipment) {
+        setSelectedEquipment(equipment); 
+        setData((prev) => ({
+          ...prev,
+          storage_capcity: equipment.code, 
+        }));
+      } else {
+        setSelectedEquipment(null); 
+        setData((prev) => ({
+          ...prev,
+          storage_capcity: '',
+        }));
+      }
+  };
       
     
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,7 +257,13 @@ export default function ScsSetup() {
       [name]: numericValue,
     }));
   };
-    
+
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    const numericValue = value.replace(/[^0-9]/g, '').slice(0, 11);
+    setData((prev) => ({ ...prev, contact_person_phone: numericValue }));
+  };
+  
   const getDisplayValue = (value: number): string => {
     return value === 0 ? '' : value.toString();
   };
@@ -264,6 +279,17 @@ export default function ScsSetup() {
         ehf_list: selected
       }));
     };
+
+    // const handleEhfNameChange = (event: SelectChangeEvent<string>) => {
+    //   const scs_name = event.target.value;
+    //   const selectedFacility = hfaList.find(hfa => hfa.facility_name === scs_name)
+    //   setData((prev) => ({
+    //     ...prev,
+    //     scs_name: scs_name,
+    //     longtitude: selectedFacility ? selectedFacility.longitude?.toString() || '' : '',
+    //     lagtitude: selectedFacility ? selectedFacility.latitude?.toString() || '' : ''
+    //   }));
+    // }
 
   const handleSubmit = () => {
     if (validate()) {
@@ -387,6 +413,41 @@ export default function ScsSetup() {
           />
         </Grid>
 
+        {/* <Grid item xs={6}>
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="scs_name" >
+              State Cold Chain Store Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="scs_name"
+              name="scs_name"
+              value={data.scs_name}
+              onChange={handleEhfNameChange}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined"
+              disabled={isView || !selectedState || hfaLoading}
+            >
+              <MenuItem value="" disabled>
+                {hfaLoading ? 'Loading facilities...' : 
+                !selectedState  ? 'Select State first' : 
+                hfaList.length === 0 ? 'No facilities found' :
+                'Select EHF Name'}
+              </MenuItem>
+              {hfaList.map((hfa, index) => (
+                <MenuItem key={`${hfa.facility_name}-${index}`} value={hfa.facility_name}>
+                  {hfa.facility_name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors?.scs_name !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.scs_name}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid> */}
+
         <Grid item xs={6}>
           <Typography component="label" htmlFor="longtitude" >
             Longitude
@@ -399,7 +460,7 @@ export default function ScsSetup() {
             value={data.longtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={true}
+            disabled={isView}
             helperText={
               errors?.longtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
@@ -420,7 +481,7 @@ export default function ScsSetup() {
             value={data.lagtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={true}
+            disabled={isView}
             helperText={
               errors?.lagtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
@@ -545,10 +606,12 @@ export default function ScsSetup() {
                 name="contact_person_phone"
                 placeholder="Phone Number "
                 value={data.contact_person_phone}
-                onChange={handleInputChange}
+                onChange={handlePhoneChange}
                 variant="outlined"
                 disabled={isView}
-                type="tel"
+                type="text"
+                inputProps={{ inputMode: 'numeric', maxLength: 11 }}
+                onKeyDown={preventInvalidKeys}
                 helperText={
                   errors?.contact_person_phone ? (
                     <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
@@ -583,16 +646,16 @@ export default function ScsSetup() {
       </Box>
 
 
-      <Box sx={{display: 'flex', gap:4, mt: 4, mb: 4 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
+      <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
           variant="contained" 
           color="inherit" 
           size="large" 
           onClick={() => navigate('/lcs-scs-page', { state: { activeTab } })}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+          Submit
         </Button>
       </Box>
     </Container>

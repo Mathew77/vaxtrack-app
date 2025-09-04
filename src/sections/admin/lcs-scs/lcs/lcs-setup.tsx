@@ -17,6 +17,8 @@ import { LcsType } from 'src/hooks/apis/lcs-scs/lcs-type';
 import { useFetchLgas, useFetchStates, useUpsertLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 import { toast } from 'react-toastify';
 import { useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchHFAList } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 
 
@@ -29,9 +31,14 @@ export default function LcsSetup() {
 
   const {data: states = []} = useFetchStates()
   const [selectedState, setSelectedState] = useState('');
+
   const { data: lgas = [] } = useFetchLgas(selectedState);
+  const [selectedLga, setSelectedLga] = useState('');
   const upsertLcs = useUpsertLcs()
+
   const { data: vaccineStorageEquipment = [] } = useVaccineStorage();
+
+  // const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga)
 
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
@@ -65,6 +72,7 @@ export default function LcsSetup() {
         lga_id: lcsData.lga_id || '',
       });
       setSelectedState(lcsData.stat_id || ''); 
+      setSelectedLga(lcsData.lga || '');
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
 
@@ -117,10 +125,12 @@ export default function LcsSetup() {
     //     : 'Latitude required';
     temp.contact_person_name = data.contact_person_name 
         ? '' 
-        : 'Contact person naame required';
-    temp.contact_person_phone = data.contact_person_phone 
-        ? '' 
-        : 'Contact person phone required';
+        : 'Contact person name required';
+    temp.contact_person_phone = data.contact_person_phone
+      ? data.contact_person_phone.length === 11
+        ? ''
+        : 'Phone number must be exactly 11 digits'
+      : 'Phone number is required';
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
@@ -139,6 +149,12 @@ export default function LcsSetup() {
       ...prev,
       [name]: value, 
     }));
+  };
+
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    const numericValue = value.replace(/[^0-9]/g, '').slice(0, 11);
+    setData((prev) => ({ ...prev, contact_person_phone: numericValue }));
   };
 
   const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
@@ -189,8 +205,24 @@ export default function LcsSetup() {
   
   const handleLgaChange = (event: SelectChangeEvent<string>) => {
     const lgaId = event.target.value;
-    setData((prev) => ({ ...prev, lga_id: lgaId }));
+    setSelectedLga(lgaId)
+    setData((prev) => ({ 
+        ...prev,
+        lga_id: lgaId, 
+        // lcs_name: '',
+      }));
   };
+
+  // const handleLcsNameChange = (event: SelectChangeEvent<string>) => {
+  //   const lcs_name = event.target.value;
+  //   const selectedFacility = hfaList.find(hfa => hfa.facility_name === lcs_name)
+  //   setData((prev) => ({
+  //     ...prev,
+  //     lcs_name: lcs_name,
+  //     longtitude: selectedFacility ? selectedFacility.longitude?.toString() || '' : '',
+  //     lagtitude: selectedFacility ? selectedFacility.latitude?.toString() || '' : ''
+  //   }));
+  // }
 
   const handleSubmit = () => {
     if (validate()) {
@@ -317,6 +349,41 @@ export default function LcsSetup() {
           />
         </Grid>
 
+        {/* <Grid item xs={6}>
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="lcs_name" >
+              Local Cold Chain Store Name  <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="lcs_name"
+              name="lcs_name"
+              value={data.lcs_name}
+              onChange={handleLcsNameChange}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined"
+              disabled={isView || !selectedState || !selectedLga || hfaLoading}
+            >
+              <MenuItem value="" disabled>
+                {hfaLoading ? 'Loading facilities...' : 
+                !selectedState || !selectedLga ? 'Select State and LGA first' : 
+                hfaList.length === 0 ? 'No facilities found' :
+                'Select LCS Name'}
+              </MenuItem>
+              {hfaList.map((hfa, index) => (
+                <MenuItem key={`${hfa.facility_name}-${index}`} value={hfa.facility_name}>
+                  {hfa.facility_name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors?.lcs_name !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.lcs_name}
+              </Typography>
+            )}
+          </FormControl>
+        </Grid> */}
+
         <Grid item xs={6}>
           <Typography component="label" htmlFor="longtitude" >
             Longitude
@@ -329,7 +396,7 @@ export default function LcsSetup() {
             value={data.longtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={true}
+            disabled={isView}
             helperText={
               errors?.longtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.longtitude}</span>
@@ -350,7 +417,7 @@ export default function LcsSetup() {
             value={data.lagtitude}
             onChange={handleInputChange}
             variant="outlined"
-            disabled={true}
+            disabled={isView}
             helperText={
               errors?.lagtitude !== '' ? (
                 <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors?.lagtitude}</span>
@@ -441,10 +508,12 @@ export default function LcsSetup() {
                   name="contact_person_phone"
                   placeholder="Phone Number "
                   value={data.contact_person_phone}
-                  onChange={handleInputChange}
+                  onChange={handlePhoneChange}
                   variant="outlined"
                   disabled={isView}
-                  type="tel"
+                  type="text"
+                  inputProps={{ inputMode: 'numeric', maxLength: 11 }}
+                  onKeyDown={preventInvalidKeys}
                   helperText={
                     errors?.contact_person_phone ? (
                       <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
@@ -478,16 +547,16 @@ export default function LcsSetup() {
           </Box>
         </Box>
 
-      <Box sx={{display: 'flex', gap:4, mt: 4, mb: 4 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
+      <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
           variant="contained" 
           color="inherit" 
           size="large" 
           onClick={() => navigate('/lcs-scs-page', { state: { activeTab }})}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+          Submit
         </Button>
       </Box>
     </Container>

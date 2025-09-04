@@ -398,12 +398,12 @@ const initialValues: ThreePlType = {
         )}
       </Grid>
 
-      <Box sx={{ display: 'flex', gap: 4, mt: 4, mb: 4 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
+      <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/threepl-page')}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+          Submit
         </Button>
       </Box>
     </Container>

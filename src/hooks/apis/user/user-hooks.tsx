@@ -25,16 +25,16 @@ export const useFetchUsers = () => {
 
 export const useUpsertUser = () => {
       const queryClient = useQueryClient();
-      return useMutation({
-        mutationFn: ({ id, data }: { id?: number; data: Partial<UserType> | Omit<UserType, 'id'> }) =>
-          id
-            ? apiHelper.putResource<UserType>(`${url}v1/user/${id}/`, data)
-            : apiHelper.postResource<UserType>(`${url}v1/user/`, data),
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['user'] });
-        },
-      });
-    };
+    return useMutation({
+      mutationFn: ({ id, data }: { id?: number; data: Partial<UserType> | Omit<UserType, 'id'> }) =>
+        id
+          ? apiHelper.putResource<UserType>(`${url}v1/user/${id}/`, data)
+          : apiHelper.postResource<UserType>(`${url}v1/user/`, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+      },
+    });
+  };
 
     export const useFetchOrgUnitLevel = () => {
       return useQuery<OrgUnit[], Error>({

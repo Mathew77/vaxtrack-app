@@ -17,7 +17,7 @@ interface TableRow {
   state: string;
   ncs_name: string;
   state_list: string[];
-  storage_capcity: number;
+  storage_capcity: string;
 }
 
 interface TabPanelProps {

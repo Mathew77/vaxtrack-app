@@ -28,3 +28,16 @@ export interface LgaType {
     id: string | number;
     name: string;
   }
+
+  export interface HFAType {
+    id: number;
+    facility_name: string; 
+    state: string;
+    lga: string;
+    latitude: number;
+    longitude: number;
+    ward: string;
+    zone: string;
+    uuid: string;
+    federal_inec_ward: string;
+}

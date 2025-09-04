@@ -14,8 +14,9 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { UHFType } from 'src/hooks/apis/ehf-uhf/uhf-type';
-import { useFetchStates, useFetchLgas, useUpsertUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { useFetchStates, useFetchLgas, useUpsertUHF, useFetchHFAList} from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 
 export default function UhfSetup() {
@@ -36,6 +37,7 @@ export default function UhfSetup() {
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const upsertUHF = useUpsertUHF();
+  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga);
 
   const initialValues: UHFType = {
     status: '',
@@ -79,22 +81,6 @@ export default function UhfSetup() {
       setCurrentState();
     }, [state]);
 
-     useEffect(() => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            setData((prev) => ({
-              ...prev,
-              longtitude: longitude.toString(),
-              lagtitude: latitude.toString(),
-            }));
-          } );
-      } else {
-        console.error('Geolocation is not supported by this browser.');
-      }
-    }, []);
-
   const validate = () => {
     let temp = { ...errors };
     temp.state = data.state 
@@ -120,14 +106,15 @@ export default function UhfSetup() {
     //     : 'Latitude required';
     temp.contact_person_name = data.contact_person_name 
         ? '' 
-        : 'Contact person naame required';
-    temp.contact_person_phone = data.contact_person_phone 
-        ? '' 
-        : 'Contact person phone required';
+        : 'Contact person name required';
+    temp.contact_person_phone = data.contact_person_phone
+      ? data.contact_person_phone.length === 11
+        ? ''
+        : 'Phone number must be exactly 11 digits'
+      : 'Phone number is required';
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
-
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === '');
   };
@@ -146,8 +133,10 @@ export default function UhfSetup() {
     setData((prev) => ({
       ...prev,
       state: state,
-      // lga_id: '',
+      lga: '',
+      uhf_name: '',
     }));
+    setSelectedLga('');
   };
 
    const handleLgaChange = (e: SelectChangeEvent<string>) => {
@@ -157,8 +146,26 @@ export default function UhfSetup() {
       setData((prev) => ({
         ...prev,
         lga: lga, 
+        uhf_name: '',
       }));
     };
+
+    const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      const numericValue = value.replace(/[^0-9]/g, '').slice(0, 11);
+      setData((prev) => ({ ...prev, contact_person_phone: numericValue }));
+    };
+
+    const handleUhfNameChange = (event: SelectChangeEvent<string>) => {
+      const uhf_name = event.target.value;
+      const selectedFacility = hfaList.find(hfa => hfa.facility_name === uhf_name)
+      setData((prev) => ({
+        ...prev,
+        uhf_name: uhf_name,
+        longtitude: selectedFacility ? selectedFacility.longitude?.toString() || '' : '',
+        lagtitude: selectedFacility ? selectedFacility.latitude?.toString() || '' : ''
+      }));
+    }
   
 
   //  const GetWards = (event: SelectChangeEvent<string>) => {
@@ -339,26 +346,41 @@ export default function UhfSetup() {
           </FormControl>
         </Grid> */}
 
-        <Grid item xs={6}>
-            <Typography component="label" htmlFor="uhf_name">
-              Unequipped Health Facility Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
-            </Typography>
-            <TextField
-              fullWidth
-              id="uhf_name"
-              name="uhf_name"
-              placeholder="UHF Name"
-              value={data.uhf_name}
-              onChange={handleChange}
-              variant="outlined"
-              disabled={isView}
-              helperText={
-                errors?.uhf_name ? (
-                  <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.uhf_name}</span>
-                ) : ''
-              }
-            />
+          <Grid item xs={6}>
+            <FormControl sx={{ m: 0, width: '100%' }}>
+              <Typography component="label" htmlFor="uhf_name" >
+                Unequipped Health Facility Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+              </Typography>
+              <Select
+                id="uhf_name"
+                name="uhf_name"
+                value={data.uhf_name}
+                onChange={handleUhfNameChange}
+                sx={{ width: '100%' }}
+                displayEmpty
+                variant="outlined"
+                disabled={isView || !selectedState || !selectedLga || hfaLoading}
+              >
+                <MenuItem value="" disabled>
+                  {hfaLoading ? 'Loading facilities...' : 
+                  !selectedState || !selectedLga ? 'Select State and LGA first' : 
+                  hfaList.length === 0 ? 'No facilities found' :
+                  'Select UHF Name'}
+                </MenuItem>
+                {hfaList.map((hfa, index) => (
+                  <MenuItem key={`${hfa.facility_name}-${index}`} value={hfa.facility_name}>
+                    {hfa.facility_name}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors?.uhf_name !== '' && (
+                <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                  {errors?.uhf_name}
+                </Typography>
+              )}
+            </FormControl>
           </Grid>
+
 
            <Grid item xs={6}>
               <Typography component="label" htmlFor="longtitude" >
@@ -444,10 +466,12 @@ export default function UhfSetup() {
                   name="contact_person_phone"
                   placeholder="Phone Number "
                   value={data.contact_person_phone}
-                  onChange={handleChange}
+                  onChange={handlePhoneChange}
                   variant="outlined"
                   disabled={isView}
-                  type="tel"
+                  type='text'
+                  inputProps={{ inputMode: 'numeric', maxLength: 11 }}
+                  onKeyDown={preventInvalidKeys}
                   helperText={
                     errors?.contact_person_phone ? (
                       <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
@@ -482,15 +506,15 @@ export default function UhfSetup() {
         </Box>
 
       <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
         <Button 
           variant="contained" 
           color="inherit" 
           size="large" 
           onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+          Submit
         </Button>
       </Box>
     </Container>

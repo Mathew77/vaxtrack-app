@@ -150,7 +150,14 @@ export default function OrgLevelSetup() {
         </Grid>
       </Grid>
 
-      <Box sx={{ display: 'flex', gap: 4, mt: 4, mb: 4 }}>
+      <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
+        <Button 
+          variant="contained" 
+          color="inherit" 
+          size="large" 
+          onClick={() => navigate('/org-units-page', {state: { activeTab} })}>
+          Cancel
+        </Button>
         <Button
           variant="contained"
           color="primary"
@@ -159,13 +166,6 @@ export default function OrgLevelSetup() {
           disabled={isView}
         >
           Submit
-        </Button>
-        <Button 
-          variant="contained" 
-          color="inherit" 
-          size="large" 
-          onClick={() => navigate('/org-units-page', {state: { activeTab} })}>
-          Cancel
         </Button>
       </Box>
     </Container>

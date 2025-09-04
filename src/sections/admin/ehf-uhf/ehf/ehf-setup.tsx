@@ -22,8 +22,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { EHFType } from 'src/hooks/apis/ehf-uhf/ehf-type';
 import { useFetchStates, useFetchLgas, useFetchWards, useUpsertEHF, useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
-import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { useFetchHFAList, useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 
 export default function EhfSetup() {
@@ -47,8 +48,9 @@ export default function EhfSetup() {
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const { data: uhfs = [] } = useFetchUHF();
+  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga);
 
-   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
+  const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
   const initialValues: EHFType = {
     status: '',
@@ -101,21 +103,6 @@ export default function EhfSetup() {
     setCurrentState();
   }, [state, vaccineStorageEquipment]);
 
-   useEffect(() => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            setData((prev) => ({
-              ...prev,
-              longtitude: longitude.toString(),
-              lagtitude: latitude.toString(),
-            }));
-          } );
-      } else {
-        console.error('Geolocation is not supported by this browser.');
-      }
-    }, []);
 
   // const calculateStorage = () => {
   //   const C = data.storage_capcity || 0;
@@ -169,9 +156,11 @@ export default function EhfSetup() {
     temp.contact_person_name = data.contact_person_name 
         ? '' 
         : 'Contact person name required';
-    temp.contact_person_phone = data.contact_person_phone 
-        ? '' 
-        : 'Contact person phone required';
+    temp.contact_person_phone = data.contact_person_phone
+      ? data.contact_person_phone.length === 11
+        ? ''
+        : 'Phone number must be exactly 11 digits'
+      : 'Phone number is required';
     temp.contact_person_email = data.contact_person_email 
         ? '' 
         : 'Contact person email required';
@@ -215,25 +204,25 @@ export default function EhfSetup() {
   };
 
   const handleEquipmentChange = (event: SelectChangeEvent<string>) => {
-  const selectedCode = event.target.value;
-  const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode);
-  
-  if (equipment) {
-    setSelectedEquipment(equipment);
-    setData((prev) => ({
-      ...prev,
-      storage_capcity: equipment.code, 
-      equipment_model_number: equipment.model,
-    }));
-  } else {
-    setSelectedEquipment(null);
-    setData((prev) => ({
-      ...prev,
-      storage_capcity: '',
-      equipment_model_number: '',
-    }));
-  }
-};
+    const selectedCode = event.target.value;
+    const equipment = vaccineStorageEquipment.find(eq => eq.code === selectedCode);
+    
+    if (equipment) {
+      setSelectedEquipment(equipment);
+      setData((prev) => ({
+        ...prev,
+        storage_capcity: equipment.code, 
+        equipment_model_number: equipment.model,
+      }));
+    } else {
+      setSelectedEquipment(null);
+      setData((prev) => ({
+        ...prev,
+        storage_capcity: '',
+        equipment_model_number: '',
+      }));
+    }
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -289,6 +278,23 @@ export default function EhfSetup() {
         uhf_list: selected
       }));
     };
+
+    const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+      const numericValue = value.replace(/[^0-9]/g, '').slice(0, 11);
+      setData((prev) => ({ ...prev, contact_person_phone: numericValue }));
+    };
+
+    const handleEhfNameChange = (event: SelectChangeEvent<string>) => {
+      const ehf_name = event.target.value;
+      const selectedFacility = hfaList.find(hfa => hfa.facility_name === ehf_name)
+      setData((prev) => ({
+        ...prev,
+        ehf_name: ehf_name,
+        longtitude: selectedFacility ? selectedFacility.longitude?.toString() || '' : '',
+        lagtitude: selectedFacility ? selectedFacility.latitude?.toString() || '' : ''
+      }));
+    }
 
     const handleSubmit = () => {
       if (validate()) {
@@ -424,7 +430,7 @@ export default function EhfSetup() {
             )}
           </FormControl>
         </Grid> */}
-
+{/* 
         <Grid item xs={6}>
           <Typography component="label" htmlFor="ehf_name">
             Equipped Health Facilty Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -444,7 +450,43 @@ export default function EhfSetup() {
               ) : ''
             }
           />
+        </Grid> */}
+
+        <Grid item xs={6}>
+          <FormControl sx={{ m: 0, width: '100%' }}>
+            <Typography component="label" htmlFor="ehf_name" >
+              Equipped Health Facility Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <Select
+              id="ehf_name"
+              name="ehf_name"
+              value={data.ehf_name}
+              onChange={handleEhfNameChange}
+              sx={{ width: '100%' }}
+              displayEmpty
+              variant="outlined"
+              disabled={isView || !selectedState || !selectedLga || hfaLoading}
+            >
+              <MenuItem value="" disabled>
+                {hfaLoading ? 'Loading facilities...' : 
+                !selectedState || !selectedLga ? 'Select State and LGA first' : 
+                hfaList.length === 0 ? 'No facilities found' :
+                'Select EHF Name'}
+              </MenuItem>
+              {hfaList.map((hfa, index) => (
+                <MenuItem key={`${hfa.facility_name}-${index}`} value={hfa.facility_name}>
+                  {hfa.facility_name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors?.ehf_name !== '' && (
+              <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                {errors?.ehf_name}
+              </Typography>
+            )}
+          </FormControl>
         </Grid>
+
          <Grid item xs={6}>
             <Typography component="label" htmlFor="longtitude" >
               Longitude
@@ -532,7 +574,7 @@ export default function EhfSetup() {
           <Grid container spacing={3}>
             <Grid item xs={6}>
               <FormControl sx={{ m: 0, width: '100%' }}>
-                <Typography component="label" htmlFor="storage_equipment" sx={{ mb: 1 }}>
+                <Typography component="label" htmlFor="storage_equipment">
                   Storage Equipment <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
                 </Typography>
                 <Select
@@ -633,10 +675,12 @@ export default function EhfSetup() {
                 name="contact_person_phone"
                 placeholder="Phone Number "
                 value={data.contact_person_phone}
-                onChange={handleInputChange}
+                onChange={handlePhoneChange}
                 variant="outlined"
                 disabled={isView}
-                type="tel"
+                type='text'
+                inputProps={{ inputMode: 'numeric', maxLength: 11 }}
+                onKeyDown={preventInvalidKeys}
                 helperText={
                   errors?.contact_person_phone ? (
                     <span style={{ color: '#DC143C', fontSize: '13px' }}>{errors.contact_person_phone}</span>
@@ -671,15 +715,15 @@ export default function EhfSetup() {
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
-        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
-          Submit
-        </Button>
         <Button 
           variant="contained" 
           color="inherit" 
           size="large" 
           onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Cancel
+        </Button>
+        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
+          Submit
         </Button>
       </Box>
     </Container>

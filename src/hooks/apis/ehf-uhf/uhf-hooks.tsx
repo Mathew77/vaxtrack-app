@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiHelper } from "../apiHelper";
 import { url } from "src/hooks/api";
-import { LgaType, StateType, UHFType, WardType, OrgUnit  } from "./uhf-type";
+import { LgaType, StateType, UHFType, WardType, OrgUnit, HFAType  } from "./uhf-type";
 
 type ApiResponse<T> = {
     status: string;
@@ -94,3 +94,50 @@ export const useFetchStates = () => {
         },
       });
     };
+
+   export const useFetchHFAList = (state: string, lga?: string) => {
+    return useQuery({
+      queryKey: ['hfa-list', state, lga],
+      queryFn: async (): Promise<HFAType[]> => {
+        if (!state) return [];
+
+        try {
+          let apiUrl = `${url}v1/hfa-list/?state=${encodeURIComponent(state.trim())}`;
+          
+          if (lga && lga.trim()) {
+            apiUrl += `&lga=${encodeURIComponent(lga.trim())}`;
+          }
+
+          const response = await apiHelper.getResource<ApiResponse<HFAType[]>>(apiUrl);
+
+          return Array.isArray(response.data) ? response.data : [];
+        } catch (error) {
+          console.error('API Error - HFA List:', error);
+          return [];
+        }
+      },
+      enabled: !!state, 
+    });
+  };
+
+
+//   export const useFetchHFAListByState = (state: string) => {
+//   return useQuery({
+//     queryKey: ['hfa-list-by-state', state],
+//     queryFn: async (): Promise<HFAType[]> => {
+//       if (!state) return [];
+
+//       try {
+//         const response = await apiHelper.getResource<ApiResponse<HFAType[]>>(
+//           `${url}v1/hfa-list/?state=${encodeURIComponent(state.trim())}`
+//         );
+
+//         return Array.isArray(response.data) ? response.data : [];
+//       } catch (error) {
+//         console.error('API Error - HFA List by State:', error);
+//         return [];
+//       }
+//     },
+//     enabled: !!state,
+//   });
+// };

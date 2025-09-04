@@ -230,7 +230,7 @@ const OrgUnitLevelList: React.FC = () => {
             columns={orgUnit}
             data={orgUnitList}
             tableHeader="Organisation Unit List"
-            customRightButton
+            customRightButton={false}
             customRightButtonIcon={<AddOutlinedIcon />}
             customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD ORGANISATION UNIT"

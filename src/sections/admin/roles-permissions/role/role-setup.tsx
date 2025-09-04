@@ -251,16 +251,7 @@ export default function RolesSetup() {
      </Grid>
 
 
-     <Box sx={{ display: 'flex', gap: 4, mt: 4, mb: 4 }}>
-       <Button
-         variant="contained"
-         color="primary"
-         size="large"
-         onClick={handleSubmit}
-         disabled={upsertRole.isPending || isView}
-       >
-         {upsertRole.isPending ? 'Submitting...' : 'Submit'}
-       </Button>
+     <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
        <Button
          variant="contained"
          color="inherit"
@@ -269,7 +260,16 @@ export default function RolesSetup() {
        >
          Cancel
        </Button>
-     </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={handleSubmit}
+          disabled={upsertRole.isPending || isView}
+        >
+          {upsertRole.isPending ? 'Submitting...' : 'Submit'}
+        </Button>
+      </Box>
    </Container>
  );
 }
