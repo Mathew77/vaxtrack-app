@@ -220,12 +220,12 @@ export const navData = [
   //   icon: icon('ic-lock'),
   //   roles: ['ehf','uhf','lcs','slwg','threepl'],
   // },
-  // {
-  //   title: 'Report',
-  //   path: '/report',
-  //   icon: <StackedLineChartIcon />,
-  //   roles: ['ehf','uhf','lcs','slwg','threepl', 'admin'],
-  // },
+  {
+    title: 'Report',
+    path: '/report',
+    icon: <StackedLineChartIcon />,
+    roles: ['admin', 'scs','slwg'],
+  },
   //test-page
   // {
   //   title: 'Test-Page',

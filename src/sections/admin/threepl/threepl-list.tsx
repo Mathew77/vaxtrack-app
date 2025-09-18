@@ -189,6 +189,7 @@ const ThreeplList: React.FC = () => {
               color: 'white',
               fontSize: '16px',
             }}
+            showDownloadButton={false}
           />
         </Box>
       </TabPanel>

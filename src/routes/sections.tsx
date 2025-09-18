@@ -46,6 +46,7 @@ export const OrgUnitPage = lazy(() => import('src/pages/admin/org-unit/index'));
 export const ThreePlPage = lazy(() => import('src/pages/admin/threepl/index'));
 export const ZonePage = lazy(() => import('src/pages/admin/zone/index'));
 export const NcsPage = lazy(() => import('src/pages/admin/ncs/index'));
+export const ReportForms = lazy(() => import('src/pages/admin/report'));
 
 // export const ScsSetup = lazy(() => import('src/pages/admin/lcs-scs/scs/scs-setup'));
 export const CommunityVaccine = lazy(() => import('src/pages/admin/community/community-setup'));
@@ -174,6 +175,8 @@ export function Router() {
 
         {path: 'vaccine-view', element: <VaccineView />},
         {path: 'vaccine-request-view', element: <VaccineRequestForm />},
+
+        { path: 'report', element: <ReportForms />},
 
 
         //TestPage

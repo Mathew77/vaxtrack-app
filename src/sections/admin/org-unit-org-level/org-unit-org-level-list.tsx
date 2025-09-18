@@ -241,6 +241,7 @@ const OrgUnitLevelList: React.FC = () => {
               color: 'white',
               fontSize: '16px',
             }}
+            showDownloadButton={false}
           />
         </Box>
       </TabPanel>
@@ -262,6 +263,7 @@ const OrgUnitLevelList: React.FC = () => {
               color: 'white',
               fontSize: '16px',
             }}
+            showDownloadButton={false}
           />
         </Box>
       </TabPanel>

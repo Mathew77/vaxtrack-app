@@ -204,6 +204,7 @@ const RolesPermissionsList: React.FC = () => {
               color: 'white',
               fontSize: '16px',
             }}
+            showDownloadButton={false}
           />
         </Box>
       </TabPanel>
@@ -225,6 +226,7 @@ const RolesPermissionsList: React.FC = () => {
               color: 'white',
               fontSize: '16px',
             }}
+            showDownloadButton={false}
           />
         </Box>
       </TabPanel>

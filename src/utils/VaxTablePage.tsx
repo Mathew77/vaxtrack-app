@@ -11,7 +11,9 @@ import {
   MRT_RowData,
 } from 'material-react-table';
 import { Box, MenuItem, Typography, SxProps, Theme } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
+import { mkConfig, generateCsv, download } from 'export-to-csv';
 import { Button } from 'react-bootstrap';
 import { ReactElement, ReactNode, CSSProperties } from 'react';
 
@@ -37,6 +39,8 @@ interface VaxTableProps<TData extends MRT_RowData> {
   actionMenuItems?: ActionMenuItem<TData>[];
   headerStyles?: SxProps<Theme>;
   buttonStyles?: CSSProperties;
+  showDownloadButton?: boolean;
+  exportFileName?: string;
 }
 
 const VaxTable = <TData extends MRT_RowData>({
@@ -54,7 +58,21 @@ const VaxTable = <TData extends MRT_RowData>({
   actionMenuItems = [],
   headerStyles = {},
   buttonStyles = {},
+  showDownloadButton = true,
+  exportFileName,
 }: VaxTableProps<TData>) => {
+  const csvConfig = mkConfig({
+    fieldSeparator: ',',
+    decimalSeparator: '.',
+    useKeysAsHeaders: true,
+    filename: exportFileName || `${tableHeader.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}`,
+  });
+
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
+
   const table = useMaterialReactTable({
     columns,
     data,
@@ -81,6 +99,7 @@ const VaxTable = <TData extends MRT_RowData>({
         borderRadius: 'none',
       },
     },
+    
     renderTopToolbar: ({ table }: { table: MRT_TableInstance<TData> }) => (
       <Box >
         <Box sx={{ marginX: '20px', marginY: '10px' }} className="header-title">
@@ -127,8 +146,8 @@ const VaxTable = <TData extends MRT_RowData>({
             <MRT_ShowHideColumnsButton table={table} />
             <MRT_ToggleFullScreenButton table={table} />
           </Box>
-          {customRightButton && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+            {customRightButton && (
               <Button
                 onClick={customRightButtonCallBackFunction}
                 style={{
@@ -146,8 +165,27 @@ const VaxTable = <TData extends MRT_RowData>({
               >
                 {customRightButtonIcon} {customRightButtonText}
               </Button>
-            </Box>
-          )}
+            )}
+            {showDownloadButton && (
+              <Button
+                onClick={handleExportData}
+                style={{
+                  border: 'none',
+                  backgroundColor: '#000000',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginLeft: '10px',
+                  marginRight: '10px',
+                  cursor: 'pointer',
+                  ...buttonStyles,
+                }}
+              >
+                <FileDownloadIcon style={{ marginRight: '5px' }} />
+                EXPORT
+              </Button>
+            )}
+          </Box>
         </Box>
       </Box>
     ),
