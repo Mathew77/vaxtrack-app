@@ -81,11 +81,14 @@ function a11yProps(index: number) {
 const statusDisplayMap: { [key: number]: string } = {
   0: 'Vaccine Requested by EHF',
   1: 'Vaccine Approved by LCS',
-  2: 'Vaccine Declined by LCS', 
+  2: 'Vaccine Declined by LCS',
   3: 'Vaccine Approved by SLWG',
   4: 'Vaccine Declined by SLWG',
-  5: 'Vaccine Picked by ThreePL',
-  6: 'Order Completed',
+  5: 'Vaccine Approved by SCS',
+  6: 'Vaccine Declined by SCS',
+  7: 'Vaccine Approved by ThreePL',
+  8: 'Order Completed',
+  9: 'Vaccine Declined by ThreePL',
 };
 
 const VaccineRequestList: React.FC = () => {
@@ -229,29 +232,31 @@ const VaccineRequestList: React.FC = () => {
       if (allowedLcsEhfIds.length === 0) return [];
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
         const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
-        return allowedLcsEhfIds.includes(String(request.ehf_id)) && 
-          (statusNumber === 0 || statusNumber === 1 || statusNumber === 2 || 
-            statusNumber === 3 || statusNumber === 4 || statusNumber === 5 || statusNumber === 6);
+        return allowedLcsEhfIds.includes(String(request.ehf_id)) &&
+          (statusNumber === 0 || statusNumber === 1 || statusNumber === 2 ||
+            statusNumber === 3 || statusNumber === 4 || statusNumber === 5 || statusNumber === 6 ||
+            statusNumber === 7 || statusNumber === 8);
       });
     } else if (isSLWG) {
       if (allowedSlwgEhfIds.length === 0) return [];
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
         const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
-        return allowedSlwgEhfIds.includes(String(request.ehf_id)) && 
-          (statusNumber === 1 || statusNumber === 3 || statusNumber === 4 || 
-            statusNumber === 5 || statusNumber === 6);
+        return allowedSlwgEhfIds.includes(String(request.ehf_id)) &&
+          (statusNumber === 1 || statusNumber === 3 || statusNumber === 4 ||
+            statusNumber === 5 || statusNumber === 6 || statusNumber === 7 || statusNumber === 8); // Removed status 0 - SLWG should only see after LCS approval
       });
     } else if (isSSC) {
       if (allowedScsEhfIds.length === 0) return [];
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
         const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
-        return allowedScsEhfIds.includes(String(request.ehf_id)) && 
-              (statusNumber === 3 || statusNumber === 4 || statusNumber === 5 || statusNumber === 6);
+        return allowedScsEhfIds.includes(String(request.ehf_id)) &&
+              (statusNumber === 3 || statusNumber === 5 || statusNumber === 6 ||
+                statusNumber === 7 || statusNumber === 8); // Removed status 4 (SLWG declined) - SCS shouldn't see declined requests
       });
     } else if (isThreePL) {
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
         const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
-        return statusNumber === 3 || statusNumber === 5 || statusNumber === 6;
+        return statusNumber === 5 || statusNumber === 7 || statusNumber === 8 || statusNumber === 9;
       });
     } else if (isEHF) {
       if (!userEhfId) return [];
@@ -384,6 +389,12 @@ const VaccineRequestList: React.FC = () => {
           icon: <FaEye style={{ color: "#1976D2" }} />,
         });
       }  else if (isSLWG) {
+      items.push({
+        display: "View / Approve",
+        handleClick: handleView,
+        icon: <FaEye style={{ color: "#1976D2" }} />,
+      });
+    } else if (isSSC) {
       items.push({
         display: "View / Approve",
         handleClick: handleView,

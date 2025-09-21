@@ -218,7 +218,7 @@ export default function UserSetup() {
   const handleStateChange = (event: any) => {
     const value = event.target.value;
     setSelectedStateId(value);
-    setSelectedItems([]); 
+    setSelectedItems([]);
     setData((prev) => ({
       ...prev,
       state: value ? [value] : [],

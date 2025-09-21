@@ -9,9 +9,43 @@ export interface BopvVaccineData {
     belowMinStock: string;
     aboveMaxStock: string;
     qtyReceived: string;
-    // closingBalance: string;
-    // postLmdDos: string;
+    
+    
+
+    
+    lcsAntigenQuantitySent?: string;
+    lcsAntigenMismatchAdjusted?: string; 
+
     dropperPhysicalStock: string; 
     dropperMismatchOutcome: string;
     dropperMismatchAdjustedValue: string;
+
+    
+    lcsDropperQuantitySent?: string;
+    lcsDropperMismatchAdjusted?: string; 
+
+      
+    slwgAntigenQuantitySent?: string;
+    slwgAntigenMismatchAdjusted?: string;
+
+    
+    slwgDropperQuantitySent?: string;
+    slwgDropperMismatchAdjusted?: string;
+
+    scsAntigenQuantitySent?: string;
+    scsAntigenMismatchAdjusted?: string;
+    
+    scsDropperQuantitySent?: string;
+    scsDropperMismatchAdjusted?: string;
+
+    threePlAntigenQuantitySent?: string;
+    threePlAntigenMismatchAdjusted?: string;
+    threePlDropperQuantitySent?: string;
+    threePlDropperMismatchAdjusted?: string;
+
+    ehfAntigenQuantityReceived?: string;
+    ehfAntigenMismatchOutcome?: string;
+    
+    ehfDropperQuantityReceived?: string;
+    ehfDropperMismatchOutcome?: string;
   }

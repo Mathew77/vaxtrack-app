@@ -48,12 +48,10 @@ export const ColdChainStatus = ({
       equipStatus: initialData.equipStatus || '',
       requestType: initialData.requestType || '',
     };
-    console.log('ColdChainStatus initial formData:', mergedData);
     return mergedData;
   });
 
   useEffect(() => {
-    console.log('ColdChainStatus useEffect - initialData:', initialData);
     const newFormData = {
       dateCreated: initialData.dateCreated || formattedDateTime,
       equipStatus: initialData.equipStatus || '',
@@ -61,7 +59,6 @@ export const ColdChainStatus = ({
     };
     setFormData((prev) => {
       if (JSON.stringify(prev) !== JSON.stringify(newFormData)) {
-        console.log('ColdChainStatus updating formData:', newFormData);
         return newFormData;
       }
       return prev;
@@ -75,7 +72,6 @@ export const ColdChainStatus = ({
     const value = event.target.value as string;
     setFormData((prev) => {
       const newFormData = { ...prev, [field]: value };
-      console.log('ColdChainStatus input changed:', newFormData);
       onDataChange(newFormData);
       return newFormData;
     });
@@ -87,7 +83,6 @@ export const ColdChainStatus = ({
     }
   };
 
-  // console.log('ColdChainStatus formData before render:', formData);
 
   return (
      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

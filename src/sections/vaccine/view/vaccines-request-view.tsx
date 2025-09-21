@@ -167,9 +167,15 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
     const payload: Partial<VaccineFormType> = {
       vaccine_status: 1,
-      product_detail_request: initialData?.product_detail_request || [],
+      product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
     };
 
@@ -213,10 +219,16 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 2, 
+      vaccine_status: 2,
       decline_comment: declineComment,
-      product_detail_request: initialData?.product_detail_request || [],
+      product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
     };
 
@@ -249,9 +261,15 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 3, 
-      product_detail_request: initialData?.product_detail_request || [],
+      vaccine_status: 3,
+      product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
     };
 
@@ -295,10 +313,16 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 4, 
+      vaccine_status: 4,
       decline_comment: declineComment,
-      product_detail_request: initialData?.product_detail_request || [],
+      product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
     };
 
@@ -318,6 +342,100 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
+  const handleScsApprove = () => {
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 5,
+      product_detail_request: productDetailRequests,
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request approved by SCS successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to approve vaccine request');
+          console.error('SCS Approval error:', error);
+        },
+      }
+    );
+  };
+
+  const handleScsDecline = () => {
+    if (!showDeclineComment) {
+      setShowDeclineComment(true);
+      setSelectedTab('cold-chain');
+      return;
+    }
+
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    if (!declineComment.trim()) {
+      toast.error('Please provide a comment for declining the request.');
+      return;
+    }
+
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 6,
+      decline_comment: declineComment,
+      product_detail_request: productDetailRequests,
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request declined by SCS successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to decline vaccine request');
+          console.error('SCS Decline error:', error);
+        },
+      }
+    );
+  };
+
   const handlePickOrder = () => {
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
@@ -331,9 +449,15 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 5, 
-      product_detail_request: initialData?.product_detail_request || [],
+      vaccine_status: 7,
+      product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
     };
 
@@ -348,6 +472,187 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
         onError: (error: any) => {
           toast.error('Failed to pick order');
           console.error('Pick order error:', error);
+        },
+      }
+    );
+  };
+
+  const handleThreePlApprove = () => {
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 7,
+      product_detail_request: productDetailRequests,
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request approved by 3PL successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to approve vaccine request');
+          console.error('3PL Approval error:', error);
+        },
+      }
+    );
+  };
+
+  const handleThreePlDecline = () => {
+    if (!showDeclineComment) {
+      setShowDeclineComment(true);
+      setSelectedTab('cold-chain');
+      return;
+    }
+
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    if (!declineComment.trim()) {
+      toast.error('Please provide a comment for declining the request.');
+      return;
+    }
+
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 9, // 3PL declined
+      decline_comment: declineComment,
+      product_detail_request: productDetailRequests,
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request declined by 3PL successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to decline vaccine request');
+          console.error('3PL Decline error:', error);
+        },
+      }
+    );
+  };
+
+  // EHF Approve Handler
+  const handleEhfApprove = () => {
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    // Convert formDataCollection to product_detail_request format
+    const productDetailRequests = Object.entries(formDataCollection).map(([type, data]) => ({
+      type,
+      ...data,
+    }));
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 8, // EHF accepted/completed (use existing completed status)
+      product_detail_request: productDetailRequests,
+      requested_by: initialData?.requested_by || username,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request accepted by EHF successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to accept vaccine request');
+          console.error('EHF Accept error:', error);
+        },
+      }
+    );
+  };
+
+  // EHF Decline Handler
+  const handleEhfDecline = () => {
+    if (!showDeclineComment) {
+      setShowDeclineComment(true);
+      return;
+    }
+
+    if (!declineComment.trim()) {
+      toast.error('Please provide a reason for declining');
+      return;
+    }
+
+    const requestId = editId || (location.state as any)?.editId || initialData?.id;
+    if (!requestId) {
+      toast.error('No request ID found.');
+      return;
+    }
+
+    const id = parseInt(requestId, 10);
+    if (isNaN(id)) {
+      toast.error('Invalid request ID.');
+      return;
+    }
+
+    const payload: Partial<VaccineFormType> = {
+      vaccine_status: 10, // EHF declined
+      decline_comment: declineComment,
+    };
+
+    updateVaccineRequest.mutate(
+      { id, data: payload },
+      {
+        onSuccess: () => {
+          toast.success('Vaccine request declined by EHF successfully');
+          setIsSubmitted(true);
+          navigate('/vaccine-page');
+        },
+        onError: (error: any) => {
+          toast.error('Failed to decline vaccine request');
+          console.error('EHF Decline error:', error);
         },
       }
     );
@@ -405,7 +710,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
   const userRole = useMemo(() => sessionStorage.getItem('userRole') || '', []);
   const isThreePL = userRole === 'threepl';
-  const isSSC = userRole === 'scs';
+  const isEhfUser = userRole === 'ehf';
 
   const vaccineStatusNumber = convertVaccineStatusToNumber(initialData?.vaccine_status);
   
@@ -415,19 +720,22 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   const isLcsDeclined = vaccineStatusNumber === 2;
   const isSlwgApproved = vaccineStatusNumber === 3;
   const isSlwgDeclined = vaccineStatusNumber === 4;
-  const isPicked = vaccineStatusNumber === 5;
-  const isCompleted = vaccineStatusNumber === 6;
+  const isScsApproved = vaccineStatusNumber === 5;
+  const isScsDeclined = vaccineStatusNumber === 6;
+  const isThreePlApproved = vaccineStatusNumber === 7;
+  const isCompleted = vaccineStatusNumber === 8;
+  const isThreePlDeclined = vaccineStatusNumber === 9;
 
-  const isApproved = isSlwgApproved;
-  const isDeclined = isLcsDeclined || isSlwgDeclined;
-  const isFinalState = isDeclined || isPicked || isCompleted;
 
   const getStatusMessage = () => {
     if (isLcsApproved) return { text: "✓ Request approved by LCS", color: "success.main" };
     if (isLcsDeclined) return { text: "✗ Request declined by LCS", color: "error.main" };
     if (isSlwgApproved) return { text: "✓ Request approved by SLWG", color: "success.main" };
     if (isSlwgDeclined) return { text: "✗ Request declined by SLWG", color: "error.main" };
-    if (isPicked) return { text: "Order has been picked by 3PL", color: "primary.main" };
+    if (isScsApproved) return { text: "✓ Request approved by SCS", color: "success.main" };
+    if (isScsDeclined) return { text: "✗ Request declined by SCS", color: "error.main" };
+    if (isThreePlApproved) return { text: "✓ Vaccine picked by 3PL", color: "success.main" };
+    if (isThreePlDeclined) return { text: "✗ Request declined by 3PL", color: "error.main" };
     if (isCompleted) return { text: "✓ Order completed", color: "success.main" };
     return null;
   };
@@ -493,6 +801,8 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                     onDataChange: handleDataChange,
                     key: selectedTab,
                     isView,
+                    userRole,
+                    vaccineStatus: vaccineStatusNumber,
                     declineComment: selectedTab === 'cold-chain' && isView ? declineComment : undefined,
                     setDeclineComment: selectedTab === 'cold-chain' && isView ? setDeclineComment : undefined,
                     showDeclineComment: selectedTab === 'cold-chain' && showDeclineComment,
@@ -505,29 +815,31 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
                 {isView && isLastTab && (
                   <>
-                    {isThreePL && isSlwgApproved && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="large"
-                        onClick={handlePickOrder}
-                        disabled={updateVaccineRequest.isPending || isSubmitted}
-                      >
-                        Pick Order
-                      </Button>
-                    )}
-
-                    {userRole === 'lcs' && isPending && (
+                    {isThreePL && isScsApproved && (
                       <>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="large"
+                          onClick={handleThreePlDecline}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          {showDeclineComment ? 'Confirm Decline' : 'Decline'}
+                        </Button>
                         <Button
                           variant="contained"
                           color="success"
                           size="large"
-                          onClick={handleLcsApprove}
+                          onClick={handleThreePlApprove}
                           disabled={updateVaccineRequest.isPending || isSubmitted}
                         >
                           Approve
                         </Button>
+                      </>
+                    )}
+
+                    {userRole === 'lcs' && isPending && (
+                      <>
                         <Button
                           variant="contained"
                           color="error"
@@ -537,20 +849,20 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                         >
                           {showDeclineComment ? 'Confirm Decline' : 'Decline'}
                         </Button>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={handleLcsApprove}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          Approve
+                        </Button>
                       </>
                     )}
 
                     {userRole === 'slwg' && isLcsApproved && (
                       <>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          size="large"
-                          onClick={handleSlwgApprove}
-                          disabled={updateVaccineRequest.isPending || isSubmitted}
-                        >
-                          Approve
-                        </Button>
                         <Button
                           variant="contained"
                           color="error"
@@ -560,9 +872,63 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                         >
                           {showDeclineComment ? 'Confirm Decline' : 'Decline'}
                         </Button>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={handleSlwgApprove}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          Approve
+                        </Button>
                       </>
                     )}
 
+                    {userRole === 'scs' && isSlwgApproved && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="large"
+                          onClick={handleScsDecline}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          {showDeclineComment ? 'Confirm Decline' : 'Decline'}
+                        </Button>
+                          <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={handleScsApprove}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          Approve
+                        </Button>
+                      </>
+                    )}
+
+                    {isEhfUser && isThreePlApproved && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="large"
+                          onClick={handleEhfDecline}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          {showDeclineComment ? 'Confirm Decline' : 'Decline'}
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={handleEhfApprove}
+                          disabled={updateVaccineRequest.isPending || isSubmitted}
+                        >
+                          Accept
+                        </Button>
+                      </>
+                    )}
 
                     {statusMessage && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
