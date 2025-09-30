@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, TextField, Typography, Grid } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -16,7 +16,7 @@ interface ExtendedYfAllocationProps {
   isUpdate: boolean; 
 }
 
-export const YfAllocation = ({
+const YfAllocationComponent = ({
   initialData = {},
   onDataChange,
   status = 1,
@@ -65,14 +65,32 @@ export const YfAllocation = ({
     });
   }, [initialData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const debounceRef = useRef<NodeJS.Timeout>();
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => {
-      const newFormData = { ...prev, [name]: value };
-      onDataChange(newFormData);
-      return newFormData;
-    });
-  };
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      setFormData((current) => {
+        onDataChange(current);
+        return current;
+      });
+    }, 150); 
+  }, [onDataChange]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const userRole = sessionStorage.getItem('userRole');
   // console.log(userRole);
@@ -639,3 +657,5 @@ export const YfAllocation = ({
     </Box>
   );
 };
+
+export const YfAllocation = React.memo(YfAllocationComponent);

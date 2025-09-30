@@ -110,7 +110,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
                />
              <p ></p>
              <Typography variant="h4" >
-                Welcome :  {`${userName.toUpperCase()} (${userRole.toUpperCase()})`}
+                Welcome :  {`${userName.toUpperCase()} (${userRole === 'threepl' ? '3PL' : userRole.toUpperCase()})`}
              </Typography>
              </>
            ),
@@ -119,7 +119,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
               
                {/* <Searchbar /> */}
                {/* <LanguagePopover data={_langs} /> */}
-               <NotificationsPopover data={_notifications} />
+               {/* <NotificationsPopover data={_notifications} /> */}
                <AccountPopover
                  data={[
                   //  {

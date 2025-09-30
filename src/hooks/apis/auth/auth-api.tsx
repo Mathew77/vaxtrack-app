@@ -25,6 +25,7 @@ export interface LoginResponse {
     slwg_list: string;
     threepl_list: string;
     conveyor_list: string;
+    mfa_code?: string;
   };
 }
 

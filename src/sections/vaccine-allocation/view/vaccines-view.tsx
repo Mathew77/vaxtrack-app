@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -12,12 +12,15 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useCreateAllocation, useFetchEHF, useFetchUHF } from 'src/hooks/apis/ehf/ehf-hooks';
 import { UHFType, VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
+import { validateMfaForSubmission } from 'src/utils/mfa-verification';
 
 import { BcgAllocation } from '../bcg-allocation';
 import { MeaslesAllocation } from '../measles-allocation';
@@ -37,7 +40,7 @@ import { MalariaAllocation } from '../malaria-allocation';
 interface VaccineOption {
   value: string;
   label: string;
-  component: (props: any) => JSX.Element;
+  component: React.ComponentType<any>;
 }
 
 const vaccineOptions: VaccineOption[] = [
@@ -70,6 +73,7 @@ export default function VaccineView() {
     const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
     const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
     const [status, setStatus] = useState<number>(1);
+    const [mfaCode, setMfaCode] = useState<string>('');
 
   const userRole = sessionStorage.getItem('userRole') || '';
 
@@ -118,8 +122,8 @@ export default function VaccineView() {
     }
   };
 
-  const handleEhfChange = (event: any) => {
-        setSelectedEhf(event.target.value as number);
+  const handleEhfChange = (event: any, newValue: any) => {
+        setSelectedEhf(newValue?.id || null);
         setSelectedUhf(null);
     };
 
@@ -147,7 +151,12 @@ export default function VaccineView() {
     };
 
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+      const mfaValidation = await validateMfaForSubmission(mfaCode);
+      if (!mfaValidation.isValid) {
+        toast.error(mfaValidation.error);
+        return;
+      }
 
       if (!selectedEhf || !selectedUhf) {
         toast.error('Please select both EHF and UHF.');
@@ -234,11 +243,15 @@ export default function VaccineView() {
       );
     };
 
-    const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
-    const isLastTab = currentIndex === vaccineOptions.length - 1;
-    const isFirstTab = currentIndex === 0;
-
-    const CurrentVaccineComponent = vaccineOptions.find((v) => v.value === selectedTab)?.component;
+    const { currentIndex, isLastTab, isFirstTab, CurrentVaccineComponent } = useMemo(() => {
+        const index = vaccineOptions.findIndex((v) => v.value === selectedTab);
+        return {
+            currentIndex: index,
+            isLastTab: index === vaccineOptions.length - 1,
+            isFirstTab: index === 0,
+            CurrentVaccineComponent: vaccineOptions.find((v) => v.value === selectedTab)?.component
+        };
+    }, [selectedTab]);
 
     return (
         <DashboardContent>
@@ -295,22 +308,43 @@ export default function VaccineView() {
 
                 <Grid item xs={9}>
                   <Box sx={{ mb: 2 }}>
-                      <FormControl fullWidth sx={{ mb: 2 }}>
-                          <InputLabel id="ehf-select-label">Select EHF</InputLabel>
-                          <Select
-                              labelId="ehf-select-label"
-                              value={selectedEhf || ''}
-                              label="Select EHF"
-                              onChange={handleEhfChange}
-                              disabled={isEhfLoading || isView }
-                          >
-                              {allEhf.map((ehf: any) => (
-                                  <MenuItem key={ehf.id} value={ehf.id}>
-                                      {ehf.ehf_name}
-                                  </MenuItem>
-                              ))}
-                          </Select>
-                      </FormControl>
+                      <Autocomplete
+                          fullWidth
+                          sx={{ mb: 2 }}
+                          options={allEhf}
+                          getOptionLabel={(option: any) => option.ehf_name || ''}
+                          value={allEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
+                          onChange={handleEhfChange}
+                          disabled={isEhfLoading || isView || createAllocation.isPending || status > 1}
+                          loading={isEhfLoading}
+                          renderInput={(params) => (
+                              <TextField
+                                  {...params}
+                                  label="Search and Select EHF"
+                                  placeholder="Type to search EHF..."
+                                  variant="outlined"
+                              />
+                          )}
+                          renderOption={(props, option: any) => (
+                              <Box component="li" {...props} key={option.id}>
+                                  <Box>
+                                      <Typography variant="body1">{option.ehf_name}</Typography>
+                                      {option.state && (
+                                          <Typography variant="caption" color="text.secondary">
+                                              State: {option.state}
+                                          </Typography>
+                                      )}
+                                  </Box>
+                              </Box>
+                          )}
+                          filterOptions={(options, { inputValue }) =>
+                              options.filter((option: any) =>
+                                  option.ehf_name?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                                  option.state?.toLowerCase().includes(inputValue.toLowerCase())
+                              )
+                          }
+                          noOptionsText="No EHF found"
+                      />
                       {selectedEhf && (
                         <>
                           {Array.isArray(allUhf) && allUhf.length > 0 && !isUhfLoading ? (
@@ -321,7 +355,7 @@ export default function VaccineView() {
                                 value={selectedUhf ?? ''}
                                 label="Select UHF"
                                 onChange={handleUhfChange}
-                                disabled={isUhfLoading || isView}
+                                disabled={isUhfLoading || isView || createAllocation.isPending || status > 1}
                               >
                                 {allUhf.map((uhf: UHFType) => (
                                   <MenuItem key={uhf.id} value={uhf.id}>
@@ -344,7 +378,7 @@ export default function VaccineView() {
                   {CurrentVaccineComponent && (
                       <Box sx={{ mb: 4 }}>
                           <CurrentVaccineComponent
-                              initialData={formDataCollection[selectedTab] || {}}
+                              initialData={useMemo(() => formDataCollection[selectedTab] || {}, [formDataCollection, selectedTab])}
                               onDataChange={handleDataChange}
                               status={status}
                               key={selectedTab}
@@ -352,6 +386,22 @@ export default function VaccineView() {
                               isUpdate={isUpdate}
                           />
                       </Box>
+                  )}
+
+                  {/* MFA Code Input - Show when user needs to submit or update */}
+                  {!isView && isLastTab && selectedEhf && selectedUhf && (
+                    <Box sx={{ mb: 3, width: "50%" }}>
+                      <TextField
+                        label="MFA Code"
+                        placeholder="Enter your 4-digit MFA code"
+                        value={mfaCode}
+                        onChange={(e) => setMfaCode(e.target.value)}
+                        variant="outlined"
+                        size="medium"
+                        inputProps={{ maxLength: 4 }}
+                        helperText="Please enter your MFA code to proceed with submission"
+                      />
+                    </Box>
                   )}
 
                   <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
@@ -370,9 +420,13 @@ export default function VaccineView() {
                           color="primary"
                           size="large"
                           onClick={isLastTab ? handleSubmit : handleNext}
-                          disabled={isView} 
+                          disabled={isView || createAllocation.isPending} 
                         >
-                          {isLastTab ? (isUpdate ? 'Update' : 'Submit') : 'Next'}
+                          {isLastTab ?
+                            createAllocation.isPending ?
+                              (isUpdate ? 'Updating...' : 'Submitting...') :
+                              (isUpdate ? 'Update' : 'Submit')
+                            : 'Next'}
                         </Button>
                       )}
                     

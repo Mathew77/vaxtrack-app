@@ -20,6 +20,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useFetchEHFs, useFetchLgas, useFetchStates, useFetchWards, useUpsertThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { ThreePlType } from 'src/hooks/apis/threepl/threepl-type';
+import { useFetchUsers, useFetchRoles } from 'src/hooks/apis/user/user-hooks';
 import { toast } from 'react-toastify';
 
 export default function ThreePlSetup() {
@@ -30,6 +31,8 @@ export default function ThreePlSetup() {
 
   const upsertThreepl = useUpsertThreepl();
   const {data: states = []} = useFetchStates()
+  const { data: users = [] } = useFetchUsers();
+  const { data: roles = [] } = useFetchRoles();
   const [selectedState, setSelectedState] = useState('');
   const [selectedLga, setSelectedLga] = useState('');
   const { data: lgas = [] } = useFetchLgas(selectedState);
@@ -44,6 +47,7 @@ const initialValues: ThreePlType = {
     threepl_name: '',
     ehf_list: [],
     state_list: [],
+    ccw: '',
   };
 
   const [data, setData] = useState<ThreePlType>(initialValues);
@@ -61,9 +65,10 @@ const initialValues: ThreePlType = {
           lga: threePlData.lga || '',
           state_list: threePlData.state_list || [],
           category_type: threePlData.category_type || '',
+          ccw: threePlData.ccw || '',
         });
-        setSelectedState(threePlData.state || ''); 
-        setSelectedLga(threePlData.lga || ''); 
+        setSelectedState(threePlData.state || '');
+        setSelectedLga(threePlData.lga || '');
         setIsUpdate(state.isUpdate || false);
         setIsView(state.isView || false);
       }
@@ -113,6 +118,7 @@ const initialValues: ThreePlType = {
       lga: '',
       ehf_list: [],
       state_list: [],
+      ccw: '',
     }));
     setSelectedState('');
     setSelectedLga('');
@@ -174,6 +180,13 @@ const initialValues: ThreePlType = {
     label: state.state,
   }));
 
+  const ccwRole = roles.find((role) => role.name === 'Community Case Worker');
+  const ccwRoleId = ccwRole?.id?.toString();
+
+  const ccwUsers = users.filter((user) =>
+    user.groups?.includes(ccwRoleId ? parseInt(ccwRoleId) : -1)
+  );
+
   const handleSubmit = () => {
     if (validate()) {
       const submitData = data.category_type === 'National'
@@ -182,6 +195,7 @@ const initialValues: ThreePlType = {
           state: '',
           lga: '',
           ehf_list: [],
+          ccw: '',
           }
         : { ...data, state_list: [] }; 
 
@@ -357,6 +371,31 @@ const initialValues: ThreePlType = {
                     {errors?.lga}
                   </Typography>
                 )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={6}>
+              <FormControl sx={{ m: 0, width: '100%' }}>
+                <Typography component="label" htmlFor="ccw" sx={{ mb: 1 }}>
+                  Community Case Worker
+                </Typography>
+                <Select
+                  id="ccw"
+                  name="ccw"
+                  value={data.ccw}
+                  onChange={handleChange}
+                  sx={{ width: '100%' }}
+                  displayEmpty
+                  variant="outlined"
+                  disabled={isView}
+                >
+                  <MenuItem value="">Select Community Case Worker</MenuItem>
+                  {ccwUsers.map((user) => (
+                    <MenuItem key={user.id} value={user.id?.toString()}>
+                      {user.first_name} {user.last_name}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
 

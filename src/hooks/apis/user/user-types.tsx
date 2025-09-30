@@ -9,15 +9,16 @@ export interface UserType {
   email: string;
   phone_number: string;
   groups: number[];
-  ncs_list?: string[]; 
-  scs_list?: string[]; 
-  lcs_list?: string[]; 
-  ehf_list?: string[]; 
+  ncs_list?: string[];
+  scs_list?: string[];
+  lcs_list?: string[];
+  ehf_list?: string[];
   uhf_list?: string[];
   health_facility_category?: string | null;
   user_permissions?: number[];
   state: string[];
   role_names?: string[];
+  mfa_code?: string;
 }
 
   export interface RoleType {

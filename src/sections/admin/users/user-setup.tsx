@@ -28,6 +28,7 @@ import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { useFetchThreePl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { toast } from 'react-toastify';
 import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
+import { generateMfaCode } from 'src/utils/mfa-code-generator';
 
 export default function UserSetup() {
   const navigate = useNavigate();
@@ -62,6 +63,7 @@ export default function UserSetup() {
     uhf_list: [],
     user_permissions: [],
     state: [],
+    mfa_code: generateMfaCode(),
   };
 
   const [data, setData] = useState<UserType>(initialValues);
@@ -86,7 +88,8 @@ export default function UserSetup() {
         ehf_list: userData.ehf_list || [],
         uhf_list: userData.uhf_list || [],
         user_permissions: userData.user_permissions || [],
-        state: userData.state || [], 
+        state: userData.state || [],
+        mfa_code: userData.mfa_code || generateMfaCode(),
       });
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
@@ -272,6 +275,9 @@ export default function UserSetup() {
     case 'UNICEF':
       return [];
 
+    case 'Community Case Worker':
+      return [];
+
     default:
       return [];
   }
@@ -292,8 +298,8 @@ export default function UserSetup() {
         return 'Select Unequipped Health Facilities';
       case '3PL':
         return 'Select 3PLs';
-      // case 'State Logistic Working Group':
-      //   return 'Select State Cold Chain Store';
+      case 'State Logistics Working Group':
+        return 'Select Cold Chain Store';
       default:
         return '';
     }
@@ -514,6 +520,22 @@ export default function UserSetup() {
         </Grid>
 
         <Grid item xs={6}>
+          <Typography component="label" htmlFor="mfa_code">
+            MFA Code
+          </Typography>
+          <TextField
+            fullWidth
+            id="mfa_code"
+            name="mfa_code"
+            placeholder="MFA Code"
+            value={data.mfa_code}
+            variant="outlined"
+            disabled
+            // helperText="Auto-generated 4-digit code"
+          />
+        </Grid>
+
+        <Grid item xs={6}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" htmlFor="groups">
               Role <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -570,53 +592,62 @@ export default function UserSetup() {
           </Grid>
         )}
 
-        {selectedRoleId && (
+        {selectedRoleId && roles.find((role) => role.id.toString() === selectedRoleId)?.name === 'State Logistics Working Group' && (
+          <Grid item xs={6}>
+            <Typography component="label">
+              {getSelectedLists()} <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+            </Typography>
+            <FormControl sx={{ m: 0, width: '100%' }}>
+              <Select
+                id="scs_select"
+                name="scs_select"
+                value={selectedScsId}
+                onChange={handleScsChange}
+                sx={{ width: '100%' }}
+                displayEmpty
+                variant="outlined"
+                disabled={isView}
+              >
+                <MenuItem value="">Select State Cold Chain Store</MenuItem>
+                {scs
+                  .filter((sc) => sc.id !== undefined && sc.id !== null)
+                  .map((sc) => (
+                    <MenuItem key={`scs-${sc.id}`} value={sc.id!.toString()}>
+                      {sc.scs_name}
+                    </MenuItem>
+                  ))}
+              </Select>
+              {errors?.scs_list && (
+                <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
+                  {errors?.scs_list}
+                </Typography>
+              )}
+            </FormControl>
+          </Grid>
+        )}
+
+        {selectedRoleId &&
+          (() => {
+            const roleName = roles.find((role) => role.id.toString() === selectedRoleId)?.name?.trim() || '';
+            return !['State Logistics Working Group', 'UNICEF', 'Community Case Worker'].includes(roleName);
+          })() && (
           <Grid item xs={12}>
             <Typography component="label">
               {getSelectedLists()} <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
-            {roles.find((role) => role.id.toString() === selectedRoleId)?.name === 'State Logistics Working Group' ? (
-              <FormControl sx={{ m: 0, width: '48%' }}>
-                <Select
-                  id="scs_select"
-                  name="scs_select"
-                  value={selectedScsId}
-                  onChange={handleScsChange}
-                  sx={{ width: '100%' }}
-                  displayEmpty
-                  variant="outlined"
-                  disabled={isView}
-                >
-                  <MenuItem value="">Select State Cold Chain Store</MenuItem>
-                  {scs
-                    .filter((sc) => sc.id !== undefined && sc.id !== null)
-                    .map((sc) => (
-                      <MenuItem key={`scs-${sc.id}`} value={sc.id!.toString()}>
-                        {sc.scs_name}
-                      </MenuItem>
-                    ))}
-                </Select>
-                {errors?.scs_list && (
-                  <Typography component="span" sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                    {errors?.scs_list}
-                  </Typography>
-                )}
-              </FormControl>
-            ) : (
-              <DualListBox
-                canFilter
-                options={getItemOptions()}
-                selected={selectedItems}
-                onChange={handleItemChange}
-                disabled={isView}
-                icons={{
-                  moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
-                  moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
-                  moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
-                  moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
-                }}
-              />
-            )}
+            <DualListBox
+              canFilter
+              options={getItemOptions()}
+              selected={selectedItems}
+              onChange={handleItemChange}
+              disabled={isView}
+              icons={{
+                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
+                moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
+                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
+              }}
+            />
           </Grid>
         )}
       </Grid>

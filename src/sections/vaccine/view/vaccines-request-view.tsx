@@ -8,13 +8,15 @@ import {
   Button,
   Tabs,
   Tab,
+  TextField,
 } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useFetchUsers } from 'src/hooks/apis/ehf/ehf-hooks';
+// import { useFetchUsers } from 'src/hooks/apis/ehf/ehf-hooks'; // No longer needed for MFA verification
 import { useCreateVaccine, useUpdateVaccineRequest } from 'src/hooks/apis/ehf/ehf-hooks';
 import { VaccineFormType } from 'src/hooks/apis/ehf/ehf-type';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { validateMfaForSubmission } from 'src/utils/mfa-verification';
 
 import { BcgVaccines } from '../bcg-vaccines';
 import { MeaslesVaccine } from '../measles-vaccines';
@@ -79,7 +81,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   const isView = (location.state as any)?.isView || (!!initialData && !editId);
   const isEdit = (location.state as any)?.isEdit || !!editId;
   
-  const { data: users = [] } = useFetchUsers();
+  // const { data: users = [] } = useFetchUsers(); // No longer needed for MFA verification
   const createVaccine = useCreateVaccine();
   const updateVaccineRequest = useUpdateVaccineRequest();
 
@@ -101,7 +103,9 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
   const [declineComment, setDeclineComment] = useState<string>('');
   const [showDeclineComment, setShowDeclineComment] = useState<boolean>(false);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false); 
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [mfaCode, setMfaCode] = useState<string>('');
+  const [showMfaInput, setShowMfaInput] = useState<boolean>(false); 
 
   const userEhfList = useMemo(() => {
     try {
@@ -154,7 +158,14 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   };
 
 
-  const handleLcsApprove = () => {
+  const handleLcsApprove = async () => {
+    // Validate MFA code first using server-side verification
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
       toast.error('No request ID found.');
@@ -248,7 +259,14 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
-  const handleSlwgApprove = () => {
+  const handleSlwgApprove = async () => {
+    // Validate MFA code first using server-side verification
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
       toast.error('No request ID found.');
@@ -342,7 +360,14 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
-  const handleScsApprove = () => {
+  const handleScsApprove = async () => {
+    // Validate MFA code first using server-side verification
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
       toast.error('No request ID found.');
@@ -477,7 +502,14 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
-  const handleThreePlApprove = () => {
+  const handleThreePlApprove = async () => {
+    // Validate MFA code first using server-side verification
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
       toast.error('No request ID found.');
@@ -572,7 +604,14 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   };
 
   // EHF Approve Handler
-  const handleEhfApprove = () => {
+  const handleEhfApprove = async () => {
+    // Validate MFA code first using server-side verification
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
     const requestId = editId || (location.state as any)?.editId || initialData?.id;
     if (!requestId) {
       toast.error('No request ID found.');
@@ -658,7 +697,14 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Validate MFA code first using server-side verification
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
     if (userEhfList.length === 0) {
       toast.error('No user found. Please log in and try again.');
       return;
@@ -807,6 +853,28 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                     setDeclineComment: selectedTab === 'cold-chain' && isView ? setDeclineComment : undefined,
                     showDeclineComment: selectedTab === 'cold-chain' && showDeclineComment,
                   })}
+              </Box>
+            )}
+
+            {/* MFA Code Input - Show when user needs to submit or approve */}
+            {((!isView && isLastTab) || (isView && isLastTab && (
+              (userRole === 'lcs' && isPending) ||
+              (userRole === 'slwg' && isLcsApproved) ||
+              (userRole === 'scs' && isSlwgApproved) ||
+              (isThreePL && isScsApproved) ||
+              (isEhfUser && isThreePlApproved)
+            ))) && (
+              <Box sx={{ mb: 3, width: "50%" }}>
+                <TextField
+                  label="MFA Code"
+                  placeholder="Enter your 4-digit MFA code"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  variant="outlined"
+                  size="medium"
+                  inputProps={{ maxLength: 4 }}
+                  helperText="Please enter your MFA code to proceed with submission/approval"
+                />
               </Box>
             )}
 
