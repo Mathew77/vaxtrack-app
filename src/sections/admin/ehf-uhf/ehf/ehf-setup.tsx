@@ -48,7 +48,7 @@ export default function EhfSetup() {
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const { data: uhfs = [] } = useFetchUHF();
-  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga);
+  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga, 'EHF');
 
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid, Button } from '@mui/material';
 import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../../utils/VaxTablePage';
-import { useFetchStates, useFetchLgas, useFetchWards } from 'src/hooks/apis/report/report-hook';
+import { useFetchStates, useFetchLgas, /* useFetchWards, */ useFetchColdChainStatusReport } from 'src/hooks/apis/report/report-hook';
 import SearchIcon from '@mui/icons-material/Search';
 
 interface TabPanelProps {
@@ -41,57 +41,43 @@ function a11yProps(index: number) {
   };
 }
 
-const mockData = [
-  { 
-    id: 1, 
-    state: 'Lagos', 
-    lga: 'Ikeja', 
-    ward: 'GRA', 
-    address: '123 Allen Avenue, Ikeja, Lagos' 
-  },
-  { 
-    id: 2, 
-    state: 'Abuja', 
-    lga: 'Abuja Municipal', 
-    ward: 'Wuse II', 
-    address: '45 Ademola Adetokunbo Crescent, Wuse II, Abuja' 
-  },
-  { 
-    id: 3, 
-    state: 'Rivers', 
-    lga: 'Port Harcourt', 
-    ward: 'Old GRA', 
-    address: '8A Forces Avenue, Old GRA, Port Harcourt' 
-  },
-  { 
-    id: 4, 
-    state: 'Lagos', 
-    lga: 'Lagos Island', 
-    ward: 'Victoria Island', 
-    address: '12 Tiamiyu Savage Street, Victoria Island, Lagos' 
-  },
-  { 
-    id: 5, 
-    state: 'Rivers', 
-    lga: 'Obio-Akpor', 
-    ward: 'Rumuokwuta', 
-    address: '23 East-West Road, Rumuokwuta, Rivers' 
-  },
-];
-
 const StockOutReport: React.FC = () => {
   const [value, setValue] = React.useState<number>(0);
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedLga, setSelectedLga] = useState<string>('');
-  const [selectedWard, setSelectedWard] = useState<string>('');
-  const [filteredData, setFilteredData] = useState<any[]>([]);
-  const [hasSearched, setHasSearched] = useState<boolean>(false); 
+  // const [selectedWard, setSelectedWard] = useState<string>('');
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const { data: states = [], isLoading: statesLoading } = useFetchStates();
   const { data: lgas = [], isLoading: lgasLoading } = useFetchLgas(selectedState);
-  const { data: wards = [], isLoading: wardsLoading } = useFetchWards(selectedLga);
+  // const { data: wards = [], isLoading: wardsLoading } = useFetchWards(selectedLga);
+  const { data: reportData, isLoading: reportLoading } = useFetchColdChainStatusReport(
+    selectedState,
+    selectedLga,
+    undefined,
+    hasSearched
+  );
 
-  const userRole = "scs"
+  const userRole = sessionStorage.getItem('userRole');
+
+  const isAdmin= userRole === 'admin';
+  const isSlwg = userRole === 'slwg';
+  const isScs = userRole === 'scs';
+
+
+  const scs_list = JSON.parse(sessionStorage.getItem('scs_list') || '[]') as string[];
+
+   useEffect(() => {
+    if ((isSlwg || isScs) && states.length > 0 && scs_list.length > 0 && !selectedState) {
+        const userState = states.find((state: any) =>
+        scs_list.includes(String(state.id))
+        );
+        if (userState) {
+        const stateValue = userState.state;
+        setSelectedState(stateValue);
+        }
+    }
+    }, [states, isSlwg, isScs, scs_list]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -100,49 +86,34 @@ const StockOutReport: React.FC = () => {
   const handleStateChange = (event: any) => {
     const newState = event.target.value;
     setSelectedState(newState);
-    setSelectedLga(''); 
-    setSelectedWard(''); 
+    setSelectedLga('');
+    setHasSearched(false); 
+    // setSelectedWard('');
   };
 
   const handleLgaChange = (event: any) => {
     const newLga = event.target.value;
     setSelectedLga(newLga);
-    setSelectedWard('');
+    setHasSearched(false);
+    // setSelectedWard('');
   };
 
-  const handleWardChange = (event: any) => {
-    setSelectedWard(event.target.value);
-  };
+  // const handleWardChange = (event: any) => {
+  //   setSelectedWard(event.target.value);
+  // };
 
   const handleSearch = () => {
-    let filtered = mockData;
-
-    if (selectedState === 'all-states') {
-      filtered = mockData;
-    } else if (selectedState) {
-      filtered = filtered.filter(item => item.state === selectedState);
-    } else {
-      filtered = [];
-    }
-
-    if (selectedLga) {
-      filtered = filtered.filter(item => item.lga === selectedLga);
-    }
-
-    if (selectedWard) {
-      filtered = filtered.filter(item => item.ward === selectedWard);
-    }
-
-    setFilteredData(filtered);
     setHasSearched(true);
   };
 
   const clearFilters = () => {
-    setSelectedState('');
     setSelectedLga('');
-    setSelectedWard('');
-    setFilteredData([]);
+    // setSelectedWard('');
     setHasSearched(false);
+
+    if (isAdmin) {
+        setSelectedState('');
+    }
   };
 
   const columns = useMemo(
@@ -150,22 +121,55 @@ const StockOutReport: React.FC = () => {
       {
         accessorKey: 'state',
         header: 'State',
-        size: 200,
+        size: 150,
       },
       {
         accessorKey: 'lga',
         header: 'LGA',
+        size: 150,
+      },
+      // {
+      //   accessorKey: 'ward',
+      //   header: 'Ward',
+      //   size: 150,
+      // },
+      {
+        accessorKey: 'facility',
+        header: 'Facility',
         size: 200,
       },
       {
-        accessorKey: 'ward',
-        header: 'Ward',
+        accessorKey: 'vaccine',
+        header: 'Vaccine',
         size: 200,
       },
       {
-        accessorKey: 'address',
-        header: 'Address',
-        size: 300,
+        accessorKey: 'facility_type',
+        header: 'Facility Type',
+        size: 120,
+      },
+      {
+        accessorKey: 'cold_chain_equipment_status',
+        header: 'Cold Chain Status',
+        size: 140,
+      },
+      {
+        accessorKey: 'request_type',
+        header: 'Request Type',
+        size: 120,
+      },
+      {
+        accessorKey: 'created_date',
+        header: 'Created Date',
+        size: 180,
+        Cell: ({ cell }: any) => {
+          const date = new Date(cell.getValue());
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+        },
       },
     ],
     []
@@ -182,26 +186,44 @@ const StockOutReport: React.FC = () => {
           <FormControl fullWidth size="small">
             <InputLabel id="state-select-label">State</InputLabel>
             <Select
-              labelId="state-select-label"
-              id="state-select"
-              value={selectedState}
-              label="State"
-              onChange={handleStateChange}
-              disabled={statesLoading}
+                labelId="state-select-label"
+                id="state-select"
+                value={selectedState}
+                label="State"
+                onChange={handleStateChange}
+                disabled={statesLoading}
             >
-              <MenuItem value="">
+                <MenuItem value="">
                 <em>Select State</em>
-              </MenuItem>
-              <MenuItem value="all-states">
-                <strong>All States</strong>
-              </MenuItem>
-              {states.map((state: any) => (
-                <MenuItem key={state.id ?? state.value ?? state.name} value={state.state ?? state.value ?? state.name}>
-                  {state.state ?? state.value ?? state.name}
                 </MenuItem>
-              ))}
+
+                {/* Only show "All States" to admin */}
+                {isAdmin && (
+                <MenuItem value="all-states">
+                    <strong>All States</strong>
+                </MenuItem>
+                )}
+
+                {/* Filter states based on role */}
+                {states
+                .filter((state: any) => {
+                    if (isAdmin) return true;
+                    if (isSlwg || isScs) {
+                    const stateId = String(state.id);
+                    return scs_list.includes(stateId);
+                    }
+                    return false;
+                })
+                .map((state: any) => (
+                    <MenuItem
+                    key={state.id ?? state.value ?? state.name}
+                    value={state.state ?? state.value ?? state.name}
+                    >
+                    {state.state ?? state.value ?? state.name}
+                    </MenuItem>
+                ))}
             </Select>
-          </FormControl>
+            </FormControl>
         </Grid>
 
         <Grid item xs={12} sm={6} md={2.5}>
@@ -227,7 +249,7 @@ const StockOutReport: React.FC = () => {
           </FormControl>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={2.5}>
+        {/* <Grid item xs={12} sm={6} md={2.5}>
           <FormControl fullWidth size="small">
             <InputLabel id="ward-select-label">Ward</InputLabel>
             <Select
@@ -248,7 +270,7 @@ const StockOutReport: React.FC = () => {
               ))}
             </Select>
           </FormControl>
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={12} sm={6} md={2}>
           <Button
@@ -287,14 +309,15 @@ const StockOutReport: React.FC = () => {
 
       <Box sx={{ marginTop: '16px' }}>
         <Typography variant="body2" color="textSecondary">
-          {!hasSearched 
-            ? "Please select a state and click Search to view data" 
-            : `Showing ${filteredData.length} of ${filteredData.length} records`
-          }
-          {selectedState === 'all-states'}
-          {selectedState && selectedState !== 'all-states'}
-          {selectedLga && ` | LGA: ${selectedLga}`}
-          {selectedWard && ` | Ward: ${selectedWard}`}
+          {!hasSearched ? (
+            "Please select a state and click Search to view data"
+          ) : (
+            <>
+              {`Showing ${reportData?.data?.length || 0} of ${reportData?.count || 0} records`}
+              {selectedLga && ` | LGA: ${selectedLga}`}
+              {/* {selectedWard && ` | Ward: ${selectedWard}`} */}
+            </>
+          )}
         </Typography>
       </Box>
     </Box>
@@ -306,7 +329,7 @@ const StockOutReport: React.FC = () => {
         <Box>
           <VaxTable
             columns={columns}
-            data={filteredData}
+            data={hasSearched ? (reportData?.data || []) : []}
             tableHeader=""
             customRightButton={false}
             extraComponents={<FilterControls />}

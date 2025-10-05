@@ -95,15 +95,19 @@ export const useFetchStates = () => {
       });
     };
 
-   export const useFetchHFAList = (state: string, lga?: string) => {
+   export const useFetchHFAList = (state: string, lga?: string, status?: string) => {
     return useQuery({
-      queryKey: ['hfa-list', state, lga],
+      queryKey: ['hfa-list', state, lga, status],
       queryFn: async (): Promise<HFAType[]> => {
         if (!state) return [];
 
         try {
           let apiUrl = `${url}v1/hfa-list/?state=${encodeURIComponent(state.trim())}`;
-          
+
+          if (status && status.trim()) {
+            apiUrl += `&status=${encodeURIComponent(status.trim())}`;
+          }
+
           if (lga && lga.trim()) {
             apiUrl += `&lga=${encodeURIComponent(lga.trim())}`;
           }
@@ -116,7 +120,7 @@ export const useFetchStates = () => {
           return [];
         }
       },
-      enabled: !!state, 
+      enabled: !!state,
     });
   };
 

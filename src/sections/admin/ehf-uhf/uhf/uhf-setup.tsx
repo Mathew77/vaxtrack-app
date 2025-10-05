@@ -37,7 +37,7 @@ export default function UhfSetup() {
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const upsertUHF = useUpsertUHF();
-  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga);
+  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga, 'UHF');
 
   const initialValues: UHFType = {
     status: '',

@@ -17,7 +17,7 @@ export const useFetchStates = () => {
         const response = await apiHelper.getResource<StateType[]>(
             `${url}v1/states/`
         );
-        return response; 
+        return response;
       },
     });
   };
@@ -26,13 +26,13 @@ export const useFetchStates = () => {
     return useQuery({
       queryKey: ['lgas', state],
       queryFn: async (): Promise<LgaType[]> => {
-        if (!state) return []; 
+        if (!state || state === 'all-states') return [];
         const response = await apiHelper.getResource<LgaType[]>(
           `${url}v1/lgas/?state=${state}`
         );
         return response;
       },
-      enabled: !!state, 
+      enabled: !!state && state !== 'all-states',
     });
   };
 
@@ -40,12 +40,147 @@ export const useFetchStates = () => {
       return useQuery({
         queryKey: ['wards', lga],
         queryFn: async (): Promise<WardType[]> => {
-          if (!lga) return []; 
+          if (!lga) return [];
           const response = await apiHelper.getResource<WardType[]>(
             `${url}v1/wards/?lga=${lga}`
           );
           return response;
         },
-        enabled: !!lga, 
+        enabled: !!lga,
       });
-    };   
+    };
+
+export const useFetchStockOutReport = (state?: string, lga?: string, ward?: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['stock-out-report', state, lga, ward],
+    queryFn: async (): Promise<any> => {
+      let endpoint = `${url}v1/reports/stock-out/`;
+      const params = new URLSearchParams();
+
+      if (state && state !== 'all-states') {
+        params.append('state', state);
+      }
+      if (lga) {
+        params.append('lga', lga);
+      }
+      if (ward) {
+        params.append('ward', ward);
+      }
+
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+      const response = await apiHelper.getResource<any>(fullUrl);
+      return response;
+    },
+    enabled: enabled && !!state,
+  });
+};
+
+export const useFetchColdChainStatusReport = (state?: string, lga?: string, ward?: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['cold-chain-status-report', state, lga, ward],
+    queryFn: async (): Promise<any> => {
+      let endpoint = `${url}v1/reports/cold-chain-status/`;
+      const params = new URLSearchParams();
+
+      if (state && state !== 'all-states') {
+        params.append('state', state);
+      }
+      if (lga) {
+        params.append('lga', lga);
+      }
+      if (ward) {
+        params.append('ward', ward);
+      }
+
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+      const response = await apiHelper.getResource<any>(fullUrl);
+      return response;
+    },
+    enabled: enabled && !!state,
+  });
+};
+
+export const useFetchMinimumStockFlagReport = (state?: string, lga?: string, ward?: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['minimum-stock-flag-report', state, lga, ward],
+    queryFn: async (): Promise<any> => {
+      let endpoint = `${url}v1/reports/minimum-stock-flag/`;
+      const params = new URLSearchParams();
+
+      if (state && state !== 'all-states') {
+        params.append('state', state);
+      }
+      if (lga) {
+        params.append('lga', lga);
+      }
+      if (ward) {
+        params.append('ward', ward);
+      }
+
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+      const response = await apiHelper.getResource<any>(fullUrl);
+      return response;
+    },
+    enabled: enabled && !!state,
+  });
+};
+
+export const useFetchVvmStageReport = (state?: string, lga?: string, ward?: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['vvm-stage-report', state, lga, ward],
+    queryFn: async (): Promise<any> => {
+      let endpoint = `${url}v1/reports/vvm-stage/`;
+      const params = new URLSearchParams();
+
+      if (state && state !== 'all-states') {
+        params.append('state', state);
+      }
+      if (lga) {
+        params.append('lga', lga);
+      }
+      if (ward) {
+        params.append('ward', ward);
+      }
+
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+      const response = await apiHelper.getResource<any>(fullUrl);
+      return response;
+    },
+    enabled: enabled && !!state,
+  });
+};
+
+export const useFetchMaximumStockReport = (state?: string, lga?: string, ward?: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: ['maximum-stock-report', state, lga, ward],
+    queryFn: async (): Promise<any> => {
+      let endpoint = `${url}v1/reports/maximum-stock/`;
+      const params = new URLSearchParams();
+
+      if (state && state !== 'all-states') {
+        params.append('state', state);
+      }
+      if (lga) {
+        params.append('lga', lga);
+      }
+      if (ward) {
+        params.append('ward', ward);
+      }
+
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${endpoint}?${queryString}` : endpoint;
+
+      const response = await apiHelper.getResource<any>(fullUrl);
+      return response;
+    },
+    enabled: enabled && !!state,
+  });
+};
