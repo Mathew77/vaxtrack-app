@@ -45,6 +45,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
 
 
  const [navOpen, setNavOpen] = useState(false);
+ const [collapsed, setCollapsed] = useState(false);
  const [userRole, setUserRole] = useState('');
  const [userName, setUserName] = useState('');
 
@@ -148,7 +149,12 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       * Sidebar
       *************************************** */
      sidebarSection={
-       <NavDesktop data={filteredNavData} layoutQuery={layoutQuery} />
+       <NavDesktop
+         data={filteredNavData}
+         layoutQuery={layoutQuery}
+         collapsed={collapsed}
+         onToggleCollapse={() => setCollapsed(!collapsed)}
+       />
      }
      /** **************************************
       * Footer
@@ -158,7 +164,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
       * Style
       *************************************** */
      cssVars={{
-       '--layout-nav-vertical-width': '300px',
+       '--layout-nav-vertical-width': collapsed ? '80px' : '300px',
        '--layout-dashboard-content-pt': theme.spacing(1),
        '--layout-dashboard-content-pb': theme.spacing(8),
        '--layout-dashboard-content-px': theme.spacing(5),
@@ -167,6 +173,7 @@ export function DashboardLayout({ sx, children, header }: DashboardLayoutProps) 
        [`& .${layoutClasses.hasSidebar}`]: {
          [theme.breakpoints.up(layoutQuery)]: {
            pl: 'var(--layout-nav-vertical-width)',
+           transition: 'padding-left 0.3s ease-in-out',
          },
        },
        ...sx,

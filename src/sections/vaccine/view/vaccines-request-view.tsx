@@ -9,11 +9,13 @@ import {
   Tabs,
   Tab,
   TextField,
+  Autocomplete,
 } from '@mui/material';
 import { DashboardContent } from 'src/layouts/dashboard';
 // import { useFetchUsers } from 'src/hooks/apis/ehf/ehf-hooks'; // No longer needed for MFA verification
 import { useCreateVaccine, useUpdateVaccineRequest } from 'src/hooks/apis/ehf/ehf-hooks';
 import { VaccineFormType } from 'src/hooks/apis/ehf/ehf-type';
+import { useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { validateMfaForSubmission } from 'src/utils/mfa-verification';
@@ -81,9 +83,10 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   const isView = (location.state as any)?.isView || (!!initialData && !editId);
   const isEdit = (location.state as any)?.isEdit || !!editId;
   
-  // const { data: users = [] } = useFetchUsers(); // No longer needed for MFA verification
+  // const { data: users = [] } = useFetchUsers();
   const createVaccine = useCreateVaccine();
   const updateVaccineRequest = useUpdateVaccineRequest();
+  const { data: allEhfData = [] } = useFetchEHF();
 
   const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>(
@@ -105,7 +108,8 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
   const [showDeclineComment, setShowDeclineComment] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [mfaCode, setMfaCode] = useState<string>('');
-  const [showMfaInput, setShowMfaInput] = useState<boolean>(false); 
+  const [showMfaInput, setShowMfaInput] = useState<boolean>(false);
+  const [selectedEhfId, setSelectedEhfId] = useState<string>(''); 
 
   const userEhfList = useMemo(() => {
     try {
@@ -125,7 +129,43 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     return sessionStorage.getItem('username') || 'Unknown User';
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+  const userEhfOptions = useMemo(() => {
+    // console.log('userEhfList:', userEhfList);
+    // console.log('allEhfData:', allEhfData);
+
+    if (userEhfList.length === 0 || allEhfData.length === 0) {
+      // console.log('Returning empty - userEhfList length:', userEhfList.length, 'allEhfData length:', allEhfData.length);
+      return [];
+    }
+
+    // Convert userEhfList to numbers for comparison
+    const userEhfIds = userEhfList.map(id => typeof id === 'string' ? parseInt(id, 10) : id);
+    // console.log('userEhfIds (converted):', userEhfIds);
+
+    const filtered = allEhfData
+      .filter((ehf) => {
+        const ehfId = ehf.id ?? 0;
+        const isIncluded = userEhfIds.includes(ehfId);
+        // console.log(`Checking EHF ${ehfId} (${ehf.ehf_name}): included = ${isIncluded}`);
+        return isIncluded;
+      })
+      .map((ehf) => ({
+        id: (ehf.id ?? 0).toString(),
+        label: ehf.ehf_name || `EHF ${ehf.id}`,
+      }));
+
+    // console.log('userEhfOptions:', filtered);
+    return filtered;
+  }, [userEhfList, allEhfData]);
+
+  // Initialize selectedEhfId with the first EHF if not already set
+  React.useEffect(() => {
+    if (!selectedEhfId && userEhfOptions.length > 0) {
+      setSelectedEhfId(userEhfOptions[0].id);
+    }
+  }, [userEhfOptions, selectedEhfId]);
+
+  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setSelectedTab(newValue);
   };
 
@@ -581,7 +621,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     }));
 
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 9, // 3PL declined
+      vaccine_status: 9, 
       decline_comment: declineComment,
       product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
@@ -603,7 +643,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
-  // EHF Approve Handler
+  // EHF Approve 
   const handleEhfApprove = async () => {
     // Validate MFA code first using server-side verification
     const mfaValidation = await validateMfaForSubmission(mfaCode);
@@ -631,7 +671,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     }));
 
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 8, // EHF accepted/completed (use existing completed status)
+      vaccine_status: 8, 
       product_detail_request: productDetailRequests,
       requested_by: initialData?.requested_by || username,
     };
@@ -652,7 +692,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     );
   };
 
-  // EHF Decline Handler
+  // EHF Decline 
   const handleEhfDecline = () => {
     if (!showDeclineComment) {
       setShowDeclineComment(true);
@@ -677,7 +717,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
     }
 
     const payload: Partial<VaccineFormType> = {
-      vaccine_status: 10, // EHF declined
+      vaccine_status: 10,
       decline_comment: declineComment,
     };
 
@@ -705,16 +745,13 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
       return;
     }
 
-    if (userEhfList.length === 0) {
-      toast.error('No user found. Please log in and try again.');
+    if (!selectedEhfId) {
+      toast.error('Please select an EHF facility before submitting.');
       return;
     }
 
-    const ehfId = userEhfList[0]?.toString();
-    if (!ehfId) {
-      toast.error('No EHF ID found for this user. Please contact support.');
-      return;
-    }
+    const ehfId = selectedEhfId;
+    const ehfName = userEhfOptions.find(opt => opt.id === selectedEhfId)?.label || '';
 
     if (Object.keys(formDataCollection).length === 0) {
       toast.error('Please fill out at least one vaccine form before submitting.');
@@ -728,7 +765,8 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
 
     const payload: VaccineFormType = {
       ehf_id: ehfId,
-      vaccine_status: 0, 
+      ehf_name: ehfName,
+      vaccine_status: 0,
       product_detail_request: productDetailRequests,
       requested_by: username,
     };
@@ -801,12 +839,12 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
             <Paper
               sx={{
                 p: 2,
-                border: '2px solid #1976D2',
+                border: '2px solid rgb(12, 125, 64)',
                 borderRadius: 1,
                 height: 'fit-content',
                 maxHeight: 'calc(100vh - 150px)',
                 overflow: 'auto',
-                backgroundColor: '#1976D2',
+                backgroundColor: 'rgb(12, 125, 64)',
               }}
             >
               <Tabs
@@ -814,7 +852,7 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                 variant="scrollable"
                 value={selectedTab}
                 onChange={handleTabChange}
-                sx={{ '& .MuiTabs-indicator': { backgroundColor: '#1976D2' } }}
+                sx={{ '& .MuiTabs-indicator': { backgroundColor: 'rgb(12, 125, 64)' } }}
               >
                 {vaccineOptions.map((vaccine) => (
                   <Tab
@@ -826,10 +864,20 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
                       textAlign: 'left',
                       color: 'white',
                       mb: 0.5,
-                      '&.Mui-selected': { backgroundColor: '#1565C0', color: 'white', borderRadius: 1 },
-                      '&:hover': { backgroundColor: '#1565C0' },
-                      borderRadius: 0,
+                      borderRadius: 1,
                       minHeight: 36,
+                      '&:hover': {
+                        bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.08))',
+                        color: 'white',
+                      },
+                      '&.Mui-selected': {
+                        fontWeight: 'fontWeightSemiBold',
+                        bgcolor: 'var(--layout-nav-item-active-bg, rgba(255, 255, 255, 0.16))',
+                        color: 'var(--layout-nav-item-active-color, white)',
+                        '&:hover': {
+                          bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.12))',
+                        },
+                      },
                     }}
                   />
                 ))}
@@ -838,6 +886,34 @@ export default function VaccineRequestForm({ initialData: propInitialData }: Vac
           </Grid>
 
           <Grid item xs={9}>
+            {/* EHF Selection Dropdown - Show when creating or editing (not viewing) */}
+            {!isView && userEhfOptions.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Autocomplete
+                  fullWidth
+                  options={userEhfOptions}
+                  getOptionLabel={(option) => option.label}
+                  value={userEhfOptions.find((opt) => opt.id === selectedEhfId) || null}
+                  onChange={(_, newValue) => {
+                    setSelectedEhfId(newValue?.id || '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select EHF Facility"
+                      placeholder="Choose the facility you are submitting for"
+                      required
+                      helperText={
+                        userEhfOptions.length === 1
+                          ? 'This is the only facility assigned to you'
+                          : 'Select the facility you are submitting this request for'
+                      }
+                    />
+                  )}
+                />
+              </Box>
+            )}
+
             {selectedTab && (
               <Box sx={{ mb: 4 }}>
                 {vaccineOptions

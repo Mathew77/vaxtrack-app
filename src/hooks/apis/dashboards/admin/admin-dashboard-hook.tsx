@@ -4,15 +4,19 @@ import { url } from "src/hooks/api";
 import { AdminAntigenStock, AdminLogisticStock, MonthlyAntigenStock } from "./admin-dashboard-type";
 
 
-  export const useFetchAdminLogisticsStockSummary = () => {
+  export const useFetchAdminLogisticsStockSummary = (state?: string, lga?: string) => {
       return useQuery<AdminLogisticStock, Error>({
-          queryKey: ['logistic-stock-summary'],
+          queryKey: ['logistic-stock-summary', state, lga],
           queryFn: async () => {
-              const response = await apiHelper.getResource<AdminLogisticStock>(
-                  `${url}v1/logistic-stock-summary/`
-              )
+              let apiUrl = `${url}v1/logistic-stock-summary/`;
+              const params = new URLSearchParams();
+              if (state) params.append('state', state);
+              if (lga) params.append('lga', lga);
+              if (params.toString()) apiUrl += `?${params.toString()}`;
+
+              const response = await apiHelper.getResource<AdminLogisticStock>(apiUrl);
               return response
-          } 
+          }
       })
   }
 
@@ -28,13 +32,17 @@ import { AdminAntigenStock, AdminLogisticStock, MonthlyAntigenStock } from "./ad
         });
     };
 
-    export const useFetchAntigenMonthlyStock = () => {
+    export const useFetchAntigenMonthlyStock = (state?: string, lga?: string) => {
         return useQuery<MonthlyAntigenStock[], Error>({
-            queryKey: ["antigen-monthly-stock"],
+            queryKey: ["antigen-monthly-stock", state, lga],
             queryFn: async () => {
-            const response = await apiHelper.getResource<MonthlyAntigenStock[]>(
-               ` ${url}v1/antigen-monthly-both-flags/`
-            );
+            let apiUrl = `${url}v1/antigen-monthly-both-flags/`;
+            const params = new URLSearchParams();
+            if (state) params.append('state', state);
+            if (lga) params.append('lga', lga);
+            if (params.toString()) apiUrl += `?${params.toString()}`;
+
+            const response = await apiHelper.getResource<MonthlyAntigenStock[]>(apiUrl);
             return response;
             },
         });

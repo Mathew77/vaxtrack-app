@@ -238,15 +238,9 @@ const LcsScsList: React.FC = () => {
             tableHeader="Local Cold Chain Store List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD LOCAL COLD CHAIN STORE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={lcsItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>
@@ -260,15 +254,9 @@ const LcsScsList: React.FC = () => {
             tableHeader="State Cold Chain Store List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD STATE COLD CHAIN STORE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={scsItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>

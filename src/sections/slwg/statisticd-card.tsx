@@ -1,12 +1,12 @@
 import React from 'react';
-import { Grid, Typography, Card, CardContent } from '@mui/material';
+import { Grid, Typography, Card, CardContent, Box } from '@mui/material';
 
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import RoomServiceIcon from '@mui/icons-material/RoomService';
 import BatteryFullIcon from '@mui/icons-material/BatteryFull';
 import SystemSecurityUpdateWarningIcon from '@mui/icons-material/SystemSecurityUpdateWarning';
-import { useFetchScsDashboard } from 'src/hooks/apis/dashboards/scs/scs-dashboard-hook';
+import { useFetchSlwgSummary } from 'src/hooks/apis/dashboards/slwg/slwg-dashboard-hook';
 import { DashboardContent } from 'src/layouts/dashboard';
 import Skeleton from '@mui/material/Skeleton';
 
@@ -50,11 +50,18 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
   return (
     <Card
       sx={{
-        boxShadow: 3,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
         borderRadius: 2,
         background: bgColor,
         color: textColor,
         height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
+          transform: 'scale(1.02)',
+        },
       }}
     >
       <CardContent
@@ -68,16 +75,42 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
           height: '100%',
         }}
       >
-        {/* <Typography variant="body2" sx={{ position: 'absolute', top: 10, right: 15, fontWeight: 'bold' }}>
-          {trend}
-        </Typography> */}
-        <div style={{ fontSize: 40, marginBottom: 8 }}>{icon}</div>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {title}
-        </Typography>
-        <Typography variant="h5" fontWeight="bold">
-          {total}
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 48,
+            height: 48,
+            borderRadius: 1.5,
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            mb: 2,
+          }}
+        >
+          <Box sx={{ fontSize: 28, display: 'flex', alignItems: 'center' }}>{icon}</Box>
+        </Box>
+        <Box sx={{ width: '100%' }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 500,
+              mb: 0.5,
+              opacity: 0.95,
+              fontSize: '0.875rem',
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 600,
+              fontSize: '2rem',
+            }}
+          >
+            {total}
+          </Typography>
+        </Box>
       </CardContent>
     </Card>
   );
@@ -85,7 +118,7 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
 
 export default function VaccineOverview() {
 
-  const { data, isLoading: isAllSlwgStock } = useFetchScsDashboard();
+  const { data, isLoading: isAllSlwgStock, error } = useFetchSlwgSummary();
 
   const isLoading = isAllSlwgStock;
 
@@ -93,13 +126,26 @@ export default function VaccineOverview() {
     return <SkeletonLoader />;
   }
 
+  if (error) {
+    console.error('SLWG Summary Error:', error);
+    return (
+      <Typography variant="body1" color="error">
+        Error loading data: {error.message}
+      </Typography>
+    );
+  }
+
   if (!data) {
+    console.log('SLWG Summary - No data returned');
+    console.log('SessionStorage slwg_list:', sessionStorage.getItem('slwg_list'));
     return (
       <Typography variant="body1" color="textSecondary">
         No data available
       </Typography>
     );
   }
+
+  console.log('SLWG Summary Data:', data);
 
   return (
     <Grid container spacing={2}>
@@ -108,35 +154,31 @@ export default function VaccineOverview() {
           title: 'EHF LMD Order Received',
           total: (data.Total_EHF_LMD_Order_Received || 0).toString(),
           icon: <ReceiptLongIcon fontSize="large" />,
-          bgColor: 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)',
-          textColor: '#0D47A1',
-          // trend: '↗ +2.6%',
+          bgColor: '#2E7D67',
+          textColor: '#FFFFFF',
         },
         {
           title: 'EHF LMD Order Serviced',
           total: (data.Total_EHF_LMD_Order_Serviced || 0).toString(),
           icon: <RoomServiceIcon fontSize="large" />,
-          bgColor: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)',
-          textColor: '#1B5E20',
-          // trend: '↗ +1.2%',
+          bgColor: '#226192',
+          textColor: '#FFFFFF',
         },
         {
           title: 'EHF LMD Order Serviced in Full',
           total: (data.Total_EHF_LMD_Order_Serviced_in_Full || 0).toString(),
           icon: <BatteryFullIcon fontSize="large" />,
-          bgColor: 'linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)',
-          textColor: '#B71C1C',
-          // trend: '↘ -0.8%',
+          bgColor: '#90CAF9',
+          textColor: '#1C252E',
         },
         {
-          title: 'EHF with non-functioning CCE EHF',
-          total: (data.Total_EHF_with_non_functioning_CCE || 0).toString(),
+          title: 'Total Vaccine Expired',
+          total: (data.Total_Vaccine_expired || 0).toString(),
           icon: <SystemSecurityUpdateWarningIcon fontSize="large" />,
-          bgColor: 'linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)',
-          textColor: '#E65100',
-          // trend: '↘ -1.5%',
+          bgColor: '#E8753A',
+          textColor: '#FFFFFF',
         },
-        
+
       ].map((card, index) => (
         <Grid key={index} item xs={12} sm={6} md={3}>
           {/* 5 cards per row: 12 / 5 = 2.4 */}

@@ -16,23 +16,10 @@ import Filter from 'src/utils/Filter';
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-       {/* <Filter
-        showState={false}
-        showLga={true}
-        showWard={true}
-         /> */}
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        {/* Hi, EHF */}
+        Conveyor Dashboard
       </Typography>
       <WelcomeCard />
-      <br/>
-      {/* <VaccineCard />
-      <br/>
-      <DashboardCards />
-      <br/>
-      <b/>
-      <br/>
-      <TransactionHistory /> */}
     </DashboardContent>
   );
 }

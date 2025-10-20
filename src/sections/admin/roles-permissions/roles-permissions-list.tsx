@@ -195,15 +195,9 @@ const RolesPermissionsList: React.FC = () => {
             tableHeader="Roles List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD ROLES"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={rolesItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>
@@ -217,15 +211,9 @@ const RolesPermissionsList: React.FC = () => {
             tableHeader="Permissions List"
             customRightButton={false}
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD PERMISSIONS"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={permissionItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>

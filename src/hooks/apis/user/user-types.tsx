@@ -35,12 +35,6 @@ export interface UserType {
   export interface StateOption {
   id: string;
   name: string;
-  // ehf_list?: EhfFacility[];
+  ehf_list?: string[];
 }
-
-// interface EhfFacility {
-//   id: string;
-//   name: string;
-//   stat_id: string;
-// }
   

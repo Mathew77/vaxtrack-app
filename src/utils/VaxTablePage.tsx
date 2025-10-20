@@ -10,11 +10,10 @@ import {
   MRT_ColumnDef,
   MRT_RowData,
 } from 'material-react-table';
-import { Box, MenuItem, Typography, SxProps, Theme } from '@mui/material';
+import { Box, MenuItem, Typography, SxProps, Theme, Button as MuiButton } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
-import { Button } from 'react-bootstrap';
 import { ReactElement, ReactNode, CSSProperties } from 'react';
 
 export interface ActionMenuItem<TData extends MRT_RowData> {
@@ -37,8 +36,8 @@ interface VaxTableProps<TData extends MRT_RowData> {
   tableHeader?: string;
   extraComponents?: ReactNode;
   actionMenuItems?: ActionMenuItem<TData>[];
+  getActionMenuItems?: (row: TData) => ActionMenuItem<TData>[];
   headerStyles?: SxProps<Theme>;
-  buttonStyles?: CSSProperties;
   showDownloadButton?: boolean;
   exportFileName?: string;
 }
@@ -56,8 +55,8 @@ const VaxTable = <TData extends MRT_RowData>({
   tableHeader = 'Enter Table Header',
   extraComponents = <></>,
   actionMenuItems = [],
+  getActionMenuItems,
   headerStyles = {},
-  buttonStyles = {},
   showDownloadButton = true,
   exportFileName,
 }: VaxTableProps<TData>) => {
@@ -81,15 +80,29 @@ const VaxTable = <TData extends MRT_RowData>({
       sx: {
         fontWeight: 'bold',
         fontSize: '14px',
-        bgcolor: '#F3F8F7',
-        boxShadow: 0,
+        bgcolor: '#34495e',
+        boxShadow: '0 4px 12px rgba(44, 62, 80, 0.4)',
         borderRadius: 'none',
         ...headerStyles,
       },
     },
-    muiTableHeadCellProps: { 
+    muiTableHeadCellProps: {
       sx: {
+        color: '#ffffff',
+        fontWeight: 'bold',
         ...headerStyles,
+      },
+    },
+    muiTableBodyRowProps: () => ({
+      sx: {
+        '&:hover': {
+          bgcolor: 'rgba(12, 125, 64, 0.08)',
+        },
+      },
+    }),
+    muiTableBodyCellProps: {
+      sx: {
+        borderBottom: '1px solid rgba(12, 125, 64, 0.1)',
       },
     },
     muiTableProps: {
@@ -148,58 +161,92 @@ const VaxTable = <TData extends MRT_RowData>({
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
             {customRightButton && (
-              <Button
+              <MuiButton
                 onClick={customRightButtonCallBackFunction}
-                style={{
-                  border: 'none',
-                  backgroundColor: '#0B795F',
+                variant="contained"
+                startIcon={customRightButtonIcon}
+                sx={{
+                  background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
                   color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginLeft: '10px',
-                  marginRight: '10px',
-                  cursor: 'pointer', 
-                  ...buttonStyles,
-                  ...customRightButtonStyles, 
+                  fontWeight: 600,
+                  px: 2,
+                  py: 1.2,
+                  ml: 1.5,
+                  mr: 1.5,
+                  borderRadius: 1,
+                  boxShadow: '0 4px 14px 0 rgba(12, 125, 64, 0.4)',
+                  textTransform: 'none',
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease-in-out',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                    boxShadow: '0 6px 20px 0 rgba(12, 125, 64, 0.6)',
+                    transform: 'translateY(-2px)',
+                    '& .MuiButton-startIcon': {
+                      transform: 'rotate(90deg)',
+                    },
+                  },
+                  '& .MuiButton-startIcon': {
+                    transition: 'transform 0.3s ease-in-out',
+                  },
+                  ...customRightButtonStyles,
                 }}
               >
-                {customRightButtonIcon} {customRightButtonText}
-              </Button>
+                {customRightButtonText}
+              </MuiButton>
             )}
             {showDownloadButton && (
-              <Button
+              <MuiButton
                 onClick={handleExportData}
-                style={{
-                  border: 'none',
-                  backgroundColor: '#000000',
+                variant="contained"
+                startIcon={<FileDownloadIcon />}
+                sx={{
+                  background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
                   color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  marginLeft: '10px',
-                  marginRight: '10px',
-                  cursor: 'pointer',
-                  ...buttonStyles,
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1.2,
+                  ml: 1.5,
+                  mr: 1.5,
+                  borderRadius: 1,
+                  boxShadow: '0 4px 14px 0 rgba(12, 125, 64, 0.4)',
+                  textTransform: 'none',
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease-in-out',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                    boxShadow: '0 6px 20px 0 rgba(12, 125, 64, 0.6)',
+                    transform: 'translateY(-2px)',
+                    '& .MuiButton-startIcon': {
+                      animation: 'bounce 0.6s ease-in-out',
+                    },
+                  },
+                  '@keyframes bounce': {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-4px)' },
+                  },
                 }}
               >
-                <FileDownloadIcon style={{ marginRight: '5px' }} />
                 EXPORT
-              </Button>
+              </MuiButton>
             )}
           </Box>
         </Box>
       </Box>
     ),
-    enableRowActions: actionMenuItems.length > 0,
+    enableRowActions: actionMenuItems.length > 0 || !!getActionMenuItems,
     positionActionsColumn: 'last',
-    renderRowActionMenuItems: ({ row }) =>
-      actionMenuItems.map((item, index) => {
+    renderRowActionMenuItems: ({ row }) => {
+      // Use dynamic function if provided, otherwise use static array
+      const items = getActionMenuItems ? getActionMenuItems(row.original) : actionMenuItems;
 
-        const displayText = typeof item.display === 'function' 
-          ? item.display(row.original) 
+      return items.map((item, index) => {
+        const displayText = typeof item.display === 'function'
+          ? item.display(row.original)
           : item.display;
-        
-        const isDisabled = typeof item.disabled === 'function' 
-          ? item.disabled(row.original) 
+
+        const isDisabled = typeof item.disabled === 'function'
+          ? item.disabled(row.original)
           : (item.disabled || false);
 
         return (
@@ -210,11 +257,12 @@ const VaxTable = <TData extends MRT_RowData>({
             key={`${displayText}:${index}`}
             onClick={() => (item.handleClick ? item.handleClick(row.original) : undefined)}
           >
-            {item.icon && <span style={{ marginRight: '10px', color: '#0B795F' }}>{item.icon}</span>}
+            {item.icon && <span style={{ marginRight: '10px', color: 'rgb(12, 125, 64)' }}>{item.icon}</span>}
             <span>{displayText}</span>
           </MenuItem>
         );
-      }),
+      });
+    },
   });
 
   return <MaterialReactTable table={table} />;

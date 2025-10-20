@@ -82,7 +82,7 @@ export const useUpsertUser = () => {
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => 
+    mutationFn: (id: number) =>
       apiHelper.deleteResource<void>(`${url}v1/user/${id}/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });

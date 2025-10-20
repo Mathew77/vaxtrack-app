@@ -209,15 +209,9 @@ const UserList: React.FC = () => {
             tableHeader="User Management List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD USER"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={userItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>

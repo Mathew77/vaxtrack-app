@@ -270,15 +270,9 @@ const VaccineAllocationList: React.FC = () => {
             tableHeader="Vaccine Allocation - Summary Page"
             customRightButton={!isEHF}
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText={"REQUEST VACCINE ALLOCATION"}
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={allocationItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>

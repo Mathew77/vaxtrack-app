@@ -232,15 +232,9 @@ const OrgUnitLevelList: React.FC = () => {
             tableHeader="Organisation Unit List"
             customRightButton={false}
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD ORGANISATION UNIT"
             // customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={orgUnitItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>
@@ -254,15 +248,9 @@ const OrgUnitLevelList: React.FC = () => {
             tableHeader="Organisation Level List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD ORGANISATION LEVEL"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={orgListItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>

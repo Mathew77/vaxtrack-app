@@ -1,7 +1,6 @@
 import type { Theme, SxProps, CSSObject } from '@mui/material/styles';
 
 import Box from '@mui/material/Box';
-import { useTheme } from '@mui/material/styles';
 import GlobalStyles from '@mui/material/GlobalStyles';
 
 import { baseVars } from '../config-vars';
@@ -26,13 +25,11 @@ export function LayoutSection({
   headerSection,
   sidebarSection,
 }: LayoutSectionProps) {
-  const theme = useTheme();
-
   const inputGlobalStyles = (
     <GlobalStyles
       styles={{
         body: {
-          ...baseVars(theme),
+          ...baseVars(),
           ...cssVars,
         },
       }}

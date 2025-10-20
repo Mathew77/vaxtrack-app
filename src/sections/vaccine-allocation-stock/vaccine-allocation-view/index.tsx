@@ -1,0 +1,1 @@
+export * from './vaccine-allocation-stock-view'

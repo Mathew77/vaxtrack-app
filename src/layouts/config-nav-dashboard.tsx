@@ -93,12 +93,16 @@ export const navData = [
   {
     title: 'Dashboard',
     path: '/conveyor-home',
-    icon: icon('ic-user'),
+    icon: icon('ic-analytics'),
     roles: ['conveyor'],
-    children: [
-      { title: 'Conveyor Dashboard 1', path: '/conveyor-home/dashboard1', roles: ['conveyor', 'admin'] },
-      { title: 'Conveyor Dashboard 2', path: '/conveyor-home/dashboard2', roles: ['conveyor', 'admin'] },
-    ],
+  },
+
+  //MCCO Menu
+  {
+    title: 'Dashboard',
+    path: '/mcco-home',
+    icon: icon('ic-analytics'),
+    roles: ['mcco'],
   },
   
  
@@ -119,13 +123,13 @@ export const navData = [
     title: 'EHF & UHF Setup',
     path: '/ehf-uhf-page',
     icon: icon('ic-facility'),
-    roles: ['admin', 'lcs', 'slwg'],
+    roles: ['admin', 'lcs'],
   },
   {
     title: 'LCS & SCS Setup',
     path: '/lcs-scs-page',
     icon: icon('ic-local'),
-    roles: ['admin', 'slwg'],
+    roles: ['admin'],
   },
   {
     title: 'Roles & Permissions Setup',
@@ -188,13 +192,13 @@ export const navData = [
     roles: ['admin'],
   },
   //Generic Menu 
-  {
+  // {
 
-    title: 'Vaccine Request',
-    path: '/vaccine-page',
-    icon: <MenuBookIcon />,
-    roles: ['ehf', 'lcs', 'scs', 'threepl', 'slwg'],
-  },
+  //   title: 'Vaccine Request',
+  //   path: '/vaccine-page',
+  //   icon: <MenuBookIcon />,
+  //   roles: ['ehf', 'lcs', 'scs', 'threepl', 'slwg'],
+  // },
   // {
   //   title: 'Vaccine Allocation',
   //   path: '/conveyor',
@@ -202,11 +206,17 @@ export const navData = [
   //   roles: ['conveyor', 'ehf', 'uhf'],
 
   // },
+  // {
+  //   title: 'Vaccine Allocation',
+  //   path: '/vaccine-allocation-page',
+  //   icon: icon('ic-community'),
+  //   roles: ['ehf', 'uhf', 'threepl'],
+  // },
   {
-    title: 'Vaccine Allocation',
-    path: '/vaccine-allocation-page',
+    title: 'Vaccine Allocation Stock',
+    path: '/vaccine-allocation-stock-page',
     icon: icon('ic-community'),
-    roles: ['conveyor', 'ehf', 'uhf', 'threepl'],
+    roles: ['slwg', 'scs', 'threepl', 'mcco'],
   },
   // {
   //   title: 'WayBill / Invoice',
@@ -214,12 +224,12 @@ export const navData = [
   //   icon: <StackedLineChartIcon />,
   //   roles: ['threepl'],
   // },
-  // {
-  //   title: 'Table Page',
-  //   path: '/table',
-  //   icon: icon('ic-lock'),
-  //   roles: ['ehf','uhf','lcs','slwg','threepl'],
-  // },
+  {
+    title: 'Stock Upload',
+    path: '/upload-stock',
+    icon: icon('ic-lock'),
+    roles: ['admin'],
+  },
   {
     title: 'Report',
     path: '/report',

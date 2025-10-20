@@ -275,11 +275,11 @@ const VvmStageReport: React.FC = () => {
             disabled={!selectedState}
             startIcon={<SearchIcon />}
             fullWidth
-            sx={{
+            sx={{ 
               height: '40px',
-              backgroundColor: '#1976d2',
+              backgroundColor: '#2c3e50',
               '&:hover': {
-                backgroundColor: '#1565c0',
+                backgroundColor: '#34495e',
               }
             }}
           >
@@ -328,11 +328,6 @@ const VvmStageReport: React.FC = () => {
             tableHeader=""
             customRightButton={false}
             extraComponents={<FilterControls />}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={true}
           />
         </Box>

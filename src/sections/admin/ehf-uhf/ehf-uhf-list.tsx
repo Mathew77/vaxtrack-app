@@ -252,15 +252,9 @@ const EhfUHFList: React.FC = () => {
             tableHeader="Equipped Health Facility List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD EQUIPPED HEALTH FACILITY"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ehfItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>
@@ -274,15 +268,9 @@ const EhfUHFList: React.FC = () => {
             tableHeader="Unequipped Health Facility List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD UNEQUIPPED HEALTH FACILITY"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uhfItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
            showDownloadButton={false}
           />
         </Box>

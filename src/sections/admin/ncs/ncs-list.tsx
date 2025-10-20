@@ -160,15 +160,9 @@ const NcsList: React.FC = () => {
             tableHeader="National Strategic Cold Store List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD NATIONAL STRATEGIC COLD STORE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ncsListItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
             showDownloadButton={false}
           />
         </Box>

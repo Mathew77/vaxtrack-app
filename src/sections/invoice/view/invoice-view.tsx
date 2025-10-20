@@ -177,15 +177,9 @@ export default function InvoiceList() {
             tableHeader="Way Bills"
             customRightButton={false}
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Way Bills"
             customRightButtonCallBackFunction={handleAddNew}
             // actionMenuItems={zoneListItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
           />
         </Box>
       </TabPanel>
@@ -197,15 +191,9 @@ export default function InvoiceList() {
             tableHeader="Invoice"
             customRightButton={false}
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="Invoice"
             customRightButtonCallBackFunction={handleAddNew}
             // actionMenuItems={zoneListItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
           />
         </Box>
       </TabPanel>

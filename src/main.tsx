@@ -17,7 +17,24 @@ root.render(
       <BrowserRouter>
         <Suspense>
           <App />
-          <ToastContainer />
+          <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            style={{ zIndex: 9999 }}
+            toastStyle={{
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              fontFamily: 'inherit',
+            }}
+          />
         </Suspense>
       </BrowserRouter>
     </HelmetProvider>

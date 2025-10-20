@@ -162,15 +162,9 @@ const ZoneList: React.FC = () => {
             tableHeader="Zone Management List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonStyles={{ backgroundColor: 'black', color: '#fff', padding: 4, borderRadius: 2 }}
             customRightButtonText="ADD ZONE"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={zoneListItem}
-            headerStyles={{
-              backgroundColor: '#1976D2',
-              color: 'white',
-              fontSize: '16px',
-            }}
           />
         </Box>
       </TabPanel>
