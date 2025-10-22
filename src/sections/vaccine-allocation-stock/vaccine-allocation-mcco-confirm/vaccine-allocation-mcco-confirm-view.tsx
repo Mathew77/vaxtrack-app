@@ -162,11 +162,13 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       mcco_mfa_code: mfaCode,
     };
 
+    // MCCO always sets status to 3 (Pending LCS Review)
+    // LCS will review and set to status 4 when complete
     updateStatusMutation.mutate(
       { id: data.id, status: 3, data: updatePayload },
       {
         onSuccess: () => {
-          toast.success('Vaccine receipt confirmed successfully!');
+          toast.success('Vaccine receipt confirmed successfully! Pending LCS review.');
           navigate('/vaccine-allocation-stock-page');
         },
         onError: () => {
@@ -180,7 +182,8 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     if (status === 0) return 'Pending SCS Confirmation';
     if (status === 1) return 'Pending 3PL Pickup';
     if (status === 2) return 'Pending MCCO Confirmation';
-    if (status === 3) return 'Completed';
+    if (status === 3) return 'Pending LCS Review';
+    if (status === 4) return 'Completed';
     return 'Unknown';
   };
 
@@ -188,7 +191,8 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     if (status === 0) return 'warning';
     if (status === 1) return 'info';
     if (status === 2) return 'warning';
-    if (status === 3) return 'success';
+    if (status === 3) return 'warning';
+    if (status === 4) return 'success';
     return 'default';
   };
 

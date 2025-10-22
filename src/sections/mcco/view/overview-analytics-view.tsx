@@ -1,19 +1,18 @@
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-
-import WelcomeCard  from '../welcome';
+import MccoStatisticsCard from '../dashboard/statistics-card';
+import MccoVaccineStockTable from '../dashboard/vaccine-stock-table';
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        MCCO Dashboard
-      </Typography>
-      <WelcomeCard />
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 2 }}>
+        <MccoStatisticsCard />
+        <MccoVaccineStockTable />
+      </Box>
     </DashboardContent>
   );
 }

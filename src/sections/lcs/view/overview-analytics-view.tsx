@@ -2,31 +2,16 @@
 import Box from '@mui/material/Box';
 import { DashboardContent } from 'src/layouts/dashboard';
 
-import WelcomeCard from '../welcome';
-import VaccineCard from '../statistics';
-import TransactionHistory from '../transaction-history';
-import DashboardCards from '../statistics2';
-import Filter from 'src/utils/Filter';
+import Statistics from '../statisticd-card';
+import VaccineStockTable from '../vaccine-stock-table';
 
 export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
-      {/* <Filter showState={false} showLga={false} showWard={true} /> */}
-
-      <Box mt={3}>
-        <VaccineCard />
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 2 }}>
+        <Statistics />
+        <VaccineStockTable />
       </Box>
-      <Box mt={3}>
-        <WelcomeCard />
-      </Box>
-
-      <Box mt={3}>
-        <DashboardCards />
-      </Box>
-
-      {/* <Box mt={3}>
-        <TransactionHistory />
-      </Box> */}
     </DashboardContent>
   );
 }

@@ -128,8 +128,8 @@ export default function PermissionSetup() {
           Submit
         </Button>
         <Button 
-          variant="contained" 
-          color="inherit" 
+          variant="outlined" 
+          // color="inherit" 
           size="large" 
           onClick={() => navigate('/roles-permissions-page', {state: { activeTab }})}>
           Cancel

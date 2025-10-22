@@ -158,7 +158,7 @@ export default function UhfSetup() {
 
     const handleUhfNameChange = (event: SelectChangeEvent<string>) => {
       const uhf_name = event.target.value;
-      const selectedFacility = hfaList.find(hfa => hfa.facility_name === uhf_name)
+      const selectedFacility = hfaList.find(hfa => hfa.name_of_ehf === uhf_name)
       setData((prev) => ({
         ...prev,
         uhf_name: uhf_name,
@@ -368,8 +368,8 @@ export default function UhfSetup() {
                   'Select UHF Name'}
                 </MenuItem>
                 {hfaList.map((hfa, index) => (
-                  <MenuItem key={`${hfa.facility_name}-${index}`} value={hfa.facility_name}>
-                    {hfa.facility_name}
+                  <MenuItem key={`${hfa.name_of_ehf}-${index}`} value={hfa.name_of_ehf}>
+                    {hfa.name_of_ehf}
                   </MenuItem>
                 ))}
               </Select>
@@ -507,8 +507,8 @@ export default function UhfSetup() {
 
       <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
-          variant="contained" 
-          color="inherit" 
+          variant="outlined" 
+          // color="inherit" 
           size="large" 
           onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Cancel

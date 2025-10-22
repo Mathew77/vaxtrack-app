@@ -47,12 +47,13 @@ const VaccineAllocationConfirmView: React.FC = () => {
     );
   }
 
-  // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Confirmed by MCCO
+  // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Pending LCS Review, 4 = Completed
   const getStatusLabel = (status: number) => {
     if (status === 0) return 'Pending SCS Confirmation';
     if (status === 1) return 'Pending 3PL Pickup';
     if (status === 2) return 'Pending MCCO Confirmation';
-    if (status === 3) return 'Completed';
+    if (status === 3) return 'Pending LCS Review';
+    if (status === 4) return 'Completed';
     return 'Unknown';
   };
 
@@ -60,7 +61,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
     if (status === 0) return 'warning';
     if (status === 1) return 'info';
     if (status === 2) return 'warning';
-    if (status === 3) return 'success';
+    if (status === 3) return 'warning';
+    if (status === 4) return 'success';
     return 'default';
   };
 

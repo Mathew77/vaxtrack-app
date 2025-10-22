@@ -253,8 +253,8 @@ export default function RolesSetup() {
 
      <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
        <Button
-         variant="contained"
-         color="inherit"
+         variant="outlined"
+        //  color="inherit"
          size="large"
          onClick={() => navigate('/roles-permissions-page', { state: { activeTab } })}
        >

@@ -102,7 +102,7 @@ export const useFetchStates = () => {
         if (!state) return [];
 
         try {
-          let apiUrl = `${url}v1/hfa-list/?state=${encodeURIComponent(state.trim())}`;
+          let apiUrl = `${url}v1/ehf-detail-routes/?state=${encodeURIComponent(state.trim())}`;
 
           if (status && status.trim()) {
             apiUrl += `&status=${encodeURIComponent(status.trim())}`;
@@ -112,9 +112,9 @@ export const useFetchStates = () => {
             apiUrl += `&lga=${encodeURIComponent(lga.trim())}`;
           }
 
-          const response = await apiHelper.getResource<ApiResponse<HFAType[]>>(apiUrl);
+          const response = await apiHelper.getResource<any[]>(apiUrl);
 
-          return Array.isArray(response.data) ? response.data : [];
+          return Array.isArray(response) ? response : [];
         } catch (error) {
           console.error('API Error - HFA List:', error);
           return [];

@@ -21,8 +21,8 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { EHFType } from 'src/hooks/apis/ehf-uhf/ehf-type';
-import { useFetchStates, useFetchLgas, useFetchWards, useUpsertEHF, useVaccineStorage } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
-import { useFetchHFAList, useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { useFetchStates, useFetchLgas, useFetchWards, useUpsertEHF, useVaccineStorage, useFetchEHFDetailRoutes } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { toast } from 'react-toastify';
 import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
@@ -48,7 +48,7 @@ export default function EhfSetup() {
   // const { data: orgUnits = [] } = useFetchOrgUnits();
 
   const { data: uhfs = [] } = useFetchUHF();
-  const { data: hfaList = [], isLoading: hfaLoading } = useFetchHFAList(selectedState, selectedLga, 'EHF');
+  const { data: hfaList = [], isLoading: hfaLoading } = useFetchEHFDetailRoutes(selectedState, selectedLga);
 
   const [selectedEquipment, setSelectedEquipment] = useState<any>(null);
 
@@ -58,13 +58,14 @@ export default function EhfSetup() {
     lga: '',
     // ward: '',
     ehf_name: '',
+    ehf_unique_id: '',
     longtitude: "",
     lagtitude: "",
     uhf_list: [],
     contact_person_name: '',
     contact_person_phone: '',
     contact_person_email: '',
-    storage_capcity: '', 
+    storage_capcity: '',
     equipment_model_number: '',
   };
 
@@ -76,22 +77,33 @@ export default function EhfSetup() {
   const setCurrentState = () => {
     if (state?.data) {
       const ehfData = state.data;
-      setData({
+
+      // Map the facility data from ehf-detail-routes to form fields
+      const mappedData = {
         ...initialValues,
-        ...ehfData,
         state: ehfData.state || '',
         lga: ehfData.lga || '',
-        ward: ehfData.ward || '',
-        storage_capcity: ehfData.storage_capcity ?? null,
-        equipment_model_number: ehfData.equipment_model_number ?? null,
-      });
+        // ward: ehfData.ward || '',
+        ehf_name: ehfData.name_of_ehf || ehfData.ehf_name || '',
+        ehf_unique_id: ehfData.assigned_unique_id || ehfData.ehf_unique_id || '',
+        longtitude: ehfData.longitude?.toString() || ehfData.longtitude || '',
+        lagtitude: ehfData.latitude?.toString() || ehfData.lagtitude || '',
+        contact_person_name: ehfData.contact_person_name || '',
+        contact_person_phone: ehfData.phone_number || ehfData.contact_person_phone || '',
+        contact_person_email: ehfData.contact_person_email || '',
+        storage_capcity: ehfData.storage_capcity || '',
+        equipment_model_number: ehfData.cce_model || ehfData.equipment_model_number || '',
+        uhf_list: ehfData.uhf_list || [],
+      };
+
+      setData(mappedData);
       setSelectedState(ehfData.state || '');
       setSelectedLga(ehfData.lga || '');
       setIsUpdate(state.isUpdate || false);
       setIsView(state.isView || false);
 
-      if (ehfData.storage_capcity) {
-        const equipment = vaccineStorageEquipment.find(eq => eq.code === ehfData.storage_capcity);
+      if (mappedData.storage_capcity) {
+        const equipment = vaccineStorageEquipment.find(eq => eq.code === mappedData.storage_capcity);
         if (equipment) {
           setSelectedEquipment(equipment);
         }
@@ -142,16 +154,16 @@ export default function EhfSetup() {
     // temp.ward = data.ward 
     //     ? '' 
     //     : 'Ward is required';
-    temp.ehf_name = data.ehf_name 
-        ? '' 
+    temp.ehf_name = data.ehf_name
+        ? ''
         : 'EHF name required';
-    // temp.longtitude = data.longtitude 
-    //     ? '' 
+    // temp.longtitude = data.longtitude
+    //     ? ''
     //     : 'Longitude required';
-    // temp.lagtitude = data.lagtitude 
-    //     ? '' 
+    // temp.lagtitude = data.lagtitude
+    //     ? ''
     //     : 'Latitude required';
-    temp.uhf_list = data.uhf_list.length > 0 ? '' : 'UHF required';
+    // temp.uhf_list = data.uhf_list.length > 0 ? '' : 'UHF required';
 
     temp.contact_person_name = data.contact_person_name 
         ? '' 
@@ -177,15 +189,19 @@ export default function EhfSetup() {
   //   label: uhf.uhf_name 
   // }));
 
-  const uhfOptions = uhfs.filter(uhf => {
-    if (uhf.state !== data.state) return false;
-    if (data.lga && uhf.lga !== data.lga) return false;
-    return true;
-  })
-  .map(uhf => ({
-    value: uhf.id?.toString() || '',
-    label: uhf.uhf_name,
-  }));
+  const uhfOptions = uhfs
+    .filter(uhf => {
+      // Only show UHFs from the selected state
+      if (!data.state || uhf.state !== data.state) return false;
+      // If LGA is selected, only show UHFs from that LGA
+      if (data.lga && uhf.lga !== data.lga) return false;
+      return true;
+    })
+    .map(uhf => ({
+      value: uhf.id?.toString() || '',
+      label: uhf.uhf_name,
+    }));
+
 
   const handleSelectChange = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
@@ -286,11 +302,12 @@ export default function EhfSetup() {
     };
 
     const handleEhfNameChange = (event: SelectChangeEvent<string>) => {
-      const ehf_name = event.target.value;
-      const selectedFacility = hfaList.find(hfa => hfa.facility_name === ehf_name)
+      const assigned_unique_id = event.target.value;
+      const selectedFacility = hfaList.find(hfa => hfa.assigned_unique_id === assigned_unique_id)
       setData((prev) => ({
         ...prev,
-        ehf_name: ehf_name,
+        ehf_name: selectedFacility ? selectedFacility.name_of_ehf : '', // Store facility name
+        ehf_unique_id: assigned_unique_id, // Store assigned_unique_id
         longtitude: selectedFacility ? selectedFacility.longitude?.toString() || '' : '',
         lagtitude: selectedFacility ? selectedFacility.latitude?.toString() || '' : ''
       }));
@@ -458,24 +475,34 @@ export default function EhfSetup() {
               Equipped Health Facility Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
             </Typography>
             <Select
-              id="ehf_name"
-              name="ehf_name"
-              value={data.ehf_name}
+              id="ehf_unique_id"
+              name="ehf_unique_id"
+              value={data.ehf_unique_id || ''}
               onChange={handleEhfNameChange}
               sx={{ width: '100%' }}
               displayEmpty
               variant="outlined"
               disabled={isView || !selectedState || !selectedLga || hfaLoading}
+              renderValue={(selected) => {
+                if (!selected) {
+                  return hfaLoading ? 'Loading facilities...' :
+                    !selectedState || !selectedLga ? 'Select State and LGA first' :
+                    hfaList.length === 0 ? 'No facilities found' :
+                    'Select EHF Name';
+                }
+                const facility = hfaList.find(hfa => hfa.assigned_unique_id === selected);
+                return facility ? facility.name_of_ehf : selected;
+              }}
             >
               <MenuItem value="" disabled>
-                {hfaLoading ? 'Loading facilities...' : 
-                !selectedState || !selectedLga ? 'Select State and LGA first' : 
+                {hfaLoading ? 'Loading facilities...' :
+                !selectedState || !selectedLga ? 'Select State and LGA first' :
                 hfaList.length === 0 ? 'No facilities found' :
                 'Select EHF Name'}
               </MenuItem>
               {hfaList.map((hfa, index) => (
-                <MenuItem key={`${hfa.facility_name}-${index}`} value={hfa.facility_name}>
-                  {hfa.facility_name}
+                <MenuItem key={`${hfa.assigned_unique_id}-${index}`} value={hfa.assigned_unique_id}>
+                  {hfa.name_of_ehf}
                 </MenuItem>
               ))}
             </Select>
@@ -487,7 +514,7 @@ export default function EhfSetup() {
           </FormControl>
         </Grid>
 
-         <Grid item xs={6}>
+         {/* <Grid item xs={6}>
             <Typography component="label" htmlFor="longtitude" >
               Longitude
             </Typography>
@@ -507,7 +534,7 @@ export default function EhfSetup() {
               }
             />
           </Grid>
-  
+
           <Grid item xs={6}>
             <Typography component="label" htmlFor="lagtitude" >
               Latitude
@@ -527,9 +554,9 @@ export default function EhfSetup() {
                 ) : ''
               }
             />
-          </Grid>
+          </Grid> */}
 
-        <Grid item xs={12}> 
+        {/* <Grid item xs={12}>
           <FormControl sx={{ m: 0, width: '100%' }}>
             <Typography component="label" sx={{ mb: 1 }}>
               Unequipped Health Facilty (Cascade / Spoke)<span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -540,13 +567,13 @@ export default function EhfSetup() {
               onChange={handleUHFChange}
               selected={data.uhf_list}
               className="dual-listbox-custom"
-              alignActions="middle" 
+              alignActions="middle"
               disabled={isView}
               icons={{
-                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />, 
+                moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
                 moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
                 moveToSelected: <ArrowRightIcon sx={{ fontSize: '16px' }} />,
-                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />, 
+                moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
               }}
             />
             {errors?.uhf_list !== '' && (
@@ -564,7 +591,7 @@ export default function EhfSetup() {
             </Typography>
             ) : null}
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       {/* Vaccine Storage Capacity Section */}
@@ -612,7 +639,7 @@ export default function EhfSetup() {
                 fullWidth
                 id="equipment_model_number"
                 name="equipment_model_number"
-                value={selectedEquipment?.model || ''}
+                value={isView ? data.equipment_model_number : (selectedEquipment?.model || '')}
                 variant="outlined"
                 disabled={true}
                 placeholder="Model will auto-populate when equipment is selected"
@@ -637,8 +664,8 @@ export default function EhfSetup() {
         </Box>
       </Box>
 
-      {/* Contact Information Section */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
+      {/* Contact Information Section - Commented Out */}
+      {/* <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4 }}>
         <Typography variant="h5">
           Equipped Health Facility Contact Information
         </Typography>
@@ -646,7 +673,7 @@ export default function EhfSetup() {
           <Grid container spacing={3}>
             <Grid item xs={6}>
               <Typography component="label" htmlFor="contact_person_name">
-                Contact Person Name <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                Contact Person Name
               </Typography>
               <TextField
                 fullWidth
@@ -654,7 +681,7 @@ export default function EhfSetup() {
                 name="contact_person_name"
                 placeholder="Contact Person Name"
                 value={data.contact_person_name}
-                onChange={handleInputChange} 
+                onChange={handleInputChange}
                 variant="outlined"
                 disabled={isView}
                 helperText={
@@ -667,7 +694,7 @@ export default function EhfSetup() {
 
             <Grid item xs={6}>
               <Typography component="label" htmlFor="contact_person_phone">
-                Phone Number <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                Phone Number
               </Typography>
               <TextField
                 fullWidth
@@ -691,7 +718,7 @@ export default function EhfSetup() {
 
             <Grid item xs={6}>
               <Typography component="label" htmlFor="contact_person_email">
-                Email <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
+                Email
               </Typography>
               <TextField
                 fullWidth
@@ -712,12 +739,11 @@ export default function EhfSetup() {
             </Grid>
           </Grid>
         </Box>
-      </Box>
+      </Box> */}
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
-          variant="contained" 
-          color="inherit" 
+          variant="outlined" 
           size="large" 
           onClick={() => navigate('/ehf-uhf-page', { state: { activeTab } })}>
           Cancel

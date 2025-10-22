@@ -228,7 +228,7 @@ const handleSubmit = () => {
        <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>
          Submit
        </Button>
-       <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/zone-page')}>
+       <Button variant="outlined" size="large" onClick={() => navigate('/zone-page')}>
          Cancel
        </Button>
      </Box>

@@ -153,26 +153,16 @@ const initialValues: ThreePlType = {
     }));
   };
 
-  // const handleChangeEHF = (selected: string[]) => {
-  //   setData((prev) => ({
-  //     ...prev,
-  //     ehf_list: selected, 
-  //   }));
-  // };
-
   const handleChangeEHF = (selected: string[]) => {
-    const selectedEhfNames = selected.map((id) =>
-      ehfs.find((ehf) => ehf.id?.toString() === id)?.ehf_name || ''
-    ).filter(Boolean)
     setData((prev) => ({
       ...prev,
-      ehf_list: selectedEhfNames,
+      ehf_list: selected,
     }));
   };
 
   const ehfOptions = ehfs.map((ehf) => ({
-    value: ehf.id?.toString() || '', 
-    label: ehf.ehf_name || '',     
+    value: ehf.assigned_unique_id || '',
+    label: ehf.name_of_ehf || '',
   }));
 
   const stateOptions = states.map((state) => ({
@@ -180,12 +170,12 @@ const initialValues: ThreePlType = {
     label: state.state,
   }));
 
-  const ccwRole = roles.find((role) => role.name === 'Community Case Worker');
-  const ccwRoleId = ccwRole?.id?.toString();
+  // const ccwRole = roles.find((role) => role.name === 'Community Case Worker');
+  // const ccwRoleId = ccwRole?.id?.toString();
 
-  const ccwUsers = users.filter((user) =>
-    user.groups?.includes(ccwRoleId ? parseInt(ccwRoleId) : -1)
-  );
+  // const ccwUsers = users.filter((user) =>
+  //   user.groups?.includes(ccwRoleId ? parseInt(ccwRoleId) : -1)
+  // );
 
   const handleSubmit = () => {
     if (validate()) {
@@ -374,7 +364,7 @@ const initialValues: ThreePlType = {
               </FormControl>
             </Grid>
 
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <FormControl sx={{ m: 0, width: '100%' }}>
                 <Typography component="label" htmlFor="ccw" sx={{ mb: 1 }}>
                   Community Case Worker
@@ -397,7 +387,7 @@ const initialValues: ThreePlType = {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={12}>
               <FormControl sx={{ m: 0, width: '100%' }}>
@@ -408,12 +398,10 @@ const initialValues: ThreePlType = {
                   canFilter
                   options={ehfOptions}
                   onChange={handleChangeEHF}
-                  selected={data.ehf_list.map((name) =>
-                    ehfs.find((ehf) => ehf.ehf_name === name)?.id?.toString() || ''
-                  )} 
+                  selected={data.ehf_list}
                   className="dual-listbox-custom"
                   alignActions="middle"
-                  disabled={isView} 
+                  disabled={isView}
                   icons={{
                     moveToAvailable: <ArrowLeftIcon sx={{ fontSize: '16px' }} />,
                     moveAllToAvailable: <DoubleArrowLeftIcon sx={{ fontSize: '16px' }} />,
@@ -438,7 +426,7 @@ const initialValues: ThreePlType = {
       </Grid>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/threepl-page')}>
+        <Button variant="outlined"  size="large" onClick={() => navigate('/threepl-page')}>
           Cancel
         </Button>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>

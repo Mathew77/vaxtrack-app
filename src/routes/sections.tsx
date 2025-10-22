@@ -63,6 +63,7 @@ export const UserManagementSetup = lazy(() => import('src/pages/admin/user-manag
 
 export const UserSetup = lazy(() => import('src/sections/admin/users/user-setup'));
 export const EhfSetup = lazy(() => import('src/sections/admin/ehf-uhf/ehf/ehf-setup'));
+export const EhfView = lazy(() => import('src/pages/ehf-view/index'));
 export const UhfSetup = lazy(() => import('src/sections/admin/ehf-uhf/uhf/uhf-setup'));
 export const LcsSetup = lazy(() => import('src/sections/admin/lcs-scs/lcs/lcs-setup'));
 export const ScsSetup = lazy(() => import('src/sections/admin/lcs-scs/scs/scs-setup'));
@@ -81,6 +82,7 @@ export const VaccineRequestForm = lazy(() => import('src/sections/vaccine/view/v
 export const VaccineAllocationStockView = lazy(() => import('src/sections/vaccine-allocation-stock/vaccine-allocation-view/vaccine-allocation-stock-view'));
 export const VaccineAllocationConfirmPage = lazy(() => import('src/pages/vaccine-allocation-confirm/index'));
 export const VaccineAllocationMccoConfirmPage = lazy(() => import('src/pages/vaccine-allocation-mcco-confirm/index'));
+export const VaccineAllocationLcsReturnPage = lazy(() => import('src/pages/vaccine-allocation-lcs-return/index'));
 
 
 //Test page
@@ -250,6 +252,7 @@ export function Router() {
         { path: 'scs-home', element: <ScsHome /> },
         //Admin route menu and components
         { path: 'ehf-setup', element: <EhfSetup /> },
+        { path: 'ehf-view', element: <EhfView /> },
         { path: 'uhf-setup', element: <UhfSetup /> },
         { path: 'lcs-setup', element: <LcsSetup /> },
         { path: 'threepl-setup', element: <ThreePlSetup /> },
@@ -284,6 +287,7 @@ export function Router() {
         {path: 'vaccine-allocation-stock-view', element: <VaccineAllocationStockView />},
         {path: 'vaccine-allocation-confirm-view', element: <VaccineAllocationConfirmPage />},
         {path: 'vaccine-allocation-mcco-confirm', element: <VaccineAllocationMccoConfirmPage />},
+        {path: 'vaccine-allocation-lcs-return', element: <VaccineAllocationLcsReturnPage />},
 
         { path: 'report', element: <ReportForms />},
          { path: 'upload-stock', element: <UploadPage />},

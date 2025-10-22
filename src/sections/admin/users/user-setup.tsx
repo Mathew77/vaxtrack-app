@@ -23,7 +23,7 @@ import { useUpsertUser, useFetchRoles, useFetchStates } from 'src/hooks/apis/use
 import { useFetchNcs } from 'src/hooks/apis/ncs/ncs-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
-import { useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchEHFList } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { useFetchUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { useFetchThreePl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { toast } from 'react-toastify';
@@ -41,7 +41,7 @@ export default function UserSetup() {
   const { data: ncs = [] } = useFetchNcs();
   const { data: scs = [] } = useFetchScs();
   const { data: lcs = [] } = useFetchLcs();
-  const { data: ehfs = [] } = useFetchEHF();
+  const { data: ehfs = [] } = useFetchEHFList();
   const { data: uhfs = [] } = useFetchUHF();
   const { data: threePLs = [] } = useFetchThreePl();
    const { data: states = [] } = useFetchStates();
@@ -254,28 +254,26 @@ export default function UserSetup() {
     case 'Equipped Health Facility':
       if (selectedStateId) {
         const filteredEhfs = ehfs.filter((ehf) => {
-          return ehf.id !== undefined &&
-            ehf.id !== null &&
+          return ehf.assigned_unique_id &&
             ehf.state?.toLowerCase() === selectedStateId.toLowerCase();
         });
-        return filteredEhfs.map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }));
+        return filteredEhfs.map((ehf) => ({ label: ehf.name_of_ehf, value: ehf.assigned_unique_id }));
       }
       return ehfs
-        .filter((ehf) => ehf.id !== undefined && ehf.id !== null)
-        .map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }));
+        .filter((ehf) => ehf.assigned_unique_id)
+        .map((ehf) => ({ label: ehf.name_of_ehf, value: ehf.assigned_unique_id }));
 
     case 'Mobile Cold Chain Officer':
       if (selectedStateId) {
         const filteredEhfs = ehfs.filter((ehf) => {
-          return ehf.id !== undefined &&
-            ehf.id !== null &&
+          return ehf.assigned_unique_id &&
             ehf.state?.toLowerCase() === selectedStateId.toLowerCase();
         });
-        return filteredEhfs.map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }));
+        return filteredEhfs.map((ehf) => ({ label: ehf.name_of_ehf, value: ehf.assigned_unique_id }));
       }
       return ehfs
-        .filter((ehf) => ehf.id !== undefined && ehf.id !== null)
-        .map((ehf) => ({ label: ehf.ehf_name, value: ehf.id!.toString() }));
+        .filter((ehf) => ehf.assigned_unique_id)
+        .map((ehf) => ({ label: ehf.name_of_ehf, value: ehf.assigned_unique_id }));
 
     case 'Unequipped Health Facility':
       return uhfs
@@ -675,9 +673,10 @@ export default function UserSetup() {
       </Grid>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 2 }}>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/user-management')}>
+        <Button variant="outlined"  size="large" onClick={() => navigate('/user-management')}>
           Cancel
         </Button>
+        
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit} disabled={isView}>
           Submit
         </Button>

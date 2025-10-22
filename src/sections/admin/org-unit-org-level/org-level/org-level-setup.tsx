@@ -152,8 +152,8 @@ export default function OrgLevelSetup() {
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
-          variant="contained" 
-          color="inherit" 
+          variant="outlined" 
+          // color="inherit" 
           size="large" 
           onClick={() => navigate('/org-units-page', {state: { activeTab} })}>
           Cancel

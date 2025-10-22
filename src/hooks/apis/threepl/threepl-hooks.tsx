@@ -66,14 +66,21 @@ export const useFetchStates = () => {
       queryKey: ['ehfs', state, lga],
       queryFn: async (): Promise<any[]> => {
         if (!state) return [];
-          const query = lga ? `?state=${state}&lga=${lga}` : `?state=${state}`;
-          const response = await apiHelper.getResource<ApiResponse<any>>(
-            `${url}v1/ehf/${query}`
-        );
-        if (!response || !Array.isArray(response.data)) {
+
+        try {
+          let apiUrl = `${url}v1/ehf-detail-routes/?state=${encodeURIComponent(state.trim())}`;
+
+          if (lga && lga.trim()) {
+            apiUrl += `&lga=${encodeURIComponent(lga.trim())}`;
+          }
+
+          const response = await apiHelper.getResource<any[]>(apiUrl);
+
+          return Array.isArray(response) ? response : [];
+        } catch (error) {
+          console.error('API Error - Fetch EHFs for 3PL:', error);
           return [];
         }
-        return response.data
       },
       enabled: !!state,
     });

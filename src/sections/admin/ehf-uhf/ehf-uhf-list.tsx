@@ -10,7 +10,7 @@ import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useFetchUHF, useDeleteUHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { FaEye } from 'react-icons/fa';
-import { useDeleteEHF, useFetchEHF } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useDeleteEHF, useFetchEHFList } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
 interface TableRow {
   id?: number;
@@ -73,7 +73,7 @@ const EhfUHFList: React.FC = () => {
 
   const [value, setValue] = useState<number>(initialTab);
 
-  const { data: ehfList = [] } = useFetchEHF();
+  const { data: ehfList = [] } = useFetchEHFList();
   const deleteEHF = useDeleteEHF();
 
   const { data: uhfList = [] } = useFetchUHF();
@@ -95,30 +95,40 @@ const EhfUHFList: React.FC = () => {
         header: 'LGA',
         size: 120,
       },
-      // {
-      //   accessorKey: 'ward',
-      //   header: 'Ward',
-      //   size: 120,
-      // },
       {
-        accessorKey: 'ehf_name',
+        accessorKey: 'ward',
+        header: 'Ward',
+        size: 120,
+      },
+      {
+        accessorKey: 'name_of_ehf',
         header: 'EHF Name',
-        size: 150,
+        size: 200,
       },
       {
-        accessorKey: 'contact_person_name',
-        header: 'Contact Person',
-        size: 150,
+        accessorKey: 'assigned_unique_id',
+        header: 'Unique ID',
+        size: 100,
       },
       {
-        accessorKey: 'contact_person_phone',
+        accessorKey: 'phone_number',
         header: 'Phone',
         size: 120,
       },
       {
-        accessorKey: 'contact_person_email',
-        header: 'Email',
-        size: 200,
+        accessorKey: 'cce_model',
+        header: 'CCE Model',
+        size: 120,
+      },
+      {
+        accessorKey: 'cce_functionality_status',
+        header: 'CCE Status',
+        size: 120,
+      },
+      {
+        accessorKey: 'hard_to_reach',
+        header: 'Hard to Reach',
+        size: 100,
       },
     ],
     []
@@ -170,7 +180,11 @@ const EhfUHFList: React.FC = () => {
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value } });
+    if (type === 'ehf') {
+      navigate('/ehf-view', { state: { data, activeTab: value } });
+    } else {
+      navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value } });
+    }
   };
 
   const handleEdit = (data: TableRow) => {
@@ -195,38 +209,38 @@ const EhfUHFList: React.FC = () => {
 
   const ehfItem: ActionMenuItem<TableRow>[] = [
     {
-      display: "View",
+      display: "View Details",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
-    {
-      display: "Edit",
-      handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
-    },
-    {
-      display: "Delete",
-      handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
-    },
+    // {
+    //   display: "Edit",
+    //   handleClick: handleEdit,
+    //   icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
+    // },
+    // {
+    //   display: "Delete",
+    //   handleClick: handleDelete,
+    //   icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
+    // },
   ];
 
   const uhfItem: ActionMenuItem<TableRow>[] = [
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
-    {
-      display: "Edit",
-      handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
-    },
-    {
-      display: "Delete",
-      handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
-    },
+    // {
+    //   display: "Edit",
+    //   handleClick: handleEdit,
+    //   icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
+    // },
+    // {
+    //   display: "Delete",
+    //   handleClick: handleDelete,
+    //   icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
+    // },
   ];
 
   return (
@@ -241,7 +255,7 @@ const EhfUHFList: React.FC = () => {
         aria-label="scrollable force tabs"
       >
         <Tab style={{ textTransform: 'none' }} label="Equipped Health Facility" {...a11yProps(0)} />
-        <Tab style={{ textTransform: 'none' }} label="Unequipped Health Facility" {...a11yProps(1)} />
+        {/* <Tab style={{ textTransform: 'none' }} label="Unequipped Health Facility" {...a11yProps(1)} /> */}
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -250,9 +264,9 @@ const EhfUHFList: React.FC = () => {
             columns={ehfColumns}
             data={ehfList}
             tableHeader="Equipped Health Facility List"
-            customRightButton
+            // customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonText="ADD EQUIPPED HEALTH FACILITY"
+            // customRightButtonText=""
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ehfItem}
             showDownloadButton={false}

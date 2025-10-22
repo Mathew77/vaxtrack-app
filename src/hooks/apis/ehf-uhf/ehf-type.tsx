@@ -5,6 +5,7 @@ export interface EHFType {
   lga: string;
   // ward: string;
   ehf_name: string;
+  ehf_unique_id?: string;
   longtitude: string;
   lagtitude: string;
   uhf_list: string[];

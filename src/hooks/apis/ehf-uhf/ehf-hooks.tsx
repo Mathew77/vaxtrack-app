@@ -109,4 +109,48 @@ export const useFetchStates = () => {
       },
     });
   };
-  
+
+  // New endpoint for EHF setup - uses ehf-detail-routes with state/lga filter
+  export const useFetchEHFDetailRoutes = (state: string, lga?: string) => {
+    return useQuery({
+      queryKey: ['ehf-detail-routes', state, lga],
+      queryFn: async (): Promise<any[]> => {
+        if (!state) return [];
+
+        try {
+          let apiUrl = `${url}v1/ehf-detail-routes/?state=${encodeURIComponent(state.trim())}`;
+
+          if (lga && lga.trim()) {
+            apiUrl += `&lga=${encodeURIComponent(lga.trim())}`;
+          }
+
+          const response = await apiHelper.getResource<any[]>(apiUrl);
+
+          return Array.isArray(response) ? response : [];
+        } catch (error) {
+          console.error('API Error - EHF Detail Routes:', error);
+          return [];
+        }
+      },
+      enabled: !!state,
+    });
+  };
+
+  // Fetch all EHF list for display - uses ehf-detail-routes
+  export const useFetchEHFList = () => {
+    return useQuery({
+      queryKey: ['ehf-list-all'],
+      queryFn: async (): Promise<any[]> => {
+        try {
+          const response = await apiHelper.getResource<any[]>(
+            `${url}v1/ehf-detail-routes/`
+          );
+
+          return Array.isArray(response) ? response : [];
+        } catch (error) {
+          console.error('API Error - EHF List:', error);
+          return [];
+        }
+      },
+    });
+  };

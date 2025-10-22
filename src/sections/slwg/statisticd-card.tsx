@@ -1,12 +1,14 @@
 import React from 'react';
 import { Grid, Typography, Card, CardContent, Box } from '@mui/material';
-
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import RoomServiceIcon from '@mui/icons-material/RoomService';
-import BatteryFullIcon from '@mui/icons-material/BatteryFull';
-import SystemSecurityUpdateWarningIcon from '@mui/icons-material/SystemSecurityUpdateWarning';
-import { useFetchSlwgSummary } from 'src/hooks/apis/dashboards/slwg/slwg-dashboard-hook';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import KitchenIcon from '@mui/icons-material/Kitchen';
+import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import BusinessIcon from '@mui/icons-material/Business';
+import { useFetchSlwgIndicators } from 'src/hooks/apis/dashboards/slwg/slwg-dashboard-hook';
 import { DashboardContent } from 'src/layouts/dashboard';
 import Skeleton from '@mui/material/Skeleton';
 
@@ -16,7 +18,7 @@ interface VaccineCardProps {
   icon: React.ReactNode;
   bgColor: string;
   textColor: string;
-  // trend: string;
+  subtitle?: string;
 }
 
 const SkeletonLoader = () => (
@@ -24,7 +26,7 @@ const SkeletonLoader = () => (
     <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
     
     <Grid container spacing={3}>
-      {[1, 2, 3, 4].map((item) => (
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
         <Grid item xs={12} sm={6} md={3} key={item}>
           <Card sx={{ p: 3 }}>
             <Skeleton variant="rectangular" width={40} height={40} sx={{ mb: 2 }} />
@@ -34,19 +36,10 @@ const SkeletonLoader = () => (
         </Grid>
       ))}
     </Grid>
-
-    <Grid container spacing={3} sx={{ mt: 1 }}>
-      <Grid item xs={12} md={6} lg={4}>
-        <Skeleton variant="rectangular" height={300} />
-      </Grid>
-      <Grid item xs={12} md={6} lg={8}>
-        <Skeleton variant="rectangular" height={300} />
-      </Grid>
-    </Grid>
   </DashboardContent>
 );
 
-const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor }) => {
+const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, textColor, subtitle }) => {
   return (
     <Card
       sx={{
@@ -110,6 +103,19 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
           >
             {total}
           </Typography>
+          {subtitle && (
+            <Typography
+              variant="caption"
+              sx={{
+                opacity: 0.85,
+                fontSize: '0.75rem',
+                mt: 0.5,
+                display: 'block',
+              }}
+            >
+              {subtitle}
+            </Typography>
+          )}
         </Box>
       </CardContent>
     </Card>
@@ -117,17 +123,14 @@ const VaccineCard: React.FC<VaccineCardProps> = ({ title, total, icon, bgColor, 
 };
 
 export default function VaccineOverview() {
-
-  const { data, isLoading: isAllSlwgStock, error } = useFetchSlwgSummary();
-
-  const isLoading = isAllSlwgStock;
+  const { data, isLoading, error } = useFetchSlwgIndicators();
 
   if (isLoading) {
     return <SkeletonLoader />;
   }
 
   if (error) {
-    console.error('SLWG Summary Error:', error);
+    console.error('SLWG Indicators Error:', error);
     return (
       <Typography variant="body1" color="error">
         Error loading data: {error.message}
@@ -136,8 +139,6 @@ export default function VaccineOverview() {
   }
 
   if (!data) {
-    console.log('SLWG Summary - No data returned');
-    console.log('SessionStorage slwg_list:', sessionStorage.getItem('slwg_list'));
     return (
       <Typography variant="body1" color="textSecondary">
         No data available
@@ -145,43 +146,76 @@ export default function VaccineOverview() {
     );
   }
 
-  console.log('SLWG Summary Data:', data);
+  const cards = [
+    {
+      title: 'Total EHFs',
+      total: data.denominator_total_ehfs.toString(),
+      icon: <BusinessIcon fontSize="large" />,
+      bgColor: '#1976D2',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'In Full Delivery Rate',
+      total: `${data.indicators.in_full_delivery.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.in_full_delivery.numerator} of ${data.indicators.in_full_delivery.denominator}`,
+      icon: <CheckCircleIcon fontSize="large" />,
+      bgColor: '#2E7D67',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'On Time Delivery Rate',
+      total: `${data.indicators.on_time_delivery.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.on_time_delivery.numerator} of ${data.indicators.on_time_delivery.denominator}`,
+      icon: <AccessTimeIcon fontSize="large" />,
+      bgColor: '#226192',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'Stock Out Rate',
+      total: `${data.indicators.stock_out_rate.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.stock_out_rate.numerator} of ${data.indicators.stock_out_rate.denominator}`,
+      icon: <WarningAmberIcon fontSize="large" />,
+      bgColor: '#E8753A',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'Reorder Level Status',
+      total: `${data.indicators.reorder_level_status.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.reorder_level_status.numerator} of ${data.indicators.reorder_level_status.denominator}`,
+      icon: <TrendingDownIcon fontSize="large" />,
+      bgColor: '#F57C00',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'CCE Functionality Rate',
+      total: `${data.indicators.cce_functionality_rate.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.cce_functionality_rate.numerator} of ${data.indicators.cce_functionality_rate.denominator}`,
+      icon: <KitchenIcon fontSize="large" />,
+      bgColor: '#388E3C',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'Reverse Logistics Completion',
+      total: `${data.indicators.reverse_logistics_completion.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.reverse_logistics_completion.completed_returns} of ${data.indicators.reverse_logistics_completion.expected_returns}`,
+      icon: <AssignmentReturnIcon fontSize="large" />,
+      bgColor: '#7B1FA2',
+      textColor: '#FFFFFF',
+    },
+    {
+      title: 'Stock Adequate Per Facility',
+      total: `${data.indicators.stock_adequate_per_facility.percent.toFixed(1)}%`,
+      subtitle: `${data.indicators.stock_adequate_per_facility.numerator} of ${data.indicators.stock_adequate_per_facility.denominator}`,
+      icon: <InventoryIcon fontSize="large" />,
+      bgColor: '#0288D1',
+      textColor: '#FFFFFF',
+    },
+  ];
 
   return (
     <Grid container spacing={2}>
-      {[
-        {
-          title: 'EHF LMD Order Received',
-          total: (data.Total_EHF_LMD_Order_Received || 0).toString(),
-          icon: <ReceiptLongIcon fontSize="large" />,
-          bgColor: '#2E7D67',
-          textColor: '#FFFFFF',
-        },
-        {
-          title: 'EHF LMD Order Serviced',
-          total: (data.Total_EHF_LMD_Order_Serviced || 0).toString(),
-          icon: <RoomServiceIcon fontSize="large" />,
-          bgColor: '#226192',
-          textColor: '#FFFFFF',
-        },
-        {
-          title: 'EHF LMD Order Serviced in Full',
-          total: (data.Total_EHF_LMD_Order_Serviced_in_Full || 0).toString(),
-          icon: <BatteryFullIcon fontSize="large" />,
-          bgColor: '#90CAF9',
-          textColor: '#1C252E',
-        },
-        {
-          title: 'Total Vaccine Expired',
-          total: (data.Total_Vaccine_expired || 0).toString(),
-          icon: <SystemSecurityUpdateWarningIcon fontSize="large" />,
-          bgColor: '#E8753A',
-          textColor: '#FFFFFF',
-        },
-
-      ].map((card, index) => (
+      {cards.map((card, index) => (
         <Grid key={index} item xs={12} sm={6} md={3}>
-          {/* 5 cards per row: 12 / 5 = 2.4 */}
           <VaccineCard {...card} />
         </Grid>
       ))}

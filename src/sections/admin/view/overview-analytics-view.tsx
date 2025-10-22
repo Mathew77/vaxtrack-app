@@ -1,76 +1,25 @@
-import { useState } from 'react';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
-import Skeleton from '@mui/material/Skeleton';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
-import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
-import Filter from 'src/utils/Filter';
-import AnalyticsAntigen from '../analytics-antigen';
-import SwapHorizontalCircleIcon from '@mui/icons-material/SwapHorizontalCircle';
-import AddTaskIcon from '@mui/icons-material/AddTask';
-import { useFetchAdminLogisticsStockSummary, useFetchAntigenMonthlyStock } from 'src/hooks/apis/dashboards/admin/admin-dashboard-hook';
-import { useFetchStates } from 'src/hooks/apis/user/user-hooks';
-import { useFetchLgas } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import AdminStatisticsCard from '../dashboard/statistics-card';
+import AdminVaccineStockTable from '../dashboard/vaccine-stock-table';
 
 // ----------------------------------------------------------------------
 
-const SkeletonLoader = () => (
-  <DashboardContent maxWidth="xl">
-    <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }} />
-    
-    <Grid container spacing={3}>
-      {[1, 2, 3, 4].map((item) => (
-        <Grid item xs={12} sm={6} md={3} key={item}>
-          <Card sx={{ p: 3 }}>
-            <Skeleton variant="rectangular" width={40} height={40} sx={{ mb: 2 }} />
-            <Skeleton variant="text" sx={{ fontSize: '1rem' }} />
-            <Skeleton variant="text" sx={{ fontSize: '2rem', width: '60%' }} />
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+export function OverviewAnalyticsView() {
+  return (
+    <DashboardContent maxWidth="xl">
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 2 }}>
+        <AdminStatisticsCard />
+        <AdminVaccineStockTable />
+      </Box>
+    </DashboardContent>
+  );
+}
 
-    <Grid container spacing={3} sx={{ mt: 1 }}>
-      <Grid item xs={12} md={6} lg={4}>
-        <Skeleton variant="rectangular" height={300} />
-      </Grid>
-      <Grid item xs={12} md={6} lg={8}>
-        <Skeleton variant="rectangular" height={300} />
-      </Grid>
-    </Grid>
-  </DashboardContent>
-);
-
-type NoDataMessageProps = {
-  message: string;
-  icon?: React.ReactNode;
-  height?: string | number;
-};
-
-const NoDataMessage = ({ message, icon = '📊', height = 'auto' }: NoDataMessageProps) => (
-  <Card sx={{ height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    <CardContent sx={{ textAlign: 'center' }}>
-      <Typography variant="h5" color="text.secondary" gutterBottom>
-        {icon}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {message}
-      </Typography>
-    </CardContent>
-  </Card>
-);
-
+/*
+ * OLD DASHBOARD CODE - COMMENTED OUT FOR REFERENCE
+ *
 export function OverviewAnalyticsView() {
   const [selectedState, setSelectedState] = useState('');
   const [selectedLga, setSelectedLga] = useState('');
@@ -118,7 +67,6 @@ export function OverviewAnalyticsView() {
 
   return (
     <DashboardContent maxWidth="xl">
-      {/* Filters */}
       <Box sx={{ mb: 3 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
@@ -189,7 +137,7 @@ export function OverviewAnalyticsView() {
               icon={<AddTaskIcon />}
             />
           ) : (
-            <NoDataMessage message="Forward logistics data missing" 
+            <NoDataMessage message="Forward logistics data missing"
              />
           )}
         </Grid>
@@ -209,9 +157,9 @@ export function OverviewAnalyticsView() {
         </Grid>
       </Grid>
 
-   
+
       <Grid container spacing={3} sx={{ mt: 1 }}>
- 
+
         <Grid item xs={12} md={6} lg={4}>
           {monthlyStockData ? (
             <AnalyticsAntigen />
@@ -247,3 +195,4 @@ export function OverviewAnalyticsView() {
     </DashboardContent>
   );
 }
+*/

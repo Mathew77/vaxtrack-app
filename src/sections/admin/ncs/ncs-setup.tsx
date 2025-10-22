@@ -289,7 +289,7 @@ export default function NcsSetup() {
       </Grid>
 
       <Box sx={{ display: 'flex', gap: 2, mt: 4, mb: 2 }}>
-        <Button variant="contained" color="inherit" size="large" onClick={() => navigate('/ncs-page')}>
+        <Button variant="outlined" size="large" onClick={() => navigate('/ncs-page')}>
           Cancel
         </Button>
         <Button variant="contained" color="primary" size="large" onClick={handleSubmit}>

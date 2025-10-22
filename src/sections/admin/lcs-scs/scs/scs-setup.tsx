@@ -269,8 +269,8 @@ export default function ScsSetup() {
   };
 
   const ehfOptions = filteredEhf.map((ehf) => ({
-    value: ehf.id?.toString() || '',
-    label: ehf.name || ehf.ehf_name || `EHF ${ehf.id}`,
+    value: ehf.assigned_unique_id || '',
+    label: ehf.name_of_ehf || ehf.facility_name || '',
   }));
 
   const handleEHFChange = (selected: string[]) => {
@@ -648,8 +648,8 @@ export default function ScsSetup() {
 
       <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
-          variant="contained" 
-          color="inherit" 
+          variant="outlined" 
+          // color="inherit" 
           size="large" 
           onClick={() => navigate('/lcs-scs-page', { state: { activeTab } })}>
           Cancel

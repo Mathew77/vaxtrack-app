@@ -549,8 +549,8 @@ export default function LcsSetup() {
 
       <Box sx={{display: 'flex', gap: 2, mt: 4, mb: 4 }}>
         <Button 
-          variant="contained" 
-          color="inherit" 
+          variant="outlined" 
+          // color="inherit" 
           size="large" 
           onClick={() => navigate('/lcs-scs-page', { state: { activeTab }})}>
           Cancel
