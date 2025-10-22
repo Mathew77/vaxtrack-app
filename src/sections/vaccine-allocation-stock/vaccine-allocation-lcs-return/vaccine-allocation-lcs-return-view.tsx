@@ -193,7 +193,7 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
     vaccines.forEach(v => {
       const fieldName = vaccineFieldMap[v.name];
       if (fieldName) {
-        vaccineReturnData[`dose_${fieldName}_returned`] = v.returned;
+        vaccineReturnData[`dose_${fieldName}_return`] = v.returned;
       }
     });
 

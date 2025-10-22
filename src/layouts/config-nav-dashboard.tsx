@@ -123,7 +123,7 @@ export const navData = [
     title: 'EHF & UHF Setup',
     path: '/ehf-uhf-page',
     icon: icon('ic-facility'),
-    roles: ['admin', 'lcs'],
+    roles: ['admin'],
   },
   {
     title: 'LCS & SCS Setup',

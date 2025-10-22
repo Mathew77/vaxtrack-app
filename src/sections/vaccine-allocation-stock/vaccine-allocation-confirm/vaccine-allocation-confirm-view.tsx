@@ -146,22 +146,24 @@ const VaccineAllocationConfirmView: React.FC = () => {
   };
 
   const vaccines = [
-    { name: 'BCG', allocated: data.dose_bcg_allocated, actual: data.dose_bcg_actual, received: data.dose_bcg_received, vvmStage: data.bcg_vvm_stage, batchNumber: data.bcg_batch_number, expiryDate: data.bcg_expire_date },
-    { name: 'HepB', allocated: data.dose_hepb_allocated, actual: data.dose_hepb_actual, received: data.dose_hepb_received, vvmStage: data.hepb_vvm_stage, batchNumber: data.hepb_batch_number, expiryDate: data.hepb_expire_date },
-    { name: 'bOPV', allocated: data.dose_bopv_allocated, actual: data.dose_bopv_actual, received: data.dose_bopv_received, vvmStage: data.bopv_vvm_stage, batchNumber: data.bopv_batch_number, expiryDate: data.bopv_expire_date },
-    { name: 'Penta', allocated: data.dose_penta_allocated, actual: data.dose_penta_actual, received: data.dose_penta_received, vvmStage: data.penta_vvm_stage, batchNumber: data.penta_batch_number, expiryDate: data.penta_expire_date },
-    { name: 'PCV', allocated: data.dose_pcv_allocated, actual: data.dose_pcv_actual, received: data.dose_pcv_received, vvmStage: data.pcv_vvm_stage, batchNumber: data.pcv_batch_number, expiryDate: data.pcv_expire_date },
-    { name: 'IPV', allocated: data.dose_ipv_allocated, actual: data.dose_ipv_actual, received: data.dose_ipv_received, vvmStage: data.ipv_vvm_stage, batchNumber: data.ipv_batch_number, expiryDate: data.ipv_expire_date },
-    { name: 'Measles', allocated: data.dose_mea_allocated, actual: data.dose_mea_actual, received: data.dose_mea_received, vvmStage: data.mea_vvm_stage, batchNumber: data.mea_batch_number, expiryDate: data.mea_expire_date },
-    { name: 'YF', allocated: data.dose_yf_allocated, actual: data.dose_yf_actual, received: data.dose_yf_received, vvmStage: data.yf_vvm_stage, batchNumber: data.yf_batch_number, expiryDate: data.yf_expire_date },
-    { name: 'TD', allocated: data.dose_td_allocated, actual: data.dose_td_actual, received: data.dose_td_received, vvmStage: data.td_vvm_stage, batchNumber: data.td_batch_number, expiryDate: data.td_expire_date },
-    { name: 'MenA', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, vvmStage: data.mena_vvm_stage, batchNumber: data.mena_batch_number, expiryDate: data.mena_expire_date },
-    { name: 'Rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, vvmStage: data.rota_vvm_stage, batchNumber: data.rota_batch_number, expiryDate: data.rota_expire_date },
-    { name: 'HPV', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, vvmStage: data.hpv_vvm_stage, batchNumber: data.hpv_batch_number, expiryDate: data.hpv_expire_date },
+    { name: 'BCG', allocated: data.dose_bcg_allocated, actual: data.dose_bcg_actual, received: data.dose_bcg_received, returned: data.dose_bcg_return, vvmStage: data.bcg_vvm_stage, batchNumber: data.bcg_batch_number, expiryDate: data.bcg_expire_date },
+    { name: 'HepB', allocated: data.dose_hepb_allocated, actual: data.dose_hepb_actual, received: data.dose_hepb_received, returned: data.dose_hepb_return, vvmStage: data.hepb_vvm_stage, batchNumber: data.hepb_batch_number, expiryDate: data.hepb_expire_date },
+    { name: 'bOPV', allocated: data.dose_bopv_allocated, actual: data.dose_bopv_actual, received: data.dose_bopv_received, returned: data.dose_bopv_return, vvmStage: data.bopv_vvm_stage, batchNumber: data.bopv_batch_number, expiryDate: data.bopv_expire_date },
+    { name: 'Penta', allocated: data.dose_penta_allocated, actual: data.dose_penta_actual, received: data.dose_penta_received, returned: data.dose_penta_return, vvmStage: data.penta_vvm_stage, batchNumber: data.penta_batch_number, expiryDate: data.penta_expire_date },
+    { name: 'PCV', allocated: data.dose_pcv_allocated, actual: data.dose_pcv_actual, received: data.dose_pcv_received, returned: data.dose_pcv_return, vvmStage: data.pcv_vvm_stage, batchNumber: data.pcv_batch_number, expiryDate: data.pcv_expire_date },
+    { name: 'IPV', allocated: data.dose_ipv_allocated, actual: data.dose_ipv_actual, received: data.dose_ipv_received, returned: data.dose_ipv_return, vvmStage: data.ipv_vvm_stage, batchNumber: data.ipv_batch_number, expiryDate: data.ipv_expire_date },
+    { name: 'Measles', allocated: data.dose_mea_allocated, actual: data.dose_mea_actual, received: data.dose_mea_received, returned: data.dose_mea_return, vvmStage: data.mea_vvm_stage, batchNumber: data.mea_batch_number, expiryDate: data.mea_expire_date },
+    { name: 'YF', allocated: data.dose_yf_allocated, actual: data.dose_yf_actual, received: data.dose_yf_received, returned: data.dose_yf_return, vvmStage: data.yf_vvm_stage, batchNumber: data.yf_batch_number, expiryDate: data.yf_expire_date },
+    { name: 'TD', allocated: data.dose_td_allocated, actual: data.dose_td_actual, received: data.dose_td_received, returned: data.dose_td_return, vvmStage: data.td_vvm_stage, batchNumber: data.td_batch_number, expiryDate: data.td_expire_date },
+    { name: 'MenA', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, returned: data.dose_mena_return, vvmStage: data.mena_vvm_stage, batchNumber: data.mena_batch_number, expiryDate: data.mena_expire_date },
+    { name: 'Rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, returned: data.dose_rota_return, vvmStage: data.rota_vvm_stage, batchNumber: data.rota_batch_number, expiryDate: data.rota_expire_date },
+    { name: 'HPV', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, returned: data.dose_hpv_return, vvmStage: data.hpv_vvm_stage, batchNumber: data.hpv_batch_number, expiryDate: data.hpv_expire_date },
   ];
 
-  // Check if MCCO has confirmed (status = 3) to show received column and additional data
-  const showReceivedColumn = data.status === 3;
+  // Check if MCCO has confirmed (status >= 2) to show received column and additional data
+  const showReceivedColumn = data.status >= 2;
+  // Check if LCS has confirmed (status >= 4) to show returned column
+  const showReturnedColumn = data.status >= 4;
 
   return (
     <DashboardContent maxWidth="xl">
@@ -264,6 +266,9 @@ const VaccineAllocationConfirmView: React.FC = () => {
                       <TableCell><strong>Earliest Expiry Date</strong></TableCell>
                     </>
                   )}
+                  {showReturnedColumn && (
+                    <TableCell><strong>Returned Doses</strong></TableCell>
+                  )}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -314,6 +319,19 @@ const VaccineAllocationConfirmView: React.FC = () => {
                           </Typography>
                         </TableCell>
                       </>
+                    )}
+                    {showReturnedColumn && (
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: vaccine.returned > 0 ? 'bold' : 'normal',
+                            color: vaccine.returned > 0 ? '#ff9800' : 'text.primary'
+                          }}
+                        >
+                          {vaccine.returned || 0}
+                        </Typography>
+                      </TableCell>
                     )}
                   </TableRow>
                 ))}

@@ -145,7 +145,7 @@ export default function ThreePlStatisticsCard() {
       textColor: '#FFFFFF',
     },
     {
-      title: 'Reverse Logistics Completion',
+      title: '⁠Foward/Reverse Logistics Completion',
       total: `${data.indicators.reverse_logistics_completion.percent.toFixed(1)}%`,
       subtitle: `${data.indicators.reverse_logistics_completion.completed_returns} of ${data.indicators.reverse_logistics_completion.expected_returns}`,
       icon: <AssignmentReturnIcon fontSize="large" />,

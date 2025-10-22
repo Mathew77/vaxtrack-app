@@ -68,6 +68,7 @@ const VaccineAllocationStockList: React.FC = () => {
   const isSCS = userRole === 'scs';
   const is3PL = userRole === 'threepl';
   const isMCCO = userRole === 'mcco' || userRole === 'conveyor'; // Support both role names
+  const isLCS = userRole === 'lcs';
 
   // Only SLWG can see Stock Upload tab
   const showStockAtHandTab = isSLWG;
@@ -430,6 +431,16 @@ const VaccineAllocationStockList: React.FC = () => {
     });
   };
 
+  const handleLcsReview = (data: any) => {
+    // Navigate to LCS return processing page
+    navigate('/vaccine-allocation-lcs-return', {
+      state: {
+        data: data,
+        userRole: userRole,
+      },
+    });
+  };
+
   const handleDeleteAllocation = (data: any) => {
     setAllocationToDelete(data);
     setDeleteDialogOpen(true);
@@ -522,6 +533,28 @@ const VaccineAllocationStockList: React.FC = () => {
     return baseActions;
   };
 
+  // Action items for LCS users - only show process returns if status = 3
+  const getLcsActionItems = (row: any): ActionMenuItem<any>[] => {
+    const baseActions: ActionMenuItem<any>[] = [
+      {
+        display: "View Details",
+        handleClick: handleViewAllocation,
+        icon: <VisibilityOutlinedIcon sx={{ color: "#1976D2" }} />,
+      },
+    ];
+
+    // Only show process returns if status = 3 (pending LCS review)
+    if (row.status === 3) {
+      baseActions.push({
+        display: "Process Returns",
+        handleClick: handleLcsReview,
+        icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+      });
+    }
+
+    return baseActions;
+  };
+
 //   const handleConfirmAllocationToEHF = (data: any) => {
 //     // Navigate to confirmation page for SLWG to confirm allocation to EHF
 //     navigate('/vaccine-allocation-confirm-view', {
@@ -564,6 +597,8 @@ const VaccineAllocationStockList: React.FC = () => {
     ? get3PlActionItems
     : isMCCO
     ? getMccoActionItems
+    : isLCS
+    ? getLcsActionItems
     : isSLWG
     ? getSlwgActionItems
     : undefined;
@@ -657,9 +692,9 @@ const VaccineAllocationStockList: React.FC = () => {
         size: 200,
         Cell: ({ cell }: any) => {
           const status = cell.getValue();
-          // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Confirmed by MCCO
+          // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Pending LCS Review, 4 = Completed
           let label = 'Unknown';
-          let color: 'warning' | 'success' | 'default' = 'default';
+          let color: 'warning' | 'success' | 'info' | 'default' = 'default';
           let shouldBlink = false;
 
           if (status === 0) {
@@ -675,6 +710,10 @@ const VaccineAllocationStockList: React.FC = () => {
             color = 'warning';
             shouldBlink = true;
           } else if (status === 3) {
+            label = 'Pending LCS Review';
+            color = 'warning';
+            shouldBlink = true;
+          } else if (status === 4) {
             label = 'Completed';
             color = 'success';
             shouldBlink = false;
