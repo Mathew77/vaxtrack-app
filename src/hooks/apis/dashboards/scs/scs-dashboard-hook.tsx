@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiHelper } from "../../apiHelper";
 import { url } from "src/hooks/api";
 import { ScsDashboardType, ScsIndicatorsResponse, ScsWardVaccineSummary, ScsFacilityType, ScsDashboardLgaType, ScsWardType } from "./scs-dashboard-type";
+import { useFetchScs } from "../../lcs-scs/scs-hooks";
 
 const getScsId = () => {
     const scsListString = sessionStorage.getItem('scs_list');
@@ -22,16 +23,27 @@ const getScsId = () => {
 
 export const useFetchScsIndicators = () => {
     const scs_id = getScsId();
+    const { data: allScs } = useFetchScs();
 
     return useQuery<ScsIndicatorsResponse, Error>({
         queryKey: ['scs-indicators', scs_id],
         queryFn: async () => {
+            // Get the state associated with this SCS
+            const scsFacility = allScs?.find(scs => scs.id?.toString() === scs_id?.toString());
+
+            // stat_id contains the state name (e.g., "FCT")
+            const stateName = scsFacility?.stat_id;
+
+            if (!stateName) {
+                throw new Error('Could not determine state for SCS user');
+            }
+
             const response = await apiHelper.getResource<ScsIndicatorsResponse>(
-                `${url}v1/dashboard-slwg-indicators/?scs_id=${scs_id}`
+                `${url}v1/dashboard-slwg-indicators/?state=${stateName}`
             );
             return response;
         },
-        enabled: !!scs_id,
+        enabled: !!scs_id && !!allScs,
     });
 };
 
@@ -218,15 +230,25 @@ const transformRowsToLgas = (rows: any[]): ScsDashboardType => {
 
 export const useFetchScsDashboard = () => {
   const scs_id = getScsId();
+  const { data: allScs } = useFetchScs();
 
   return useQuery<ScsDashboardType, Error>({
     queryKey: ["scs-dashboard-lga", scs_id],
     queryFn: async () => {
+      // Get the state associated with this SCS
+      const scsFacility = allScs?.find(scs => scs.id?.toString() === scs_id?.toString());
+
+      const stateName = scsFacility?.stat_id;
+
+      if (!stateName) {
+        throw new Error('Could not determine state for SCS user');
+      }
+
       const response = await apiHelper.getResource<{ rows: any[] }>(
-        `${url}v1/dashboard-slwg-table/`
+        `${url}v1/dashboard-slwg-table/?state=${stateName}`
       );
       return transformRowsToLgas(response.rows);
     },
-    enabled: !!scs_id,
+    enabled: !!scs_id && !!allScs,
   });
 };

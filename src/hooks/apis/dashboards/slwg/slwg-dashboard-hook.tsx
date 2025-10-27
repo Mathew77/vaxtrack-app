@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiHelper } from "../../apiHelper";
 import { url } from "src/hooks/api";
 import { FacilityType, SlwgDashboardType, SlwgDashboardWardType, SlwgIndicatorsResponse, WardVaccineSummary } from "./slwg-dashboard-type";
+import { useFetchScs } from "../../lcs-scs/scs-hooks";
 
 
 const getScsId = () => {
@@ -39,16 +40,27 @@ const getScsId = () => {
 
 export const useFetchSlwgIndicators = () => {
     const scs_id = getScsId();
+    const { data: allScs } = useFetchScs();
 
     return useQuery<SlwgIndicatorsResponse, Error>({
         queryKey: ['slwg-indicators', scs_id],
         queryFn: async () => {
+            // Get the state associated with this SCS
+            const scsFacility = allScs?.find(scs => scs.id?.toString() === scs_id?.toString());
+
+            const stateName = scsFacility?.stat_id;
+
+
+            if (!stateName) {
+                throw new Error('Could not determine state for SLWG user');
+            }
+
             const response = await apiHelper.getResource<SlwgIndicatorsResponse>(
-                `${url}v1/dashboard-slwg-indicators/?scs_id=${scs_id}`
+                `${url}v1/dashboard-slwg-indicators/?state=${stateName}`
             );
             return response;
         },
-        enabled: !!scs_id,
+        enabled: !!scs_id && !!allScs,
     });
 };
 
@@ -99,7 +111,7 @@ const transformRowsToWards = (rows: any[]): SlwgDashboardType => {
 
     // Create facility object (only include needed fields)
     const facility: FacilityType = {
-      id: index, // or use a real ID if available
+      id: index, 
       name_of_ehf: row.facility_name || "Unknown Facility",
       assigned_unique_id: row.assigned_unique_id || "",
 
@@ -168,17 +180,30 @@ const transformRowsToWards = (rows: any[]): SlwgDashboardType => {
 
 export const useFetchSlwgDashboard = () => {
   const scs_id = getScsId();
+  const { data: allScs } = useFetchScs();
 
   return useQuery<SlwgDashboardType, Error>({
     queryKey: ["slwg-dashboard-ward", scs_id],
     queryFn: async () => {
-      // New API returns { filters, rows }
+      // Get the state associated with this SCS
+      const scsFacility = allScs?.find(scs => scs.id?.toString() === scs_id?.toString());
+
+      const stateName = scsFacility?.stat_id;
+
+
+      if (!stateName) {
+        throw new Error('Could not determine state for SLWG user');
+      }
+
+      // New API returns { filters, rows } and accepts state parameter
       const response = await apiHelper.getResource<{ rows: any[] }>(
-        `${url}v1/dashboard-slwg-table/`
+        `${url}v1/dashboard-slwg-table/?state=${stateName}`
       );
+
+
       return transformRowsToWards(response.rows);
     },
-    enabled: !!scs_id,
+    enabled: !!scs_id && !!allScs,
   });
 };
 

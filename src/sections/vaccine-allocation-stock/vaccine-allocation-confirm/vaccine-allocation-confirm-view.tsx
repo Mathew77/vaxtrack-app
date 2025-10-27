@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -16,6 +16,9 @@ import {
   Paper,
   Chip,
   Divider,
+  Select,
+  MenuItem,
+  FormControl,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -29,6 +32,25 @@ const VaccineAllocationConfirmView: React.FC = () => {
   const { data, userRole, isView, confirmToEHF } = location.state || {};
 
   const updateStatusMutation = useUpdateAllocationStatus();
+
+  const [vvmStages, setVvmStages] = useState({
+    bcg: data?.bcg_vvm_stage_threepl || '',
+    hepb: data?.hepb_vvm_stage_threepl || '',
+    bopv: data?.bopv_vvm_stage_threepl || '',
+    penta: data?.penta_vvm_stage_threepl || '',
+    pcv: data?.pcv_vvm_stage_threepl || '',
+    ipv: data?.ipv_vvm_stage_threepl || '',
+    mea: data?.mea_vvm_stage_threepl || '',
+    yf: data?.yf_vvm_stage_threepl || '',
+    td: data?.td_vvm_stage_threepl || '',
+    mena: data?.mena_vvm_stage_threepl || '',
+    rota: data?.rota_vvm_stage_threepl || '',
+    hpv: data?.hpv_vvm_stage_threepl || '',
+  });
+
+  const handleVvmChange = (vaccineKey: string, value: string) => {
+    setVvmStages(prev => ({ ...prev, [vaccineKey]: value }));
+  };
 
   if (!data) {
     return (
@@ -129,6 +151,21 @@ const VaccineAllocationConfirmView: React.FC = () => {
       dose_hpv_allocated: data.dose_hpv_allocated,
       // Mark as SLWG confirmed if applicable
       slwg_confirmed: confirmToEHF ? true : data.slwg_confirmed,
+      // Include VVM stages if 3PL is confirming - only for vaccines with allocations > 0
+      ...(userRole === 'threepl' && {
+        ...(data.dose_bcg_allocated > 0 && { bcg_vvm_stage_threepl: vvmStages.bcg || 0 }),
+        ...(data.dose_hepb_allocated > 0 && { hepb_vvm_stage_threepl: vvmStages.hepb || 0 }),
+        ...(data.dose_bopv_allocated > 0 && { bopv_vvm_stage_threepl: vvmStages.bopv || 0 }),
+        ...(data.dose_penta_allocated > 0 && { penta_vvm_stage_threepl: vvmStages.penta || 0 }),
+        ...(data.dose_pcv_allocated > 0 && { pcv_vvm_stage_threepl: vvmStages.pcv || 0 }),
+        ...(data.dose_ipv_allocated > 0 && { ipv_vvm_stage_threepl: vvmStages.ipv || 0 }),
+        ...(data.dose_mea_allocated > 0 && { mea_vvm_stage_threepl: vvmStages.mea || 0 }),
+        ...(data.dose_yf_allocated > 0 && { yf_vvm_stage_threepl: vvmStages.yf || 0 }),
+        ...(data.dose_td_allocated > 0 && { td_vvm_stage_threepl: vvmStages.td || 0 }),
+        ...(data.dose_mena_allocated > 0 && { mena_vvm_stage_threepl: vvmStages.mena || 0 }),
+        ...(data.dose_rota_allocated > 0 && { rota_vvm_stage_threepl: vvmStages.rota || 0 }),
+        ...(data.dose_hpv_allocated > 0 && { hpv_vvm_stage_threepl: vvmStages.hpv || 0 }),
+      }),
     };
 
     updateStatusMutation.mutate(
@@ -146,24 +183,34 @@ const VaccineAllocationConfirmView: React.FC = () => {
   };
 
   const vaccines = [
-    { name: 'BCG', allocated: data.dose_bcg_allocated, actual: data.dose_bcg_actual, received: data.dose_bcg_received, returned: data.dose_bcg_return, vvmStage: data.bcg_vvm_stage, batchNumber: data.bcg_batch_number, expiryDate: data.bcg_expire_date },
-    { name: 'HepB', allocated: data.dose_hepb_allocated, actual: data.dose_hepb_actual, received: data.dose_hepb_received, returned: data.dose_hepb_return, vvmStage: data.hepb_vvm_stage, batchNumber: data.hepb_batch_number, expiryDate: data.hepb_expire_date },
-    { name: 'bOPV', allocated: data.dose_bopv_allocated, actual: data.dose_bopv_actual, received: data.dose_bopv_received, returned: data.dose_bopv_return, vvmStage: data.bopv_vvm_stage, batchNumber: data.bopv_batch_number, expiryDate: data.bopv_expire_date },
-    { name: 'Penta', allocated: data.dose_penta_allocated, actual: data.dose_penta_actual, received: data.dose_penta_received, returned: data.dose_penta_return, vvmStage: data.penta_vvm_stage, batchNumber: data.penta_batch_number, expiryDate: data.penta_expire_date },
-    { name: 'PCV', allocated: data.dose_pcv_allocated, actual: data.dose_pcv_actual, received: data.dose_pcv_received, returned: data.dose_pcv_return, vvmStage: data.pcv_vvm_stage, batchNumber: data.pcv_batch_number, expiryDate: data.pcv_expire_date },
-    { name: 'IPV', allocated: data.dose_ipv_allocated, actual: data.dose_ipv_actual, received: data.dose_ipv_received, returned: data.dose_ipv_return, vvmStage: data.ipv_vvm_stage, batchNumber: data.ipv_batch_number, expiryDate: data.ipv_expire_date },
-    { name: 'Measles', allocated: data.dose_mea_allocated, actual: data.dose_mea_actual, received: data.dose_mea_received, returned: data.dose_mea_return, vvmStage: data.mea_vvm_stage, batchNumber: data.mea_batch_number, expiryDate: data.mea_expire_date },
-    { name: 'YF', allocated: data.dose_yf_allocated, actual: data.dose_yf_actual, received: data.dose_yf_received, returned: data.dose_yf_return, vvmStage: data.yf_vvm_stage, batchNumber: data.yf_batch_number, expiryDate: data.yf_expire_date },
-    { name: 'TD', allocated: data.dose_td_allocated, actual: data.dose_td_actual, received: data.dose_td_received, returned: data.dose_td_return, vvmStage: data.td_vvm_stage, batchNumber: data.td_batch_number, expiryDate: data.td_expire_date },
-    { name: 'MenA', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, returned: data.dose_mena_return, vvmStage: data.mena_vvm_stage, batchNumber: data.mena_batch_number, expiryDate: data.mena_expire_date },
-    { name: 'Rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, returned: data.dose_rota_return, vvmStage: data.rota_vvm_stage, batchNumber: data.rota_batch_number, expiryDate: data.rota_expire_date },
-    { name: 'HPV', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, returned: data.dose_hpv_return, vvmStage: data.hpv_vvm_stage, batchNumber: data.hpv_batch_number, expiryDate: data.hpv_expire_date },
+    { name: 'BCG', key: 'bcg', allocated: data.dose_bcg_allocated, actual: data.dose_bcg_actual, received: data.dose_bcg_received, returned: data.dose_bcg_return, vvmStage: data.bcg_vvm_stage_ehf, vvmStage3PL: data.bcg_vvm_stage_threepl, batchNumber: data.bcg_batch_number, expiryDate: data.bcg_expire_date },
+    { name: 'HepB', key: 'hepb', allocated: data.dose_hepb_allocated, actual: data.dose_hepb_actual, received: data.dose_hepb_received, returned: data.dose_hepb_return, vvmStage: data.hepb_vvm_stage_ehf, vvmStage3PL: data.hepb_vvm_stage_threepl, batchNumber: data.hepb_batch_number, expiryDate: data.hepb_expire_date },
+    { name: 'bOPV', key: 'bopv', allocated: data.dose_bopv_allocated, actual: data.dose_bopv_actual, received: data.dose_bopv_received, returned: data.dose_bopv_return, vvmStage: data.bopv_vvm_stage_ehf, vvmStage3PL: data.bopv_vvm_stage_threepl, batchNumber: data.bopv_batch_number, expiryDate: data.bopv_expire_date },
+    { name: 'Penta', key: 'penta', allocated: data.dose_penta_allocated, actual: data.dose_penta_actual, received: data.dose_penta_received, returned: data.dose_penta_return, vvmStage: data.penta_vvm_stage_ehf, vvmStage3PL: data.penta_vvm_stage_threepl, batchNumber: data.penta_batch_number, expiryDate: data.penta_expire_date },
+    { name: 'PCV', key: 'pcv', allocated: data.dose_pcv_allocated, actual: data.dose_pcv_actual, received: data.dose_pcv_received, returned: data.dose_pcv_return, vvmStage: data.pcv_vvm_stage_ehf, vvmStage3PL: data.pcv_vvm_stage_threepl, batchNumber: data.pcv_batch_number, expiryDate: data.pcv_expire_date },
+    { name: 'IPV', key: 'ipv', allocated: data.dose_ipv_allocated, actual: data.dose_ipv_actual, received: data.dose_ipv_received, returned: data.dose_ipv_return, vvmStage: data.ipv_vvm_stage_ehf, vvmStage3PL: data.ipv_vvm_stage_threepl, batchNumber: data.ipv_batch_number, expiryDate: data.ipv_expire_date },
+    { name: 'Measles', key: 'mea', allocated: data.dose_mea_allocated, actual: data.dose_mea_actual, received: data.dose_mea_received, returned: data.dose_mea_return, vvmStage: data.mea_vvm_stage_ehf, vvmStage3PL: data.mea_vvm_stage_threepl, batchNumber: data.mea_batch_number, expiryDate: data.mea_expire_date },
+    { name: 'YF', key: 'yf', allocated: data.dose_yf_allocated, actual: data.dose_yf_actual, received: data.dose_yf_received, returned: data.dose_yf_return, vvmStage: data.yf_vvm_stage_ehf, vvmStage3PL: data.yf_vvm_stage_threepl, batchNumber: data.yf_batch_number, expiryDate: data.yf_expire_date },
+    { name: 'TD', key: 'td', allocated: data.dose_td_allocated, actual: data.dose_td_actual, received: data.dose_td_received, returned: data.dose_td_return, vvmStage: data.td_vvm_stage_ehf, vvmStage3PL: data.td_vvm_stage_threepl, batchNumber: data.td_batch_number, expiryDate: data.td_expire_date },
+    { name: 'MenA', key: 'mena', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, returned: data.dose_mena_return, vvmStage: data.mena_vvm_stage_ehf, vvmStage3PL: data.mena_vvm_stage_threepl, batchNumber: data.mena_batch_number, expiryDate: data.mena_expire_date },
+    { name: 'Rota', key: 'rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, returned: data.dose_rota_return, vvmStage: data.rota_vvm_stage_ehf, vvmStage3PL: data.rota_vvm_stage_threepl, batchNumber: data.rota_batch_number, expiryDate: data.rota_expire_date },
+    { name: 'HPV', key: 'hpv', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, returned: data.dose_hpv_return, vvmStage: data.hpv_vvm_stage_ehf, vvmStage3PL: data.hpv_vvm_stage_threepl, batchNumber: data.hpv_batch_number, expiryDate: data.hpv_expire_date },
   ];
 
-  // Check if MCCO has confirmed (status >= 2) to show received column and additional data
-  const showReceivedColumn = data.status >= 2;
-  // Check if LCS has confirmed (status >= 4) to show returned column
-  const showReturnedColumn = data.status >= 4;
+  // Check if 3PL is confirming to show VVM input fields
+  const show3PLInputs = userRole === 'threepl' && data.status === 1 && !isView;
+
+  // Check if 3PL should see VVM stages they entered (when viewing after confirmation)
+  const show3PLVvmView = userRole === 'threepl' && data.status >= 2 && isView;
+
+  // Role-based visibility for columns
+  // SLWG, SCS should NOT see batch number, expiry date, VVM stage
+  // 3PL can see VVM stages they entered
+  // MCCO and LCS can see all details (batch number, expiry date, VVM stage from MCCO)
+  const showReceivedColumn = data.status >= 2 && (userRole === 'mcco' || userRole === 'lcs');
+
+  // Only LCS should see returned column
+  const showReturnedColumn = data.status >= 4 && userRole === 'lcs';
 
   return (
     <DashboardContent maxWidth="xl">
@@ -251,93 +298,147 @@ const VaccineAllocationConfirmView: React.FC = () => {
             Vaccine Allocation
           </Typography>
 
-          <TableContainer component={Paper} sx={{ mt: 2, boxShadow: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                  <TableCell><strong>Vaccine</strong></TableCell>
-                  <TableCell><strong>Stock Upload</strong></TableCell>
-                  <TableCell><strong>Vaccine Allocated</strong></TableCell>
-                  {showReceivedColumn && (
-                    <>
-                      <TableCell><strong>Received Doses</strong></TableCell>
-                      <TableCell><strong>VVM Stage</strong></TableCell>
-                      <TableCell><strong>Batch Number</strong></TableCell>
-                      <TableCell><strong>Earliest Expiry Date</strong></TableCell>
-                    </>
-                  )}
-                  {showReturnedColumn && (
-                    <TableCell><strong>Returned Doses</strong></TableCell>
-                  )}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {vaccines.map((vaccine, index) => (
-                  <TableRow
-                    key={vaccine.name}
-                    sx={{
-                      bgcolor: index % 2 === 0 ? '#ffffff' : '#f9f9f9',
-                      '&:hover': { bgcolor: 'rgba(12, 125, 64, 0.08)' },
-                    }}
-                  >
-                    <TableCell sx={{ fontWeight: 600 }}>{vaccine.name}</TableCell>
-                    <TableCell>{vaccine.actual || 0}</TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: vaccine.allocated > 0 ? 'bold' : 'normal' }}
-                      >
-                        {vaccine.allocated || 0}
-                      </Typography>
-                    </TableCell>
+          {show3PLInputs ? (
+            // Card view for 3PL VVM input
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              {vaccines.filter(v => v.allocated > 0).map((vaccine) => (
+                <Grid item xs={12} md={6} key={vaccine.name}>
+                  <Card variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                      {vaccine.name}
+                    </Typography>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="textSecondary">
+                          Allocated Doses
+                        </Typography>
+                        <Typography variant="h6" color="primary">
+                          {vaccine.allocated || 0}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <FormControl fullWidth size="small">
+                          <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
+                            VVM Stage
+                          </Typography>
+                          <Select
+                            value={vvmStages[vaccine.key as keyof typeof vvmStages]}
+                            onChange={(e) => handleVvmChange(vaccine.key, e.target.value)}
+                            displayEmpty
+                          >
+                            <MenuItem value="">Select Stage</MenuItem>
+                            <MenuItem value="1">Stage 1</MenuItem>
+                            <MenuItem value="2">Stage 2</MenuItem>
+                            <MenuItem value="3">Stage 3</MenuItem>
+                            <MenuItem value="4">Stage 4</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            // Table view for other roles
+            <TableContainer component={Paper} sx={{ mt: 2, boxShadow: 2 }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableCell><strong>Vaccine</strong></TableCell>
+                    <TableCell><strong>Stock Upload</strong></TableCell>
+                    <TableCell><strong>Vaccine Allocated</strong></TableCell>
+                    {show3PLVvmView && (
+                      <TableCell><strong>VVM Stage (3PL)</strong></TableCell>
+                    )}
                     {showReceivedColumn && (
                       <>
+                        <TableCell><strong>Received Doses</strong></TableCell>
+                        <TableCell><strong>VVM Stage</strong></TableCell>
+                        <TableCell><strong>Batch Number</strong></TableCell>
+                        <TableCell><strong>Earliest Expiry Date</strong></TableCell>
+                      </>
+                    )}
+                    {showReturnedColumn && (
+                      <TableCell><strong>Returned Doses</strong></TableCell>
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {vaccines.map((vaccine, index) => (
+                    <TableRow
+                      key={vaccine.name}
+                      sx={{
+                        bgcolor: index % 2 === 0 ? '#ffffff' : '#f9f9f9',
+                        '&:hover': { bgcolor: 'rgba(12, 125, 64, 0.08)' },
+                      }}
+                    >
+                      <TableCell sx={{ fontWeight: 600 }}>{vaccine.name}</TableCell>
+                      <TableCell>{vaccine.actual || 0}</TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: vaccine.allocated > 0 ? 'bold' : 'normal' }}
+                        >
+                          {vaccine.allocated || 0}
+                        </Typography>
+                      </TableCell>
+                      {show3PLVvmView && (
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="medium">
+                            {vaccine.vvmStage3PL ? `Stage ${vaccine.vvmStage3PL}` : '-'}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      {showReceivedColumn && (
+                        <>
+                          <TableCell>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: vaccine.received > 0 ? 'bold' : 'normal',
+                                color: vaccine.received !== vaccine.allocated ? '#d32f2f' : '#4caf50'
+                              }}
+                            >
+                              {vaccine.received || 0}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {vaccine.vvmStage ? `Stage ${vaccine.vvmStage}` : '-'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {vaccine.batchNumber || '-'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {vaccine.expiryDate ? new Date(vaccine.expiryDate).toLocaleDateString() : '-'}
+                            </Typography>
+                          </TableCell>
+                        </>
+                      )}
+                      {showReturnedColumn && (
                         <TableCell>
                           <Typography
                             variant="body2"
                             sx={{
-                              fontWeight: vaccine.received > 0 ? 'bold' : 'normal',
-                              color: vaccine.received !== vaccine.allocated ? '#d32f2f' : '#4caf50'
+                              fontWeight: vaccine.returned > 0 ? 'bold' : 'normal',
+                              color: vaccine.returned > 0 ? '#ff9800' : 'text.primary'
                             }}
                           >
-                            {vaccine.received || 0}
+                            {vaccine.returned || 0}
                           </Typography>
                         </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {vaccine.vvmStage ? `Stage ${vaccine.vvmStage}` : '-'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {vaccine.batchNumber || '-'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {vaccine.expiryDate ? new Date(vaccine.expiryDate).toLocaleDateString() : '-'}
-                          </Typography>
-                        </TableCell>
-                      </>
-                    )}
-                    {showReturnedColumn && (
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: vaccine.returned > 0 ? 'bold' : 'normal',
-                            color: vaccine.returned > 0 ? '#ff9800' : 'text.primary'
-                          }}
-                        >
-                          {vaccine.returned || 0}
-                        </Typography>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
 
           {canConfirm() && (
             <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>

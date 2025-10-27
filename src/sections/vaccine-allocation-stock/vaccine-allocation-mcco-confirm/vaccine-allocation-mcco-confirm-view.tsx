@@ -122,7 +122,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
         vaccineData[`dose_${fieldName}_received`] = v.received;
         // Extract the stage number from "Stage 1" -> 1
         const vvmStageNumber = v.vvmStage ? parseInt(v.vvmStage.replace('Stage ', '')) : 0;
-        vaccineData[`${fieldName}_vvm_stage`] = vvmStageNumber;
+        vaccineData[`${fieldName}_vvm_stage_ehf`] = vvmStageNumber;
         vaccineData[`${fieldName}_batch_number`] = v.batchNumber || '';
         vaccineData[`${fieldName}_expire_date`] = v.expiryDate || null;
       }
@@ -319,7 +319,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           value={vaccine.expiryDate}
                           onChange={(e) => handleVaccineChange(actualIndex, 'expiryDate', e.target.value)}
                           inputProps={{
-                            max: new Date().toISOString().split('T')[0]
+                            min: new Date().toISOString().split('T')[0]
                           }}
                         />
                       </Grid>
@@ -339,11 +339,11 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Enter your 4-digit MFA Code"
+                label="Enter EHF User's 4-digit MFA Code"
                 value={mfaCode}
                 onChange={(e) => setMfaCode(e.target.value)}
                 inputProps={{ maxLength: 4 }}
-                helperText="Enter the 4-digit code from your authenticator"
+                helperText={`Enter the MFA code for the EHF user at ${data.name_of_ehf || 'this facility'}`}
               />
             </Grid>
           </Grid>

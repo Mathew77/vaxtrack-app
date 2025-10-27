@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiHelper } from "../../apiHelper";
 import { url } from "src/hooks/api";
 import { FacilityType, LcsDashboardType, LcsDashboardWardType, LcsIndicatorsResponse, WardVaccineSummary } from "./lcs-dashboard-type";
+import { useFetchLcs } from "../../lcs-scs/lcs-hooks";
 
 
 const getLcsId = () => {
@@ -23,16 +24,28 @@ const getLcsId = () => {
 
 export const useFetchLcsIndicators = () => {
     const lcs_id = getLcsId();
+    const { data: allLcs } = useFetchLcs();
 
     return useQuery<LcsIndicatorsResponse, Error>({
         queryKey: ['lcs-indicators', lcs_id],
         queryFn: async () => {
+            // Get the state and LGA associated with this LCS
+            const lcsFacility = allLcs?.find(lcs => lcs.id?.toString() === lcs_id?.toString());
+
+            // stat_id contains the state name, lga_id contains the LGA name
+            const stateName = lcsFacility?.stat_id;
+            const lgaName = lcsFacility?.lga_id;
+
+            if (!stateName || !lgaName) {
+                throw new Error('Could not determine state or LGA for LCS user');
+            }
+
             const response = await apiHelper.getResource<LcsIndicatorsResponse>(
-                `${url}v1/dashboard-slwg-indicators/?lcs_id=${lcs_id}`
+                `${url}v1/dashboard-slwg-indicators/?state=${stateName}&lga=${lgaName}`
             );
             return response;
         },
-        enabled: !!lcs_id,
+        enabled: !!lcs_id && !!allLcs,
     });
 };
 
@@ -151,15 +164,27 @@ const transformRowsToWards = (rows: any[]): LcsDashboardType => {
 
 export const useFetchLcsDashboard = () => {
   const lcs_id = getLcsId();
+  const { data: allLcs } = useFetchLcs();
 
   return useQuery<LcsDashboardType, Error>({
     queryKey: ["lcs-dashboard-ward", lcs_id],
     queryFn: async () => {
+      // Get the state and LGA associated with this LCS
+      const lcsFacility = allLcs?.find(lcs => lcs.id?.toString() === lcs_id?.toString());
+
+      // stat_id contains the state name, lga_id contains the LGA name
+      const stateName = lcsFacility?.stat_id;
+      const lgaName = lcsFacility?.lga_id;
+
+      if (!stateName || !lgaName) {
+        throw new Error('Could not determine state or LGA for LCS user');
+      }
+
       const response = await apiHelper.getResource<{ rows: any[] }>(
-        `${url}v1/dashboard-slwg-table/`
+        `${url}v1/dashboard-slwg-table/?state=${stateName}&lga=${lgaName}`
       );
       return transformRowsToWards(response.rows);
     },
-    enabled: !!lcs_id,
+    enabled: !!lcs_id && !!allLcs,
   });
 };

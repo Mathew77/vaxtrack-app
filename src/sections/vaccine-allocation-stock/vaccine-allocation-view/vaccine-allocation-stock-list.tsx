@@ -13,6 +13,7 @@ import { useFetchStockAtHand, useFetchAllocatedVaccines, useDeleteAllocation } f
 import { StockAtHandData, AllocatedVaccineData } from 'src/hooks/apis/upload/upload-type';
 import { useFetchUsers } from 'src/hooks/apis/user/user-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
+import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 import { toast } from 'react-toastify';
 import { keyframes } from '@mui/system';
 
@@ -89,27 +90,36 @@ const VaccineAllocationStockList: React.FC = () => {
 
   const userScsId = userScsList[0]; // Get the first SCS ID
 
-  // Get user's state for 3PL and MCCO filtering
-  const userStateList = useMemo(() => {
-    try {
-      const stateData = sessionStorage.getItem('userState');
-      if (stateData) {
-        const parsed = JSON.parse(stateData);
-        return parsed?.state || [];
-      }
-      return [];
-    } catch (error) {
-      console.error('Error parsing userState from session storage:', error);
-      return [];
-    }
-  }, []);
-
   const userState = sessionStorage.getItem('userState') || null;
 
   const { data: stockData = [] } = useFetchStockAtHand(userState);
   const { data: allocatedData = [] } = useFetchAllocatedVaccines(userState);
   const { data: allUsers = [] } = useFetchUsers();
   const { data: allScs = [] } = useFetchScs();
+  const { data: allLcs = [] } = useFetchLcs();
+
+  // Get user's state for LCS filtering
+  const userStateList = useMemo(() => {
+    try {
+      if (isLCS) {
+        // Get LCS state from lcs_list
+        const lcsListString = sessionStorage.getItem('lcs_list');
+        if (lcsListString) {
+          const lcsList = JSON.parse(lcsListString);
+          if (Array.isArray(lcsList) && lcsList.length > 0) {
+            const lcsId = parseInt(lcsList[0], 10);
+            const lcsFacility = allLcs?.find(lcs => lcs.id === lcsId);
+            // LCS only has one state (stat_id), return as array
+            return lcsFacility?.stat_id ? [lcsFacility.stat_id] : [];
+          }
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error('Error getting userStateList from session storage:', error);
+      return [];
+    }
+  }, [isLCS, allLcs]);
   const deleteAllocationMutation = useDeleteAllocation();
   const [value, setValue] = useState<number>(0);
   const [selectedLGA, setSelectedLGA] = useState<string>('');
@@ -135,34 +145,46 @@ const VaccineAllocationStockList: React.FC = () => {
     return allUsers
       .filter(user => {
         if (!user.scs_list || !Array.isArray(user.scs_list)) return false;
-        // Check if the SCS ID exists in the user's scs_list (as string)
+        // Check if the SCS ID exists in the user's scs_list 
         return user.scs_list.includes(scsIdString);
       })
       .map(user => user.id?.toString());
   }, [isSCS, userScsId, allUsers]);
 
-  // Get the state managed by this SCS facility
+  // Get the state managed by this SCS facility (for both SCS and SLWG users)
   const scsState = useMemo(() => {
-    if (!isSCS || !userScsId || !allScs.length) return null;
+    if ((!isSCS && !isSLWG) || !userScsId || !allScs.length) return null;
 
     // Find the SCS facility with this ID
     const scsFacility = allScs.find(scs => scs.id?.toString() === userScsId.toString());
 
-    console.log('SCS Facility ID:', userScsId);
-    console.log('Found SCS Facility:', scsFacility);
-    console.log('SCS stat_id (state):', scsFacility?.stat_id);
-
     return scsFacility?.stat_id || null;
-  }, [isSCS, userScsId, allScs]);
+  }, [isSCS, isSLWG, userScsId, allScs]);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   const availableLGAs = useMemo(() => {
-    const lgas = stockData.map((item) => item.lga).filter(Boolean);
+    let filteredStock = stockData;
+
+    // Filter stock data based on user role before building LGA list
+    if (isSCS && scsState) {
+      // SCS users should only see LGAs from their state
+      filteredStock = stockData.filter(item => item.state?.toUpperCase() === scsState.toUpperCase());
+    } else if (isSLWG && scsState) {
+      // SLWG users should only see LGAs from their state
+      filteredStock = stockData.filter(item => item.state?.toUpperCase() === scsState.toUpperCase());
+    } else if (isLCS && userStateList.length > 0) {
+      // LCS users should only see LGAs from their assigned state
+      filteredStock = stockData.filter(item =>
+        userStateList.some((state: string) => state.toUpperCase() === item.state?.toUpperCase())
+      );
+    }
+
+    const lgas = filteredStock.map((item) => item.lga).filter(Boolean);
     return Array.from(new Set(lgas)).sort();
-  }, [stockData]);
+  }, [stockData, isSCS, isSLWG, isLCS, scsState, userStateList]);
 
   // Filter stock data based on selected LGA and sort by ID ascending (oldest first)
   const filteredStockData = useMemo(() => {
@@ -170,20 +192,13 @@ const VaccineAllocationStockList: React.FC = () => {
     return [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
   }, [stockData, selectedLGA]);
 
-  // Enrich allocated data with EHF info from stock data
+
   // SCS users will only see allocations for EHFs in their state
-  // 3PL and MCCO users will see allocations for their assigned states
   const enrichedAllocatedData = useMemo(() => {
     let filteredData = allocatedData;
 
-    console.log('Filtering data for role:', userRole);
-    console.log('Total allocated data:', allocatedData.length);
-
     // If user is SCS, filter by the state managed by this SCS facility
     if (isSCS) {
-      console.log('SCS user - SCS state:', scsState);
-      console.log('SCS user - mapped SLWG user IDs:', mappedSlwgUserIds);
-
       // Filter based on the SCS facility's state (case-insensitive comparison)
       if (scsState) {
         filteredData = allocatedData.filter(allocation => {
@@ -192,25 +207,12 @@ const VaccineAllocationStockList: React.FC = () => {
           );
           // Case-insensitive comparison to handle "FCT" vs "Fct"
           const isInState = stockInfo && stockInfo.state.toUpperCase() === scsState.toUpperCase();
-          console.log(`Allocation ${allocation.id} - EHF State: ${stockInfo?.state}, SCS State: ${scsState}, Matched: ${isInState}`);
           return isInState;
         });
       } else {
         // If no state found, show all allocations
-        console.log('No SCS state found, showing all allocations');
         filteredData = allocatedData;
       }
-      console.log('Filtered data count for SCS:', filteredData.length);
-    }
-    // If user is 3PL or MCCO, filter by their assigned states
-    else if ((is3PL || isMCCO) && userStateList.length > 0) {
-      filteredData = allocatedData.filter(allocation => {
-        const stockInfo = stockData.find(
-          (stock) => stock.assigned_unique_id === allocation.assigned_unique_id
-        );
-        return stockInfo && userStateList.includes(stockInfo.state);
-      });
-      console.log('Filtered data count for 3PL/MCCO:', filteredData.length);
     }
 
     return filteredData.map((allocation) => {
@@ -224,9 +226,9 @@ const VaccineAllocationStockList: React.FC = () => {
         lga: stockInfo?.lga || 'N/A',
       };
     });
-  }, [allocatedData, stockData, isSCS, is3PL, isMCCO, scsState, mappedSlwgUserIds, userStateList, userRole]);
+  }, [allocatedData, stockData, isSCS, scsState]);
 
-  // Filter allocated data based on selected LGA and sort by ID ascending (oldest first)
+  // Filter allocated data based on selected LGA and sort by ID ascending
   const filteredAllocatedData = useMemo(() => {
     let data = selectedLGA ? enrichedAllocatedData.filter((item) => item.lga === selectedLGA) : enrichedAllocatedData;
     return [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
@@ -752,30 +754,32 @@ const VaccineAllocationStockList: React.FC = () => {
         </Tabs>
       )}
 
-      {/* Filter Section - Below Tabs */}
-      <Box sx={{ mt: 3, mb: 2, px: 2 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth>
-              <InputLabel>Filter by LGA</InputLabel>
-              <Select
-                value={selectedLGA}
-                onChange={handleLGAChange}
-                label="Filter by LGA"
-              >
-                <MenuItem value="">
-                  <em>All LGAs</em>
-                </MenuItem>
-                {availableLGAs.map((lga) => (
-                  <MenuItem key={lga} value={lga}>
-                    {lga}
+      {/* Filter Section - Below Tabs (Hidden for 3PL and MCCO) */}
+      {!is3PL && !isMCCO && (
+        <Box sx={{ mt: 3, mb: 2, px: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <FormControl fullWidth>
+                <InputLabel>Filter by LGA</InputLabel>
+                <Select
+                  value={selectedLGA}
+                  onChange={handleLGAChange}
+                  label="Filter by LGA"
+                >
+                  <MenuItem value="">
+                    <em>All LGAs</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                  {availableLGAs.map((lga) => (
+                    <MenuItem key={lga} value={lga}>
+                      {lga}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
+        </Box>
+      )}
 
       {/* Show Stock Upload tab only for SLWG */}
       {showStockAtHandTab && (
