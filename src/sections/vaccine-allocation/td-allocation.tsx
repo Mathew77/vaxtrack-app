@@ -101,9 +101,9 @@ const TdAllocationComponent = ({
         variant="h6"
         sx={{
           mb: 2,
-          border: '1px solid #1976D2',
+          border: '1px solid rgb(12, 125, 64)',
           borderRadius: 1,
-          backgroundColor: '#1976D2',
+          backgroundColor: 'rgb(12, 125, 64)',
           color: 'white',
           padding: 2,
           textAlign: 'left',

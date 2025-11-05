@@ -266,12 +266,12 @@ export default function VaccineView() {
                     <Paper
                         sx={{
                             p: 2,
-                            border: '2px solid #1976D2',
+                            border: '2px solid rgb(12, 125, 64)',
                             borderRadius: 1,
                             height: 'fit-content',
                             maxHeight: 'calc(100vh - 150px)',
                             overflow: 'auto',
-                            backgroundColor: '#1976D2',
+                            backgroundColor: 'rgb(12, 125, 64)',
                         }}
                     >
                         <Tabs
@@ -279,27 +279,33 @@ export default function VaccineView() {
                             variant="scrollable"
                             value={selectedTab}
                             onChange={handleTabChange}
-                            sx={{ '& .MuiTabs-indicator': { backgroundColor: '#1976D2' } }}
+                            sx={{ '& .MuiTabs-indicator': { backgroundColor: 'rgb(12, 125, 64)' } }}
                         >
                             {vaccineOptions.map((vaccine) => (
                                 <Tab
-                                    key={vaccine.value}
-                                    label={vaccine.label}
-                                    value={vaccine.value}
-                                    sx={{
-                                        alignItems: 'flex-start',
-                                        textAlign: 'left',
-                                        color: 'white',
-                                        mb: 0.5,
-                                        '&.Mui-selected': {
-                                            backgroundColor: '#1565C0',
-                                            color: 'white',
-                                            borderRadius: 1,
-                                        },
-                                        '&:hover': { backgroundColor: '#1565C0' },
-                                        borderRadius: 0,
-                                        minHeight: 36,
-                                    }}
+                                  key={vaccine.value}
+                                  label={vaccine.label}
+                                  value={vaccine.value}
+                                  sx={{
+                                    alignItems: 'flex-start',
+                                    textAlign: 'left',
+                                    color: 'white',
+                                    mb: 0.5,
+                                    borderRadius: 1,
+                                    minHeight: 36,
+                                    '&:hover': {
+                                      bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.08))',
+                                      color: 'white',
+                                    },
+                                    '&.Mui-selected': {
+                                      fontWeight: 'fontWeightSemiBold',
+                                      bgcolor: 'var(--layout-nav-item-active-bg, rgba(255, 255, 255, 0.16))',
+                                      color: 'var(--layout-nav-item-active-color, white)',
+                                      '&:hover': {
+                                        bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.12))',
+                                      },
+                                    },
+                                  }}
                                 />
                             ))}
                         </Tabs>

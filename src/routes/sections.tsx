@@ -21,7 +21,7 @@ export const AdminHome = lazy(() => import('src/pages/admin/home'));
 export const EhfHome = lazy(() => import('src/pages/ehf/home'));
 export const ConveyorHome = lazy(() => import('src/pages/conveyor/home'));
 export const MccoHome = lazy(() => import('src/pages/mcco/home'));
-// export const ConveyorAllocation = lazy(() => import('src/pages/conveyor-allocation'));
+export const ConveyorAllocation = lazy(() => import('src/pages/conveyor-allocation'));
 export const VaccineAllocationPage = lazy(() => import('src/pages/vaccine-allocation/index'));
 export const VaccineAllocationStockPage = lazy(() => import('src/pages/vaccine-allocation-stock/index'));
 export const WayBillInvoicePage = lazy(() => import('src/pages/invoice/index'));

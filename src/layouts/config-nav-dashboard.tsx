@@ -192,13 +192,13 @@ export const navData = [
     roles: ['admin'],
   },
   //Generic Menu 
-  // {
+  {
 
-  //   title: 'Vaccine Request',
-  //   path: '/vaccine-page',
-  //   icon: <MenuBookIcon />,
-  //   roles: ['ehf', 'lcs', 'scs', 'threepl', 'slwg'],
-  // },
+    title: 'Vaccine Request',
+    path: '/vaccine-page',
+    icon: <MenuBookIcon />,
+    roles: ['ehf', 'lcs', 'scs', 'threepl', 'slwg'],
+  },
   // {
   //   title: 'Vaccine Allocation',
   //   path: '/conveyor',
@@ -206,12 +206,12 @@ export const navData = [
   //   roles: ['conveyor', 'ehf', 'uhf'],
 
   // },
-  // {
-  //   title: 'Vaccine Allocation',
-  //   path: '/vaccine-allocation-page',
-  //   icon: icon('ic-community'),
-  //   roles: ['ehf', 'uhf', 'threepl'],
-  // },
+  {
+    title: 'Vaccine Allocation',
+    path: '/vaccine-allocation-page',
+    icon: <MenuBookIcon />,
+    roles: ['ehf', 'uhf', 'threepl'],
+  },
   {
     title: 'Vaccine Allocation Stock',
     path: '/vaccine-allocation-stock-page',

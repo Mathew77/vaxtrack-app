@@ -38,19 +38,54 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
   const updateStatusMutation = useUpdateAllocationStatus();
 
   const [mfaCode, setMfaCode] = useState('');
+
+  // Helper function to convert VVM stage number to "Stage X" format
+  const formatVvmStage = (stage: any) => {
+    if (!stage || stage === 0 || stage === '0') return '';
+    return `Stage ${stage}`;
+  };
+
+  // Helper function to format date from datetime string to YYYY-MM-DD
+  const formatDate = (dateStr: any) => {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
+
+  // Store original SCS values for comparison
+  const originalScsValues = {
+    bcg: { vvmStage: formatVvmStage(data?.bcg_vvm_stage_scs), batchNumber: data?.bcg_batch_number_scs || '', expiryDate: formatDate(data?.bcg_expire_date_scs) },
+    hepb: { vvmStage: formatVvmStage(data?.hepb_vvm_stage_scs), batchNumber: data?.hepb_batch_number_scs || '', expiryDate: formatDate(data?.hepb_expire_date_scs) },
+    bopv: { vvmStage: formatVvmStage(data?.bopv_vvm_stage_scs), batchNumber: data?.bopv_batch_number_scs || '', expiryDate: formatDate(data?.bopv_expire_date_scs) },
+    penta: { vvmStage: formatVvmStage(data?.penta_vvm_stage_scs), batchNumber: data?.penta_batch_number_scs || '', expiryDate: formatDate(data?.penta_expire_date_scs) },
+    pcv: { vvmStage: formatVvmStage(data?.pcv_vvm_stage_scs), batchNumber: data?.pcv_batch_number_scs || '', expiryDate: formatDate(data?.pcv_expire_date_scs) },
+    ipv: { vvmStage: formatVvmStage(data?.ipv_vvm_stage_scs), batchNumber: data?.ipv_batch_number_scs || '', expiryDate: formatDate(data?.ipv_expire_date_scs) },
+    mea: { vvmStage: formatVvmStage(data?.mea_vvm_stage_scs), batchNumber: data?.mea_batch_number_scs || '', expiryDate: formatDate(data?.mea_expire_date_scs) },
+    yf: { vvmStage: formatVvmStage(data?.yf_vvm_stage_scs), batchNumber: data?.yf_batch_number_scs || '', expiryDate: formatDate(data?.yf_expire_date_scs) },
+    td: { vvmStage: formatVvmStage(data?.td_vvm_stage_scs), batchNumber: data?.td_batch_number_scs || '', expiryDate: formatDate(data?.td_expire_date_scs) },
+    mena: { vvmStage: formatVvmStage(data?.mena_vvm_stage_scs), batchNumber: data?.mena_batch_number_scs || '', expiryDate: formatDate(data?.mena_expire_date_scs) },
+    rota: { vvmStage: formatVvmStage(data?.rota_vvm_stage_scs), batchNumber: data?.rota_batch_number_scs || '', expiryDate: formatDate(data?.rota_expire_date_scs) },
+    hpv: { vvmStage: formatVvmStage(data?.hpv_vvm_stage_scs), batchNumber: data?.hpv_batch_number_scs || '', expiryDate: formatDate(data?.hpv_expire_date_scs) },
+  };
+
   const [vaccines, setVaccines] = useState<VaccineData[]>([
-    { name: 'BCG', allocated: data?.dose_bcg_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'HepB', allocated: data?.dose_hepb_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'bOPV', allocated: data?.dose_bopv_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'Penta', allocated: data?.dose_penta_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'PCV', allocated: data?.dose_pcv_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'IPV', allocated: data?.dose_ipv_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'Measles', allocated: data?.dose_mea_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'YF', allocated: data?.dose_yf_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'TD', allocated: data?.dose_td_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
-    { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: 0, vvmStage: '', batchNumber: '', expiryDate: '' },
+    { name: 'BCG', allocated: data?.dose_bcg_allocated || 0, received: 0, vvmStage: originalScsValues.bcg.vvmStage, batchNumber: originalScsValues.bcg.batchNumber, expiryDate: originalScsValues.bcg.expiryDate },
+    { name: 'HepB', allocated: data?.dose_hepb_allocated || 0, received: 0, vvmStage: originalScsValues.hepb.vvmStage, batchNumber: originalScsValues.hepb.batchNumber, expiryDate: originalScsValues.hepb.expiryDate },
+    { name: 'bOPV', allocated: data?.dose_bopv_allocated || 0, received: 0, vvmStage: originalScsValues.bopv.vvmStage, batchNumber: originalScsValues.bopv.batchNumber, expiryDate: originalScsValues.bopv.expiryDate },
+    { name: 'Penta', allocated: data?.dose_penta_allocated || 0, received: 0, vvmStage: originalScsValues.penta.vvmStage, batchNumber: originalScsValues.penta.batchNumber, expiryDate: originalScsValues.penta.expiryDate },
+    { name: 'PCV', allocated: data?.dose_pcv_allocated || 0, received: 0, vvmStage: originalScsValues.pcv.vvmStage, batchNumber: originalScsValues.pcv.batchNumber, expiryDate: originalScsValues.pcv.expiryDate },
+    { name: 'IPV', allocated: data?.dose_ipv_allocated || 0, received: 0, vvmStage: originalScsValues.ipv.vvmStage, batchNumber: originalScsValues.ipv.batchNumber, expiryDate: originalScsValues.ipv.expiryDate },
+    { name: 'Measles', allocated: data?.dose_mea_allocated || 0, received: 0, vvmStage: originalScsValues.mea.vvmStage, batchNumber: originalScsValues.mea.batchNumber, expiryDate: originalScsValues.mea.expiryDate },
+    { name: 'YF', allocated: data?.dose_yf_allocated || 0, received: 0, vvmStage: originalScsValues.yf.vvmStage, batchNumber: originalScsValues.yf.batchNumber, expiryDate: originalScsValues.yf.expiryDate },
+    { name: 'TD', allocated: data?.dose_td_allocated || 0, received: 0, vvmStage: originalScsValues.td.vvmStage, batchNumber: originalScsValues.td.batchNumber, expiryDate: originalScsValues.td.expiryDate },
+    { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: 0, vvmStage: originalScsValues.mena.vvmStage, batchNumber: originalScsValues.mena.batchNumber, expiryDate: originalScsValues.mena.expiryDate },
+    { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: 0, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate },
+    { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: 0, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate },
   ]);
 
   if (!data) {
@@ -115,16 +150,41 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     };
 
     // Build vaccine data with received amounts, VVM stages, batch numbers, and expiry dates
+    // Logic: Only save fields to EHF that MCCO actually changed from SCS values
     const vaccineData: any = {};
-    vaccines.forEach(v => {
+    const scsKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv'];
+
+    vaccines.forEach((v, idx) => {
       const fieldName = vaccineFieldMap[v.name];
-      if (fieldName) {
+      const scsKey = scsKeys[idx];
+
+      if (fieldName && scsKey) {
         vaccineData[`dose_${fieldName}_received`] = v.received;
-        // Extract the stage number from "Stage 1" -> 1
-        const vvmStageNumber = v.vvmStage ? parseInt(v.vvmStage.replace('Stage ', '')) : 0;
-        vaccineData[`${fieldName}_vvm_stage_ehf`] = vvmStageNumber;
-        vaccineData[`${fieldName}_batch_number`] = v.batchNumber || '';
-        vaccineData[`${fieldName}_expire_date`] = v.expiryDate || null;
+
+        const originalValues = originalScsValues[scsKey as keyof typeof originalScsValues];
+
+        // Check if each field changed individually
+        const vvmChanged = v.vvmStage !== originalValues.vvmStage;
+        const batchChanged = v.batchNumber !== originalValues.batchNumber;
+        const expiryChanged = v.expiryDate !== originalValues.expiryDate;
+
+        // Only save fields that actually changed to EHF fields
+        if (vvmChanged) {
+          const vvmStageNumber = v.vvmStage ? (
+            v.vvmStage.includes('Stage') ? parseInt(v.vvmStage.replace('Stage ', '')) : parseInt(v.vvmStage)
+          ) : 0;
+          vaccineData[`${fieldName}_vvm_stage_ehf`] = vvmStageNumber;
+        }
+
+        if (batchChanged) {
+          vaccineData[`${fieldName}_batch_number`] = v.batchNumber || '';
+        }
+
+        if (expiryChanged) {
+          vaccineData[`${fieldName}_expire_date`] = v.expiryDate || null;
+        }
+
+        // If nothing changed, values stay in SCS fields only (already set during allocation)
       }
     });
 

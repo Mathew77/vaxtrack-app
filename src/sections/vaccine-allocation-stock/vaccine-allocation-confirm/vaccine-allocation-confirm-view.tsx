@@ -182,19 +182,24 @@ const VaccineAllocationConfirmView: React.FC = () => {
     );
   };
 
+  // Helper: Show EHF value if changed, otherwise fallback to SCS value
+  const getVvmStage = (ehf: number, scs: number) => (ehf && ehf > 0) ? ehf : (scs || 0);
+  const getBatchNumber = (ehf: string | null, scs: string | null) => ehf || scs || null;
+  const getExpiryDate = (ehf: string | null, scs: string | null) => ehf || scs || null;
+
   const vaccines = [
-    { name: 'BCG', key: 'bcg', allocated: data.dose_bcg_allocated, actual: data.dose_bcg_actual, received: data.dose_bcg_received, returned: data.dose_bcg_return, vvmStage: data.bcg_vvm_stage_ehf, vvmStage3PL: data.bcg_vvm_stage_threepl, batchNumber: data.bcg_batch_number, expiryDate: data.bcg_expire_date },
-    { name: 'HepB', key: 'hepb', allocated: data.dose_hepb_allocated, actual: data.dose_hepb_actual, received: data.dose_hepb_received, returned: data.dose_hepb_return, vvmStage: data.hepb_vvm_stage_ehf, vvmStage3PL: data.hepb_vvm_stage_threepl, batchNumber: data.hepb_batch_number, expiryDate: data.hepb_expire_date },
-    { name: 'bOPV', key: 'bopv', allocated: data.dose_bopv_allocated, actual: data.dose_bopv_actual, received: data.dose_bopv_received, returned: data.dose_bopv_return, vvmStage: data.bopv_vvm_stage_ehf, vvmStage3PL: data.bopv_vvm_stage_threepl, batchNumber: data.bopv_batch_number, expiryDate: data.bopv_expire_date },
-    { name: 'Penta', key: 'penta', allocated: data.dose_penta_allocated, actual: data.dose_penta_actual, received: data.dose_penta_received, returned: data.dose_penta_return, vvmStage: data.penta_vvm_stage_ehf, vvmStage3PL: data.penta_vvm_stage_threepl, batchNumber: data.penta_batch_number, expiryDate: data.penta_expire_date },
-    { name: 'PCV', key: 'pcv', allocated: data.dose_pcv_allocated, actual: data.dose_pcv_actual, received: data.dose_pcv_received, returned: data.dose_pcv_return, vvmStage: data.pcv_vvm_stage_ehf, vvmStage3PL: data.pcv_vvm_stage_threepl, batchNumber: data.pcv_batch_number, expiryDate: data.pcv_expire_date },
-    { name: 'IPV', key: 'ipv', allocated: data.dose_ipv_allocated, actual: data.dose_ipv_actual, received: data.dose_ipv_received, returned: data.dose_ipv_return, vvmStage: data.ipv_vvm_stage_ehf, vvmStage3PL: data.ipv_vvm_stage_threepl, batchNumber: data.ipv_batch_number, expiryDate: data.ipv_expire_date },
-    { name: 'Measles', key: 'mea', allocated: data.dose_mea_allocated, actual: data.dose_mea_actual, received: data.dose_mea_received, returned: data.dose_mea_return, vvmStage: data.mea_vvm_stage_ehf, vvmStage3PL: data.mea_vvm_stage_threepl, batchNumber: data.mea_batch_number, expiryDate: data.mea_expire_date },
-    { name: 'YF', key: 'yf', allocated: data.dose_yf_allocated, actual: data.dose_yf_actual, received: data.dose_yf_received, returned: data.dose_yf_return, vvmStage: data.yf_vvm_stage_ehf, vvmStage3PL: data.yf_vvm_stage_threepl, batchNumber: data.yf_batch_number, expiryDate: data.yf_expire_date },
-    { name: 'TD', key: 'td', allocated: data.dose_td_allocated, actual: data.dose_td_actual, received: data.dose_td_received, returned: data.dose_td_return, vvmStage: data.td_vvm_stage_ehf, vvmStage3PL: data.td_vvm_stage_threepl, batchNumber: data.td_batch_number, expiryDate: data.td_expire_date },
-    { name: 'MenA', key: 'mena', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, returned: data.dose_mena_return, vvmStage: data.mena_vvm_stage_ehf, vvmStage3PL: data.mena_vvm_stage_threepl, batchNumber: data.mena_batch_number, expiryDate: data.mena_expire_date },
-    { name: 'Rota', key: 'rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, returned: data.dose_rota_return, vvmStage: data.rota_vvm_stage_ehf, vvmStage3PL: data.rota_vvm_stage_threepl, batchNumber: data.rota_batch_number, expiryDate: data.rota_expire_date },
-    { name: 'HPV', key: 'hpv', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, returned: data.dose_hpv_return, vvmStage: data.hpv_vvm_stage_ehf, vvmStage3PL: data.hpv_vvm_stage_threepl, batchNumber: data.hpv_batch_number, expiryDate: data.hpv_expire_date },
+    { name: 'BCG', key: 'bcg', allocated: data.dose_bcg_allocated, actual: data.dose_bcg_actual, received: data.dose_bcg_received, returned: data.dose_bcg_return, vvmStage: getVvmStage(data.bcg_vvm_stage_ehf, data.bcg_vvm_stage_scs), vvmStage3PL: data.bcg_vvm_stage_threepl, batchNumber: getBatchNumber(data.bcg_batch_number, data.bcg_batch_number_scs), expiryDate: getExpiryDate(data.bcg_expire_date, data.bcg_expire_date_scs) },
+    { name: 'HepB', key: 'hepb', allocated: data.dose_hepb_allocated, actual: data.dose_hepb_actual, received: data.dose_hepb_received, returned: data.dose_hepb_return, vvmStage: getVvmStage(data.hepb_vvm_stage_ehf, data.hepb_vvm_stage_scs), vvmStage3PL: data.hepb_vvm_stage_threepl, batchNumber: getBatchNumber(data.hepb_batch_number, data.hepb_batch_number_scs), expiryDate: getExpiryDate(data.hepb_expire_date, data.hepb_expire_date_scs) },
+    { name: 'bOPV', key: 'bopv', allocated: data.dose_bopv_allocated, actual: data.dose_bopv_actual, received: data.dose_bopv_received, returned: data.dose_bopv_return, vvmStage: getVvmStage(data.bopv_vvm_stage_ehf, data.bopv_vvm_stage_scs), vvmStage3PL: data.bopv_vvm_stage_threepl, batchNumber: getBatchNumber(data.bopv_batch_number, data.bopv_batch_number_scs), expiryDate: getExpiryDate(data.bopv_expire_date, data.bopv_expire_date_scs) },
+    { name: 'Penta', key: 'penta', allocated: data.dose_penta_allocated, actual: data.dose_penta_actual, received: data.dose_penta_received, returned: data.dose_penta_return, vvmStage: getVvmStage(data.penta_vvm_stage_ehf, data.penta_vvm_stage_scs), vvmStage3PL: data.penta_vvm_stage_threepl, batchNumber: getBatchNumber(data.penta_batch_number, data.penta_batch_number_scs), expiryDate: getExpiryDate(data.penta_expire_date, data.penta_expire_date_scs) },
+    { name: 'PCV', key: 'pcv', allocated: data.dose_pcv_allocated, actual: data.dose_pcv_actual, received: data.dose_pcv_received, returned: data.dose_pcv_return, vvmStage: getVvmStage(data.pcv_vvm_stage_ehf, data.pcv_vvm_stage_scs), vvmStage3PL: data.pcv_vvm_stage_threepl, batchNumber: getBatchNumber(data.pcv_batch_number, data.pcv_batch_number_scs), expiryDate: getExpiryDate(data.pcv_expire_date, data.pcv_expire_date_scs) },
+    { name: 'IPV', key: 'ipv', allocated: data.dose_ipv_allocated, actual: data.dose_ipv_actual, received: data.dose_ipv_received, returned: data.dose_ipv_return, vvmStage: getVvmStage(data.ipv_vvm_stage_ehf, data.ipv_vvm_stage_scs), vvmStage3PL: data.ipv_vvm_stage_threepl, batchNumber: getBatchNumber(data.ipv_batch_number, data.ipv_batch_number_scs), expiryDate: getExpiryDate(data.ipv_expire_date, data.ipv_expire_date_scs) },
+    { name: 'Measles', key: 'mea', allocated: data.dose_mea_allocated, actual: data.dose_mea_actual, received: data.dose_mea_received, returned: data.dose_mea_return, vvmStage: getVvmStage(data.mea_vvm_stage_ehf, data.mea_vvm_stage_scs), vvmStage3PL: data.mea_vvm_stage_threepl, batchNumber: getBatchNumber(data.mea_batch_number, data.mea_batch_number_scs), expiryDate: getExpiryDate(data.mea_expire_date, data.mea_expire_date_scs) },
+    { name: 'YF', key: 'yf', allocated: data.dose_yf_allocated, actual: data.dose_yf_actual, received: data.dose_yf_received, returned: data.dose_yf_return, vvmStage: getVvmStage(data.yf_vvm_stage_ehf, data.yf_vvm_stage_scs), vvmStage3PL: data.yf_vvm_stage_threepl, batchNumber: getBatchNumber(data.yf_batch_number, data.yf_batch_number_scs), expiryDate: getExpiryDate(data.yf_expire_date, data.yf_expire_date_scs) },
+    { name: 'TD', key: 'td', allocated: data.dose_td_allocated, actual: data.dose_td_actual, received: data.dose_td_received, returned: data.dose_td_return, vvmStage: getVvmStage(data.td_vvm_stage_ehf, data.td_vvm_stage_scs), vvmStage3PL: data.td_vvm_stage_threepl, batchNumber: getBatchNumber(data.td_batch_number, data.td_batch_number_scs), expiryDate: getExpiryDate(data.td_expire_date, data.td_expire_date_scs) },
+    { name: 'MenA', key: 'mena', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, returned: data.dose_mena_return, vvmStage: getVvmStage(data.mena_vvm_stage_ehf, data.mena_vvm_stage_scs), vvmStage3PL: data.mena_vvm_stage_threepl, batchNumber: getBatchNumber(data.mena_batch_number, data.mena_batch_number_scs), expiryDate: getExpiryDate(data.mena_expire_date, data.mena_expire_date_scs) },
+    { name: 'Rota', key: 'rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, returned: data.dose_rota_return, vvmStage: getVvmStage(data.rota_vvm_stage_ehf, data.rota_vvm_stage_scs), vvmStage3PL: data.rota_vvm_stage_threepl, batchNumber: getBatchNumber(data.rota_batch_number, data.rota_batch_number_scs), expiryDate: getExpiryDate(data.rota_expire_date, data.rota_expire_date_scs) },
+    { name: 'HPV', key: 'hpv', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, returned: data.dose_hpv_return, vvmStage: getVvmStage(data.hpv_vvm_stage_ehf, data.hpv_vvm_stage_scs), vvmStage3PL: data.hpv_vvm_stage_threepl, batchNumber: getBatchNumber(data.hpv_batch_number, data.hpv_batch_number_scs), expiryDate: getExpiryDate(data.hpv_expire_date, data.hpv_expire_date_scs) },
   ];
 
   // Check if 3PL is confirming to show VVM input fields
@@ -316,7 +321,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
                           {vaccine.allocated || 0}
                         </Typography>
                       </Grid>
-                      <Grid item xs={6}>
+                      {/* Commented out VVM Stage for 3PL */}
+                      {/* <Grid item xs={6}>
                         <FormControl fullWidth size="small">
                           <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                             VVM Stage
@@ -333,7 +339,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                             <MenuItem value="4">Stage 4</MenuItem>
                           </Select>
                         </FormControl>
-                      </Grid>
+                      </Grid> */}
                     </Grid>
                   </Card>
                 </Grid>
@@ -348,9 +354,10 @@ const VaccineAllocationConfirmView: React.FC = () => {
                     <TableCell><strong>Vaccine</strong></TableCell>
                     <TableCell><strong>Stock Upload</strong></TableCell>
                     <TableCell><strong>Vaccine Allocated</strong></TableCell>
-                    {show3PLVvmView && (
+                    {/* Commented out VVM Stage (3PL) column */}
+                    {/* {show3PLVvmView && (
                       <TableCell><strong>VVM Stage (3PL)</strong></TableCell>
-                    )}
+                    )} */}
                     {showReceivedColumn && (
                       <>
                         <TableCell><strong>Received Doses</strong></TableCell>
@@ -383,13 +390,14 @@ const VaccineAllocationConfirmView: React.FC = () => {
                           {vaccine.allocated || 0}
                         </Typography>
                       </TableCell>
-                      {show3PLVvmView && (
+                      {/* Commented out VVM Stage (3PL) cell */}
+                      {/* {show3PLVvmView && (
                         <TableCell>
                           <Typography variant="body2" fontWeight="medium">
                             {vaccine.vvmStage3PL ? `Stage ${vaccine.vvmStage3PL}` : '-'}
                           </Typography>
                         </TableCell>
-                      )}
+                      )} */}
                       {showReceivedColumn && (
                         <>
                           <TableCell>

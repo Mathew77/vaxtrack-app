@@ -71,8 +71,8 @@ const VaccineAllocationStockList: React.FC = () => {
   const isMCCO = userRole === 'mcco' || userRole === 'conveyor'; // Support both role names
   const isLCS = userRole === 'lcs';
 
-  // Only SLWG can see Stock Upload tab
-  const showStockAtHandTab = isSLWG;
+  // SCS can see Stock Upload tab to allocate, SLWG can see to view only
+  const showStockAtHandTab = isSLWG || isSCS;
 
   const userScsList = useMemo(() => {
     try {
@@ -378,7 +378,18 @@ const VaccineAllocationStockList: React.FC = () => {
     navigate('/upload-view');
   };
 
-  const stockActionItems: ActionMenuItem<StockAtHandData>[] = [
+  // SCS can allocate vaccines, SLWG can only view
+  const handleViewStock = (data: StockAtHandData) => {
+    navigate('/vaccine-allocation-stock-view', {
+      state: {
+        data: data,
+        isUpdate: false,
+        isView: true,
+      },
+    });
+  };
+
+  const stockActionItems: ActionMenuItem<StockAtHandData>[] = isSCS ? [
     {
       display: "Allocate Vaccine",
       handleClick: handleEdit,
@@ -389,7 +400,13 @@ const VaccineAllocationStockList: React.FC = () => {
       handleClick: handleDelete,
       icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
-  ];
+  ] : isSLWG ? [
+    {
+      display: "View Details",
+      handleClick: handleViewStock,
+      icon: <VisibilityOutlinedIcon sx={{ color: "#1976D2" }} />,
+    },
+  ] : [];
 
   const handleViewAllocation = (data: any) => {
     navigate('/vaccine-allocation-confirm-view', {

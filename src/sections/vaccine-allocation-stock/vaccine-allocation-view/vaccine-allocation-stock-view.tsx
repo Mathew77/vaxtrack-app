@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Grid, Paper, TextField, Button, LinearProgress, Chip } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Paper, TextField, Button, LinearProgress, Chip, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { StockAtHandData } from 'src/hooks/apis/upload/upload-type';
 import { useSubmitAllocation } from 'src/hooks/apis/upload/upload-hook';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
@@ -23,16 +23,24 @@ interface AllocationData {
     dose_hpv: number;
 }
 
+interface VaccineMetadata {
+    vvm_stage: string;
+    batch_number: string;
+    expire_date: string;
+}
+
 export default function VaccineAllocationStock() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { data } = location.state || {};
+    const { data, isView } = location.state || {};
     const stockData = data as StockAtHandData;
     const submitAllocation = useSubmitAllocation();
 
     // Get user information from sessionStorage
     const userState = sessionStorage.getItem('userState') || null;
     const userData = userState ? JSON.parse(userState) : null;
+    const userRole = sessionStorage.getItem('userRole') || '';
+    const isViewMode = isView === true; // View-only mode for SLWG
 
     const [allocationData, setAllocationData] = useState<Record<keyof AllocationData, string>>({
         dose_bcg: '',
@@ -49,6 +57,22 @@ export default function VaccineAllocationStock() {
         dose_hpv: '',
     });
 
+    // Metadata for each vaccine type (VVM, batch number, expiry date)
+    const [metadataMap, setMetadataMap] = useState<Record<keyof AllocationData, VaccineMetadata>>({
+        dose_bcg: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_hepb: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_bopv: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_penta: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_pcv: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_ipv: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_mea: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_yf: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_td: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_mena: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_rota: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_hpv: { vvm_stage: '', batch_number: '', expire_date: '' },
+    });
+
     const [period, setPeriod] = useState<string>('');
 
     const handleInputChange = (vaccine: keyof AllocationData, value: string) => {
@@ -59,6 +83,20 @@ export default function VaccineAllocationStock() {
                 [vaccine]: value,
             }));
         }
+    };
+
+    const handleMetadataChange = (
+        vaccine: keyof AllocationData,
+        field: keyof VaccineMetadata,
+        value: string
+    ) => {
+        setMetadataMap((prev) => ({
+            ...prev,
+            [vaccine]: {
+                ...prev[vaccine],
+                [field]: value,
+            },
+        }));
     };
 
     // Helper function to get progress bar color based on allocation
@@ -127,29 +165,79 @@ export default function VaccineAllocationStock() {
                 period: period,
                 dose_bcg_actual: stockData.dose_bcg || 0,
                 dose_bcg_allocated: parseInt(allocationData.dose_bcg) || 0,
+                bcg_vvm_stage_scs: parseInt(metadataMap.dose_bcg.vvm_stage) || 0,
+                bcg_batch_number_scs: metadataMap.dose_bcg.batch_number || '',
+                bcg_expire_date_scs: metadataMap.dose_bcg.expire_date || null,
+
                 dose_hepb_actual: stockData.dose_hepb || 0,
                 dose_hepb_allocated: parseInt(allocationData.dose_hepb) || 0,
+                hepb_vvm_stage_scs: parseInt(metadataMap.dose_hepb.vvm_stage) || 0,
+                hepb_batch_number_scs: metadataMap.dose_hepb.batch_number || '',
+                hepb_expire_date_scs: metadataMap.dose_hepb.expire_date || null,
+
                 dose_bopv_actual: stockData.dose_bopv || 0,
                 dose_bopv_allocated: parseInt(allocationData.dose_bopv) || 0,
+                bopv_vvm_stage_scs: parseInt(metadataMap.dose_bopv.vvm_stage) || 0,
+                bopv_batch_number_scs: metadataMap.dose_bopv.batch_number || '',
+                bopv_expire_date_scs: metadataMap.dose_bopv.expire_date || null,
+
                 dose_penta_actual: stockData.dose_penta || 0,
                 dose_penta_allocated: parseInt(allocationData.dose_penta) || 0,
+                penta_vvm_stage_scs: parseInt(metadataMap.dose_penta.vvm_stage) || 0,
+                penta_batch_number_scs: metadataMap.dose_penta.batch_number || '',
+                penta_expire_date_scs: metadataMap.dose_penta.expire_date || null,
+
                 dose_pcv_actual: stockData.dose_pcv || 0,
                 dose_pcv_allocated: parseInt(allocationData.dose_pcv) || 0,
+                pcv_vvm_stage_scs: parseInt(metadataMap.dose_pcv.vvm_stage) || 0,
+                pcv_batch_number_scs: metadataMap.dose_pcv.batch_number || '',
+                pcv_expire_date_scs: metadataMap.dose_pcv.expire_date || null,
+
                 dose_ipv_actual: stockData.dose_ipv || 0,
                 dose_ipv_allocated: parseInt(allocationData.dose_ipv) || 0,
+                ipv_vvm_stage_scs: parseInt(metadataMap.dose_ipv.vvm_stage) || 0,
+                ipv_batch_number_scs: metadataMap.dose_ipv.batch_number || '',
+                ipv_expire_date_scs: metadataMap.dose_ipv.expire_date || null,
+
                 dose_mea_actual: stockData.dose_mea || 0,
                 dose_mea_allocated: parseInt(allocationData.dose_mea) || 0,
+                mea_vvm_stage_scs: parseInt(metadataMap.dose_mea.vvm_stage) || 0,
+                mea_batch_number_scs: metadataMap.dose_mea.batch_number || '',
+                mea_expire_date_scs: metadataMap.dose_mea.expire_date || null,
+
                 dose_yf_actual: stockData.dose_yf || 0,
                 dose_yf_allocated: parseInt(allocationData.dose_yf) || 0,
+                yf_vvm_stage_scs: parseInt(metadataMap.dose_yf.vvm_stage) || 0,
+                yf_batch_number_scs: metadataMap.dose_yf.batch_number || '',
+                yf_expire_date_scs: metadataMap.dose_yf.expire_date || null,
+
                 dose_td_actual: stockData.dose_td || 0,
                 dose_td_allocated: parseInt(allocationData.dose_td) || 0,
+                td_vvm_stage_scs: parseInt(metadataMap.dose_td.vvm_stage) || 0,
+                td_batch_number_scs: metadataMap.dose_td.batch_number || '',
+                td_expire_date_scs: metadataMap.dose_td.expire_date || null,
+
                 dose_mena_actual: stockData.dose_mena || 0,
                 dose_mena_allocated: parseInt(allocationData.dose_mena) || 0,
+                mena_vvm_stage_scs: parseInt(metadataMap.dose_mena.vvm_stage) || 0,
+                mena_batch_number_scs: metadataMap.dose_mena.batch_number || '',
+                mena_expire_date_scs: metadataMap.dose_mena.expire_date || null,
+
                 dose_rota_actual: stockData.dose_rota || 0,
                 dose_rota_allocated: parseInt(allocationData.dose_rota) || 0,
+                rota_vvm_stage_scs: parseInt(metadataMap.dose_rota.vvm_stage) || 0,
+                rota_batch_number_scs: metadataMap.dose_rota.batch_number || '',
+                rota_expire_date_scs: metadataMap.dose_rota.expire_date || null,
+
                 dose_hpv_actual: stockData.dose_hpv || 0,
                 dose_hpv_allocated: parseInt(allocationData.dose_hpv) || 0,
+                hpv_vvm_stage_scs: parseInt(metadataMap.dose_hpv.vvm_stage) || 0,
+                hpv_batch_number_scs: metadataMap.dose_hpv.batch_number || '',
+                hpv_expire_date_scs: metadataMap.dose_hpv.expire_date || null,
+
                 slwg_user: userData?.id || null,
+                // Status: 0 = Pending SCS (SLWG allocated), 1 = Pending 3PL (SCS allocated/confirmed)
+                status: userRole === 'scs' ? 1 : 0,
             };
 
             await submitAllocation.mutateAsync(submissionData);
@@ -174,7 +262,7 @@ export default function VaccineAllocationStock() {
         <Box sx={{ p: 3 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
                 <Typography variant="h5">
-                    Allocate Vaccine - {stockData.name_of_ehf}
+                    {isViewMode ? 'View Stock Details' : 'Allocate Vaccine'} - {stockData.name_of_ehf}
                 </Typography>
                 <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/vaccine-allocation-stock-page')}>
                     Back
@@ -231,35 +319,38 @@ export default function VaccineAllocationStock() {
                 </CardContent>
             </Card>
 
-            <Card sx={{ mt: 3 }}>
-                <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                        Allocation Period
-                    </Typography>
-                    <TextField
-                        fullWidth
-                        type="date"
-                        label="Period"
-                        value={period}
-                        onChange={(e) => setPeriod(e.target.value)}
-                        required
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        inputProps={{
-                            max: new Date().toISOString().split('T')[0]
-                        }}
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                            }
-                        }}
-                    />
-                </CardContent>
-            </Card>
+            {!isViewMode && (
+                <Card sx={{ mt: 3 }}>
+                    <CardContent>
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                            Allocation Period
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            type="date"
+                            label="Period"
+                            value={period}
+                            onChange={(e) => setPeriod(e.target.value)}
+                            required
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            inputProps={{
+                                max: new Date().toISOString().split('T')[0]
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                    '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                }
+                            }}
+                        />
+                    </CardContent>
+                </Card>
+            )}
 
-            <Card sx={{ mt: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' }}>
+            {!isViewMode && (
+                <Card sx={{ mt: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' }}>
                 <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                         <VaccinesIcon sx={{ fontSize: 32, color: 'rgb(12, 125, 64)', mr: 1 }} />
@@ -327,6 +418,53 @@ export default function VaccineAllocationStock() {
                                         Remaining: {stockData.dose_bcg - (parseInt(allocationData.dose_bcg) || 0)}
                                     </Typography>
                                 )}
+                                {userRole === 'scs' && parseInt(allocationData.dose_bcg) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_bcg.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_bcg', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    label="Batch Number"
+                                                    value={metadataMap.dose_bcg.batch_number}
+                                                    onChange={(e) => handleMetadataChange('dose_bcg', 'batch_number', e.target.value)}
+                                                    placeholder="Enter batch number"
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    type="date"
+                                                    label="Earliest Expiry Date"
+                                                    value={metadataMap.dose_bcg.expire_date}
+                                                    onChange={(e) => handleMetadataChange('dose_bcg', 'expire_date', e.target.value)}
+                                                    InputLabelProps={{ shrink: true }}
+                                                    inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                )}
                             </Paper>
                         </Grid>
 
@@ -389,6 +527,37 @@ export default function VaccineAllocationStock() {
                                         Remaining: {stockData.dose_hepb - (parseInt(allocationData.dose_hepb) || 0)}
                                     </Typography>
                                 )}
+                                {userRole === 'scs' && parseInt(allocationData.dose_hepb) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_hepb.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_hepb', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hepb.batch_number} onChange={(e) => handleMetadataChange('dose_hepb', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hepb.expire_date} onChange={(e) => handleMetadataChange('dose_hepb', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                )}
                             </Paper>
                         </Grid>
 
@@ -446,10 +615,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_bopv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_bopv - (parseInt(allocationData.dose_bopv) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_bopv) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_bopv.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_bopv', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_bopv.batch_number} onChange={(e) => handleMetadataChange('dose_bopv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_bopv.expire_date} onChange={(e) => handleMetadataChange('dose_bopv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -508,10 +703,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_penta && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_penta - (parseInt(allocationData.dose_penta) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_penta) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_penta.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_penta', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_penta.batch_number} onChange={(e) => handleMetadataChange('dose_penta', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_penta.expire_date} onChange={(e) => handleMetadataChange('dose_penta', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -570,10 +791,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_pcv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_pcv - (parseInt(allocationData.dose_pcv) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_pcv) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_pcv.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_pcv', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_pcv.batch_number} onChange={(e) => handleMetadataChange('dose_pcv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_pcv.expire_date} onChange={(e) => handleMetadataChange('dose_pcv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -632,10 +879,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_ipv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_ipv - (parseInt(allocationData.dose_ipv) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_ipv) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_ipv.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_ipv', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_ipv.batch_number} onChange={(e) => handleMetadataChange('dose_ipv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_ipv.expire_date} onChange={(e) => handleMetadataChange('dose_ipv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -694,10 +967,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_mea && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_mea - (parseInt(allocationData.dose_mea) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_mea) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_mea.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_mea', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mea.batch_number} onChange={(e) => handleMetadataChange('dose_mea', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mea.expire_date} onChange={(e) => handleMetadataChange('dose_mea', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -756,10 +1055,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_yf && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_yf - (parseInt(allocationData.dose_yf) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_yf) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_yf.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_yf', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_yf.batch_number} onChange={(e) => handleMetadataChange('dose_yf', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_yf.expire_date} onChange={(e) => handleMetadataChange('dose_yf', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -818,10 +1143,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_td && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_td - (parseInt(allocationData.dose_td) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_td) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_td.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_td', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_td.batch_number} onChange={(e) => handleMetadataChange('dose_td', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_td.expire_date} onChange={(e) => handleMetadataChange('dose_td', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -880,10 +1231,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_mena && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_mena - (parseInt(allocationData.dose_mena) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_mena) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_mena.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_mena', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mena.batch_number} onChange={(e) => handleMetadataChange('dose_mena', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mena.expire_date} onChange={(e) => handleMetadataChange('dose_mena', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -942,10 +1319,36 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_rota && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_rota - (parseInt(allocationData.dose_rota) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_rota) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_rota.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_rota', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_rota.batch_number} onChange={(e) => handleMetadataChange('dose_rota', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_rota.expire_date} onChange={(e) => handleMetadataChange('dose_rota', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
@@ -1004,16 +1407,43 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
-                                {allocationData.dose_hpv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_hpv - (parseInt(allocationData.dose_hpv) || 0)}
-                                    </Typography>
+                                {userRole === 'scs' && parseInt(allocationData.dose_hpv) > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                            Vaccine Details
+                                        </Typography>
+                                        <Grid container spacing={1.5}>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth size="small">
+                                                    <InputLabel>VVM Stage</InputLabel>
+                                                    <Select
+                                                        value={metadataMap.dose_hpv.vvm_stage}
+                                                        onChange={(e) => handleMetadataChange('dose_hpv', 'vvm_stage', e.target.value)}
+                                                        label="VVM Stage"
+                                                    >
+                                                        <MenuItem value="">Select Stage</MenuItem>
+                                                        <MenuItem value="1">Stage 1</MenuItem>
+                                                        <MenuItem value="2">Stage 2</MenuItem>
+                                                        <MenuItem value="3">Stage 3</MenuItem>
+                                                        <MenuItem value="4">Stage 4</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hpv.batch_number} onChange={(e) => handleMetadataChange('dose_hpv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hpv.expire_date} onChange={(e) => handleMetadataChange('dose_hpv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
                                 )}
                             </Paper>
                         </Grid>
                     </Grid>
                 </CardContent>
             </Card>
+            )}
 
             <Card sx={{ mt: 3 }}>
                 <CardContent>
@@ -1049,24 +1479,26 @@ export default function VaccineAllocationStock() {
                 </CardContent>
             </Card>
 
-            {/* Submit Button */}
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                <Button
-                    variant="outlined"
-                    size="large"
-                    onClick={() => navigate('/vaccine-allocation-stock-page')}
-                >
-                    Cancel
-                </Button>
-                <Button
-                    variant="contained"
-                    size="large"
-                    onClick={handleSubmit}
-                    disabled={submitAllocation.isPending}
-                >
-                    {submitAllocation.isPending ? 'Submitting...' : 'Submit Allocation'}
-                </Button>
-            </Box>
+            {/* Submit Button - Only show in allocation mode */}
+            {!isViewMode && (
+                <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                    <Button
+                        variant="outlined"
+                        size="large"
+                        onClick={() => navigate('/vaccine-allocation-stock-page')}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        size="large"
+                        onClick={handleSubmit}
+                        disabled={submitAllocation.isPending}
+                    >
+                        {submitAllocation.isPending ? 'Submitting...' : 'Submit Allocation'}
+                    </Button>
+                </Box>
+            )}
         </Box>
     );
 }
