@@ -15,9 +15,13 @@ import {
   Autocomplete,
   TextField,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { useCreateAllocation, useFetchEHF, useFetchUHF } from 'src/hooks/apis/ehf/ehf-hooks';
-import { UHFType, VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
+import { useCreateAllocation } from 'src/hooks/apis/ehf/ehf-hooks';
+import { VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
+import { useFetchEHFDetailRoutes } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchUHFByEHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
+import { UHFType } from 'src/hooks/apis/ehf-uhf/uhf-type';
 import { toast } from 'react-toastify';
 import { v4 as uuidv4 } from 'uuid';
 import { validateMfaForSubmission } from 'src/utils/mfa-verification';
@@ -66,9 +70,11 @@ export default function VaccineView() {
   const { data: allocationData, isView = false, isUpdate = false } = location.state || {};
 
     const createAllocation = useCreateAllocation();
-    const { data: allEhf = [], isLoading: isEhfLoading } = useFetchEHF();
     const [selectedEhf, setSelectedEhf] = useState<number | null>(null);
-    const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHF(selectedEhf);
+    const [selectedEhfUniqueId, setSelectedEhfUniqueId] = useState<string | null>(null);
+
+    // Fetch UHF based on selected EHF's assigned_unique_id
+    const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHFByEHF(selectedEhfUniqueId);
     const [selectedUhf, setSelectedUhf] = useState<number | null>(null);
     const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
     const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
@@ -77,12 +83,92 @@ export default function VaccineView() {
 
   const userRole = sessionStorage.getItem('userRole') || '';
 
+  // Get user's assigned EHF list from sessionStorage
+  const userAssignedEhfs = useMemo(() => {
+    try {
+      const ehfListData = sessionStorage.getItem('ehf_list');
+      if (ehfListData) {
+        const parsed = JSON.parse(ehfListData);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      return [];
+    } catch (error) {
+      console.error('Error parsing ehf_list:', error);
+      return [];
+    }
+  }, []);
+
+  // For Conveyor/EHF/3PL roles, get the state from the assigned_unique_id prefix
+  const userStateFromAssignedId = useMemo(() => {
+    if ((userRole === 'conveyor' || userRole === 'ehf') && userAssignedEhfs.length > 0) {
+      const assignedId = userAssignedEhfs[0];
+      if (typeof assignedId === 'string' && assignedId.includes('-')) {
+        return assignedId.split('-')[0]; 
+      }
+    }
+    return null;
+  }, [userRole, userAssignedEhfs]);
+
+  // For SCS/SLWG/LCS roles, get state from their role list
+  const userStateFromRoleList = useMemo(() => {
+    const roleListMap: { [key: string]: string } = {
+      'scs': 'scs_list',
+      'slwg': 'slwg_list',
+      'lcs': 'lcs_list',
+    };
+
+    const listKey = roleListMap[userRole];
+    if (listKey) {
+      try {
+        const listData = sessionStorage.getItem(listKey);
+        if (listData) {
+          const parsed = JSON.parse(listData);
+          if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].state) {
+            return parsed[0].state;
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing role list:', error);
+      }
+    }
+    return null;
+  }, [userRole]);
+
+  const userState = userStateFromAssignedId || userStateFromRoleList;
+
+  // Fetch EHF data based on user's state
+  const { data: allEhf = [], isLoading: isEhfLoading } = useFetchEHFDetailRoutes(userState || '', '');
+
+  // Filter EHF based on user role
+  const filteredEhf = useMemo(() => {
+    // For Conveyor/EHF/3PL: only show their assigned EHF
+    if ((userRole === 'conveyor' || userRole === 'ehf' || userRole === 'threepl') && userAssignedEhfs.length > 0) {
+      const filtered = allEhf.filter((ehf: any) => userAssignedEhfs.includes(ehf.assigned_unique_id));
+      return filtered;
+    }
+
+    // For other roles: show all EHFs in their state
+    if (userState) {
+      const filtered = allEhf.filter((ehf: any) => ehf.state?.toUpperCase() === userState.toUpperCase());
+      return filtered;
+    }
+
+    // Default: show all
+    return allEhf;
+  }, [allEhf, userRole, userAssignedEhfs, userState]);
+
   useEffect(() => {
     if (allocationData && allocationData.vaccines_allocation_detail?.length > 0) {
       const firstDetail = allocationData.vaccines_allocation_detail[0];
       setSelectedEhf(firstDetail.ehf_id);
       setSelectedUhf(firstDetail.uhf_id);
       setStatus(Number(firstDetail.status) || 1);
+
+      // Find the EHF's assigned_unique_id to fetch UHF
+      const ehfData = allEhf.find((ehf: any) => ehf.id === firstDetail.ehf_id);
+      if (ehfData && ehfData.assigned_unique_id) {
+        setSelectedEhfUniqueId(ehfData.assigned_unique_id);
+      }
 
       const populatedFormData: Record<string, any> = {};
       allocationData.vaccines_allocation_detail.forEach((detail: any) => {
@@ -105,7 +191,7 @@ export default function VaccineView() {
         setSelectedTab(firstAvailableType.value);
       }
     }
-  }, [allocationData]);
+  }, [allocationData, allEhf]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setSelectedTab(newValue);
@@ -124,6 +210,7 @@ export default function VaccineView() {
 
   const handleEhfChange = (event: any, newValue: any) => {
         setSelectedEhf(newValue?.id || null);
+        setSelectedEhfUniqueId(newValue?.assigned_unique_id || null);
         setSelectedUhf(null);
     };
 
@@ -158,10 +245,16 @@ export default function VaccineView() {
         return;
       }
 
-      if (!selectedEhf || !selectedUhf) {
-        toast.error('Please select both EHF and UHF.');
+      if (!selectedEhf) {
+        toast.error('Please select EHF.');
         return;
       }
+
+      // Temporarily relaxed UHF requirement
+      // if (!selectedUhf) {
+      //   toast.error('Please select UHF.');
+      //   return;
+      // }
 
       if (Object.keys(formDataCollection).length === 0) {
         toast.error('Please fill out at least one vaccine form before submitting.');
@@ -173,51 +266,60 @@ export default function VaccineView() {
         return;
       }
 
-      const selectedUhfData = allUhf.find((uhf: UHFType) => uhf.id === selectedUhf);
-      if (!selectedUhfData) {
-        toast.error('Selected UHF not found. Please select a valid UHF.');
-        return;
+      // Skip UHF validation for Conveyor since they work directly with EHF
+      let selectedUhfData: UHFType | undefined;
+      if (userRole !== 'conveyor') {
+        selectedUhfData = allUhf.find((uhf: UHFType) => uhf.id === selectedUhf);
+        if (!selectedUhfData) {
+          toast.error('Selected UHF not found. Please select a valid UHF.');
+          return;
+        }
       }
 
       let newStatus = status;
-      if ((userRole === 'uhf' || userRole === 'threepl') && status === 1) {
-        newStatus = 2;
-      } else if (userRole === 'ehf' && status === 2) {
-        newStatus = 3;
-      } else if ((userRole === 'threepl' || userRole === 'conveyor') && status === 3) {
-        newStatus = 4;
-      } else if ((userRole === 'uhf' || userRole === 'threepl') && status === 4) {
-        newStatus = 5;
-      } else if ((userRole === 'conveyor' || userRole === 'threepl') && status === 5) {
-        newStatus = 6;
-      } else if (userRole === 'ehf' && status === 6) {
-        newStatus = 7;
+      // Conveyor enters data on behalf of EHF for both forward and reverse logistics
+      if (userRole === 'conveyor' && status === 1) {
+        newStatus = 6; // Forward: Conveyor allocates on behalf of EHF → jump to reverse logistics step
+      } else if (userRole === 'conveyor' && status === 6) {
+        newStatus = 7; // Reverse: Conveyor receives on behalf of EHF → completed
       }
 
       const request_id = isUpdate ? allocationData.vaccines_allocation_detail[0].request_id : uuidv4();
       const username = sessionStorage.getItem('username') || '';
 
+      // Get selected EHF data for Conveyor to extract state/lga
+      const selectedEhfData = filteredEhf.find((ehf: any) => ehf.id === selectedEhf);
+
       const vaccines_allocation_detail = Object.entries(formDataCollection)
-      .filter(([_, data]) => data && Object.keys(data).length > 0 && data.ehf_id && data.uhf_id)
+      .filter(([_, data]) => {
+        // For Conveyor, only require ehf_id. For others, require both ehf_id and uhf_id
+        if (userRole === 'conveyor') {
+          return data && Object.keys(data).length > 0 && data.ehf_id;
+        }
+        return data && Object.keys(data).length > 0 && data.ehf_id && data.uhf_id;
+      })
       .map(([type, data]) => {
-        const { status, ...allData } = data; 
+        const { status, ...allData } = data;
+
+        // For Conveyor, use EHF state/lga. For others, use UHF state/lga
+        const state = userRole === 'conveyor' ? (selectedEhfData?.state || '') : (selectedUhfData?.state || '');
+        const lga = userRole === 'conveyor' ? (selectedEhfData?.lga || '') : (selectedUhfData?.lga || '');
+
         return {
           type,
           request_id,
           status: newStatus,
           username,
           ehf_id: data.ehf_id,
-          uhf_id: data.uhf_id,
-          state: selectedUhfData.state || '',
-          lga: selectedUhfData.lga || '',
+          uhf_id: data.uhf_id || null,
+          state,
+          lga,
           ...allData,
         };
       });
 
 
       const payload: VaccineAllocationType = { vaccines_allocation_detail };
-
-      console.log('Payload being sent:', JSON.stringify(payload, null, 2));
 
       setStatus(newStatus);
 
@@ -229,11 +331,20 @@ export default function VaccineView() {
             setSelectedTab(vaccineOptions[0].value);
             setSelectedEhf(null);
             setSelectedUhf(null);
-            toast.success(
-              response?.status === 'success'
-                ? 'Vaccine Allocation Updated Successfully'
-                : response?.status || 'Vaccine Allocation Updated'
-            );
+
+            // Show different success message based on the new status
+            let successMessage = 'Vaccine Allocation Updated';
+            if (response?.status === 'success') {
+              if (newStatus === 6) {
+                successMessage = 'Vaccine Allocated Successfully';
+              } else if (newStatus === 7) {
+                successMessage = 'Vaccine Receipt Confirmed Successfully';
+              } else {
+                successMessage = 'Vaccine Allocation Updated Successfully';
+              }
+            }
+
+            toast.success(successMessage);
             navigate('/vaccine-allocation-page');
           },
           onError: (error: any) => {
@@ -256,10 +367,20 @@ export default function VaccineView() {
     return (
         <DashboardContent>
           <Container maxWidth="xl" sx={{ textAlign: 'left' }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: '1.25rem', mb: 2 }}>
-                Vaccine Products 
-                {/* (Status: {status}) */}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+                  Vaccine Products
+                  {/* (Status: {status}) */}
+              </Typography>
+              <Button
+                variant="text"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate(-1)}
+                sx={{ color: 'rgb(12, 125, 64)' }}
+              >
+                Back
+              </Button>
+            </Box>
 
             <Grid container spacing={2}>
                 <Grid item xs={3}>
@@ -317,9 +438,9 @@ export default function VaccineView() {
                       <Autocomplete
                           fullWidth
                           sx={{ mb: 2 }}
-                          options={allEhf}
-                          getOptionLabel={(option: any) => option.ehf_name || ''}
-                          value={allEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
+                          options={filteredEhf}
+                          getOptionLabel={(option: any) => option.name_of_ehf || option.ehf_name || ''}
+                          value={filteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
                           onChange={handleEhfChange}
                           disabled={isEhfLoading || isView || createAllocation.isPending || status > 1}
                           loading={isEhfLoading}
@@ -334,10 +455,10 @@ export default function VaccineView() {
                           renderOption={(props, option: any) => (
                               <Box component="li" {...props} key={option.id}>
                                   <Box>
-                                      <Typography variant="body1">{option.ehf_name}</Typography>
+                                      <Typography variant="body1">{option.name_of_ehf || option.ehf_name}</Typography>
                                       {option.state && (
                                           <Typography variant="caption" color="text.secondary">
-                                              State: {option.state}
+                                              State: {option.state} {option.assigned_unique_id ? `(${option.assigned_unique_id})` : ''}
                                           </Typography>
                                       )}
                                   </Box>
@@ -345,8 +466,10 @@ export default function VaccineView() {
                           )}
                           filterOptions={(options, { inputValue }) =>
                               options.filter((option: any) =>
+                                  option.name_of_ehf?.toLowerCase().includes(inputValue.toLowerCase()) ||
                                   option.ehf_name?.toLowerCase().includes(inputValue.toLowerCase()) ||
-                                  option.state?.toLowerCase().includes(inputValue.toLowerCase())
+                                  option.state?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                                  option.assigned_unique_id?.toLowerCase().includes(inputValue.toLowerCase())
                               )
                           }
                           noOptionsText="No EHF found"
@@ -372,8 +495,8 @@ export default function VaccineView() {
                             </FormControl>
                           ) : (
                             !isUhfLoading && (
-                              <Typography variant="body1" color="error" sx={{ mt: 2 }}>
-                                No UHF found for the selected EHF.
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                                No UHF available for this EHF.
                               </Typography>
                             )
                           )}
@@ -395,7 +518,7 @@ export default function VaccineView() {
                   )}
 
                   {/* MFA Code Input - Show when user needs to submit or update */}
-                  {!isView && isLastTab && selectedEhf && selectedUhf && (
+                  {!isView && isLastTab && selectedEhf && (userRole === 'conveyor' || selectedUhf) && (
                     <Box sx={{ mb: 3, width: "50%" }}>
                       <TextField
                         label="MFA Code"

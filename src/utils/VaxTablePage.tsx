@@ -40,6 +40,7 @@ interface VaxTableProps<TData extends MRT_RowData> {
   headerStyles?: SxProps<Theme>;
   showDownloadButton?: boolean;
   exportFileName?: string;
+  getRowStyles?: (row: TData) => SxProps<Theme>;
 }
 
 const VaxTable = <TData extends MRT_RowData>({
@@ -59,6 +60,7 @@ const VaxTable = <TData extends MRT_RowData>({
   headerStyles = {},
   showDownloadButton = true,
   exportFileName,
+  getRowStyles,
 }: VaxTableProps<TData>) => {
   const csvConfig = mkConfig({
     fieldSeparator: ',',
@@ -93,11 +95,12 @@ const VaxTable = <TData extends MRT_RowData>({
         ...headerStyles,
       },
     },
-    muiTableBodyRowProps: () => ({
+    muiTableBodyRowProps: ({ row }) => ({
       sx: {
         '&:hover': {
           bgcolor: 'rgba(12, 125, 64, 0.08)',
         },
+        ...(getRowStyles ? getRowStyles(row.original) : {}),
       },
     }),
     muiTableBodyCellProps: {

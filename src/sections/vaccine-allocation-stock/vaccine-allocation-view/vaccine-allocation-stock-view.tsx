@@ -615,6 +615,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_bopv && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_bopv - (parseInt(allocationData.dose_bopv) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_bopv) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -703,6 +708,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_penta && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_penta - (parseInt(allocationData.dose_penta) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_penta) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -791,6 +801,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_pcv && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_pcv - (parseInt(allocationData.dose_pcv) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_pcv) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -879,6 +894,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_ipv && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_ipv - (parseInt(allocationData.dose_ipv) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_ipv) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -967,6 +987,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_mea && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_mea - (parseInt(allocationData.dose_mea) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_mea) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -1055,6 +1080,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_yf && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_yf - (parseInt(allocationData.dose_yf) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_yf) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -1143,6 +1173,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_td && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_td - (parseInt(allocationData.dose_td) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_td) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -1231,6 +1266,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_mena && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_mena - (parseInt(allocationData.dose_mena) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_mena) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -1319,6 +1359,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_rota && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_rota - (parseInt(allocationData.dose_rota) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_rota) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
@@ -1407,6 +1452,11 @@ export default function VaccineAllocationStock() {
                                         }
                                     }}
                                 />
+                                {allocationData.dose_hpv && (
+                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                        Remaining: {stockData.dose_hpv - (parseInt(allocationData.dose_hpv) || 0)}
+                                    </Typography>
+                                )}
                                 {userRole === 'scs' && parseInt(allocationData.dose_hpv) > 0 && (
                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>

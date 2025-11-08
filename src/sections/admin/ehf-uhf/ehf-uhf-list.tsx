@@ -17,11 +17,14 @@ interface TableRow {
   state?: string;
   lga?: string;
   // ward?: string;
-  contact_person_name?: string;
-  contact_person_phone?: string;
-  contact_person_email?: string;
+  contact_person_name?: string | null;
+  contact_person_phone?: string | null;
+  contact_person_email?: string | null;
+  assigned_ehf_unique_id?: string;
   uhf_name?: string;
   ehf_name?: string;
+  longtitude?: string | null;
+  lagtitude?: string | null;
 }
 
 interface TabPanelProps {

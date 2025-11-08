@@ -100,11 +100,11 @@ const MenAAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = isEHF && status === 2 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = isEHF && status === 6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -143,7 +143,7 @@ const MenAAllocationComponent = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Typography
                 variant="subtitle1"
                 sx={{
@@ -223,7 +223,7 @@ const MenAAllocationComponent = ({
                   </Box>
                 </Grid>
               </Grid>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
               <Typography
                 variant="subtitle1"
@@ -305,7 +305,7 @@ const MenAAllocationComponent = ({
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Typography
                 variant="subtitle1"
                 sx={{
@@ -385,7 +385,7 @@ const MenAAllocationComponent = ({
                   </Box>
                 </Grid>
               </Grid>
-            </Grid>
+            </Grid> */}
           </Grid>
         </AccordionDetails>
       </Accordion>
@@ -408,7 +408,7 @@ const MenAAllocationComponent = ({
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Typography
                 variant="subtitle1"
                 sx={{
@@ -488,8 +488,8 @@ const MenAAllocationComponent = ({
                   </Box>
                 </Grid>
               </Grid>
-            </Grid>
-            <Grid item xs={12}>
+            </Grid> */}
+            {/* <Grid item xs={12}>
               <Typography
                 variant="subtitle1"
                 sx={{
@@ -569,7 +569,7 @@ const MenAAllocationComponent = ({
                   </Box>
                 </Grid>
               </Grid>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12}>
               <Typography
                 variant="subtitle1"

@@ -107,11 +107,14 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
   const handleVaccineChange = (index: number, field: string, value: string) => {
     const updatedVaccines = [...vaccines];
-    updatedVaccines[index] = { ...updatedVaccines[index], [field]: value };
+    // Convert 'received' field to number for proper comparison
+    const updatedValue = field === 'received' ? Number(value) || 0 : value;
+    updatedVaccines[index] = { ...updatedVaccines[index], [field]: updatedValue };
     setVaccines(updatedVaccines);
   };
 
   const validateForm = () => {
+
     // Only validate vaccines that have allocations > 0
     const allocatedVaccines = vaccines.filter(v => v.allocated > 0);
 
@@ -131,7 +134,9 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
   };
 
   const handleConfirm = () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     // Map vaccine names to field names
     const vaccineFieldMap: { [key: string]: string } = {
@@ -159,7 +164,9 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       const scsKey = scsKeys[idx];
 
       if (fieldName && scsKey) {
-        vaccineData[`dose_${fieldName}_received`] = v.received;
+        // CRITICAL: Ensure received is ALWAYS a number by parsing it
+        const receivedNumber = typeof v.received === 'string' ? parseInt(v.received, 10) : v.received;
+        vaccineData[`dose_${fieldName}_received`] = receivedNumber || 0;
 
         const originalValues = originalScsValues[scsKey as keyof typeof originalScsValues];
 
@@ -222,13 +229,32 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       mcco_mfa_code: mfaCode,
     };
 
-    // MCCO always sets status to 3 (Pending LCS Review)
-    // LCS will review and set to status 4 when complete
+    // Check if all received quantities match allocated quantities
+    // If ALL match → Status 4 (Completed)
+    // If ANY don't match → Status 3 (Pending LCS Review)
+    const hasDiscrepancies = vaccines.some(v => {
+      // Only check vaccines that have allocations
+      if (v.allocated > 0) {
+        // CRITICAL: Convert both to numbers for comparison
+        const allocatedNum = Number(v.allocated);
+        const receivedNum = typeof v.received === 'string' ? parseInt(v.received, 10) : Number(v.received);
+        const mismatch = receivedNum !== allocatedNum;
+        return mismatch;
+      }
+      return false;
+    });
+
+    const newStatus = hasDiscrepancies ? 3 : 4;
+    const successMessage = hasDiscrepancies
+      ? 'Deficit detected. Please transfer the deficit.'
+      : 'All vaccines received match allocation! Status: Completed.';
+
+
     updateStatusMutation.mutate(
-      { id: data.id, status: 3, data: updatePayload },
+      { id: data.id, status: newStatus, data: updatePayload },
       {
         onSuccess: () => {
-          toast.success('Vaccine receipt confirmed successfully! Pending LCS review.');
+          toast.success(successMessage);
           navigate('/vaccine-allocation-stock-page');
         },
         onError: () => {
@@ -242,8 +268,15 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     if (status === 0) return 'Pending SCS Confirmation';
     if (status === 1) return 'Pending 3PL Pickup';
     if (status === 2) return 'Pending MCCO Confirmation';
-    if (status === 3) return 'Pending LCS Review';
+    if (status === 3) return 'Deficit Pending for Return';
     if (status === 4) return 'Completed';
+    if (status === 5) {
+      // Dynamic label based on transfer type
+      const transferTo = data?.deficit_transfer_to;
+      if (transferTo === 'lcs') return 'Pending LCS Confirmation';
+      if (transferTo === 'ehf') return 'Pending EHF Confirmation';
+      return 'Pending Confirmation';
+    }
     return 'Unknown';
   };
 
@@ -328,7 +361,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
           </Typography>
 
           <Grid container spacing={3} sx={{ mt: 2 }}>
-            {allocatedVaccines.map((vaccine, index) => {
+            {allocatedVaccines.map((vaccine) => {
               const actualIndex = vaccines.findIndex(v => v.name === vaccine.name);
               return (
                 <Grid item xs={12} key={vaccine.name}>
@@ -420,7 +453,9 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
               variant="contained"
               size="large"
               startIcon={<CheckCircleOutlineIcon />}
-              onClick={handleConfirm}
+              onClick={() => {
+                handleConfirm();
+              }}
               disabled={updateStatusMutation.isPending}
               sx={{
                 background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',

@@ -116,6 +116,9 @@ export default function UserSetup() {
             case 'Mobile Cold Chain Officer':
               setSelectedItems(userData.ehf_list || []);
               break;
+            case 'Conveyor':
+              setSelectedItems(userData.ehf_list || []);
+              break;
             case 'Unequipped Health Facility':
               setSelectedItems(userData.uhf_list || []);
               break;
@@ -179,6 +182,7 @@ export default function UserSetup() {
         'Local Cold Chain Store',
         'Equipped Health Facility',
         'Mobile Cold Chain Officer',
+        'Conveyor',
         'Unequipped Health Facility',
         '3PL',
       ].includes(selectedRole) &&
@@ -290,6 +294,18 @@ export default function UserSetup() {
           return { label, value: threepl.id!.toString() };
         });
 
+    case 'Conveyor':
+      if (selectedStateId) {
+        const filteredEhfs = ehfs.filter((ehf) => {
+          return ehf.assigned_unique_id &&
+            ehf.state?.toLowerCase() === selectedStateId.toLowerCase();
+        });
+        return filteredEhfs.map((ehf) => ({ label: ehf.name_of_ehf, value: ehf.assigned_unique_id }));
+      }
+      return ehfs
+        .filter((ehf) => ehf.assigned_unique_id)
+        .map((ehf) => ({ label: ehf.name_of_ehf, value: ehf.assigned_unique_id }));
+
     case 'UNICEF':
       return [];
 
@@ -318,6 +334,8 @@ export default function UserSetup() {
         return 'Select Unequipped Health Facilities';
       case '3PL':
         return 'Select 3PLs';
+      case 'Conveyor':
+        return 'Select Equipped Health Facilities';
       case 'State Logistics Working Group':
         return 'Select Cold Chain Store';
       default:
@@ -327,7 +345,7 @@ export default function UserSetup() {
 
   const isEhfRole = () => {
     const selectedRole = roles.find((role) => role.id.toString() === selectedRoleId)?.name;
-    return selectedRole === 'Equipped Health Facility' || selectedRole === 'Mobile Cold Chain Officer';
+    return selectedRole === 'Equipped Health Facility' || selectedRole === 'Mobile Cold Chain Officer' || selectedRole === 'Conveyor';
   };
 
   const handleSubmit = () => {
@@ -346,7 +364,7 @@ export default function UserSetup() {
             ? [selectedScsId]
             : undefined,
         lcs_list: role.name === 'Local Cold Chain Store' && selectedItems.length > 0 ? selectedItems : undefined,
-        ehf_list: (role.name === 'Equipped Health Facility' || role.name === 'Mobile Cold Chain Officer') && selectedItems.length > 0 ? selectedItems : undefined,
+        ehf_list: (role.name === 'Equipped Health Facility' || role.name === 'Mobile Cold Chain Officer' || role.name === 'Conveyor') && selectedItems.length > 0 ? selectedItems : undefined,
         uhf_list: role.name === 'Unequipped Health Facility' && selectedItems.length > 0 ? selectedItems : undefined,
         user_permissions: role.permissions ? role.permissions.map((perm) => parseInt(perm, 10)) : [],
       };

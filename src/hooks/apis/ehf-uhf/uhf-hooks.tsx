@@ -16,8 +16,31 @@ export const useFetchUHF = () => {
                 `${url}v1/uhf/`
             )
             return response.data
-        } 
+        }
     })
+}
+
+// Fetch UHF by EHF's assigned_unique_id
+export const useFetchUHFByEHF = (ehfAssignedUniqueId: string | null) => {
+    return useQuery<UHFType[], Error>({
+        queryKey: ['uhf-by-ehf', ehfAssignedUniqueId],
+        queryFn: async () => {
+            if (!ehfAssignedUniqueId) return [];
+
+            try {
+                const response = await apiHelper.getResource<any>(
+                    `${url}v1/uhf/?assigned_ehf_unique_id=${ehfAssignedUniqueId}`
+                );
+                // Handle both response.data and direct response
+                const data = response.data || response;
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error('Error fetching UHF by EHF:', error);
+                return [];
+            }
+        },
+        enabled: !!ehfAssignedUniqueId,
+    });
 }
 
 export const useFetchStates = () => {

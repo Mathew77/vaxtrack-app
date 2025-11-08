@@ -92,8 +92,21 @@ const VaccineAllocationStockList: React.FC = () => {
 
   const userState = sessionStorage.getItem('userState') || null;
 
-  const { data: stockData = [] } = useFetchStockAtHand(userState);
-  const { data: allocatedData = [] } = useFetchAllocatedVaccines(userState);
+  // Parse userState if it's a JSON object
+  const parsedUserState = useMemo(() => {
+    if (!userState) return null;
+    try {
+      const parsed = JSON.parse(userState);
+      // If it's an object with a state property, return that, otherwise return the string
+      return parsed?.state || userState;
+    } catch {
+      // If it's not JSON, return as is
+      return userState;
+    }
+  }, [userState]);
+
+  const { data: stockData = [], isLoading: isStockLoading } = useFetchStockAtHand(parsedUserState);
+  const { data: allocatedData = [], isLoading: isAllocatedLoading } = useFetchAllocatedVaccines(parsedUserState);
   const { data: allUsers = [] } = useFetchUsers();
   const { data: allScs = [] } = useFetchScs();
   const { data: allLcs = [] } = useFetchLcs();
@@ -186,19 +199,35 @@ const VaccineAllocationStockList: React.FC = () => {
     return Array.from(new Set(lgas)).sort();
   }, [stockData, isSCS, isSLWG, isLCS, scsState, userStateList]);
 
-  // Filter stock data based on selected LGA and sort by ID ascending (oldest first)
+  // Filter stock data based on state (for SCS/SLWG users) and selected LGA, then sort by ID ascending (oldest first)
   const filteredStockData = useMemo(() => {
-    let data = selectedLGA ? stockData.filter((item) => item.lga === selectedLGA) : stockData;
+    let data = stockData;
+
+    // If user is SCS or SLWG, filter by state first
+    if ((isSCS || isSLWG) && scsState) {
+      data = stockData.filter((item) => item.state?.toUpperCase() === scsState.toUpperCase());
+    }
+
+    // Then filter by LGA if selected
+    if (selectedLGA) {
+      data = data.filter((item) => item.lga === selectedLGA);
+    }
+
     return [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
-  }, [stockData, selectedLGA]);
+  }, [stockData, selectedLGA, isSCS, isSLWG, scsState]);
 
 
-  // SCS users will only see allocations for EHFs in their state
+  // SCS and SLWG users will only see allocations for EHFs in their state
   const enrichedAllocatedData = useMemo(() => {
+    // Wait for stock data to load before enriching allocated data
+    if (isStockLoading || stockData.length === 0) {
+      return [];
+    }
+
     let filteredData = allocatedData;
 
-    // If user is SCS, filter by the state managed by this SCS facility
-    if (isSCS) {
+    // If user is SCS or SLWG, filter by the state managed by this SCS facility
+    if (isSCS || isSLWG) {
       // Filter based on the SCS facility's state (case-insensitive comparison)
       if (scsState) {
         filteredData = allocatedData.filter(allocation => {
@@ -226,12 +255,12 @@ const VaccineAllocationStockList: React.FC = () => {
         lga: stockInfo?.lga || 'N/A',
       };
     });
-  }, [allocatedData, stockData, isSCS, scsState]);
+  }, [allocatedData, stockData, isSCS, isSLWG, scsState, isStockLoading]);
 
-  // Filter allocated data based on selected LGA and sort by ID ascending
+  // Filter allocated data based on selected LGA and sort by ID descending (most recent first)
   const filteredAllocatedData = useMemo(() => {
     let data = selectedLGA ? enrichedAllocatedData.filter((item) => item.lga === selectedLGA) : enrichedAllocatedData;
-    return [...data].sort((a, b) => (a.id || 0) - (b.id || 0));
+    return [...data].sort((a, b) => (b.id || 0) - (a.id || 0));
   }, [enrichedAllocatedData, selectedLGA]);
 
 
@@ -271,21 +300,21 @@ const VaccineAllocationStockList: React.FC = () => {
         header: 'Ward',
         size: 120,
       },
-      {
-        accessorKey: 'phone_number',
-        header: 'Phone Number',
-        size: 130,
-      },
-      {
-        accessorKey: 'cce_count',
-        header: 'CCE Count',
-        size: 80,
-      },
-      {
-        accessorKey: 'cce_functionality_status',
-        header: 'CCE Status',
-        size: 120,
-      },
+      // {
+      //   accessorKey: 'phone_number',
+      //   header: 'Phone Number',
+      //   size: 130,
+      // },
+      // {
+      //   accessorKey: 'cce_count',
+      //   header: 'CCE Count',
+      //   size: 80,
+      // },
+      // {
+      //   accessorKey: 'cce_functionality_status',
+      //   header: 'CCE Status',
+      //   size: 120,
+      // },
       {
         accessorKey: 'dose_bcg',
         header: 'BCG',
@@ -460,6 +489,18 @@ const VaccineAllocationStockList: React.FC = () => {
     });
   };
 
+  const handleReturnDeficit = (data: any) => {
+    // Navigate to confirm view with Transfer Deficit section enabled
+    navigate('/vaccine-allocation-confirm-view', {
+      state: {
+        data: data,
+        userRole: userRole,
+        isView: false,
+        showTransferDeficit: true,
+      },
+    });
+  };
+
   const handleDeleteAllocation = (data: any) => {
     setAllocationToDelete(data);
     setDeleteDialogOpen(true);
@@ -549,10 +590,19 @@ const VaccineAllocationStockList: React.FC = () => {
       });
     }
 
+    // Show "Return Deficit" action if status = 3 (deficit pending for return)
+    if (row.status === 3) {
+      baseActions.push({
+        display: "Return Deficit",
+        handleClick: handleReturnDeficit,
+        icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+      });
+    }
+
     return baseActions;
   };
 
-  // Action items for LCS users - only show process returns if status = 3
+  // Action items for LCS users - show process returns for status 3 or 5
   const getLcsActionItems = (row: any): ActionMenuItem<any>[] => {
     const baseActions: ActionMenuItem<any>[] = [
       {
@@ -562,10 +612,17 @@ const VaccineAllocationStockList: React.FC = () => {
       },
     ];
 
-    // Only show process returns if status = 3 (pending LCS review)
+    // Show "Return to LCS" if status = 3 (deficit pending for return)
+    // Show "Confirm Return" if status = 5 (pending LCS confirmation)
     if (row.status === 3) {
       baseActions.push({
-        display: "Process Returns",
+        display: "Pending return confirmation",
+        handleClick: handleLcsReview,
+        icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+      });
+    } else if (row.status === 5) {
+      baseActions.push({
+        display: "Confirm Return",
         handleClick: handleLcsReview,
         icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
       });
@@ -625,9 +682,10 @@ const VaccineAllocationStockList: React.FC = () => {
   const allocatedColumns = useMemo(
     () => [
       {
-        accessorKey: 'id',
+        accessorKey: 'serial_no',
         header: 'S/N',
         size: 80,
+        enableSorting: false,
         Cell: ({ row }: any) => row.index + 1,
       },
       {
@@ -709,9 +767,10 @@ const VaccineAllocationStockList: React.FC = () => {
         accessorKey: 'status',
         header: 'Status',
         size: 200,
-        Cell: ({ cell }: any) => {
+        Cell: ({ cell, row }: any) => {
           const status = cell.getValue();
-          // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Pending LCS Review, 4 = Completed
+          const rowData = row.original;
+          // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Deficit Pending for Return, 4 = Completed, 5 = Pending Confirmation
           let label = 'Unknown';
           let color: 'warning' | 'success' | 'info' | 'default' = 'default';
           let shouldBlink = false;
@@ -729,13 +788,25 @@ const VaccineAllocationStockList: React.FC = () => {
             color = 'warning';
             shouldBlink = true;
           } else if (status === 3) {
-            label = 'Pending LCS Review';
+            label = 'Deficit Pending for Return';
             color = 'warning';
             shouldBlink = true;
           } else if (status === 4) {
             label = 'Completed';
             color = 'success';
             shouldBlink = false;
+          } else if (status === 5) {
+            // Dynamic label based on transfer type
+            const transferTo = rowData?.deficit_transfer_to;
+            if (transferTo === 'lcs') {
+              label = 'Pending LCS Confirmation';
+            } else if (transferTo === 'ehf') {
+              label = 'Pending EHF Confirmation';
+            } else {
+              label = 'Pending Confirmation';
+            }
+            color = 'warning';
+            shouldBlink = true;
           }
 
           return (
@@ -827,6 +898,18 @@ const VaccineAllocationStockList: React.FC = () => {
               customRightButtonCallBackFunction={handleAddNew}
               getActionMenuItems={getActionItems}
               showDownloadButton={true}
+              getRowStyles={(row: any) => {
+                // Highlight rows with deficit (status 3 or 5)
+                if (row.status === 3 || row.status === 5) {
+                  return {
+                    bgcolor: '#fff3e0', // Light orange background
+                    '&:hover': {
+                      bgcolor: '#ffe0b2 !important', // Slightly darker on hover
+                    },
+                  };
+                }
+                return {};
+              }}
             />
           </Box>
         </TabPanel>
@@ -838,6 +921,18 @@ const VaccineAllocationStockList: React.FC = () => {
             tableHeader="Vaccine Allocated"
             getActionMenuItems={getActionItems}
             showDownloadButton={true}
+            getRowStyles={(row: any) => {
+              // Highlight rows with deficit (status 3 or 5)
+              if (row.status === 3 || row.status === 5) {
+                return {
+                  bgcolor: '#fff3e0', // Light orange background
+                  '&:hover': {
+                    bgcolor: '#ffe0b2 !important', // Slightly darker on hover
+                  },
+                };
+              }
+              return {};
+            }}
           />
         </Box>
       )}

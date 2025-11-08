@@ -65,7 +65,7 @@ const VaccineAllocationList: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: allocationList = [] } = useFetchAllocation();
-  const { data: uhfList = [] } = useFetchUHF(null); 
+  const { data: uhfList = [] } = useFetchUHF(null);
   const deleteAllocation = useDeleteAllocation();
 
   const [value, setValue] = useState<number>(0);
@@ -73,14 +73,44 @@ const VaccineAllocationList: React.FC = () => {
   const userRole = sessionStorage.getItem('userRole');
 
   const isEHF = userRole === 'ehf';
-  const isThreePL = userRole === 'threepl'
+  const isThreePL = userRole === 'threepl';
+  const isConveyor = userRole === 'conveyor';
+
+  // Get Conveyor's state from ehf_list
+  const conveyorState = useMemo(() => {
+    if (!isConveyor) return null;
+    try {
+      const ehfListData = sessionStorage.getItem('ehf_list');
+      if (ehfListData) {
+        const ehfList = JSON.parse(ehfListData);
+        if (Array.isArray(ehfList) && ehfList.length > 0) {
+          const assignedId = ehfList[0];
+          if (typeof assignedId === 'string' && assignedId.includes('-')) {
+            return assignedId.split('-')[0]; 
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing conveyor state:', error);
+    }
+    return null;
+  }, [isConveyor]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   const transformedAllocationList: TableRow[] = useMemo(() => {
-  return allocationList.map((allocation: VaccineAllocationType) => {
+  return allocationList
+    .filter((allocation: VaccineAllocationType) => {
+      // Filter by state for Conveyor
+      if (isConveyor && conveyorState) {
+        const firstDetail = allocation.vaccines_allocation_detail?.[0];
+        return firstDetail?.state?.toUpperCase() === conveyorState.toUpperCase();
+      }
+      return true; // Show all for other roles
+    })
+    .map((allocation: VaccineAllocationType) => {
     if (
       !allocation.vaccines_allocation_detail ||
       !Array.isArray(allocation.vaccines_allocation_detail) ||
@@ -101,10 +131,10 @@ const VaccineAllocationList: React.FC = () => {
     const firstDetail = allocation.vaccines_allocation_detail[0];
 
     const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
-    let uhfName = firstDetail.uhf_name || 'Unknown UHF';
+    let uhfName = firstDetail.uhf_name || 'No UHF Available';
       if (!firstDetail.uhf_name) {
         const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
-        uhfName = uhf?.uhf_name || 'Unknown UHF';
+        uhfName = uhf?.uhf_name || 'No UHF Available';
       }
 
     return {
@@ -118,7 +148,7 @@ const VaccineAllocationList: React.FC = () => {
       status: firstDetail.status,
     };
   });
-}, [allocationList, uhfList]);
+}, [allocationList, uhfList, isConveyor, conveyorState]);
 
   interface DisplayStatus {
   [key: number]: string;
@@ -129,8 +159,8 @@ const VaccineAllocationList: React.FC = () => {
     3: "Vaccine allocated by EHF",
     4: "Quantity received from EHF by 3PL/conveyor",
     5: "Quantity return by UHF/3PL",
-    6: "Quantity return by 3PL/conveyor",
-    7: "Quantity recieved by EHF after supply (closed)"
+    6: "Quantity Allocated by EHF",
+    7: "Quantity Received by EHF"
   };
 
   interface EditAction {
@@ -142,12 +172,19 @@ const VaccineAllocationList: React.FC = () => {
     3: 'Approved by EHF',
     4: 'Received by 3PL/Conveyor',
     5: 'Return by UHF/3PL',
-    6: 'Confirm Returned by 3PL/Conveyor',
-    7: 'Receieved by EHF',
+    6: 'Allocated by EHF',
+    7: 'Received by EHF',
   };
 
   const columns = useMemo(
     () => [
+      {
+        accessorKey: "serial_no",
+        header: "S/N",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }: { row: any }) => row.index + 1,
+      },
       {
         accessorKey: "request_id",
         header: "Request ID",
@@ -159,7 +196,7 @@ const VaccineAllocationList: React.FC = () => {
         size: 200,
         Cell: ({ cell }: { cell: MRT_Cell<TableRow, unknown> }) => {
           const uhfName = cell.getValue() as string;
-          return uhfName || 'Unknown UHF';
+          return uhfName || 'No UHF Available';
         },
       },
       // {

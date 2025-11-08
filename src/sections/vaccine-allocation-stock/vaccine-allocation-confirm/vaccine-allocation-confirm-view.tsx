@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -19,19 +19,32 @@ import {
   Select,
   MenuItem,
   FormControl,
+  InputLabel,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { toast } from 'react-toastify';
 import { useUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
+import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
+import { useFetchStockAtHand } from 'src/hooks/apis/upload/upload-hook';
 
 const VaccineAllocationConfirmView: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { data, userRole, isView, confirmToEHF } = location.state || {};
+  const { data, userRole, isView, confirmToEHF, showTransferDeficit: showTransferDeficitProp } = location.state || {};
 
   const updateStatusMutation = useUpdateAllocationStatus();
+
+  // Fetch LCS and EHF data
+  const { data: allLcs = [] } = useFetchLcs();
+  const { data: allEhf = [] } = useFetchStockAtHand(null);
+
+  // Transfer Deficit state - Initialize from saved data if available
+  const [transferType, setTransferType] = useState<'lcs' | 'ehf' | ''>(data?.deficit_transfer_to || '');
+  const [selectedFacility, setSelectedFacility] = useState<string>(
+    data?.deficit_vaccine_location_id ? data.deficit_vaccine_location_id.toString() : ''
+  );
 
   const [vvmStages, setVvmStages] = useState({
     bcg: data?.bcg_vvm_stage_threepl || '',
@@ -52,6 +65,31 @@ const VaccineAllocationConfirmView: React.FC = () => {
     setVvmStages(prev => ({ ...prev, [vaccineKey]: value }));
   };
 
+  // Filter LCS by state
+  const lcsInState = useMemo(() => {
+    if (!data?.state) return [];
+    return allLcs.filter(lcs => lcs.stat_id?.toUpperCase() === data.state.toUpperCase());
+  }, [allLcs, data?.state]);
+
+  // Filter EHF by state
+  const ehfInState = useMemo(() => {
+    if (!data?.state) return [];
+    return allEhf.filter(ehf => ehf.state?.toUpperCase() === data.state.toUpperCase());
+  }, [allEhf, data?.state]);
+
+  // Get facilities based on transfer type
+  const facilitiesList = useMemo(() => {
+    if (transferType === 'lcs') return lcsInState;
+    if (transferType === 'ehf') return ehfInState;
+    return [];
+  }, [transferType, lcsInState, ehfInState]);
+
+  // Show Transfer Deficit section when explicitly passed via navigation state
+  const showTransferDeficit = showTransferDeficitProp === true;
+
+  // Check if transfer has already been confirmed (status = 5)
+  const isTransferConfirmed = data?.status === 5;
+
   if (!data) {
     return (
       <DashboardContent>
@@ -69,13 +107,20 @@ const VaccineAllocationConfirmView: React.FC = () => {
     );
   }
 
-  // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Pending LCS Review, 4 = Completed
+  // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Deficit Pending for Return, 4 = Completed, 5 = Pending Confirmation (LCS/EHF)
   const getStatusLabel = (status: number) => {
     if (status === 0) return 'Pending SCS Confirmation';
     if (status === 1) return 'Pending 3PL Pickup';
     if (status === 2) return 'Pending MCCO Confirmation';
-    if (status === 3) return 'Pending LCS Review';
+    if (status === 3) return 'Deficit Pending for Return';
     if (status === 4) return 'Completed';
+    if (status === 5) {
+      // Dynamic label based on transfer type
+      const transferTo = data?.deficit_transfer_to;
+      if (transferTo === 'lcs') return 'Pending LCS Confirmation';
+      if (transferTo === 'ehf') return 'Pending EHF Confirmation';
+      return 'Pending Confirmation';
+    }
     return 'Unknown';
   };
 
@@ -296,6 +341,122 @@ const VaccineAllocationConfirmView: React.FC = () => {
               </Typography>
             </Grid>
           </Grid>
+
+          {/* Transfer Deficit Section - Only for MCCO when viewing */}
+          {showTransferDeficit && (
+            <>
+              <Divider sx={{ my: 3 }} />
+
+              <Typography variant="h6" gutterBottom sx={{ color: 'rgb(12, 125, 64)', fontWeight: 600 }}>
+                Transfer Deficit
+              </Typography>
+
+              <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Transfer To</InputLabel>
+                    <Select
+                      value={transferType}
+                      onChange={(e) => {
+                        setTransferType(e.target.value as 'lcs' | 'ehf' | '');
+                        setSelectedFacility(''); // Reset facility selection when type changes
+                      }}
+                      label="Transfer To"
+                      disabled={isTransferConfirmed}
+                    >
+                      <MenuItem value="">
+                        <em>Select type</em>
+                      </MenuItem>
+                      <MenuItem value="lcs">LCS</MenuItem>
+                      <MenuItem value="ehf">EHF</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                {transferType && (
+                  <Grid item xs={12} md={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>
+                        {transferType === 'lcs' ? 'Select LCS' : 'Select EHF'}
+                      </InputLabel>
+                      <Select
+                        value={selectedFacility}
+                        onChange={(e) => setSelectedFacility(e.target.value)}
+                        label={transferType === 'lcs' ? 'Select LCS' : 'Select EHF'}
+                        disabled={isTransferConfirmed}
+                      >
+                        <MenuItem value="">
+                          <em>Select facility</em>
+                        </MenuItem>
+                        {facilitiesList.map((facility: any) => (
+                          <MenuItem
+                            key={facility.id}
+                            value={transferType === 'lcs' ? facility.id : facility.assigned_unique_id}
+                          >
+                            {transferType === 'lcs'
+                              ? `${facility.lcs_name || 'N/A'} - ${facility.lga_id || 'N/A'}`
+                              : `${facility.name_of_ehf || 'N/A'} - ${facility.lga || 'N/A'}`
+                            }
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                )}
+
+                {/* Show confirmation message if already confirmed */}
+                {isTransferConfirmed && (
+                  <Grid item xs={12}>
+                    <Box sx={{ p: 2, bgcolor: '#e8f5e9', borderRadius: 1, border: '1px solid #4caf50' }}>
+                      <Typography variant="body1" sx={{ color: '#2e7d32', fontWeight: 500 }}>
+                        ✓ Transfer confirmed to {transferType?.toUpperCase()}. Awaiting confirmation.
+                      </Typography>
+                    </Box>
+                  </Grid>
+                )}
+
+                {/* Confirm Transfer Button - Only show if not yet confirmed */}
+                {transferType && selectedFacility && !isTransferConfirmed && (
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        // Handle transfer confirmation
+                        const transferData = {
+                          ...data,
+                          deficit_transfer_to: transferType,
+                          deficit_vaccine_location_id: selectedFacility,
+                        };
+
+                        // Update status to show "Pending LCS Confirmation"
+                        updateStatusMutation.mutate(
+                          { id: data.id, status: 5, data: transferData },
+                          {
+                            onSuccess: () => {
+                              toast.success(`Transfer to ${transferType.toUpperCase()} confirmed successfully!`);
+                              navigate('/vaccine-allocation-stock-page');
+                            },
+                            onError: () => {
+                              toast.error('Failed to confirm transfer. Please try again.');
+                            },
+                          }
+                        );
+                      }}
+                      disabled={updateStatusMutation.isPending}
+                      sx={{
+                        background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                        },
+                      }}
+                    >
+                      {updateStatusMutation.isPending ? 'Confirming Transfer...' : 'Confirm Transfer'}
+                    </Button>
+                  </Grid>
+                )}
+              </Grid>
+            </>
+          )}
 
           <Divider sx={{ my: 3 }} />
 

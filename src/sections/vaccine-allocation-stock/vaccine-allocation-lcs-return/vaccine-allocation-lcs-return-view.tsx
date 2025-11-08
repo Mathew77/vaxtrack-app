@@ -252,8 +252,15 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
     if (status === 0) return 'Pending SCS Confirmation';
     if (status === 1) return 'Pending 3PL Pickup';
     if (status === 2) return 'Pending MCCO Confirmation';
-    if (status === 3) return 'Pending LCS Review';
+    if (status === 3) return 'Deficit Pending for Return';
     if (status === 4) return 'Completed';
+    if (status === 5) {
+      // Dynamic label based on transfer type
+      const transferTo = data?.deficit_transfer_to;
+      if (transferTo === 'lcs') return 'Pending LCS Confirmation';
+      if (transferTo === 'ehf') return 'Pending EHF Confirmation';
+      return 'Pending Confirmation';
+    }
     return 'Unknown';
   };
 
@@ -334,11 +341,11 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="h6" gutterBottom color="error">
-            Vaccines with Discrepancies
+            Deficit Vaccines
           </Typography>
           <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 2 }}>
             The following vaccines have a difference between allocated and received amounts.
-            Please enter the number of vaccines returned to LCS.
+            Please enter the number of vaccines returned.
           </Typography>
 
           {vaccinesWithDiscrepancy.length === 0 ? (

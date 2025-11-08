@@ -51,6 +51,7 @@ export default function UhfSetup() {
     contact_person_name: '',
     contact_person_phone: '',
     contact_person_email: '',
+    assigned_ehf_unique_id: '',
   };
 
   const [data, setData] = useState<UHFType>(initialValues);

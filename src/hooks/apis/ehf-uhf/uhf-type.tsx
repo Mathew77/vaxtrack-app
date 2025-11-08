@@ -1,15 +1,20 @@
 export interface UHFType {
     id?: number;
-    status: string;
+    status?: string;
     state: string;
     lga: string;
-    // ward?: string; 
-    contact_person_name: string;
-    contact_person_phone: string;
-    contact_person_email: string;
+    // ward?: string;
+    contact_person_name: string | null;
+    contact_person_phone: string | null;
+    contact_person_email: string | null;
+    assigned_ehf_unique_id: string;
     uhf_name: string;
-    longtitude: string;
-    lagtitude: string;
+    longtitude: string | null;
+    lagtitude: string | null;
+    created_by?: string;
+    created_date?: string;
+    modify_by?: string | null;
+    modify_date?: string;
 }
 
 export interface StateType {
