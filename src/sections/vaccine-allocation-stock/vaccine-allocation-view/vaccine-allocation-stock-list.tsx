@@ -310,11 +310,6 @@ const VaccineAllocationStockList: React.FC = () => {
       //   header: 'CCE Count',
       //   size: 80,
       // },
-      // {
-      //   accessorKey: 'cce_functionality_status',
-      //   header: 'CCE Status',
-      //   size: 120,
-      // },
       {
         accessorKey: 'dose_bcg',
         header: 'BCG',
@@ -374,6 +369,16 @@ const VaccineAllocationStockList: React.FC = () => {
         accessorKey: 'dose_hpv',
         header: 'HPV',
         size: 80,
+      },
+      {
+        accessorKey: 'cce_functionality_status',
+        header: 'CCE Status',
+        size: 120,
+      },
+      {
+        accessorKey: 'cce_model',
+        header: 'CCE Model',
+        size: 120,
       },
       {
         accessorKey: 'total_vaccine_storage_volume_utilized',

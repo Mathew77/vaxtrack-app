@@ -261,7 +261,7 @@ const VaccineStockTable = () => {
                         title={
                           <Box sx={{ p: 0.5 }}>
                             <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>{vaccine}</Typography>
-                            <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>Actual: {formatNumber(actualValue)}</Typography>
+                            <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>Maximum: {formatNumber(actualValue)}</Typography>
                             <Typography variant="caption" sx={{ display: 'block' }}>Allocated: {formatNumber(allocatedValue)}</Typography>
                             <Typography variant="caption" sx={{ display: 'block' }}>Percentage: {percentage}%</Typography>
                             <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
@@ -333,7 +333,7 @@ const VaccineStockTable = () => {
                           title={
                             <Box sx={{ p: 0.5 }}>
                               <Typography variant="caption" sx={{ fontWeight: 600, display: 'block' }}>{vaccine} - {facility.name_of_ehf}</Typography>
-                              <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>Actual: {formatNumber(actualValue)}</Typography>
+                              <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>Maximum: {formatNumber(actualValue)}</Typography>
                               <Typography variant="caption" sx={{ display: 'block' }}>Allocated: {formatNumber(allocatedValue)}</Typography>
                               <Typography variant="caption" sx={{ display: 'block' }}>Percentage: {percentage}%</Typography>
                               <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>

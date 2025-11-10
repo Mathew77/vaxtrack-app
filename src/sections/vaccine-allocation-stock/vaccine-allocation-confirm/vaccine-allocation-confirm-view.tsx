@@ -71,11 +71,14 @@ const VaccineAllocationConfirmView: React.FC = () => {
     return allLcs.filter(lcs => lcs.stat_id?.toUpperCase() === data.state.toUpperCase());
   }, [allLcs, data?.state]);
 
-  // Filter EHF by state
+  // Filter EHF by state and LGA
   const ehfInState = useMemo(() => {
     if (!data?.state) return [];
-    return allEhf.filter(ehf => ehf.state?.toUpperCase() === data.state.toUpperCase());
-  }, [allEhf, data?.state]);
+    return allEhf.filter(ehf =>
+      ehf.state?.toUpperCase() === data.state.toUpperCase() &&
+      ehf.lga?.toUpperCase() === data.lga?.toUpperCase()
+    );
+  }, [allEhf, data?.state, data?.lga]);
 
   // Get facilities based on transfer type
   const facilitiesList = useMemo(() => {
