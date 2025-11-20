@@ -15,6 +15,9 @@ export interface YfAllocationData {
   yfDiluentReceived: string;
   yf05mlSyringeReceived: string;
   yf5mlSyringeReceived: string;
+  yfEmptyVials: string;
+  yfSafetyBoxes: string;
+  yfUnusedVials: string;
   yfVaccineConveyorDelivered: string;
   yfDiluentConveyorDelivered: string;
   yf05mlSyringeConveyorDelivered: string;

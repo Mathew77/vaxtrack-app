@@ -7,6 +7,9 @@ export interface PentaAllocationData {
   penta05mlSyringeReturned: string;
   pentaVaccineReceived: string;
   penta05mlSyringeReceived: string;
+  pentaEmptyVials: string;
+  pentaSafetyBoxes: string;
+  pentaUnusedVials: string;
   pentaVaccineConveyorDelivered: string;
   penta05mlSyringeConveyorDelivered: string;
   pentaVaccineConveyorReturned: string;

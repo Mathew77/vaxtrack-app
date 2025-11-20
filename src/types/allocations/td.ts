@@ -7,6 +7,9 @@ export interface TdAllocationData {
   td05mlSyringeReturned: string;
   tdVaccineReceived: string;
   td05mlSyringeReceived: string;
+  tdEmptyVials: string;
+  tdSafetyBoxes: string;
+  tdUnusedVials: string;
   tdVaccineConveyorDelivered: string;
   td05mlSyringeConveyorDelivered: string;
   tdVaccineConveyorReturned: string;

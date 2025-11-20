@@ -7,6 +7,9 @@ export interface HepBAllocationData {
   hepB05mlSyringeReturned: string;
   hepBVaccineReceived: string;
   hepB05mlSyringeReceived: string;
+  hepBEmptyVials: string;
+  hepBSafetyBoxes: string;
+  hepBUnusedVials: string;
   hepBVaccineConveyorDelivered: string;
   hepB05mlSyringeConveyorDelivered: string;
   hepBVaccineConveyorReturned: string;

@@ -15,6 +15,9 @@ export interface BcgAllocationData {
   bcgDiluentReceived: string;
   bcg005mlSyringeReceived: string;
   bcg2mlSyringeReceived: string;
+  bcgEmptyVials: string;
+  bcgSafetyBoxes: string;
+  bcgUnusedVials: string;
   bcgVaccineConveyorDelivered: string;
   bcgDiluentConveyorDelivered: string;
   bcg005mlSyringeConveyorDelivered: string;

@@ -7,6 +7,9 @@ export interface HpvAllocationData {
   hpv05mlSyringeReturned: string;
   hpvVaccineReceived: string;
   hpv05mlSyringeReceived: string;
+  hpvEmptyVials: string;
+  hpvSafetyBoxes: string;
+  hpvUnusedVials: string;
   hpvVaccineConveyorDelivered: string;
   hpv05mlSyringeConveyorDelivered: string;
   hpvVaccineConveyorReturned: string;

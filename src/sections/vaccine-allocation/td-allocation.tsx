@@ -32,6 +32,9 @@ const TdAllocationComponent = ({
     td05mlSyringeReturned: '',
     tdVaccineReceived: '',
     td05mlSyringeReceived: '',
+    tdEmptyVials: '',
+    tdSafetyBoxes: '',
+    tdUnusedVials: '',
     tdVaccineConveyorDelivered: '',
     td05mlSyringeConveyorDelivered: '',
     tdVaccineConveyorReturned: '',
@@ -441,6 +444,54 @@ const TdAllocationComponent = ({
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
                       type='number'
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Empty Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="tdEmptyVials"
+                      value={formData.tdEmptyVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Safety Boxes</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="tdSafetyBoxes"
+                      value={formData.tdSafetyBoxes}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Unused Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="tdUnusedVials"
+                      value={formData.tdUnusedVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
                     />
                   </Box>
                 </Grid>

@@ -153,7 +153,7 @@ type ApiResponse<T> = {
       mutationFn: (id: number) =>
         apiHelper.deleteResource<void>(`${url}v1/vaccine-allocation/${id}/`),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['vaccine'] });
+        queryClient.invalidateQueries({ queryKey: ['vaccine-allocations'] });
       },
     });
   }

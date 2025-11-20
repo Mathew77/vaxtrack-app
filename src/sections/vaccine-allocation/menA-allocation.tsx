@@ -40,6 +40,9 @@ const MenAAllocationComponent = ({
     menADiluentReceived: '',
     menA05mlSyringeReceived: '',
     menA5mlSyringeReceived: '',
+    menAEmptyVials: '',
+    menASafetyBoxes: '',
+    menAUnusedVials: '',
     menAVaccineConveyorDelivered: '',
     menADiluentConveyorDelivered: '',
     menA05mlSyringeConveyorDelivered: '',
@@ -641,6 +644,54 @@ const MenAAllocationComponent = ({
                       variant="outlined"
                       name="menA5mlSyringeReceived"
                       value={formData.menA5mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Empty Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAEmptyVials"
+                      value={formData.menAEmptyVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Safety Boxes</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menASafetyBoxes"
+                      value={formData.menASafetyBoxes}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Unused Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="menAUnusedVials"
+                      value={formData.menAUnusedVials}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}

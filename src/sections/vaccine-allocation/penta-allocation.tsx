@@ -32,6 +32,9 @@ const PentaAllocationComponent = ({
     penta05mlSyringeReturned: '',
     pentaVaccineReceived: '',
     penta05mlSyringeReceived: '',
+    pentaEmptyVials: '',
+    pentaSafetyBoxes: '',
+    pentaUnusedVials: '',
     pentaVaccineConveyorDelivered: '',
     penta05mlSyringeConveyorDelivered: '',
     pentaVaccineConveyorReturned: '',
@@ -437,6 +440,54 @@ const PentaAllocationComponent = ({
                       variant="outlined"
                       name="penta05mlSyringeReceived"
                       value={formData.penta05mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Empty Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="pentaEmptyVials"
+                      value={formData.pentaEmptyVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Safety Boxes</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="pentaSafetyBoxes"
+                      value={formData.pentaSafetyBoxes}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Unused Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="pentaUnusedVials"
+                      value={formData.pentaUnusedVials}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}

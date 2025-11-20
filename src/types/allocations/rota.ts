@@ -7,6 +7,9 @@ export interface RotaAllocationData {
   rotaDropperReturned: string;
   rotaVaccineReceived: string;
   rotaDropperReceived: string;
+  rotaEmptyVials: string;
+  rotaSafetyBoxes: string;
+  rotaUnusedVials: string;
   rotaVaccineConveyorDelivered: string;
   rotaDropperConveyorDelivered: string;
   rotaVaccineConveyorReturned: string;

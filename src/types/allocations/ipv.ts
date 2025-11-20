@@ -7,6 +7,9 @@ export interface IpvAllocationData {
   ipv05mlSyringeReturned: string;
   ipvVaccineReceived: string;
   ipv05mlSyringeReceived: string;
+  ipvEmptyVials: string;
+  ipvSafetyBoxes: string;
+  ipvUnusedVials: string;
   ipvVaccineConveyorDelivered: string;
   ipv05mlSyringeConveyorDelivered: string;
   ipvVaccineConveyorReturned: string;

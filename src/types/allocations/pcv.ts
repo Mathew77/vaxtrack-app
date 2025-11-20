@@ -7,6 +7,9 @@ export interface PcvAllocationData {
   pcv05mlSyringeReturned: string;
   pcvVaccineReceived: string;
   pcv05mlSyringeReceived: string;
+  pcvEmptyVials: string;
+  pcvSafetyBoxes: string;
+  pcvUnusedVials: string;
   pcvVaccineConveyorDelivered: string;
   pcv05mlSyringeConveyorDelivered: string;
   pcvVaccineConveyorReturned: string;

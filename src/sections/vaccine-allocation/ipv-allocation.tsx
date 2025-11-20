@@ -32,6 +32,9 @@ const IpvAllocationComponent = ({
     ipv05mlSyringeReturned: '',
     ipvVaccineReceived: '',
     ipv05mlSyringeReceived: '',
+    ipvEmptyVials: '',
+    ipvSafetyBoxes: '',
+    ipvUnusedVials: '',
     ipvVaccineConveyorDelivered: '',
     ipv05mlSyringeConveyorDelivered: '',
     ipvVaccineConveyorReturned: '',
@@ -437,6 +440,54 @@ const IpvAllocationComponent = ({
                       variant="outlined"
                       name="ipv05mlSyringeReceived"
                       value={formData.ipv05mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Empty Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="ipvEmptyVials"
+                      value={formData.ipvEmptyVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Safety Boxes</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="ipvSafetyBoxes"
+                      value={formData.ipvSafetyBoxes}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Unused Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="ipvUnusedVials"
+                      value={formData.ipvUnusedVials}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}

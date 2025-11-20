@@ -15,6 +15,9 @@ export interface MeaslesAllocationData {
   measlesDiluentReceived: string;
   measles05mlSyringeReceived: string;
   measles2mlSyringeReceived: string;
+  measlesEmptyVials: string;
+  measlesSafetyBoxes: string;
+  measlesUnusedVials: string;
   measlesVaccineConveyorDelivered: string;
   measlesDiluentConveyorDelivered: string;
   measles05mlSyringeConveyorDelivered: string;

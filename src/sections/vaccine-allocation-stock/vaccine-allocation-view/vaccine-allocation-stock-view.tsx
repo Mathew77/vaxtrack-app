@@ -7,6 +7,7 @@ import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { toast } from 'react-toastify';
+import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 
 interface AllocationData {
     dose_bcg: number;
@@ -402,6 +403,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_bcg}
                                     onChange={(e) => handleInputChange('dose_bcg', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_bcg }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -511,6 +513,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_hepb}
                                     onChange={(e) => handleInputChange('dose_hepb', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_hepb }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -604,6 +607,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_bopv}
                                     onChange={(e) => handleInputChange('dose_bopv', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_bopv }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -697,6 +701,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_penta}
                                     onChange={(e) => handleInputChange('dose_penta', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_penta }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -790,6 +795,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_pcv}
                                     onChange={(e) => handleInputChange('dose_pcv', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_pcv }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -883,6 +889,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_ipv}
                                     onChange={(e) => handleInputChange('dose_ipv', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_ipv }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -976,6 +983,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_mea}
                                     onChange={(e) => handleInputChange('dose_mea', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_mea }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -1069,6 +1077,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_yf}
                                     onChange={(e) => handleInputChange('dose_yf', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_yf }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -1162,6 +1171,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_td}
                                     onChange={(e) => handleInputChange('dose_td', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_td }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -1255,6 +1265,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_mena}
                                     onChange={(e) => handleInputChange('dose_mena', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_mena }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -1348,6 +1359,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_rota}
                                     onChange={(e) => handleInputChange('dose_rota', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_rota }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{
@@ -1441,6 +1453,7 @@ export default function VaccineAllocationStock() {
                                     label="Quantity to Allocate"
                                     value={allocationData.dose_hpv}
                                     onChange={(e) => handleInputChange('dose_hpv', e.target.value)}
+                                    onKeyDown={preventInvalidKeys}
                                     inputProps={{ min: 0, max: stockData.dose_hpv }}
                                     placeholder="Enter quantity to allocate"
                                     sx={{

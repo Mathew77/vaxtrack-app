@@ -15,6 +15,9 @@ export interface MenAAllocationData {
   menADiluentReceived: string;
   menA05mlSyringeReceived: string;
   menA5mlSyringeReceived: string;
+  menAEmptyVials: string;
+  menASafetyBoxes: string;
+  menAUnusedVials: string;
   menAVaccineConveyorDelivered: string;
   menADiluentConveyorDelivered: string;
   menA05mlSyringeConveyorDelivered: string;

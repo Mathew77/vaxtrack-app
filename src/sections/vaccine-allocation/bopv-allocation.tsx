@@ -32,6 +32,9 @@ const BopvAllocationComponent = ({
     bopvDropperReturned: '',
     bopvVaccineReceived: '',
     bopvDropperReceived: '',
+    bopvEmptyVials: '',
+    bopvSafetyBoxes: '',
+    bopvUnusedVials: '',
     bopvVaccineConveyorDelivered: '',
     bopvDropperConveyorDelivered: '',
     bopvVaccineConveyorReturned: '',
@@ -437,6 +440,54 @@ const BopvAllocationComponent = ({
                       variant="outlined"
                       name="bopvDropperReceived"
                       value={formData.bopvDropperReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Empty Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bopvEmptyVials"
+                      value={formData.bopvEmptyVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Safety Boxes</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bopvSafetyBoxes"
+                      value={formData.bopvSafetyBoxes}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Unused Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="bopvUnusedVials"
+                      value={formData.bopvUnusedVials}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}

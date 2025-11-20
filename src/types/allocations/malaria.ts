@@ -15,6 +15,9 @@ export interface MalariaAllocationData {
   malariaDiluentReceived: string;
   malaria05mlSyringeReceived: string;
   malaria2mlSyringeReceived: string;
+  malariaEmptyVials: string;
+  malariaSafetyBoxes: string;
+  malariaUnusedVials: string;
   malariaVaccineConveyorDelivered: string;
   malariaDiluentConveyorDelivered: string;
   malaria05mlSyringeConveyorDelivered: string;

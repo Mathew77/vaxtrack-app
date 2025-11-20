@@ -7,6 +7,9 @@ export interface BopvAllocationData {
   bopvDropperReturned: string;
   bopvVaccineReceived: string;
   bopvDropperReceived: string;
+  bopvEmptyVials: string;
+  bopvSafetyBoxes: string;
+  bopvUnusedVials: string;
   bopvVaccineConveyorDelivered: string;
   bopvDropperConveyorDelivered: string;
   bopvVaccineConveyorReturned: string;

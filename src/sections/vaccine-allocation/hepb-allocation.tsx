@@ -32,6 +32,9 @@ const HepBAllocationComponent = ({
     hepB05mlSyringeReturned: '',
     hepBVaccineReceived: '',
     hepB05mlSyringeReceived: '',
+    hepBEmptyVials: '',
+    hepBSafetyBoxes: '',
+    hepBUnusedVials: '',
     hepBVaccineConveyorDelivered: '',
     hepB05mlSyringeConveyorDelivered: '',
     hepBVaccineConveyorReturned: '',
@@ -437,6 +440,54 @@ const HepBAllocationComponent = ({
                       variant="outlined"
                       name="hepB05mlSyringeReceived"
                       value={formData.hepB05mlSyringeReceived}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Empty Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBEmptyVials"
+                      value={formData.hepBEmptyVials}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Safety Boxes</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBSafetyBoxes"
+                      value={formData.hepBSafetyBoxes}
+                      onChange={handleChange}
+                      disabled={isView || !canEditEHFReceived}
+                      required={canEditEHFReceived}
+                      type='number'
+                      onKeyDown={preventInvalidKeys}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Typography>Unused Vials</Typography>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      name="hepBUnusedVials"
+                      value={formData.hepBUnusedVials}
                       onChange={handleChange}
                       disabled={isView || !canEditEHFReceived}
                       required={canEditEHFReceived}
