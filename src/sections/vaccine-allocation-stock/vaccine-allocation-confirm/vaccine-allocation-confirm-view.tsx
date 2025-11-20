@@ -516,7 +516,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                 <TableHead>
                   <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                     <TableCell><strong>Vaccine</strong></TableCell>
-                    <TableCell><strong>Stock Upload</strong></TableCell>
+                    <TableCell><strong>Maximum Stock</strong></TableCell>
                     <TableCell><strong>Vaccine Allocated</strong></TableCell>
                     {/* Commented out VVM Stage (3PL) column */}
                     {/* {show3PLVvmView && (

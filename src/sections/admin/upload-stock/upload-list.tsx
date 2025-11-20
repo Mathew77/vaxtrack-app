@@ -238,7 +238,7 @@ const UploadList: React.FC = () => {
         textColor="primary"
         aria-label="scrollable force tabs"
       >
-        <Tab style={{ textTransform: 'none' }} label="Stock Upload" {...a11yProps(0)} />
+        <Tab style={{ textTransform: 'none' }} label="Maximum Stock" {...a11yProps(0)} />
         
       </Tabs>
 
@@ -247,10 +247,10 @@ const UploadList: React.FC = () => {
           <VaxTable
             columns={uploadColumns}
             data={stockData}
-            tableHeader="Stock Upload"
+            tableHeader="Maximum Stock"
             customRightButton
             customRightButtonIcon={<CloudUploadOutlinedIcon />}
-            customRightButtonText="Stock Upload"
+            customRightButtonText="Maximum Stock"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uploadActionItems}
             showDownloadButton={false}

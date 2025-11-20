@@ -71,7 +71,7 @@ const VaccineAllocationStockList: React.FC = () => {
   const isMCCO = userRole === 'mcco' || userRole === 'conveyor'; // Support both role names
   const isLCS = userRole === 'lcs';
 
-  // SCS can see Stock Upload tab to allocate, SLWG can see to view only
+  // SCS can see Maximum Stock tab to allocate, SLWG can see to view only
   const showStockAtHandTab = isSLWG || isSCS;
 
   const userScsList = useMemo(() => {
@@ -842,7 +842,7 @@ const VaccineAllocationStockList: React.FC = () => {
           textColor="primary"
           aria-label="scrollable force tabs"
         >
-          <Tab style={{ textTransform: 'none' }} label="Stock Upload" {...a11yProps(0)} />
+          <Tab style={{ textTransform: 'none' }} label="Maximum Stock" {...a11yProps(0)} />
           <Tab style={{ textTransform: 'none' }} label="Vaccine Allocated" {...a11yProps(1)} />
         </Tabs>
       )}
@@ -874,14 +874,14 @@ const VaccineAllocationStockList: React.FC = () => {
         </Box>
       )}
 
-      {/* Show Stock Upload tab only for SLWG */}
+      {/* Show Maximum Stock tab only for SLWG */}
       {showStockAtHandTab && (
         <TabPanel value={value} index={0}>
           <Box>
             <VaxTable
               columns={stockColumns}
               data={filteredStockData}
-              tableHeader="Stock Upload"
+              tableHeader="Maximum Stock"
               customRightButtonText=""
               customRightButtonCallBackFunction={handleAddNew}
               actionMenuItems={stockActionItems}

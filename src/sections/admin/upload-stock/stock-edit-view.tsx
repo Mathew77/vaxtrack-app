@@ -91,7 +91,7 @@ export default function StockEditView() {
       setSuccess('Stock data updated successfully!');
 
       setTimeout(() => {
-        navigate('/upload-stock');
+        navigate('/maximum-stock');
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'Failed to update stock data');
@@ -114,7 +114,7 @@ export default function StockEditView() {
         <Typography variant="h5">
           {isView ? 'View' : isUpdate ? 'Edit' : ''} Stock Data - {stockData.name_of_ehf}
         </Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/upload-stock')}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/maximum-stock')}>
           Back
         </Button>
       </Box>

@@ -290,7 +290,7 @@ export function Router() {
         {path: 'vaccine-allocation-lcs-return', element: <VaccineAllocationLcsReturnPage />},
 
         { path: 'report', element: <ReportForms />},
-         { path: 'upload-stock', element: <UploadPage />},
+         { path: 'maximum-stock', element: <UploadPage />},
          { path: 'upload-view', element: <UploadView />},
          { path: 'stock-edit-view', element: <StockEditView />},
 

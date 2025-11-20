@@ -11,6 +11,7 @@ import {
   Paper,
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useUploadStockData } from 'src/hooks/apis/upload/upload-hook';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,11 +40,11 @@ export default function UploadView() {
 
     uploadMutation.mutate(selectedFile, {
       onSuccess: (data: any) => {
-        navigate('/upload-stock', { 
-            state: { 
+        navigate('/maximum-stock', {
+            state: {
             uploadResponse: data,
             showSuccessMessage: `Successfully processed ${data.rows_processed} rows. Created: ${data.created}, Updated: ${data.updated}${data.errors.length > 0 ? `, Errors: ${data.errors.length}` : ''}`
-            } 
+            }
         });
       },
       onError: (error: any) => {
@@ -68,9 +69,14 @@ export default function UploadView() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Upload Stock Data
-      </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+        <Typography variant="h4">
+          Maximum Stock Upload
+        </Typography>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/maximum-stock')}>
+          Back
+        </Button>
+      </Box>
 
       <Card>
         <CardContent>

@@ -225,8 +225,8 @@ export const navData = [
   //   roles: ['threepl'],
   // },
   {
-    title: 'Stock Upload',
-    path: '/upload-stock',
+    title: 'Maximum Stock',
+    path: '/maximum-stock',
     icon: icon('ic-lock'),
     roles: ['admin'],
   },
