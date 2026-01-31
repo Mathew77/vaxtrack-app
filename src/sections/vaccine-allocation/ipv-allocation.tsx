@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -60,6 +60,16 @@ const IpvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Validate IPV fields - max 10
+    // Exclude non-quantity fields like ipvEmptyVials, ipvSafetyBoxes, ipvUnusedVials
+    const excludedIpvFields = ['ipvEmptyVials', 'ipvSafetyBoxes', 'ipvUnusedVials'];
+    if (name.startsWith('ipv') && !excludedIpvFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 10) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -201,33 +211,39 @@ const IpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="ipvVaccineAllocated"
-                      value={formData.ipvVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter IPV vaccine quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="ipvVaccineAllocated"
+                        value={formData.ipvVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="ipv05mlSyringeAllocated"
-                      value={formData.ipv05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter IPV 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="ipv05mlSyringeAllocated"
+                        value={formData.ipv05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,33 +435,39 @@ const IpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="ipvVaccineReceived"
-                      value={formData.ipvVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter IPV vaccine quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="ipvVaccineReceived"
+                        value={formData.ipvVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="ipv05mlSyringeReceived"
-                      value={formData.ipv05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter IPV 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="ipv05mlSyringeReceived"
+                        value={formData.ipv05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -60,6 +60,16 @@ const BopvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Validate bOPV fields - max 20
+    // Exclude non-quantity fields like bopvEmptyVials, bopvSafetyBoxes, bopvUnusedVials
+    const excludedBopvFields = ['bopvEmptyVials', 'bopvSafetyBoxes', 'bopvUnusedVials'];
+    if (name.startsWith('bopv') && !excludedBopvFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 20) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -201,33 +211,39 @@ const BopvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bopvVaccineAllocated"
-                      value={formData.bopvVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BOPV vaccine quantity (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bopvVaccineAllocated"
+                        value={formData.bopvVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Dropper</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bopvDropperAllocated"
-                      value={formData.bopvDropperAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BOPV dropper quantity (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bopvDropperAllocated"
+                        value={formData.bopvDropperAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,33 +435,39 @@ const BopvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bopvVaccineReceived"
-                      value={formData.bopvVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BOPV vaccine quantity received (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bopvVaccineReceived"
+                        value={formData.bopvVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Dropper</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bopvDropperReceived"
-                      value={formData.bopvDropperReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BOPV dropper quantity received (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bopvDropperReceived"
+                        value={formData.bopvDropperReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

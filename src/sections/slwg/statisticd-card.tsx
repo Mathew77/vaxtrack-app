@@ -203,7 +203,7 @@ export default function VaccineOverview() {
       textColor: '#FFFFFF',
     },
     {
-      title: 'Stock Adequate Per Facility',
+      title: 'Stock Adequacy To Plan',
       total: `${data.indicators.stock_adequate_per_facility.percent.toFixed(1)}%`,
       subtitle: `${data.indicators.stock_adequate_per_facility.numerator} of ${data.indicators.stock_adequate_per_facility.denominator}`,
       icon: <InventoryIcon fontSize="large" />,

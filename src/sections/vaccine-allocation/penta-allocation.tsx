@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -60,6 +60,16 @@ const PentaAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Validate Penta fields - max 10
+    // Exclude non-quantity fields like pentaEmptyVials, pentaSafetyBoxes, pentaUnusedVials
+    const excludedPentaFields = ['pentaEmptyVials', 'pentaSafetyBoxes', 'pentaUnusedVials'];
+    if (name.startsWith('penta') && !excludedPentaFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 10) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -201,33 +211,39 @@ const PentaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="pentaVaccineAllocated"
-                      value={formData.pentaVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Penta vaccine quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="pentaVaccineAllocated"
+                        value={formData.pentaVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="penta05mlSyringeAllocated"
-                      value={formData.penta05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Penta 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="penta05mlSyringeAllocated"
+                        value={formData.penta05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,33 +435,39 @@ const PentaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="pentaVaccineReceived"
-                      value={formData.pentaVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Penta vaccine quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="pentaVaccineReceived"
+                        value={formData.pentaVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="penta05mlSyringeReceived"
-                      value={formData.penta05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Penta 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="penta05mlSyringeReceived"
+                        value={formData.penta05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

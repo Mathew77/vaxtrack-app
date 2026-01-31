@@ -41,10 +41,10 @@ export default function UploadView() {
     uploadMutation.mutate(selectedFile, {
       onSuccess: (data: any) => {
         navigate('/maximum-stock', {
-            state: {
+          state: {
             uploadResponse: data,
             showSuccessMessage: `Successfully processed ${data.rows_processed} rows. Created: ${data.created}, Updated: ${data.updated}${data.errors.length > 0 ? `, Errors: ${data.errors.length}` : ''}`
-            }
+          }
         });
       },
       onError: (error: any) => {

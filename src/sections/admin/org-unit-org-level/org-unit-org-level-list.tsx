@@ -28,7 +28,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 
 function TabPanel(props: TabPanelProps) {
@@ -62,19 +62,19 @@ function a11yProps(index: number) {
 }
 
 const OrgUnitLevelList: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { state } = location;
-    const initialTab = state?.activeTab || 0
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const initialTab = state?.activeTab || 0
 
-    const [value, setValue] = useState<number>(initialTab);
-    // const [orgLevelList, setOrgLevelList] = useState<TableRow[]>([]);
+  const [value, setValue] = useState<number>(initialTab);
+  // const [orgLevelList, setOrgLevelList] = useState<TableRow[]>([]);
 
-    const { data: orgLevelList = [], isLoading } = useFetchOrgLevels();
-    const deleteOrgLevel = useDeleteOrgLevel();
+  const { data: orgLevelList = [], isLoading } = useFetchOrgLevels();
+  const deleteOrgLevel = useDeleteOrgLevel();
 
-    const { data: orgUnitList = [] } = useFetchOrgUnits();
-    const deleteOrgUnit = useDeleteOrgUnit();
+  const { data: orgUnitList = [], isLoading: isUnitLoading } = useFetchOrgUnits();
+  const deleteOrgUnit = useDeleteOrgUnit();
 
 
 
@@ -87,11 +87,11 @@ const OrgUnitLevelList: React.FC = () => {
 
   const orgUnit = useMemo(
     () => [
-       // {
-         //    accessorKey: 'id', 
-         //    header: 'ID',
-         //    size: 150,
-         // },
+      // {
+      //    accessorKey: 'id', 
+      //    header: 'ID',
+      //    size: 150,
+      // },
       {
         accessorKey: 'state',
         header: 'State',
@@ -118,11 +118,11 @@ const OrgUnitLevelList: React.FC = () => {
 
   const orgLevel = useMemo(
     () => [
-       // {
-         //    accessorKey: 'id', 
-         //    header: 'ID',
-         //    size: 150,
-         // },
+      // {
+      //    accessorKey: 'id', 
+      //    header: 'ID',
+      //    size: 150,
+      // },
       {
         accessorKey: 'name',
         header: 'Name',
@@ -142,12 +142,12 @@ const OrgUnitLevelList: React.FC = () => {
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true , activeTab: value} });
+    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value } });
   };
 
   const handleEdit = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isUpdate: true , activeTab: value} });
+    navigate(`/${type}-setup`, { state: { data, isUpdate: true, activeTab: value } });
   };
 
   const handleDelete = (data: TableRow) => {
@@ -158,24 +158,24 @@ const OrgUnitLevelList: React.FC = () => {
 
   const handleAddNew = () => {
     const type = getTabType();
-    navigate(`/${type}-setup`, {state: { activeTab: value }});
+    navigate(`/${type}-setup`, { state: { activeTab: value } });
   };
 
   const orgUnitItem: ActionMenuItem<TableRow>[] = [
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -183,17 +183,17 @@ const OrgUnitLevelList: React.FC = () => {
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -214,7 +214,7 @@ const OrgUnitLevelList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
@@ -236,6 +236,7 @@ const OrgUnitLevelList: React.FC = () => {
             // customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={orgUnitItem}
             showDownloadButton={false}
+            loading={isUnitLoading}
           />
         </Box>
       </TabPanel>
@@ -252,6 +253,7 @@ const OrgUnitLevelList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={orgListItem}
             showDownloadButton={false}
+            loading={isLoading}
           />
         </Box>
       </TabPanel>

@@ -23,7 +23,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -56,16 +56,16 @@ function a11yProps(index: number) {
 }
 
 const RolesPermissionsList: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { state } = location;
-    const initialTab = state?.activeTab || 0
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const initialTab = state?.activeTab || 0
 
   const [value, setValue] = useState<number>(initialTab);
 
-  const { data: rolesList = [] } = useFetchRoles();
+  const { data: rolesList = [], isLoading: isRolesLoading } = useFetchRoles();
   const deleteRole = useDeleteRole();
-  const { data: permissionsList = [] } = useFetchPermissions();
+  const { data: permissionsList = [], isLoading: isPermissionsLoading } = useFetchPermissions();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -96,22 +96,22 @@ const RolesPermissionsList: React.FC = () => {
   );
 
   const permissionColumns = useMemo(
-      () => [
-        {
-          accessorKey: 'name',
-          header: 'Name',
-          size: 100,
-        },
-      ],
-      []
-    );
+    () => [
+      {
+        accessorKey: 'name',
+        header: 'Name',
+        size: 100,
+      },
+    ],
+    []
+  );
 
 
   const getTabType = () => (value === 0 ? 'role' : 'permission');
 
   const handleView = (data: TableRow) => {
     const type = getTabType();
-    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value }});
+    navigate(`/${type}-setup`, { state: { data, isView: true, activeTab: value } });
   };
 
   const handleEdit = (data: TableRow) => {
@@ -124,28 +124,28 @@ const RolesPermissionsList: React.FC = () => {
       deleteRole.mutate(data.id);
     }
   };
-  
+
 
   const handleAddNew = () => {
-    navigate(`/${getTabType()}-setup`, {state: { activeTab: value }});
+    navigate(`/${getTabType()}-setup`, { state: { activeTab: value } });
   };
-  
+
 
   const rolesItem: ActionMenuItem<TableRow>[] = [
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -153,19 +153,19 @@ const RolesPermissionsList: React.FC = () => {
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
       disabled: true,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
       disabled: true,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
       disabled: true,
     },
   ];
@@ -177,7 +177,7 @@ const RolesPermissionsList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
@@ -199,6 +199,7 @@ const RolesPermissionsList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={rolesItem}
             showDownloadButton={false}
+            loading={isRolesLoading}
           />
         </Box>
       </TabPanel>
@@ -215,6 +216,7 @@ const RolesPermissionsList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={permissionItem}
             showDownloadButton={false}
+            loading={isPermissionsLoading}
           />
         </Box>
       </TabPanel>

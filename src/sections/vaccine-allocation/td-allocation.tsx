@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -60,6 +60,16 @@ const TdAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Validate TD fields - max 10
+    // Exclude non-quantity fields like tdEmptyVials, tdSafetyBoxes, tdUnusedVials
+    const excludedTdFields = ['tdEmptyVials', 'tdSafetyBoxes', 'tdUnusedVials'];
+    if (name.startsWith('td') && !excludedTdFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 10) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -201,33 +211,39 @@ const TdAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>TD Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="tdVaccineAllocated"
-                      value={formData.tdVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter TD vaccine quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="tdVaccineAllocated"
+                        value={formData.tdVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>TD 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="td05mlSyringeAllocated"
-                      value={formData.td05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter TD 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="td05mlSyringeAllocated"
+                        value={formData.td05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,32 +435,39 @@ const TdAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>TD Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="tdVaccineReceived"
-                      value={formData.tdVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter TD vaccine quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="tdVaccineReceived"
+                        value={formData.tdVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>TD 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="td05mlSyringeReceived"
-                      value={formData.td05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                    />
+                    <Tooltip title="Enter TD 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="td05mlSyringeReceived"
+                        value={formData.td05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

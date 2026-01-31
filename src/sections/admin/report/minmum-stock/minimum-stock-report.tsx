@@ -3,7 +3,7 @@ import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Grid, Butto
 import PropTypes from 'prop-types';
 import VaxTable, { ActionMenuItem } from '../../../../utils/VaxTablePage';
 import { useFetchStates, useFetchLgas, /* useFetchWards, */ useFetchMinimumStockFlagReport } from 'src/hooks/apis/report/report-hook';
-import SearchIcon from '@mui/icons-material/Search'; 
+import SearchIcon from '@mui/icons-material/Search';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -61,24 +61,24 @@ const MinimumStockReport: React.FC = () => {
 
   const userRole = sessionStorage.getItem('userRole');
 
-  const isAdmin= userRole === 'admin';
+  const isAdmin = userRole === 'admin';
   const isSlwg = userRole === 'slwg';
   const isScs = userRole === 'scs';
 
 
   const scs_list = JSON.parse(sessionStorage.getItem('scs_list') || '[]') as string[];
 
-   useEffect(() => {
+  useEffect(() => {
     if ((isSlwg || isScs) && states.length > 0 && scs_list.length > 0 && !selectedState) {
-        const userState = states.find((state: any) =>
+      const userState = states.find((state: any) =>
         scs_list.includes(String(state.id))
-        );
-        if (userState) {
+      );
+      if (userState) {
         const stateValue = userState.state;
         setSelectedState(stateValue);
-        }
+      }
     }
-    }, [states, isSlwg, isScs, scs_list]);
+  }, [states, isSlwg, isScs, scs_list]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -88,14 +88,14 @@ const MinimumStockReport: React.FC = () => {
     const newState = event.target.value;
     setSelectedState(newState);
     setSelectedLga('');
-    setHasSearched(false); 
+    setHasSearched(false);
     // setSelectedWard('');
   };
 
   const handleLgaChange = (event: any) => {
     const newLga = event.target.value;
     setSelectedLga(newLga);
-    setHasSearched(false); 
+    setHasSearched(false);
     // setSelectedWard('');
   };
 
@@ -113,7 +113,7 @@ const MinimumStockReport: React.FC = () => {
     setHasSearched(false);
 
     if (isAdmin) {
-        setSelectedState('');
+      setSelectedState('');
     }
   };
 
@@ -187,44 +187,44 @@ const MinimumStockReport: React.FC = () => {
           <FormControl fullWidth size="small">
             <InputLabel id="state-select-label">State</InputLabel>
             <Select
-                labelId="state-select-label"
-                id="state-select"
-                value={selectedState}
-                label="State"
-                onChange={handleStateChange}
-                disabled={statesLoading}
+              labelId="state-select-label"
+              id="state-select"
+              value={selectedState}
+              label="State"
+              onChange={handleStateChange}
+              disabled={statesLoading}
             >
-                <MenuItem value="">
+              <MenuItem value="">
                 <em>Select State</em>
-                </MenuItem>
+              </MenuItem>
 
-                {/* Only show "All States" to admin */}
-                {isAdmin && (
+              {/* Only show "All States" to admin */}
+              {isAdmin && (
                 <MenuItem value="all-states">
-                    <strong>All States</strong>
+                  <strong>All States</strong>
                 </MenuItem>
-                )}
+              )}
 
-                {/* Filter states based on role */}
-                {states
+              {/* Filter states based on role */}
+              {states
                 .filter((state: any) => {
-                    if (isAdmin) return true;
-                    if (isSlwg || isScs) {
+                  if (isAdmin) return true;
+                  if (isSlwg || isScs) {
                     const stateId = String(state.id);
                     return scs_list.includes(stateId);
-                    }
-                    return false;
+                  }
+                  return false;
                 })
                 .map((state: any) => (
-                    <MenuItem
+                  <MenuItem
                     key={state.id ?? state.value ?? state.name}
                     value={state.state ?? state.value ?? state.name}
-                    >
+                  >
                     {state.state ?? state.value ?? state.name}
-                    </MenuItem>
+                  </MenuItem>
                 ))}
             </Select>
-            </FormControl>
+          </FormControl>
         </Grid>
 
         <Grid item xs={12} sm={6} md={2.5}>
@@ -281,7 +281,7 @@ const MinimumStockReport: React.FC = () => {
             disabled={!selectedState}
             startIcon={<SearchIcon />}
             fullWidth
-            sx={{ 
+            sx={{
               height: '40px',
               backgroundColor: '#2c3e50',
               '&:hover': {
@@ -335,6 +335,7 @@ const MinimumStockReport: React.FC = () => {
             customRightButton={false}
             extraComponents={<FilterControls />}
             showDownloadButton={true}
+            loading={reportLoading}
           />
         </Box>
       </TabPanel>

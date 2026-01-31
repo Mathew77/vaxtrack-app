@@ -16,7 +16,7 @@ export const navData = [
   //   icon: icon('ic-analytics'),
   //   roles: ['admin', 'ehf', 'uhf', 'lcs', 'slwg', 'threepl'],
   // },
-//EHF Menu
+  //EHF Menu
   {
     title: 'Dashboard',
     path: '/ehf-home',
@@ -25,11 +25,11 @@ export const navData = [
     children: [
       // { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['ehf', 'admin'] },
       // { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['ehf', 'admin'] },
-      { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['', ] },
+      { title: 'EHF Dashboard 1', path: '/ehf-home/dashboard1', roles: ['',] },
       { title: 'EHF Dashboard 2', path: '/ehf-home/dashboard2', roles: ['', ''] },
     ],
   },
-  
+
   //UHF Menu
   {
     title: 'Dashboard',
@@ -41,7 +41,7 @@ export const navData = [
       { title: 'UHF Dashboard 2', path: '/uhf-home/dashboard2', roles: ['uhf', 'admin'] },
     ],
   },
-  
+
   //LCS Menu
   {
     title: 'Dashboard',
@@ -64,7 +64,7 @@ export const navData = [
       { title: 'SCS Dashboard 2', path: '/scs-home/dashboard2', roles: ['scs', 'admin'] },
     ],
   },
-  
+
   //SLWG Menu
   {
     title: 'Dashboard',
@@ -76,7 +76,7 @@ export const navData = [
       { title: 'SLWG Dashboard 2', path: '/slwg-home/dashboard2', roles: ['slwg', 'admin'] },
     ],
   },
-  
+
   //3PL & SCS  Menu
   {
     title: 'Dashboard',
@@ -104,8 +104,8 @@ export const navData = [
     icon: icon('ic-analytics'),
     roles: ['mcco'],
   },
-  
- 
+
+
   //Adminsitratve  Menu
   {
     title: 'Dashboard',
@@ -234,7 +234,7 @@ export const navData = [
     title: 'Report',
     path: '/report',
     icon: <StackedLineChartIcon />,
-    roles: ['admin', 'scs','slwg'],
+    roles: ['admin', 'scs', 'slwg'],
   },
   //test-page
   // {

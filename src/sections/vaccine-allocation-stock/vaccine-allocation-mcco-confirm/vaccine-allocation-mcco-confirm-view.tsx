@@ -100,7 +100,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
         </Typography>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/vaccine-allocation-stock-page')}
+          onClick={() => navigate('/vaccine-allocation-batch-detail')}
           sx={{ mt: 2 }}
         >
           Back to List
@@ -269,7 +269,9 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(successMessage);
-          navigate('/vaccine-allocation-stock-page');
+          navigate('/vaccine-allocation-batch-detail', {
+            state: { batch_no: data.batch_no }
+          });
         },
         onError: () => {
           toast.error('Failed to confirm. Please try again.');
@@ -311,7 +313,9 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <Button
           startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/vaccine-allocation-stock-page')}
+          onClick={() => navigate('/vaccine-allocation-batch-detail', {
+            state: { batch_no: data.batch_no }
+          })}
         >
           Back
         </Button>
@@ -493,7 +497,9 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
             <Button
               variant="outlined"
               size="large"
-              onClick={() => navigate('/vaccine-allocation-stock-page')}
+              onClick={() => navigate('/vaccine-allocation-batch-detail', {
+                state: { batch_no: data.batch_no }
+              })}
             >
               Cancel
             </Button>

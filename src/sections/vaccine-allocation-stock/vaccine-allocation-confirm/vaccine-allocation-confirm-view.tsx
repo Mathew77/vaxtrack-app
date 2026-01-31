@@ -525,6 +525,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                     {showReceivedColumn && (
                       <>
                         <TableCell><strong>Received Doses</strong></TableCell>
+                        <TableCell><strong>Deficit</strong></TableCell>
                         <TableCell><strong>VVM Stage</strong></TableCell>
                         <TableCell><strong>Batch Number</strong></TableCell>
                         <TableCell><strong>Earliest Expiry Date</strong></TableCell>
@@ -574,6 +575,25 @@ const VaccineAllocationConfirmView: React.FC = () => {
                             >
                               {vaccine.received || 0}
                             </Typography>
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const deficit = (vaccine.allocated || 0) - (vaccine.received || 0);
+                              if (deficit > 0) {
+                                return (
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontWeight: 'bold',
+                                      color: '#d32f2f'
+                                    }}
+                                  >
+                                    {deficit}
+                                  </Typography>
+                                );
+                              }
+                              return <Typography variant="body2">-</Typography>;
+                            })()}
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">

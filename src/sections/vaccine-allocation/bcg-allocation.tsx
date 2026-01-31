@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -77,6 +77,16 @@ const BcgAllocationComponent = ({
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
+    // Validate all BCG fields (vaccine, diluent, syringes) - max 20
+    // Exclude non-quantity fields like bcgEmptyVials, bcgSafetyBoxes, bcgUnusedVials
+    const excludedBcgFields = ['bcgEmptyVials', 'bcgSafetyBoxes', 'bcgUnusedVials'];
+    if (name.startsWith('bcg') && !excludedBcgFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 20) {
+        return;
+      }
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (debounceRef.current) {
@@ -88,7 +98,7 @@ const BcgAllocationComponent = ({
         onDataChange(current);
         return current;
       });
-    }, 150); 
+    }, 150);
   }, [onDataChange]);
 
   useEffect(() => {
@@ -251,65 +261,77 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcgVaccineAllocated"
-                      value={formData.bcgVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG vaccine quantity (vials contain 20 doses, max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcgVaccineAllocated"
+                        value={formData.bcgVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcgDiluentAllocated"
-                      value={formData.bcgDiluentAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG diluent quantity (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcgDiluentAllocated"
+                        value={formData.bcgDiluentAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 0.05ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcg005mlSyringeAllocated"
-                      value={formData.bcg005mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG 0.05ml syringe quantity (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcg005mlSyringeAllocated"
+                        value={formData.bcg005mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 2ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcg2mlSyringeAllocated"
-                      value={formData.bcg2mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG 2ml syringe quantity (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcg2mlSyringeAllocated"
+                        value={formData.bcg2mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -598,65 +620,77 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcgVaccineReceived"
-                      value={formData.bcgVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG vaccine quantity received (vials contain 20 doses, max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcgVaccineReceived"
+                        value={formData.bcgVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcgDiluentReceived"
-                      value={formData.bcgDiluentReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG diluent quantity received (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcgDiluentReceived"
+                        value={formData.bcgDiluentReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 0.05ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcg005mlSyringeReceived"
-                      value={formData.bcg005mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG 0.05ml syringe quantity received (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcg005mlSyringeReceived"
+                        value={formData.bcg005mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 2ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="bcg2mlSyringeReceived"
-                      value={formData.bcg2mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter BCG 2ml syringe quantity received (max: 20)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="bcg2mlSyringeReceived"
+                        value={formData.bcg2mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 20, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

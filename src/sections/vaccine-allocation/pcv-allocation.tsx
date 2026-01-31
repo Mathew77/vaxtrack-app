@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -60,6 +60,16 @@ const PcvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Validate PCV fields - max 2
+    // Exclude non-quantity fields like pcvEmptyVials, pcvSafetyBoxes, pcvUnusedVials
+    const excludedPcvFields = ['pcvEmptyVials', 'pcvSafetyBoxes', 'pcvUnusedVials'];
+    if (name.startsWith('pcv') && !excludedPcvFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 2) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -201,33 +211,39 @@ const PcvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="pcvVaccineAllocated"
-                      value={formData.pcvVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter PCV vaccine quantity (max: 2)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="pcvVaccineAllocated"
+                        value={formData.pcvVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 2, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="pcv05mlSyringeAllocated"
-                      value={formData.pcv05mlSyringeAllocated}
-                      onChange={handleChange}
-                     disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter PCV 0.5ml syringe quantity (max: 2)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="pcv05mlSyringeAllocated"
+                        value={formData.pcv05mlSyringeAllocated}
+                        onChange={handleChange}
+                       disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 2, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,33 +435,39 @@ const PcvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="pcvVaccineReceived"
-                      value={formData.pcvVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter PCV vaccine quantity received (max: 2)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="pcvVaccineReceived"
+                        value={formData.pcvVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 2, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="pcv05mlSyringeReceived"
-                      value={formData.pcv05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter PCV 0.5ml syringe quantity received (max: 2)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="pcv05mlSyringeReceived"
+                        value={formData.pcv05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 2, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

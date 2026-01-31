@@ -119,12 +119,94 @@ export interface AllocationSubmitData {
   hpv_empty_vials?: number;
   hpv_safety_boxes?: number;
   hpv_unused_vials?: number;
+  batch_no?: string;
+  threepl?: string;
+}
+
+// New nested structure for bulk allocation submission
+export interface AllocationItemData {
+  assigned_unique_id: string;
+  ehf_id: number;
+  dose_bcg_actual: number;
+  dose_bcg_allocated: number;
+  bcg_vvm_stage_scs?: number;
+  bcg_batch_number_scs?: string;
+  bcg_expire_date_scs?: string | null;
+  dose_hepb_actual: number;
+  dose_hepb_allocated: number;
+  hepb_vvm_stage_scs?: number;
+  hepb_batch_number_scs?: string;
+  hepb_expire_date_scs?: string | null;
+  dose_bopv_actual: number;
+  dose_bopv_allocated: number;
+  bopv_vvm_stage_scs?: number;
+  bopv_batch_number_scs?: string;
+  bopv_expire_date_scs?: string | null;
+  dose_penta_actual: number;
+  dose_penta_allocated: number;
+  penta_vvm_stage_scs?: number;
+  penta_batch_number_scs?: string;
+  penta_expire_date_scs?: string | null;
+  dose_pcv_actual: number;
+  dose_pcv_allocated: number;
+  pcv_vvm_stage_scs?: number;
+  pcv_batch_number_scs?: string;
+  pcv_expire_date_scs?: string | null;
+  dose_ipv_actual: number;
+  dose_ipv_allocated: number;
+  ipv_vvm_stage_scs?: number;
+  ipv_batch_number_scs?: string;
+  ipv_expire_date_scs?: string | null;
+  dose_mea_actual: number;
+  dose_mea_allocated: number;
+  mea_vvm_stage_scs?: number;
+  mea_batch_number_scs?: string;
+  mea_expire_date_scs?: string | null;
+  dose_yf_actual: number;
+  dose_yf_allocated: number;
+  yf_vvm_stage_scs?: number;
+  yf_batch_number_scs?: string;
+  yf_expire_date_scs?: string | null;
+  dose_td_actual: number;
+  dose_td_allocated: number;
+  td_vvm_stage_scs?: number;
+  td_batch_number_scs?: string;
+  td_expire_date_scs?: string | null;
+  dose_mena_actual: number;
+  dose_mena_allocated: number;
+  mena_vvm_stage_scs?: number;
+  mena_batch_number_scs?: string;
+  mena_expire_date_scs?: string | null;
+  dose_rota_actual: number;
+  dose_rota_allocated: number;
+  rota_vvm_stage_scs?: number;
+  rota_batch_number_scs?: string;
+  rota_expire_date_scs?: string | null;
+  dose_hpv_actual: number;
+  dose_hpv_allocated: number;
+  hpv_vvm_stage_scs?: number;
+  hpv_batch_number_scs?: string;
+  hpv_expire_date_scs?: string | null;
+  slwg_user?: number | null;
+}
+
+export interface BulkAllocationSubmitData {
+  batch_no: string;
+  period: string;
+  threepl?: string;
+  status: number;
+  created_by: number;
+  items: AllocationItemData[];
 }
 
 export interface AllocatedVaccineData {
   id: number;
   period: string;
   assigned_unique_id: string;
+  threepl?: string;
+  batch_no?: string;
+  batch_status?: number;
+  facility_count?: number;
   dose_bcg_actual: number;
   dose_bcg_allocated: number;
   bcg_empty_vials?: number;

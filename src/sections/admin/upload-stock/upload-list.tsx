@@ -16,7 +16,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -51,7 +51,7 @@ function a11yProps(index: number) {
 const UploadList: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: stockData = [] } = useFetchStockAtHand(null);
+  const { data: stockData = [], isLoading } = useFetchStockAtHand(null);
   const [value, setValue] = useState<number>(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -179,7 +179,7 @@ const UploadList: React.FC = () => {
     ],
     []
   );
-  
+
   const handleView = (data: StockAtHandData) => {
     navigate('/stock-edit-view', {
       state: {
@@ -232,14 +232,14 @@ const UploadList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
         aria-label="scrollable force tabs"
       >
         <Tab style={{ textTransform: 'none' }} label="Maximum Stock" {...a11yProps(0)} />
-        
+
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -250,10 +250,11 @@ const UploadList: React.FC = () => {
             tableHeader="Maximum Stock"
             customRightButton
             customRightButtonIcon={<CloudUploadOutlinedIcon />}
-            customRightButtonText="Maximum Stock"
+            customRightButtonText="Upload Stock"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uploadActionItems}
             showDownloadButton={false}
+            loading={isLoading}
           />
         </Box>
       </TabPanel>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedMeaslesAllocationProps {
   initialData?: Partial<MeaslesAllocationData>;
   onDataChange: (data: MeaslesAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView?: boolean;
   isUpdate?: boolean;
@@ -72,6 +72,16 @@ const MeaslesAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Validate Measles fields - max 5
+    // Exclude non-quantity fields like measlesEmptyVials, measlesSafetyBoxes, measlesUnusedVials
+    const excludedMeaslesFields = ['measlesEmptyVials', 'measlesSafetyBoxes', 'measlesUnusedVials'];
+    if (name.startsWith('measles') && !excludedMeaslesFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 5) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -245,65 +255,77 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measlesVaccineAllocated"
-                      value={formData.measlesVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella vaccine quantity (5 doses per vial, max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measlesVaccineAllocated"
+                        value={formData.measlesVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measlesDiluentAllocated"
-                      value={formData.measlesDiluentAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella diluent quantity (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measlesDiluentAllocated"
+                        value={formData.measlesDiluentAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measles05mlSyringeAllocated"
-                      value={formData.measles05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella 0.5ml syringe quantity (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measles05mlSyringeAllocated"
+                        value={formData.measles05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 2ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measles2mlSyringeAllocated"
-                      value={formData.measles2mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella 2ml syringe quantity (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measles2mlSyringeAllocated"
+                        value={formData.measles2mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -591,65 +613,77 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measlesVaccineReceived"
-                      value={formData.measlesVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella vaccine quantity received (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measlesVaccineReceived"
+                        value={formData.measlesVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measlesDiluentReceived"
-                      value={formData.measlesDiluentReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella diluent quantity received (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measlesDiluentReceived"
+                        value={formData.measlesDiluentReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measles05mlSyringeReceived"
-                      value={formData.measles05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella 0.5ml syringe quantity received (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measles05mlSyringeReceived"
+                        value={formData.measles05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 2ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="measles2mlSyringeReceived"
-                      value={formData.measles2mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Measles & Rubella 2ml syringe quantity received (max: 5)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="measles2mlSyringeReceived"
+                        value={formData.measles2mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 5, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

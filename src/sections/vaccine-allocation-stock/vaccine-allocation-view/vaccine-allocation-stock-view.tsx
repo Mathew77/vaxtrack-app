@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Grid, Paper, TextField, Button, LinearProgress, Chip, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { StockAtHandData } from 'src/hooks/apis/upload/upload-type';
 import { useSubmitAllocation } from 'src/hooks/apis/upload/upload-hook';
+import { useFetchThreePl } from 'src/hooks/apis/threepl/threepl-hooks';
 import VaccinesIcon from '@mui/icons-material/Vaccines';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -110,15 +111,15 @@ export default function VaccineAllocationStock() {
         }
 
         if (allocated > actual) {
-            return 'error.main'; 
+            return 'error.main';
         }
 
         const percentage = (allocated / actual) * 100;
 
         if (percentage >= 40 && percentage <= 60) {
-            return 'warning.main'; 
+            return 'warning.main';
         } else {
-            return 'success.main'; 
+            return 'success.main';
         }
     };
 
@@ -132,17 +133,20 @@ export default function VaccineAllocationStock() {
         }
 
         if (allocated > actual) {
-            return 'error.main'; 
+            return 'error.main';
         }
 
         const percentage = (allocated / actual) * 100;
 
         if (percentage >= 40 && percentage <= 60) {
-            return 'warning.main'; 
+            return 'warning.main';
         } else {
             return 'success.light';
         }
     };
+
+    const { data: allThreePl = [] } = useFetchThreePl();
+    const [selectedThreePl, setSelectedThreePl] = useState<string>('');
 
     const handleSubmit = async () => {
         // Check if period is provided
@@ -164,6 +168,8 @@ export default function VaccineAllocationStock() {
                 ehf_id: stockData.id,
                 assigned_unique_id: stockData.assigned_unique_id,
                 period: period,
+                batch_no: `BN-${Date.now()}`,
+                threepl: selectedThreePl || undefined,
                 dose_bcg_actual: stockData.dose_bcg || 0,
                 dose_bcg_allocated: parseInt(allocationData.dose_bcg) || 0,
                 bcg_vvm_stage_scs: parseInt(metadataMap.dose_bcg.vvm_stage) || 0,
@@ -351,1161 +357,1193 @@ export default function VaccineAllocationStock() {
             )}
 
             {!isViewMode && (
-                <Card sx={{ mt: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' }}>
-                <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                        <VaccinesIcon sx={{ fontSize: 32, color: 'rgb(12, 125, 64)', mr: 1 }} />
-                        <Typography variant="h5" sx={{ fontWeight: 600, color: 'rgb(12, 125, 64)' }}>
-                            Allocate Vaccines
+                <Card sx={{ mt: 3 }}>
+                    <CardContent>
+                        <Typography variant="h6" sx={{ mb: 2 }}>
+                            Delivery Details
                         </Typography>
-                    </Box>
-                    <Grid container spacing={1.5}>
-                        {/* BCG */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_bcg'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>BCG</Typography>
-                                    </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_bcg}`}
-                                        color={stockData.dose_bcg > 100 ? "success" : stockData.dose_bcg > 0 ? "warning" : "error"}
-                                        size="small"
-                                    />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_bcg > 0 ? Math.min((stockData.dose_bcg / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_bcg')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_bcg}
-                                    onChange={(e) => handleInputChange('dose_bcg', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_bcg }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_bcg && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_bcg - (parseInt(allocationData.dose_bcg) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_bcg) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
-                                        </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_bcg.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_bcg', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    size="small"
-                                                    label="Batch Number"
-                                                    value={metadataMap.dose_bcg.batch_number}
-                                                    onChange={(e) => handleMetadataChange('dose_bcg', 'batch_number', e.target.value)}
-                                                    placeholder="Enter batch number"
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField
-                                                    fullWidth
-                                                    size="small"
-                                                    type="date"
-                                                    label="Earliest Expiry Date"
-                                                    value={metadataMap.dose_bcg.expire_date}
-                                                    onChange={(e) => handleMetadataChange('dose_bcg', 'expire_date', e.target.value)}
-                                                    InputLabelProps={{ shrink: true }}
-                                                    inputProps={{ min: new Date().toISOString().split('T')[0] }}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
+                        <Grid container spacing={2}>
+                            {/* Batch Number is auto-generated */}
+                            <Grid item xs={12} md={6}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Select 3PL Provider</InputLabel>
+                                    <Select
+                                        value={selectedThreePl}
+                                        onChange={(e) => setSelectedThreePl(e.target.value)}
+                                        label="Select 3PL Provider"
+                                    >
+                                        <MenuItem value="">
+                                            <em>Select 3PL</em>
+                                        </MenuItem>
+                                        {allThreePl.map((pl: any) => (
+                                            <MenuItem key={pl.id} value={pl.id?.toString()}>
+                                                {pl.threepl_name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
                         </Grid>
+                    </CardContent>
+                </Card>
+            )}
 
-                        {/* HepB */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_hepb'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>HepB</Typography>
+            {!isViewMode && (
+                <Card sx={{ mt: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' }}>
+                    <CardContent>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <VaccinesIcon sx={{ fontSize: 32, color: 'rgb(12, 125, 64)', mr: 1 }} />
+                            <Typography variant="h5" sx={{ fontWeight: 600, color: 'rgb(12, 125, 64)' }}>
+                                Allocate Vaccines
+                            </Typography>
+                        </Box>
+                        <Grid container spacing={1.5}>
+                            {/* BCG */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_bcg'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>BCG</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_bcg}`}
+                                            color={stockData.dose_bcg > 100 ? "success" : stockData.dose_bcg > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_hepb}`}
-                                        color={stockData.dose_hepb > 100 ? "success" : stockData.dose_hepb > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_bcg > 0 ? Math.min((stockData.dose_bcg / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_bcg')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_hepb > 0 ? Math.min((stockData.dose_hepb / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_hepb')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_hepb}
-                                    onChange={(e) => handleInputChange('dose_hepb', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_hepb }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_hepb && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_hepb - (parseInt(allocationData.dose_hepb) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_hepb) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_bcg}
+                                        onChange={(e) => handleInputChange('dose_bcg', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_bcg }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_bcg && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_bcg - (parseInt(allocationData.dose_bcg) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_hepb.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_hepb', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_bcg) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_bcg.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_bcg', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        label="Batch Number"
+                                                        value={metadataMap.dose_bcg.batch_number}
+                                                        onChange={(e) => handleMetadataChange('dose_bcg', 'batch_number', e.target.value)}
+                                                        placeholder="Enter batch number"
+                                                    />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField
+                                                        fullWidth
+                                                        size="small"
+                                                        type="date"
+                                                        label="Earliest Expiry Date"
+                                                        value={metadataMap.dose_bcg.expire_date}
+                                                        onChange={(e) => handleMetadataChange('dose_bcg', 'expire_date', e.target.value)}
+                                                        InputLabelProps={{ shrink: true }}
+                                                        inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                                                    />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hepb.batch_number} onChange={(e) => handleMetadataChange('dose_hepb', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hepb.expire_date} onChange={(e) => handleMetadataChange('dose_hepb', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* bOPV */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_bopv'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>bOPV</Typography>
+                            {/* HepB */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_hepb'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>HepB</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_hepb}`}
+                                            color={stockData.dose_hepb > 100 ? "success" : stockData.dose_hepb > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_bopv}`}
-                                        color={stockData.dose_bopv > 100 ? "success" : stockData.dose_bopv > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_hepb > 0 ? Math.min((stockData.dose_hepb / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_hepb')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_bopv > 0 ? Math.min((stockData.dose_bopv / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_bopv')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_bopv}
-                                    onChange={(e) => handleInputChange('dose_bopv', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_bopv }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_bopv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_bopv - (parseInt(allocationData.dose_bopv) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_bopv) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_hepb}
+                                        onChange={(e) => handleInputChange('dose_hepb', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_hepb }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_hepb && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_hepb - (parseInt(allocationData.dose_hepb) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_bopv.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_bopv', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_hepb) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_hepb.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_hepb', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hepb.batch_number} onChange={(e) => handleMetadataChange('dose_hepb', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hepb.expire_date} onChange={(e) => handleMetadataChange('dose_hepb', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_bopv.batch_number} onChange={(e) => handleMetadataChange('dose_bopv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_bopv.expire_date} onChange={(e) => handleMetadataChange('dose_bopv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* Penta */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_penta'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>Penta</Typography>
+                            {/* bOPV */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_bopv'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>bOPV</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_bopv}`}
+                                            color={stockData.dose_bopv > 100 ? "success" : stockData.dose_bopv > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_penta}`}
-                                        color={stockData.dose_penta > 100 ? "success" : stockData.dose_penta > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_bopv > 0 ? Math.min((stockData.dose_bopv / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_bopv')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_penta > 0 ? Math.min((stockData.dose_penta / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_penta')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_penta}
-                                    onChange={(e) => handleInputChange('dose_penta', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_penta }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_penta && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_penta - (parseInt(allocationData.dose_penta) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_penta) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_bopv}
+                                        onChange={(e) => handleInputChange('dose_bopv', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_bopv }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_bopv && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_bopv - (parseInt(allocationData.dose_bopv) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_penta.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_penta', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_bopv) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_bopv.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_bopv', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_bopv.batch_number} onChange={(e) => handleMetadataChange('dose_bopv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_bopv.expire_date} onChange={(e) => handleMetadataChange('dose_bopv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_penta.batch_number} onChange={(e) => handleMetadataChange('dose_penta', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_penta.expire_date} onChange={(e) => handleMetadataChange('dose_penta', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* PCV */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_pcv'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>PCV</Typography>
+                            {/* Penta */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_penta'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>Penta</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_penta}`}
+                                            color={stockData.dose_penta > 100 ? "success" : stockData.dose_penta > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_pcv}`}
-                                        color={stockData.dose_pcv > 100 ? "success" : stockData.dose_pcv > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_penta > 0 ? Math.min((stockData.dose_penta / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_penta')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_pcv > 0 ? Math.min((stockData.dose_pcv / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_pcv')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_pcv}
-                                    onChange={(e) => handleInputChange('dose_pcv', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_pcv }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_pcv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_pcv - (parseInt(allocationData.dose_pcv) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_pcv) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_penta}
+                                        onChange={(e) => handleInputChange('dose_penta', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_penta }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_penta && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_penta - (parseInt(allocationData.dose_penta) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_pcv.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_pcv', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_penta) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_penta.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_penta', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_penta.batch_number} onChange={(e) => handleMetadataChange('dose_penta', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_penta.expire_date} onChange={(e) => handleMetadataChange('dose_penta', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_pcv.batch_number} onChange={(e) => handleMetadataChange('dose_pcv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_pcv.expire_date} onChange={(e) => handleMetadataChange('dose_pcv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* IPV */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_ipv'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>IPV</Typography>
+                            {/* PCV */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_pcv'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>PCV</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_pcv}`}
+                                            color={stockData.dose_pcv > 100 ? "success" : stockData.dose_pcv > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_ipv}`}
-                                        color={stockData.dose_ipv > 100 ? "success" : stockData.dose_ipv > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_pcv > 0 ? Math.min((stockData.dose_pcv / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_pcv')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_ipv > 0 ? Math.min((stockData.dose_ipv / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_ipv')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_ipv}
-                                    onChange={(e) => handleInputChange('dose_ipv', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_ipv }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_ipv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_ipv - (parseInt(allocationData.dose_ipv) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_ipv) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_pcv}
+                                        onChange={(e) => handleInputChange('dose_pcv', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_pcv }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_pcv && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_pcv - (parseInt(allocationData.dose_pcv) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_ipv.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_ipv', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_pcv) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_pcv.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_pcv', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_pcv.batch_number} onChange={(e) => handleMetadataChange('dose_pcv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_pcv.expire_date} onChange={(e) => handleMetadataChange('dose_pcv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_ipv.batch_number} onChange={(e) => handleMetadataChange('dose_ipv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_ipv.expire_date} onChange={(e) => handleMetadataChange('dose_ipv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* Measles */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_mea'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>Measles</Typography>
+                            {/* IPV */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_ipv'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>IPV</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_ipv}`}
+                                            color={stockData.dose_ipv > 100 ? "success" : stockData.dose_ipv > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_mea}`}
-                                        color={stockData.dose_mea > 100 ? "success" : stockData.dose_mea > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_ipv > 0 ? Math.min((stockData.dose_ipv / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_ipv')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_mea > 0 ? Math.min((stockData.dose_mea / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_mea')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_mea}
-                                    onChange={(e) => handleInputChange('dose_mea', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_mea }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_mea && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_mea - (parseInt(allocationData.dose_mea) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_mea) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_ipv}
+                                        onChange={(e) => handleInputChange('dose_ipv', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_ipv }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_ipv && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_ipv - (parseInt(allocationData.dose_ipv) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_mea.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_mea', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_ipv) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_ipv.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_ipv', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_ipv.batch_number} onChange={(e) => handleMetadataChange('dose_ipv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_ipv.expire_date} onChange={(e) => handleMetadataChange('dose_ipv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mea.batch_number} onChange={(e) => handleMetadataChange('dose_mea', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mea.expire_date} onChange={(e) => handleMetadataChange('dose_mea', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* YF */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_yf'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>YF</Typography>
+                            {/* Measles */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_mea'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>Measles</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_mea}`}
+                                            color={stockData.dose_mea > 100 ? "success" : stockData.dose_mea > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_yf}`}
-                                        color={stockData.dose_yf > 100 ? "success" : stockData.dose_yf > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_mea > 0 ? Math.min((stockData.dose_mea / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_mea')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_yf > 0 ? Math.min((stockData.dose_yf / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_yf')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_yf}
-                                    onChange={(e) => handleInputChange('dose_yf', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_yf }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_yf && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_yf - (parseInt(allocationData.dose_yf) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_yf) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_mea}
+                                        onChange={(e) => handleInputChange('dose_mea', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_mea }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_mea && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_mea - (parseInt(allocationData.dose_mea) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_yf.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_yf', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_mea) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_mea.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_mea', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mea.batch_number} onChange={(e) => handleMetadataChange('dose_mea', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mea.expire_date} onChange={(e) => handleMetadataChange('dose_mea', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_yf.batch_number} onChange={(e) => handleMetadataChange('dose_yf', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_yf.expire_date} onChange={(e) => handleMetadataChange('dose_yf', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* TD */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_td'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>TD</Typography>
+                            {/* YF */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_yf'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>YF</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_yf}`}
+                                            color={stockData.dose_yf > 100 ? "success" : stockData.dose_yf > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_td}`}
-                                        color={stockData.dose_td > 100 ? "success" : stockData.dose_td > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_yf > 0 ? Math.min((stockData.dose_yf / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_yf')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_td > 0 ? Math.min((stockData.dose_td / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_td')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_td}
-                                    onChange={(e) => handleInputChange('dose_td', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_td }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_td && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_td - (parseInt(allocationData.dose_td) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_td) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_yf}
+                                        onChange={(e) => handleInputChange('dose_yf', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_yf }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_yf && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_yf - (parseInt(allocationData.dose_yf) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_td.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_td', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_yf) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_yf.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_yf', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_yf.batch_number} onChange={(e) => handleMetadataChange('dose_yf', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_yf.expire_date} onChange={(e) => handleMetadataChange('dose_yf', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_td.batch_number} onChange={(e) => handleMetadataChange('dose_td', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_td.expire_date} onChange={(e) => handleMetadataChange('dose_td', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* MenA */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_mena'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>MenA</Typography>
+                            {/* TD */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_td'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>TD</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_td}`}
+                                            color={stockData.dose_td > 100 ? "success" : stockData.dose_td > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_mena}`}
-                                        color={stockData.dose_mena > 100 ? "success" : stockData.dose_mena > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_td > 0 ? Math.min((stockData.dose_td / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_td')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_mena > 0 ? Math.min((stockData.dose_mena / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_mena')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_mena}
-                                    onChange={(e) => handleInputChange('dose_mena', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_mena }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_mena && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_mena - (parseInt(allocationData.dose_mena) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_mena) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_td}
+                                        onChange={(e) => handleInputChange('dose_td', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_td }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_td && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_td - (parseInt(allocationData.dose_td) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_mena.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_mena', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_td) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_td.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_td', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_td.batch_number} onChange={(e) => handleMetadataChange('dose_td', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_td.expire_date} onChange={(e) => handleMetadataChange('dose_td', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mena.batch_number} onChange={(e) => handleMetadataChange('dose_mena', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mena.expire_date} onChange={(e) => handleMetadataChange('dose_mena', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* Rota */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_rota'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>Rota</Typography>
+                            {/* MenA */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_mena'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>MenA</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_mena}`}
+                                            color={stockData.dose_mena > 100 ? "success" : stockData.dose_mena > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_rota}`}
-                                        color={stockData.dose_rota > 100 ? "success" : stockData.dose_rota > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_mena > 0 ? Math.min((stockData.dose_mena / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_mena')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_rota > 0 ? Math.min((stockData.dose_rota / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_rota')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_rota}
-                                    onChange={(e) => handleInputChange('dose_rota', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_rota }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_rota && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_rota - (parseInt(allocationData.dose_rota) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_rota) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_mena}
+                                        onChange={(e) => handleInputChange('dose_mena', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_mena }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_mena && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_mena - (parseInt(allocationData.dose_mena) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_rota.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_rota', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_mena) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_mena.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_mena', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mena.batch_number} onChange={(e) => handleMetadataChange('dose_mena', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mena.expire_date} onChange={(e) => handleMetadataChange('dose_mena', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_rota.batch_number} onChange={(e) => handleMetadataChange('dose_rota', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_rota.expire_date} onChange={(e) => handleMetadataChange('dose_rota', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                )}
-                            </Paper>
-                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
 
-                        {/* HPV */}
-                        <Grid item xs={12} md={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2.5,
-                                    borderRadius: 1,
-                                    border: '2px solid',
-                                    borderColor: getBorderColor('dose_hpv'),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
-                                        <Typography variant="h6" sx={{ fontWeight: 600 }}>HPV</Typography>
+                            {/* Rota */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_rota'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>Rota</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_rota}`}
+                                            color={stockData.dose_rota > 100 ? "success" : stockData.dose_rota > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                    <Chip
-                                        label={`Available: ${stockData.dose_hpv}`}
-                                        color={stockData.dose_hpv > 100 ? "success" : stockData.dose_hpv > 0 ? "warning" : "error"}
-                                        size="small"
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_rota > 0 ? Math.min((stockData.dose_rota / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_rota')
+                                            }
+                                        }}
                                     />
-                                </Box>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={stockData.dose_hpv > 0 ? Math.min((stockData.dose_hpv / 1000) * 100, 100) : 0}
-                                    sx={{
-                                        mb: 2,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        bgcolor: 'grey.200',
-                                        '& .MuiLinearProgress-bar': {
-                                            bgcolor: getProgressColor('dose_hpv')
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    type="number"
-                                    fullWidth
-                                    label="Quantity to Allocate"
-                                    value={allocationData.dose_hpv}
-                                    onChange={(e) => handleInputChange('dose_hpv', e.target.value)}
-                                    onKeyDown={preventInvalidKeys}
-                                    inputProps={{ min: 0, max: stockData.dose_hpv }}
-                                    placeholder="Enter quantity to allocate"
-                                    sx={{
-                                        mb: 2,
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
-                                            '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
-                                            '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
-                                        }
-                                    }}
-                                />
-                                {allocationData.dose_hpv && (
-                                    <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                                        Remaining: {stockData.dose_hpv - (parseInt(allocationData.dose_hpv) || 0)}
-                                    </Typography>
-                                )}
-                                {userRole === 'scs' && parseInt(allocationData.dose_hpv) > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
-                                            Vaccine Details
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_rota}
+                                        onChange={(e) => handleInputChange('dose_rota', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_rota }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_rota && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_rota - (parseInt(allocationData.dose_rota) || 0)}
                                         </Typography>
-                                        <Grid container spacing={1.5}>
-                                            <Grid item xs={12}>
-                                                <FormControl fullWidth size="small">
-                                                    <InputLabel>VVM Stage</InputLabel>
-                                                    <Select
-                                                        value={metadataMap.dose_hpv.vvm_stage}
-                                                        onChange={(e) => handleMetadataChange('dose_hpv', 'vvm_stage', e.target.value)}
-                                                        label="VVM Stage"
-                                                    >
-                                                        <MenuItem value="">Select Stage</MenuItem>
-                                                        <MenuItem value="1">Stage 1</MenuItem>
-                                                        <MenuItem value="2">Stage 2</MenuItem>
-                                                        <MenuItem value="3">Stage 3</MenuItem>
-                                                        <MenuItem value="4">Stage 4</MenuItem>
-                                                    </Select>
-                                                </FormControl>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_rota) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_rota.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_rota', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_rota.batch_number} onChange={(e) => handleMetadataChange('dose_rota', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_rota.expire_date} onChange={(e) => handleMetadataChange('dose_rota', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hpv.batch_number} onChange={(e) => handleMetadataChange('dose_hpv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hpv.expire_date} onChange={(e) => handleMetadataChange('dose_hpv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
-                                            </Grid>
-                                        </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
+
+                            {/* HPV */}
+                            <Grid item xs={12} md={6}>
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        p: 2.5,
+                                        borderRadius: 1,
+                                        border: '2px solid',
+                                        borderColor: getBorderColor('dose_hpv'),
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 }
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocalHospitalIcon sx={{ color: 'rgb(12, 125, 64)' }} />
+                                            <Typography variant="h6" sx={{ fontWeight: 600 }}>HPV</Typography>
+                                        </Box>
+                                        <Chip
+                                            label={`Available: ${stockData.dose_hpv}`}
+                                            color={stockData.dose_hpv > 100 ? "success" : stockData.dose_hpv > 0 ? "warning" : "error"}
+                                            size="small"
+                                        />
                                     </Box>
-                                )}
-                            </Paper>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={stockData.dose_hpv > 0 ? Math.min((stockData.dose_hpv / 1000) * 100, 100) : 0}
+                                        sx={{
+                                            mb: 2,
+                                            height: 8,
+                                            borderRadius: 4,
+                                            bgcolor: 'grey.200',
+                                            '& .MuiLinearProgress-bar': {
+                                                bgcolor: getProgressColor('dose_hpv')
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        type="number"
+                                        fullWidth
+                                        label="Quantity to Allocate"
+                                        value={allocationData.dose_hpv}
+                                        onChange={(e) => handleInputChange('dose_hpv', e.target.value)}
+                                        onKeyDown={preventInvalidKeys}
+                                        inputProps={{ min: 0, max: stockData.dose_hpv }}
+                                        placeholder="Enter quantity to allocate"
+                                        sx={{
+                                            mb: 2,
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                '&:hover fieldset': { borderColor: 'rgb(12, 125, 64)' },
+                                                '&.Mui-focused fieldset': { borderColor: 'rgb(12, 125, 64)' }
+                                            }
+                                        }}
+                                    />
+                                    {allocationData.dose_hpv && (
+                                        <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                                            Remaining: {stockData.dose_hpv - (parseInt(allocationData.dose_hpv) || 0)}
+                                        </Typography>
+                                    )}
+                                    {userRole === 'scs' && parseInt(allocationData.dose_hpv) > 0 && (
+                                        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
+                                                Vaccine Details
+                                            </Typography>
+                                            <Grid container spacing={1.5}>
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth size="small">
+                                                        <InputLabel>VVM Stage</InputLabel>
+                                                        <Select
+                                                            value={metadataMap.dose_hpv.vvm_stage}
+                                                            onChange={(e) => handleMetadataChange('dose_hpv', 'vvm_stage', e.target.value)}
+                                                            label="VVM Stage"
+                                                        >
+                                                            <MenuItem value="">Select Stage</MenuItem>
+                                                            <MenuItem value="1">Stage 1</MenuItem>
+                                                            <MenuItem value="2">Stage 2</MenuItem>
+                                                            <MenuItem value="3">Stage 3</MenuItem>
+                                                            <MenuItem value="4">Stage 4</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hpv.batch_number} onChange={(e) => handleMetadataChange('dose_hpv', 'batch_number', e.target.value)} placeholder="Enter batch number" />
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hpv.expire_date} onChange={(e) => handleMetadataChange('dose_hpv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} inputProps={{ min: new Date().toISOString().split('T')[0] }} />
+                                                </Grid>
+                                            </Grid>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
             )}
 
             <Card sx={{ mt: 3 }}>

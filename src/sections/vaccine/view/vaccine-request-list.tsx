@@ -94,7 +94,7 @@ const statusDisplayMap: { [key: number]: string } = {
 const VaccineRequestList: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: vaccineRequests = [] } = useFetchRequest();
+  const { data: vaccineRequests = [], isLoading } = useFetchRequest();
   const deleteVaccineRequest = useDeleteVaccineRequest();
   const { data: users = [] } = useFetchUsers();
   const { data: ehfs = [] } = useFetchEHF();
@@ -141,7 +141,7 @@ const VaccineRequestList: React.FC = () => {
 
   const userScsState = useMemo(() => {
     if (!userScsId || !scs.length) return null;
-    
+
     const userScs = scs.find((scsItem: any) => scsItem.id?.toString() === userScsId?.toString());
     return userScs?.stat_id || null;
   }, [userScsId, scs]);
@@ -164,7 +164,7 @@ const VaccineRequestList: React.FC = () => {
 
   const userLcsState = useMemo(() => {
     if (!userLcsId || !lcs.length) return null;
-    
+
     const userLcs = lcs.find((lcsItem: any) => lcsItem.id?.toString() === userLcsId?.toString());
     return userLcs?.stat_id || null;
   }, [userLcsId, lcs]);
@@ -250,8 +250,8 @@ const VaccineRequestList: React.FC = () => {
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
         const statusNumber = convertVaccineStatusToNumber(request.vaccine_status);
         return allowedScsEhfIds.includes(String(request.ehf_id)) &&
-              (statusNumber === 3 || statusNumber === 5 || statusNumber === 6 ||
-                statusNumber === 7 || statusNumber === 8); // Removed status 4 (SLWG declined) - SCS shouldn't see declined requests
+          (statusNumber === 3 || statusNumber === 5 || statusNumber === 6 ||
+            statusNumber === 7 || statusNumber === 8); // Removed status 4 (SLWG declined) - SCS shouldn't see declined requests
       });
     } else if (isThreePL) {
       baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => {
@@ -260,7 +260,7 @@ const VaccineRequestList: React.FC = () => {
       });
     } else if (isEHF) {
       if (!userEhfId) return [];
-      baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) => 
+      baseFilteredRequests = vaccineRequests.filter((request: VaccineFormType) =>
         String(request.ehf_id) === userEhfId
       );
     } else {
@@ -269,15 +269,15 @@ const VaccineRequestList: React.FC = () => {
 
     return baseFilteredRequests;
   }, [
-    vaccineRequests, 
-    isLCS, 
-    isSLWG, 
-    isSSC, 
-    isThreePL, 
-    isEHF, 
-    allowedLcsEhfIds, 
-    allowedSlwgEhfIds, 
-    allowedScsEhfIds, 
+    vaccineRequests,
+    isLCS,
+    isSLWG,
+    isSSC,
+    isThreePL,
+    isEHF,
+    allowedLcsEhfIds,
+    allowedSlwgEhfIds,
+    allowedScsEhfIds,
     userEhfId
   ]);
 
@@ -300,7 +300,7 @@ const VaccineRequestList: React.FC = () => {
       ehf_id: String(data.ehf_id),
       requested_by: data.requested_by,
       product_detail_request: data.product_detail_request || [],
-      vaccine_status: data.vaccine_status, 
+      vaccine_status: data.vaccine_status,
     } as VaccineFormType;
     navigate(`/vaccine-request-view`, {
       state: {
@@ -311,7 +311,7 @@ const VaccineRequestList: React.FC = () => {
     });
   };
 
-   const handleDelete = (data: VaccineRequestTableRow) => {
+  const handleDelete = (data: VaccineRequestTableRow) => {
     if ((isEHF) && data.id) {
       deleteVaccineRequest.mutate(data.id, {
         onSuccess: () => {
@@ -383,12 +383,12 @@ const VaccineRequestList: React.FC = () => {
         icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
       });
     } else if (isLCS) {
-        items.push({
-          display: "View / Approve",
-          handleClick: handleView,
-          icon: <FaEye style={{ color: "#1976D2" }} />,
-        });
-      }  else if (isSLWG) {
+      items.push({
+        display: "View / Approve",
+        handleClick: handleView,
+        icon: <FaEye style={{ color: "#1976D2" }} />,
+      });
+    } else if (isSLWG) {
       items.push({
         display: "View / Approve",
         handleClick: handleView,
@@ -442,6 +442,7 @@ const VaccineRequestList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={actionMenuItems}
             showDownloadButton={false}
+            loading={isLoading}
           />
         </Box>
       </TabPanel>

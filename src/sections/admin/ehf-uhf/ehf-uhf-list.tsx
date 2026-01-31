@@ -76,10 +76,10 @@ const EhfUHFList: React.FC = () => {
 
   const [value, setValue] = useState<number>(initialTab);
 
-  const { data: ehfList = [] } = useFetchEHFList();
+  const { data: ehfList = [], isLoading: isEhfLoading } = useFetchEHFList();
   const deleteEHF = useDeleteEHF();
 
-  const { data: uhfList = [] } = useFetchUHF();
+  const { data: uhfList = [], isLoading: isUhfLoading } = useFetchUHF();
   const deleteUHF = useDeleteUHF();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -198,9 +198,9 @@ const EhfUHFList: React.FC = () => {
   const handleDelete = (data: TableRow) => {
     const type = getTabType();
     if (data.id) {
-      if(type === 'ehf'){
+      if (type === 'ehf') {
         deleteEHF.mutate(data.id)
-      }else {
+      } else {
         deleteUHF.mutate(data.id);
       }
     }
@@ -251,7 +251,7 @@ const EhfUHFList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
@@ -273,6 +273,7 @@ const EhfUHFList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ehfItem}
             showDownloadButton={false}
+            loading={isEhfLoading}
           />
         </Box>
       </TabPanel>
@@ -288,7 +289,8 @@ const EhfUHFList: React.FC = () => {
             customRightButtonText="ADD UNEQUIPPED HEALTH FACILITY"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uhfItem}
-           showDownloadButton={false}
+            showDownloadButton={false}
+            loading={isUhfLoading}
           />
         </Box>
       </TabPanel>

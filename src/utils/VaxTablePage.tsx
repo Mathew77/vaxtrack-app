@@ -41,6 +41,7 @@ interface VaxTableProps<TData extends MRT_RowData> {
   showDownloadButton?: boolean;
   exportFileName?: string;
   getRowStyles?: (row: TData) => SxProps<Theme>;
+  loading?: boolean;
 }
 
 const VaxTable = <TData extends MRT_RowData>({
@@ -52,7 +53,7 @@ const VaxTable = <TData extends MRT_RowData>({
   customRightButtonCallBackFunction,
   customRightButton = false,
   showBackButton = false,
-  backButtonCallBackFunction = () => {},
+  backButtonCallBackFunction = () => { },
   tableHeader = 'Enter Table Header',
   extraComponents = <></>,
   actionMenuItems = [],
@@ -61,6 +62,7 @@ const VaxTable = <TData extends MRT_RowData>({
   showDownloadButton = true,
   exportFileName,
   getRowStyles,
+  loading = false,
 }: VaxTableProps<TData>) => {
   const csvConfig = mkConfig({
     fieldSeparator: ',',
@@ -77,7 +79,7 @@ const VaxTable = <TData extends MRT_RowData>({
   const table = useMaterialReactTable({
     columns,
     data,
-    initialState: { showColumnFilters: false, showGlobalFilter: true },
+    state: { isLoading: loading, showColumnFilters: false, showGlobalFilter: true },
     muiTableHeadRowProps: {
       sx: {
         fontWeight: 'bold',
@@ -115,7 +117,7 @@ const VaxTable = <TData extends MRT_RowData>({
         borderRadius: 'none',
       },
     },
-    
+
     renderTopToolbar: ({ table }: { table: MRT_TableInstance<TData> }) => (
       <Box >
         <Box sx={{ marginX: '20px', marginY: '10px' }} className="header-title">

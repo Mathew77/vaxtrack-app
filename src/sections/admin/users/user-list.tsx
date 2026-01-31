@@ -27,7 +27,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -61,10 +61,10 @@ function a11yProps(index: number) {
 
 const UserList: React.FC = () => {
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const { data: userList = [] } = useFetchUsers();
-    const deleteUser = useDeleteUser();
+  const { data: userList = [], isLoading } = useFetchUsers();
+  const deleteUser = useDeleteUser();
 
   const [value, setValue] = useState<number>(0);
 
@@ -74,7 +74,7 @@ const UserList: React.FC = () => {
 
   const transformedUserList: TableRow[] = userList.map((user: UserType) => ({
     ...user,
-    role_names: user.role_names || [], 
+    role_names: user.role_names || [],
   }));
 
   const rolesList: TableRow[] = [];
@@ -116,7 +116,7 @@ const UserList: React.FC = () => {
         accessorKey: 'role_names',
         header: 'Role Names',
         size: 200,
-        Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+        Cell: ({ cell }: { cell: { getValue: () => unknown } }) => {
           const group = cell.getValue() as [];
           return group.join(',  ')
         }
@@ -172,17 +172,17 @@ const UserList: React.FC = () => {
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -191,14 +191,14 @@ const UserList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
         aria-label="scrollable force tabs"
       >
         <Tab style={{ textTransform: 'none' }} label="User Management" {...a11yProps(0)} />
-        
+
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -213,6 +213,7 @@ const UserList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={userItem}
             showDownloadButton={false}
+            loading={isLoading}
           />
         </Box>
       </TabPanel>

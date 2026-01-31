@@ -83,6 +83,7 @@ export const VaccineAllocationStockView = lazy(() => import('src/sections/vaccin
 export const VaccineAllocationConfirmPage = lazy(() => import('src/pages/vaccine-allocation-confirm/index'));
 export const VaccineAllocationMccoConfirmPage = lazy(() => import('src/pages/vaccine-allocation-mcco-confirm/index'));
 export const VaccineAllocationLcsReturnPage = lazy(() => import('src/pages/vaccine-allocation-lcs-return/index'));
+export const BatchDetailPage = lazy(() => import('src/pages/vaccine-allocation-stock/batch-detail'));
 
 
 //Test page
@@ -282,17 +283,18 @@ export function Router() {
 
         { path: 'waybill-details', element: <WayBillDetails /> },
 
-        {path: 'vaccine-view', element: <VaccineView />},
-        {path: 'vaccine-request-view', element: <VaccineRequestForm />},
-        {path: 'vaccine-allocation-stock-view', element: <VaccineAllocationStockView />},
-        {path: 'vaccine-allocation-confirm-view', element: <VaccineAllocationConfirmPage />},
-        {path: 'vaccine-allocation-mcco-confirm', element: <VaccineAllocationMccoConfirmPage />},
-        {path: 'vaccine-allocation-lcs-return', element: <VaccineAllocationLcsReturnPage />},
+        { path: 'vaccine-view', element: <VaccineView /> },
+        { path: 'vaccine-request-view', element: <VaccineRequestForm /> },
+        { path: 'vaccine-allocation-stock-view', element: <VaccineAllocationStockView /> },
+        { path: 'vaccine-allocation-confirm-view', element: <VaccineAllocationConfirmPage /> },
+        { path: 'vaccine-allocation-mcco-confirm', element: <VaccineAllocationMccoConfirmPage /> },
+        { path: 'vaccine-allocation-lcs-return', element: <VaccineAllocationLcsReturnPage /> },
+        { path: 'vaccine-allocation-batch-detail', element: <BatchDetailPage /> },
 
-        { path: 'report', element: <ReportForms />},
-         { path: 'maximum-stock', element: <UploadPage />},
-         { path: 'upload-view', element: <UploadView />},
-         { path: 'stock-edit-view', element: <StockEditView />},
+        { path: 'report', element: <ReportForms /> },
+        { path: 'maximum-stock', element: <UploadPage /> },
+        { path: 'upload-view', element: <UploadView /> },
+        { path: 'stock-edit-view', element: <StockEditView /> },
 
 
         //TestPage

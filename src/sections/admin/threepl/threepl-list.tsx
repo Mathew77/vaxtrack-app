@@ -13,18 +13,18 @@ import { FaEye } from 'react-icons/fa';
 
 interface TableRow {
   id?: number;
-  state: string;  
-  lga: string; 
-  state_list: string[];   
-  threepl_name: string;    
-  ehf_list: string[]; 
+  state: string;
+  lga: string;
+  state_list: string[];
+  threepl_name: string;
+  ehf_list: string[];
 }
 
 interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -57,10 +57,10 @@ function a11yProps(index: number) {
 }
 
 const ThreeplList: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const { data: threepl = [] } = useFetchThreePl();
-    const deleteThreepl = useDeleteThreepl();
+  const { data: threepl = [], isLoading } = useFetchThreePl();
+  const deleteThreepl = useDeleteThreepl();
 
   const [value, setValue] = useState<number>(0);
 
@@ -87,7 +87,7 @@ const ThreeplList: React.FC = () => {
         accessorKey: "state_list",
         header: "State List",
         size: 200,
-        Cell: ({ cell }: { cell : {getValue: () => unknown }}) => {
+        Cell: ({ cell }: { cell: { getValue: () => unknown } }) => {
           const state_list = cell.getValue() as string[];
           return state_list.join(',  ')
         }
@@ -115,7 +115,7 @@ const ThreeplList: React.FC = () => {
     ],
     []
   );
-  
+
   const getTabType = () => 'threepl';
 
   const handleView = (data: TableRow) => {
@@ -143,17 +143,17 @@ const ThreeplList: React.FC = () => {
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -162,14 +162,14 @@ const ThreeplList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
         aria-label="scrollable force tabs"
       >
         <Tab style={{ textTransform: 'none' }} label="3PL" {...a11yProps(0)} />
-        
+
       </Tabs>
 
       <TabPanel value={value} index={0}>
@@ -184,6 +184,7 @@ const ThreeplList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={threeplItem}
             showDownloadButton={false}
+            loading={isLoading}
           />
         </Box>
       </TabPanel>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Container,
   Typography,
@@ -72,6 +72,9 @@ export default function VaccineView() {
     const createAllocation = useCreateAllocation();
     const [selectedEhf, setSelectedEhf] = useState<number | null>(null);
     const [selectedEhfUniqueId, setSelectedEhfUniqueId] = useState<string | null>(null);
+
+    // Track if initial setup has been done to prevent resetting tab on subsequent allEhf updates
+    const initialSetupDoneRef = useRef(false);
 
     // Fetch UHF based on selected EHF's assigned_unique_id
     const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHFByEHF(selectedEhfUniqueId);
@@ -160,35 +163,41 @@ export default function VaccineView() {
   useEffect(() => {
     if (allocationData && allocationData.vaccines_allocation_detail?.length > 0) {
       const firstDetail = allocationData.vaccines_allocation_detail[0];
-      setSelectedEhf(firstDetail.ehf_id);
-      setSelectedUhf(firstDetail.uhf_id);
-      setStatus(Number(firstDetail.status) || 1);
 
-      // Find the EHF's assigned_unique_id to fetch UHF
+      // Find the EHF's assigned_unique_id to fetch UHF (this can update when allEhf changes)
       const ehfData = allEhf.find((ehf: any) => ehf.id === firstDetail.ehf_id);
       if (ehfData && ehfData.assigned_unique_id) {
         setSelectedEhfUniqueId(ehfData.assigned_unique_id);
       }
 
-      const populatedFormData: Record<string, any> = {};
-      allocationData.vaccines_allocation_detail.forEach((detail: any) => {
-        if (detail.type) {
-          populatedFormData[detail.type] = {
-            ...detail,
-            ehf_id: detail.ehf_id,
-            uhf_id: detail.uhf_id,
-          };
-        }
-      });
-      setFormDataCollection(populatedFormData);
+      // Only do initial setup once to prevent resetting tab when allEhf updates
+      if (!initialSetupDoneRef.current) {
+        setSelectedEhf(firstDetail.ehf_id);
+        setSelectedUhf(firstDetail.uhf_id);
+        setStatus(Number(firstDetail.status) || 1);
 
-      const availableVaccineTypes = allocationData.vaccines_allocation_detail.map((detail: any) => detail.type);
-      const firstAvailableType = vaccineOptions.find(option => 
-        availableVaccineTypes.includes(option.value)
-      );
-      
-      if (firstAvailableType) {
-        setSelectedTab(firstAvailableType.value);
+        const populatedFormData: Record<string, any> = {};
+        allocationData.vaccines_allocation_detail.forEach((detail: any) => {
+          if (detail.type) {
+            populatedFormData[detail.type] = {
+              ...detail,
+              ehf_id: detail.ehf_id,
+              uhf_id: detail.uhf_id,
+            };
+          }
+        });
+        setFormDataCollection(populatedFormData);
+
+        const availableVaccineTypes = allocationData.vaccines_allocation_detail.map((detail: any) => detail.type);
+        const firstAvailableType = vaccineOptions.find(option =>
+          availableVaccineTypes.includes(option.value)
+        );
+
+        if (firstAvailableType) {
+          setSelectedTab(firstAvailableType.value);
+        }
+
+        initialSetupDoneRef.current = true;
       }
     }
   }, [allocationData, allEhf]);

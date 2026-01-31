@@ -93,7 +93,7 @@ const VvmStageReport: React.FC = () => {
   const handleLgaChange = (event: any) => {
     const newLga = event.target.value;
     setSelectedLga(newLga);
-    setHasSearched(false); 
+    setHasSearched(false);
     // setSelectedWard('');
   };
 
@@ -275,7 +275,7 @@ const VvmStageReport: React.FC = () => {
             disabled={!selectedState}
             startIcon={<SearchIcon />}
             fullWidth
-            sx={{ 
+            sx={{
               height: '40px',
               backgroundColor: '#2c3e50',
               '&:hover': {
@@ -329,6 +329,7 @@ const VvmStageReport: React.FC = () => {
             customRightButton={false}
             extraComponents={<FilterControls />}
             showDownloadButton={true}
+            loading={reportLoading}
           />
         </Box>
       </TabPanel>

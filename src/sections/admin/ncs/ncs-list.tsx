@@ -59,7 +59,7 @@ function a11yProps(index: number) {
 const NcsList: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: ncsList } = useFetchNcs();
+  const { data: ncsList, isLoading } = useFetchNcs();
   const deleteNcs = useDeleteNcs();
 
   const [value, setValue] = useState<number>(0);
@@ -164,6 +164,7 @@ const NcsList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={ncsListItem}
             showDownloadButton={false}
+            loading={isLoading}
           />
         </Box>
       </TabPanel>

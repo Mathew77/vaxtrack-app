@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Chip } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -13,6 +13,13 @@ import { useFetchThreePl, useDeleteThreepl } from 'src/hooks/apis/threepl/threep
 import { FaEye } from 'react-icons/fa';
 import { useFetchAllocation, useFetchUHF, useDeleteAllocation } from 'src/hooks/apis/ehf/ehf-hooks';
 import { UHFType, VaccineAllocationDetail, VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
+import { keyframes } from '@mui/system';
+
+// Blinking animation for pending statuses
+const blink = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+`;
 
 interface TableRow {
   id?: number;
@@ -29,7 +36,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -64,7 +71,7 @@ function a11yProps(index: number) {
 const VaccineAllocationList: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: allocationList = [] } = useFetchAllocation();
+  const { data: allocationList = [], isLoading } = useFetchAllocation();
   const { data: uhfList = [] } = useFetchUHF(null);
   const deleteAllocation = useDeleteAllocation();
 
@@ -86,7 +93,7 @@ const VaccineAllocationList: React.FC = () => {
         if (Array.isArray(ehfList) && ehfList.length > 0) {
           const assignedId = ehfList[0];
           if (typeof assignedId === 'string' && assignedId.includes('-')) {
-            return assignedId.split('-')[0]; 
+            return assignedId.split('-')[0];
           }
         }
       }
@@ -101,57 +108,58 @@ const VaccineAllocationList: React.FC = () => {
   };
 
   const transformedAllocationList: TableRow[] = useMemo(() => {
-  return allocationList
-    .filter((allocation: VaccineAllocationType) => {
-      // Filter by state for Conveyor
-      if (isConveyor && conveyorState) {
-        const firstDetail = allocation.vaccines_allocation_detail?.[0];
-        return firstDetail?.state?.toUpperCase() === conveyorState.toUpperCase();
-      }
-      return true; // Show all for other roles
-    })
-    .map((allocation: VaccineAllocationType) => {
-    if (
-      !allocation.vaccines_allocation_detail ||
-      !Array.isArray(allocation.vaccines_allocation_detail) ||
-      allocation.vaccines_allocation_detail.length === 0
-    ) {
-      return {
-        id: allocation.id || 0,
-        request_id: 'N/A',
-        uhf_id: 0,
-        ehf_id: 0,
-        uhf_name: 'N/A',
-        state: 'N/A',
-        lga: 'N/A',
-        status: 0,
-      };
-    }
+    return allocationList
+      .filter((allocation: VaccineAllocationType) => {
+        // Filter by state for Conveyor
+        if (isConveyor && conveyorState) {
+          const firstDetail = allocation.vaccines_allocation_detail?.[0];
+          return firstDetail?.state?.toUpperCase() === conveyorState.toUpperCase();
+        }
+        return true; // Show all for other roles
+      })
+      .map((allocation: VaccineAllocationType) => {
+        if (
+          !allocation.vaccines_allocation_detail ||
+          !Array.isArray(allocation.vaccines_allocation_detail) ||
+          allocation.vaccines_allocation_detail.length === 0
+        ) {
+          return {
+            id: allocation.id || 0,
+            request_id: 'N/A',
+            uhf_id: 0,
+            ehf_id: 0,
+            uhf_name: 'N/A',
+            state: 'N/A',
+            lga: 'N/A',
+            status: 0,
+          };
+        }
 
-    const firstDetail = allocation.vaccines_allocation_detail[0];
+        const firstDetail = allocation.vaccines_allocation_detail[0];
 
-    const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
-    let uhfName = firstDetail.uhf_name || 'No UHF Available';
-      if (!firstDetail.uhf_name) {
         const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
-        uhfName = uhf?.uhf_name || 'No UHF Available';
-      }
+        let uhfName = firstDetail.uhf_name || 'No UHF Available';
+        if (!firstDetail.uhf_name) {
+          const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
+          uhfName = uhf?.uhf_name || 'No UHF Available';
+        }
 
-    return {
-      id: allocation.id,
-      request_id: firstDetail.request_id,
-      uhf_id: firstDetail.uhf_id,
-      uhf_name: uhfName,
-      ehf_id: firstDetail.ehf_id,
-      state: firstDetail.state,
-      lga: firstDetail.lga,
-      status: firstDetail.status,
-    };
-  });
-}, [allocationList, uhfList, isConveyor, conveyorState]);
+        return {
+          id: allocation.id,
+          request_id: firstDetail.request_id,
+          uhf_id: firstDetail.uhf_id,
+          uhf_name: uhfName,
+          ehf_id: firstDetail.ehf_id,
+          state: firstDetail.state,
+          lga: firstDetail.lga,
+          status: firstDetail.status,
+        };
+      })
+      .sort((a, b) => (b.id || 0) - (a.id || 0)); // Sort by ID descending (latest first)
+  }, [allocationList, uhfList, isConveyor, conveyorState]);
 
   interface DisplayStatus {
-  [key: number]: string;
+    [key: number]: string;
   }
 
   const displayStatus: DisplayStatus = {
@@ -219,22 +227,51 @@ const VaccineAllocationList: React.FC = () => {
         header: 'Status',
         size: 200,
         Cell: ({ cell }: { cell: MRT_Cell<TableRow, unknown> }) => {
-          const statusValue = cell.getValue() as number; 
-          return displayStatus[statusValue] || statusValue;
+          const statusValue = cell.getValue() as number;
+          const statusText = displayStatus[statusValue] || statusValue;
+
+          let color: 'warning' | 'success' | 'info' = 'info';
+          let shouldBlink = false;
+
+          if (statusValue === 6) {
+            // Quantity Allocated by EHF - orange with blinking
+            color = 'warning';
+            shouldBlink = true;
+          } else if (statusValue === 7) {
+            // Quantity Received by EHF - green
+            color = 'success';
+            shouldBlink = false;
+          } else {
+            // Other statuses - blue/info
+            color = 'info';
+            shouldBlink = false;
+          }
+
+          return (
+            <Chip
+              label={statusText}
+              color={color}
+              size="small"
+              sx={shouldBlink ? {
+                animation: `${blink} 2s ease-in-out infinite`,
+              } : {}}
+            />
+          );
         },
       },
     ],
     []
   );
-  
+
   const getTabType = () => 'vaccine';
 
   const handleView = (data: TableRow) => {
-  const type = getTabType();
-  const allocation = allocationList.find((alloc: VaccineAllocationType) => alloc.id === data.id);
-  if (allocation) {
-    navigate(`/${type}-view`, { state: { data: allocation, isView: true, isUpdate: false,},
-    });
+    const type = getTabType();
+    const allocation = allocationList.find((alloc: VaccineAllocationType) => alloc.id === data.id);
+    if (allocation) {
+      navigate(`/${type}-view`, {
+        state: { data: allocation, isView: true, isUpdate: false, },
+      });
     }
   };
 
@@ -245,7 +282,7 @@ const VaccineAllocationList: React.FC = () => {
       // console.log('Navigating with allocation:', JSON.stringify(allocation, null, 2));
       navigate(`/${type}-view`, {
         state: {
-          data: allocation, 
+          data: allocation,
           isView: false,
           isUpdate: true,
         },
@@ -254,7 +291,7 @@ const VaccineAllocationList: React.FC = () => {
   };
 
   const handleDelete = (data: TableRow) => {
-    if(data.id){
+    if (data.id) {
       deleteAllocation.mutate(data.id)
     }
   };
@@ -268,22 +305,22 @@ const VaccineAllocationList: React.FC = () => {
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
-     {
+    {
       display: (row: TableRow) => editAction[row.status] || 'Edit',
       handleClick: handleEdit,
       icon: <EditOutlinedIcon sx={{ color: '#1976D2' }} />,
     },
     ...(userRole !== "ehf"
-    ? [
+      ? [
         {
           display: "Delete",
           handleClick: handleDelete,
           icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
         },
       ]
-    : []),
+      : []),
   ];
 
   return (
@@ -311,6 +348,19 @@ const VaccineAllocationList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={allocationItem}
             showDownloadButton={false}
+            loading={isLoading}
+            getRowStyles={(row: any) => {
+              // Highlight rows with status 6 (Quantity Allocated by EHF)
+              if (row.status === 6) {
+                return {
+                  bgcolor: '#fff3e0', // Light orange/brown background
+                  '&:hover': {
+                    bgcolor: '#ffe0b2 !important', // Slightly darker on hover
+                  },
+                };
+              }
+              return {};
+            }}
           />
         </Box>
       </TabPanel>

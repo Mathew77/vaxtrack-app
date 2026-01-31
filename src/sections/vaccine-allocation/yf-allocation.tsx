@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,10 +10,10 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedYfAllocationProps {
   initialData?: Partial<YfAllocationData>;
   onDataChange: (data: YfAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
-  isView: boolean; 
-  isUpdate: boolean; 
+  isView: boolean;
+  isUpdate: boolean;
 }
 
 const YfAllocationComponent = ({
@@ -73,6 +73,16 @@ const YfAllocationComponent = ({
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
+    // Validate YF fields - max 10
+    // Exclude non-quantity fields like yfEmptyVials, yfSafetyBoxes, yfUnusedVials
+    const excludedYfFields = ['yfEmptyVials', 'yfSafetyBoxes', 'yfUnusedVials'];
+    if (name.startsWith('yf') && !excludedYfFields.includes(name) && value !== '') {
+      const numValue = parseInt(value, 10);
+      if (numValue > 10) {
+        return;
+      }
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (debounceRef.current) {
@@ -84,7 +94,7 @@ const YfAllocationComponent = ({
         onDataChange(current);
         return current;
       });
-    }, 150); 
+    }, 150);
   }, [onDataChange]);
 
   useEffect(() => {
@@ -103,11 +113,11 @@ const YfAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -245,65 +255,77 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yfVaccineAllocated"
-                      value={formData.yfVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF vaccine quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yfVaccineAllocated"
+                        value={formData.yfVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yfDiluentAllocated"
-                      value={formData.yfDiluentAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF diluent quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yfDiluentAllocated"
+                        value={formData.yfDiluentAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yf05mlSyringeAllocated"
-                      value={formData.yf05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yf05mlSyringeAllocated"
+                        value={formData.yf05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yf5mlSyringeAllocated"
-                      value={formData.yf5mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF 5ml syringe quantity (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yf5mlSyringeAllocated"
+                        value={formData.yf5mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -591,65 +613,77 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yfVaccineReceived"
-                      value={formData.yfVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF vaccine quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yfVaccineReceived"
+                        value={formData.yfVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yfDiluentReceived"
-                      value={formData.yfDiluentReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF diluent quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yfDiluentReceived"
+                        value={formData.yfDiluentReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yf05mlSyringeReceived"
-                      value={formData.yf05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yf05mlSyringeReceived"
+                        value={formData.yf05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="yf5mlSyringeReceived"
-                      value={formData.yf5mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter YF 5ml syringe quantity received (max: 10)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="yf5mlSyringeReceived"
+                        value={formData.yf5mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                        inputProps={{ max: 10, min: 0 }}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

@@ -13,21 +13,21 @@ import { useDeleteLcs, useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 import { useDeleteScs, useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 
 interface TableRow {
-    id?: number;
-    stat_id?: string;
-    lga_id?: string;
-    lcs_name?: string;
-    scs_name?: string;
-    contact_person_name?: string;
-    contact_person_phone?: string;
-    contact_person_email?: string;
+  id?: number;
+  stat_id?: string;
+  lga_id?: string;
+  lcs_name?: string;
+  scs_name?: string;
+  contact_person_name?: string;
+  contact_person_phone?: string;
+  contact_person_email?: string;
 }
 
 interface TabPanelProps {
   children?: React.ReactNode;
   value: number;
   index: number;
-}  
+}
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -60,17 +60,17 @@ function a11yProps(index: number) {
 }
 
 const LcsScsList: React.FC = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { state } = location;
-    const initialTab = state?.activeTab || 0;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = location;
+  const initialTab = state?.activeTab || 0;
 
   const [value, setValue] = useState<number>(initialTab);
 
-  const { data: lcsList = [] } = useFetchLcs();
+  const { data: lcsList = [], isLoading: isLcsLoading } = useFetchLcs();
   const deleteLcs = useDeleteLcs();
 
-  const { data: scsList = [] } = useFetchScs();
+  const { data: scsList = [], isLoading: isScsLoading } = useFetchScs();
   const deleteScs = useDeleteScs()
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -164,33 +164,33 @@ const LcsScsList: React.FC = () => {
   const handleDelete = (data: TableRow) => {
     const type = getTabType();
     if (data.id) {
-      if(type === "lcs"){
+      if (type === "lcs") {
         deleteLcs.mutate(data.id);
-      }else {
+      } else {
         deleteScs.mutate(data.id);
-      }   
+      }
     }
   };
 
   const handleAddNew = () => {
-    navigate(`/${getTabType()}-setup`, {state: { activeTab: value }});
+    navigate(`/${getTabType()}-setup`, { state: { activeTab: value } });
   };
 
   const scsItem: ActionMenuItem<TableRow>[] = [
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -198,17 +198,17 @@ const LcsScsList: React.FC = () => {
     {
       display: "View",
       handleClick: handleView,
-      icon: <FaEye style={{ color: "#1976D2" }} />, 
+      icon: <FaEye style={{ color: "#1976D2" }} />,
     },
     {
       display: "Edit",
       handleClick: handleEdit,
-      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />, 
+      icon: <EditOutlinedIcon sx={{ color: "#1976D2" }} />,
     },
     {
       display: "Delete",
       handleClick: handleDelete,
-      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />, 
+      icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
     },
   ];
 
@@ -220,7 +220,7 @@ const LcsScsList: React.FC = () => {
       <Tabs
         value={value}
         onChange={handleChange}
-     
+
         variant="scrollable"
         scrollButtons="auto"
         textColor="primary"
@@ -242,6 +242,7 @@ const LcsScsList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={lcsItem}
             showDownloadButton={false}
+            loading={isLcsLoading}
           />
         </Box>
       </TabPanel>
@@ -258,6 +259,7 @@ const LcsScsList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={scsItem}
             showDownloadButton={false}
+            loading={isScsLoading}
           />
         </Box>
       </TabPanel>
