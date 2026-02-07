@@ -463,7 +463,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                       <Grid item xs={12} md={4}>
                         <TextField
                           fullWidth
-                          label="Unused Vials"
+                          label="Physical Stock at Hand"
                           type="number"
                           value={vaccine.unusedVials || ''}
                           onChange={(e) => handleVaccineChange(actualIndex, 'unusedVials', e.target.value)}
