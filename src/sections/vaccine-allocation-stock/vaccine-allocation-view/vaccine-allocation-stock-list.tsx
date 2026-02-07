@@ -12,7 +12,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { useFetchStockAtHand, useFetchAllocatedVaccines, useDeleteAllocation, useSubmitAllocation } from 'src/hooks/apis/upload/upload-hook';
+import { useFetchStockAtHand, useFetchAllocatedVaccines, useFetchAllIndividualAllocations, useDeleteAllocation, useSubmitAllocation } from 'src/hooks/apis/upload/upload-hook';
 import { StockAtHandData, AllocatedVaccineData } from 'src/hooks/apis/upload/upload-type';
 import { useFetchUsers } from 'src/hooks/apis/user/user-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
@@ -63,6 +63,17 @@ const blink = keyframes`
   50% { opacity: 0.4; }
 `;
 
+// Interface for selected facilities table
+interface SelectedFacility {
+  id: string;
+  stockId: number;
+  ehfId: string;
+  ehfName: string;
+  lga: string;
+  ward: string;
+  stockData: StockAtHandData;
+}
+
 const VaccineAllocationStockList: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -111,6 +122,7 @@ const VaccineAllocationStockList: React.FC = () => {
 
   const { data: stockData = [], isLoading: isStockLoading } = useFetchStockAtHand(parsedUserState);
   const { data: allocatedData = [], isLoading: isAllocatedLoading } = useFetchAllocatedVaccines();
+  const { data: allIndividualAllocations = [] } = useFetchAllIndividualAllocations();
   const { data: allUsers = [] } = useFetchUsers();
   const { data: allScs = [] } = useFetchScs();
   const { data: allLcs = [] } = useFetchLcs();
@@ -146,10 +158,15 @@ const VaccineAllocationStockList: React.FC = () => {
   const [selectedEHF, setSelectedEHF] = useState<string>('');
   const [selectedThreePl, setSelectedThreePl] = useState<string>('');
   const [allocationPeriod, setAllocationPeriod] = useState<string>('');
+  const [safetyBox, setSafetyBox] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [allocationToDelete, setAllocationToDelete] = useState<any>(null);
+  const [allocationDialogOpen, setAllocationDialogOpen] = useState(false);
   // Batch number will be generated automatically, no state needed for input
+
+  // State for selected facilities table (showing max stock before allocation)
+  const [selectedFacilities, setSelectedFacilities] = useState<SelectedFacility[]>([]);
 
   // Allocation input state
   const [allocationData, setAllocationData] = useState({
@@ -241,12 +258,12 @@ const VaccineAllocationStockList: React.FC = () => {
 
     const newEntry: AllocationEntry = {
       id: Date.now().toString(),
-      stockId: selectedEHFData.id,
+      stockId: selectedEHFData?.id,
       ehfId: selectedEHF,
-      ehfName: selectedEHFData.name_of_ehf || '',
-      state: selectedEHFData.state || '',
-      lga: selectedEHFData.lga || '',
-      ward: selectedEHFData.ward || '',
+      ehfName: selectedEHFData?.name_of_ehf || '',
+      state: selectedEHFData?.state || '',
+      lga: selectedEHFData?.lga || '',
+      ward: selectedEHFData?.ward || '',
       threePlId: selectedThreePl,
       threePlName: selected3PL?.threepl_name || '',
       batchNo: `BN-${Date.now()}`,
@@ -256,7 +273,7 @@ const VaccineAllocationStockList: React.FC = () => {
     };
 
     setAllocationList(prev => [...prev, newEntry]);
-    toast.success(`Added ${selectedEHFData.name_of_ehf} to allocation list`);
+    toast.success(`Added ${selectedEHFData?.name_of_ehf} to allocation list`);
 
     // Reset form for next entry
     resetAllocationData();
@@ -593,6 +610,15 @@ const VaccineAllocationStockList: React.FC = () => {
     return allThreePl.filter(pl => pl.lga?.toUpperCase() === selectedLGA.toUpperCase());
   }, [allThreePl, selectedLGA]);
 
+  // Get available 3PLs based on selected facilities' LGAs (for bulk allocation)
+  const facilityBased3PLs = useMemo(() => {
+    if (selectedFacilities.length === 0) return allThreePl;
+    // Get unique LGAs from selected facilities
+    const facilityLGAs = [...new Set(selectedFacilities.map((f: SelectedFacility) => f.lga?.toUpperCase()))];
+    // Return 3PLs that serve any of the selected facilities' LGAs
+    return allThreePl.filter(pl => facilityLGAs.includes(pl.lga?.toUpperCase()));
+  }, [allThreePl, selectedFacilities]);
+
   // Filter stock data based on state (for SCS/SLWG users), selected LGA, Ward, and EHF
   const filteredStockData = useMemo(() => {
     let data = stockData;
@@ -621,6 +647,21 @@ const VaccineAllocationStockList: React.FC = () => {
   }, [stockData, selectedLGA, selectedWard, selectedEHF, isSCS, isSLWG, scsState]);
 
 
+  // Group individual allocations by batch_no for computing facility_count and threepl
+  const allocationsByBatch = useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    allIndividualAllocations.forEach((allocation: any) => {
+      const batchNo = allocation.batch_no;
+      if (batchNo) {
+        if (!grouped[batchNo]) {
+          grouped[batchNo] = [];
+        }
+        grouped[batchNo].push(allocation);
+      }
+    });
+    return grouped;
+  }, [allIndividualAllocations]);
+
   // SCS and SLWG users will only see allocations for EHFs in their state
   const enrichedAllocatedData = useMemo(() => {
     // Wait for stock data to load before enriching allocated data
@@ -628,10 +669,24 @@ const VaccineAllocationStockList: React.FC = () => {
       return [];
     }
 
-    // For batch summary view, the data is already aggregated.
-    // batch_status comes directly from the API
-    return allocatedData;
-  }, [allocatedData, isStockLoading, stockData.length]);
+    // For batch summary view, enrich with facility_count and threepl from individual allocations
+    return allocatedData.map((batch: any) => {
+      const enrichedBatch = { ...batch };
+      const batchAllocations = allocationsByBatch[batch.batch_no] || [];
+
+      // Compute facility_count from the number of individual allocations in this batch
+      if (enrichedBatch.facility_count === undefined && batchAllocations.length > 0) {
+        enrichedBatch.facility_count = batchAllocations.length;
+      }
+
+      // Get threepl from the first allocation in this batch
+      if (enrichedBatch.threepl === undefined && batchAllocations[0]?.threepl) {
+        enrichedBatch.threepl = batchAllocations[0].threepl;
+      }
+
+      return enrichedBatch;
+    });
+  }, [allocatedData, isStockLoading, stockData.length, allocationsByBatch]);
 
   // Sort by batch_no descending (most recent first)
   const filteredAllocatedData = useMemo(() => {
@@ -665,6 +720,144 @@ const VaccineAllocationStockList: React.FC = () => {
   const handleThreePlChange = (event: any) => {
     setSelectedThreePl(event.target.value);
   };
+
+  // Add selected facility to the table
+  const handleAddFacilityToTable = () => {
+    if (!selectedEHFData) {
+      toast.warning('Please select a facility first');
+      return;
+    }
+
+    // Check if this facility is already in the list
+    const existingIndex = selectedFacilities.findIndex(item => item.ehfId === selectedEHF);
+    if (existingIndex !== -1) {
+      toast.warning('This facility is already in the list');
+      return;
+    }
+
+    const newFacility: SelectedFacility = {
+      id: Date.now().toString(),
+      stockId: selectedEHFData?.id,
+      ehfId: selectedEHF,
+      ehfName: selectedEHFData?.name_of_ehf || '',
+      lga: selectedEHFData?.lga || '',
+      ward: selectedEHFData?.ward || '',
+      stockData: selectedEHFData,
+    };
+
+    setSelectedFacilities(prev => [...prev, newFacility]);
+    toast.success(`Added ${selectedEHFData?.name_of_ehf} to the list`);
+
+    // Reset EHF selection for next entry
+    setSelectedEHF('');
+  };
+
+  // Remove facility from the table
+  const handleRemoveFacilityFromTable = (id: string) => {
+    setSelectedFacilities(prev => prev.filter(item => item.id !== id));
+    toast.info('Facility removed from list');
+  };
+
+  // Columns for selected facilities table (showing max stock)
+  const selectedFacilitiesColumns = useMemo(
+    () => [
+      {
+        accessorKey: 'serial_no',
+        header: 'S/N',
+        size: 60,
+        enableSorting: false,
+        Cell: ({ row }: any) => row.index + 1,
+      },
+      {
+        accessorKey: 'lga',
+        header: 'LGA',
+        size: 120,
+      },
+      {
+        accessorKey: 'ward',
+        header: 'Ward',
+        size: 120,
+      },
+      {
+        accessorKey: 'ehfName',
+        header: 'Facility Name',
+        size: 200,
+      },
+      {
+        accessorKey: 'stockData.dose_bcg',
+        header: 'Maximum BCG',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_bcg || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_hepb',
+        header: ' Maximum HepB',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_hepb || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_bopv',
+        header: 'Maximum bOPV',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_bopv || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_penta',
+        header: 'Maximum Penta',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_penta || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_pcv',
+        header: 'Maximum PCV',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_pcv || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_ipv',
+        header: 'Maximum IPV',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_ipv || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_mea',
+        header: 'Maximum Measles',
+        size: 80,
+        Cell: ({ row }: any) => row.original.stockData?.dose_mea || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_yf',
+        header: 'Maximum YF',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_yf || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_td',
+        header: 'Maximum TD',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_td || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_mena',
+        header: 'Maximum MenA',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_mena || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_rota',
+        header: 'Maximum Rota',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_rota || 0,
+      },
+      {
+        accessorKey: 'stockData.dose_hpv',
+        header: 'Maximum HPV',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.dose_hpv || 0,
+      },
+    ],
+    []
+  );
 
   const stockColumns = useMemo(
     () => [
@@ -1002,13 +1195,34 @@ const VaccineAllocationStockList: React.FC = () => {
 
   // Action items for LCS users - show process returns for status 3 or 5
   const getLcsActionItems = (row: any): ActionMenuItem<any>[] => {
-    return [
+    const actions: ActionMenuItem<any>[] = [
       {
         display: "View Details",
         handleClick: handleViewAllocation,
         icon: <VisibilityOutlinedIcon sx={{ color: "#1976D2" }} />,
       },
     ];
+
+    // Check if any allocation in this batch has been transferred to LCS (status 5, deficit_transfer_to = 'lcs')
+    const batchNo = row.batch_no;
+    const batchAllocations = allocationsByBatch[batchNo] || [];
+    const hasLcsTransfer = batchAllocations.some((alloc: any) =>
+      alloc.status === 5 && alloc.deficit_transfer_to === 'lcs'
+    );
+
+    if (hasLcsTransfer) {
+      actions.push({
+        display: "Confirm Return",
+        handleClick: (data: any) => {
+          navigate('/vaccine-allocation-batch-detail', {
+            state: { batch_no: data.batch_no }
+          });
+        },
+        icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+      });
+    }
+
+    return actions;
   };
 
   //   const handleConfirmAllocationToEHF = (data: any) => {
@@ -1147,12 +1361,57 @@ const VaccineAllocationStockList: React.FC = () => {
           const statusValue = cell.getValue();
           const status = Number(statusValue);
           const rowData = row.original;
+          const batchNo = rowData.batch_no;
+
+          // Check individual allocations in this batch
+          const batchAllocations = allocationsByBatch[batchNo] || [];
+
+          // Check various statuses in individual allocations
+          const hasLcsTransfer = batchAllocations.some((alloc: any) => alloc.status === 5 && alloc.deficit_transfer_to === 'lcs');
+          const hasEhfTransfer = batchAllocations.some((alloc: any) => alloc.status === 5 && alloc.deficit_transfer_to === 'ehf');
+          const hasPendingMcco = batchAllocations.some((alloc: any) => alloc.status === 2);
+          const hasDeficitPending = batchAllocations.some((alloc: any) => alloc.status === 3);
+
+          // Check if ALL allocations are completed (status 4)
+          const allCompleted = batchAllocations.length > 0 && batchAllocations.every((alloc: any) => alloc.status === 4);
+
           // Status workflow: 0 = Allocated by SLWG, 1 = Confirmed by SCS, 2 = Picked up by 3PL, 3 = Deficit Pending for Return, 4 = Completed, 5 = Pending Confirmation
           let label = 'Unknown';
           let color: 'warning' | 'success' | 'info' | 'default' = 'default';
           let shouldBlink = false;
 
-          if (status === 0) {
+          // Priority order: Check individual allocation statuses first
+          if (hasLcsTransfer) {
+            // Any allocation pending LCS confirmation
+            label = 'Pending LCS Confirmation';
+            color = 'warning';
+            shouldBlink = true;
+          } else if (hasEhfTransfer) {
+            // Any allocation pending EHF confirmation
+            label = 'Pending EHF Confirmation';
+            color = 'warning';
+            shouldBlink = true;
+          } else if (hasDeficitPending && hasPendingMcco) {
+            // Mix of deficit and pending MCCO
+            label = 'Deficit & Pending MCCO Confirmation';
+            color = 'warning';
+            shouldBlink = true;
+          } else if (hasDeficitPending) {
+            // Any allocation has deficit pending return
+            label = 'Deficit Pending for Return';
+            color = 'warning';
+            shouldBlink = true;
+          } else if (hasPendingMcco) {
+            // Any allocation pending MCCO confirmation
+            label = 'Pending MCCO Confirmation';
+            color = 'warning';
+            shouldBlink = true;
+          } else if (allCompleted) {
+            // ALL allocations are completed
+            label = 'Completed';
+            color = 'success';
+            shouldBlink = false;
+          } else if (status === 0) {
             label = 'Pending SCS Confirmation';
             color = 'warning';
             shouldBlink = true;
@@ -1169,16 +1428,15 @@ const VaccineAllocationStockList: React.FC = () => {
             color = 'warning';
             shouldBlink = true;
           } else if (status === 4) {
+            // Fallback to batch status if no individual allocations found
             label = 'Completed';
             color = 'success';
             shouldBlink = false;
           } else if (status === 5) {
-            // Batch status 5 = all individual allocations are status 3 (Deficit Pending for Return)
             label = 'Deficit Pending for Return';
             color = 'warning';
             shouldBlink = true;
           } else if (status === 6) {
-            // Batch status 6 = mix of status 2 and status 3 in individual allocations
             label = 'Deficit & Pending MCCO Confirmation';
             color = 'warning';
             shouldBlink = true;
@@ -1197,7 +1455,7 @@ const VaccineAllocationStockList: React.FC = () => {
         },
       }
     ],
-    [allThreePl]
+    [allThreePl, allocationsByBatch]
   );
 
   // Draft Allocation Columns (for the list before submission)
@@ -1408,8 +1666,8 @@ const VaccineAllocationStockList: React.FC = () => {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth disabled={!selectedLGA || available3PLs.length === 0}>
+                <Grid item xs={12} md={3}>
+                  {/* <FormControl fullWidth disabled={!selectedLGA || available3PLs.length === 0}>
                     <InputLabel>Select 3PL</InputLabel>
                     <Select
                       value={selectedThreePl}
@@ -1425,13 +1683,107 @@ const VaccineAllocationStockList: React.FC = () => {
                         </MenuItem>
                       ))}
                     </Select>
-                  </FormControl>
+                  </FormControl> */}
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  {/* <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleAddFacilityToTable}
+                    disabled={!selectedEHF}
+                    startIcon={<AddCircleOutlineIcon />}
+                    sx={{
+                      height: '56px',
+                      background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                      },
+                    }}
+                  >
+                    Add Facility
+                  </Button> */}
+                  <Button variant="contained" color="primary" size="large" onClick={handleAddFacilityToTable}>
+                    Add Facility
+                  </Button>
                 </Grid>
               </Grid>
             </Box>
 
-            {/* Show EHF Details and Vaccine Boxes when EHF is selected */}
-            {selectedEHFData && (
+            {/* Selected Facilities Table - showing max stock */}
+            {selectedFacilities.length > 0 && (
+              <Box sx={{ mb: 3 }}>
+                <VaxTable
+                  tableHeader={`Selected Facilities (${selectedFacilities.length})`}
+                  columns={selectedFacilitiesColumns}
+                  data={selectedFacilities}
+                  loading={false}
+                  getActionMenuItems={(row) => [
+                    {
+                      display: "Remove",
+                      handleClick: (data: SelectedFacility) => handleRemoveFacilityFromTable(data.id),
+                      icon: <DeleteOutlineIcon sx={{ color: "red" }} />,
+                    },
+                  ]}
+                />
+
+                {/* Allocation Controls - Date, Safety Box, 3PL, and Submit Button */}
+                <Card sx={{ mt: 3 }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'rgb(12, 125, 64)' }}>
+                      Allocation Details
+                    </Typography>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Select 3PL</InputLabel>
+                          <Select
+                            value={selectedThreePl}
+                            onChange={handleThreePlChange}
+                            label="Select 3PL"
+                          >
+                            <MenuItem value="">
+                              <em>Select 3PL for Delivery</em>
+                            </MenuItem>
+                            {facilityBased3PLs.map((pl) => (
+                              <MenuItem key={pl.id} value={pl.id?.toString()}>
+                                {pl.threepl_name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          disabled={selectedFacilities.length === 0 || !selectedThreePl}
+                          onClick={() => {
+                            navigate('/vaccine-allocation-bulk-form', {
+                              state: {
+                                selectedFacilities,
+                                selectedThreePl,
+                              },
+                            });
+                          }}
+                          sx={{
+                            height: '56px',
+                            background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                            },
+                          }}
+                        >
+                          Allocate Vaccine
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Box>
+            )}
+
+            {/* Show EHF Details and Vaccine Boxes when EHF is selected - HIDDEN FOR NEW FLOW */}
+            {false && selectedEHFData && (
               <>
                 {/* EHF Details Card */}
                 <Card sx={{ mb: 3 }}>
@@ -1445,7 +1797,7 @@ const VaccineAllocationStockList: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">
                             EHF Name
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData.name_of_ehf}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData?.name_of_ehf}</Typography>
                         </Paper>
                       </Grid>
                       <Grid item xs={12} md={6}>
@@ -1453,7 +1805,7 @@ const VaccineAllocationStockList: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">
                             Unique ID
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData.assigned_unique_id}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData?.assigned_unique_id}</Typography>
                         </Paper>
                       </Grid>
                       <Grid item xs={12} md={4}>
@@ -1461,7 +1813,7 @@ const VaccineAllocationStockList: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">
                             State
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData.state}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData?.state}</Typography>
                         </Paper>
                       </Grid>
                       <Grid item xs={12} md={4}>
@@ -1469,7 +1821,7 @@ const VaccineAllocationStockList: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">
                             LGA
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData.lga}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData?.lga}</Typography>
                         </Paper>
                       </Grid>
                       <Grid item xs={12} md={4}>
@@ -1477,7 +1829,7 @@ const VaccineAllocationStockList: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">
                             Ward
                           </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData.ward}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{selectedEHFData?.ward}</Typography>
                         </Paper>
                       </Grid>
                     </Grid>
@@ -1502,20 +1854,20 @@ const VaccineAllocationStockList: React.FC = () => {
                             p: 2,
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: (selectedEHFData.dose_bcg || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_bcg || 0) > 0 ? '#ff9800' : '#f44336',
+                            borderColor: (selectedEHFData?.dose_bcg || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_bcg || 0) > 0 ? '#ff9800' : '#f44336',
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>BCG</Typography>
                             <Chip
-                              label={`Available: ${selectedEHFData.dose_bcg || 0}`}
-                              color={(selectedEHFData.dose_bcg || 0) > 100 ? "success" : (selectedEHFData.dose_bcg || 0) > 0 ? "warning" : "error"}
+                              label={`Maximum Stock: ${selectedEHFData?.dose_bcg || 0}`}
+                              color={(selectedEHFData?.dose_bcg || 0) > 100 ? "success" : (selectedEHFData?.dose_bcg || 0) > 0 ? "warning" : "error"}
                               size="small"
                             />
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={Math.min(((selectedEHFData.dose_bcg || 0) / 1000) * 100, 100)}
+                            value={Math.min(((selectedEHFData?.dose_bcg || 0) / 1000) * 100, 100)}
                             sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }}
                           />
                           <TextField
@@ -1525,11 +1877,11 @@ const VaccineAllocationStockList: React.FC = () => {
                             label="Quantity to Allocate"
                             value={allocationData.dose_bcg}
                             onChange={(e) => handleAllocationChange('dose_bcg', e.target.value)}
-                            inputProps={{ min: 0, max: selectedEHFData.dose_bcg || 0 }}
+                            inputProps={{ min: 0, max: selectedEHFData?.dose_bcg || 0 }}
                           />
                           {allocationData.dose_bcg && (
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                              Remaining: {(selectedEHFData.dose_bcg || 0) - (parseInt(allocationData.dose_bcg) || 0)}
+                              Remaining: {(selectedEHFData?.dose_bcg || 0) - (parseInt(allocationData.dose_bcg) || 0)}
                             </Typography>
                           )}
                           {parseInt(allocationData.dose_bcg) > 0 && (
@@ -1589,20 +1941,20 @@ const VaccineAllocationStockList: React.FC = () => {
                             p: 2,
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: (selectedEHFData.dose_hepb || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_hepb || 0) > 0 ? '#ff9800' : '#f44336',
+                            borderColor: (selectedEHFData?.dose_hepb || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_hepb || 0) > 0 ? '#ff9800' : '#f44336',
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>HepB</Typography>
                             <Chip
-                              label={`Available: ${selectedEHFData.dose_hepb || 0}`}
-                              color={(selectedEHFData.dose_hepb || 0) > 100 ? "success" : (selectedEHFData.dose_hepb || 0) > 0 ? "warning" : "error"}
+                              label={`Maximum Stock: ${selectedEHFData?.dose_hepb || 0}`}
+                              color={(selectedEHFData?.dose_hepb || 0) > 100 ? "success" : (selectedEHFData?.dose_hepb || 0) > 0 ? "warning" : "error"}
                               size="small"
                             />
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={Math.min(((selectedEHFData.dose_hepb || 0) / 1000) * 100, 100)}
+                            value={Math.min(((selectedEHFData?.dose_hepb || 0) / 1000) * 100, 100)}
                             sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }}
                           />
                           <TextField
@@ -1612,11 +1964,11 @@ const VaccineAllocationStockList: React.FC = () => {
                             label="Quantity to Allocate"
                             value={allocationData.dose_hepb}
                             onChange={(e) => handleAllocationChange('dose_hepb', e.target.value)}
-                            inputProps={{ min: 0, max: selectedEHFData.dose_hepb || 0 }}
+                            inputProps={{ min: 0, max: selectedEHFData?.dose_hepb || 0 }}
                           />
                           {allocationData.dose_hepb && (
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                              Remaining: {(selectedEHFData.dose_hepb || 0) - (parseInt(allocationData.dose_hepb) || 0)}
+                              Remaining: {(selectedEHFData?.dose_hepb || 0) - (parseInt(allocationData.dose_hepb) || 0)}
                             </Typography>
                           )}
                           {parseInt(allocationData.dose_hepb) > 0 && (
@@ -1676,20 +2028,20 @@ const VaccineAllocationStockList: React.FC = () => {
                             p: 2,
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: (selectedEHFData.dose_bopv || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_bopv || 0) > 0 ? '#ff9800' : '#f44336',
+                            borderColor: (selectedEHFData?.dose_bopv || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_bopv || 0) > 0 ? '#ff9800' : '#f44336',
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>bOPV</Typography>
                             <Chip
-                              label={`Available: ${selectedEHFData.dose_bopv || 0}`}
-                              color={(selectedEHFData.dose_bopv || 0) > 100 ? "success" : (selectedEHFData.dose_bopv || 0) > 0 ? "warning" : "error"}
+                              label={`Maximum Stock: ${selectedEHFData?.dose_bopv || 0}`}
+                              color={(selectedEHFData?.dose_bopv || 0) > 100 ? "success" : (selectedEHFData?.dose_bopv || 0) > 0 ? "warning" : "error"}
                               size="small"
                             />
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={Math.min(((selectedEHFData.dose_bopv || 0) / 1000) * 100, 100)}
+                            value={Math.min(((selectedEHFData?.dose_bopv || 0) / 1000) * 100, 100)}
                             sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }}
                           />
                           <TextField
@@ -1699,11 +2051,11 @@ const VaccineAllocationStockList: React.FC = () => {
                             label="Quantity to Allocate"
                             value={allocationData.dose_bopv}
                             onChange={(e) => handleAllocationChange('dose_bopv', e.target.value)}
-                            inputProps={{ min: 0, max: selectedEHFData.dose_bopv || 0 }}
+                            inputProps={{ min: 0, max: selectedEHFData?.dose_bopv || 0 }}
                           />
                           {allocationData.dose_bopv && (
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                              Remaining: {(selectedEHFData.dose_bopv || 0) - (parseInt(allocationData.dose_bopv) || 0)}
+                              Remaining: {(selectedEHFData?.dose_bopv || 0) - (parseInt(allocationData.dose_bopv) || 0)}
                             </Typography>
                           )}
                           {parseInt(allocationData.dose_bopv) > 0 && (
@@ -1742,20 +2094,20 @@ const VaccineAllocationStockList: React.FC = () => {
                             p: 2,
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: (selectedEHFData.dose_penta || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_penta || 0) > 0 ? '#ff9800' : '#f44336',
+                            borderColor: (selectedEHFData?.dose_penta || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_penta || 0) > 0 ? '#ff9800' : '#f44336',
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>Penta</Typography>
                             <Chip
-                              label={`Available: ${selectedEHFData.dose_penta || 0}`}
-                              color={(selectedEHFData.dose_penta || 0) > 100 ? "success" : (selectedEHFData.dose_penta || 0) > 0 ? "warning" : "error"}
+                              label={`Maximum Stock: ${selectedEHFData?.dose_penta || 0}`}
+                              color={(selectedEHFData?.dose_penta || 0) > 100 ? "success" : (selectedEHFData?.dose_penta || 0) > 0 ? "warning" : "error"}
                               size="small"
                             />
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={Math.min(((selectedEHFData.dose_penta || 0) / 1000) * 100, 100)}
+                            value={Math.min(((selectedEHFData?.dose_penta || 0) / 1000) * 100, 100)}
                             sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }}
                           />
                           <TextField
@@ -1765,11 +2117,11 @@ const VaccineAllocationStockList: React.FC = () => {
                             label="Quantity to Allocate"
                             value={allocationData.dose_penta}
                             onChange={(e) => handleAllocationChange('dose_penta', e.target.value)}
-                            inputProps={{ min: 0, max: selectedEHFData.dose_penta || 0 }}
+                            inputProps={{ min: 0, max: selectedEHFData?.dose_penta || 0 }}
                           />
                           {allocationData.dose_penta && (
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                              Remaining: {(selectedEHFData.dose_penta || 0) - (parseInt(allocationData.dose_penta) || 0)}
+                              Remaining: {(selectedEHFData?.dose_penta || 0) - (parseInt(allocationData.dose_penta) || 0)}
                             </Typography>
                           )}
                           {parseInt(allocationData.dose_penta) > 0 && (
@@ -1808,20 +2160,20 @@ const VaccineAllocationStockList: React.FC = () => {
                             p: 2,
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: (selectedEHFData.dose_pcv || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_pcv || 0) > 0 ? '#ff9800' : '#f44336',
+                            borderColor: (selectedEHFData?.dose_pcv || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_pcv || 0) > 0 ? '#ff9800' : '#f44336',
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>PCV</Typography>
                             <Chip
-                              label={`Available: ${selectedEHFData.dose_pcv || 0}`}
-                              color={(selectedEHFData.dose_pcv || 0) > 100 ? "success" : (selectedEHFData.dose_pcv || 0) > 0 ? "warning" : "error"}
+                              label={`Maximum Stock: ${selectedEHFData?.dose_pcv || 0}`}
+                              color={(selectedEHFData?.dose_pcv || 0) > 100 ? "success" : (selectedEHFData?.dose_pcv || 0) > 0 ? "warning" : "error"}
                               size="small"
                             />
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={Math.min(((selectedEHFData.dose_pcv || 0) / 1000) * 100, 100)}
+                            value={Math.min(((selectedEHFData?.dose_pcv || 0) / 1000) * 100, 100)}
                             sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }}
                           />
                           <TextField
@@ -1831,11 +2183,11 @@ const VaccineAllocationStockList: React.FC = () => {
                             label="Quantity to Allocate"
                             value={allocationData.dose_pcv}
                             onChange={(e) => handleAllocationChange('dose_pcv', e.target.value)}
-                            inputProps={{ min: 0, max: selectedEHFData.dose_pcv || 0 }}
+                            inputProps={{ min: 0, max: selectedEHFData?.dose_pcv || 0 }}
                           />
                           {allocationData.dose_pcv && (
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                              Remaining: {(selectedEHFData.dose_pcv || 0) - (parseInt(allocationData.dose_pcv) || 0)}
+                              Remaining: {(selectedEHFData?.dose_pcv || 0) - (parseInt(allocationData.dose_pcv) || 0)}
                             </Typography>
                           )}
                           {parseInt(allocationData.dose_pcv) > 0 && (
@@ -1874,20 +2226,20 @@ const VaccineAllocationStockList: React.FC = () => {
                             p: 2,
                             borderRadius: 2,
                             border: '2px solid',
-                            borderColor: (selectedEHFData.dose_ipv || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_ipv || 0) > 0 ? '#ff9800' : '#f44336',
+                            borderColor: (selectedEHFData?.dose_ipv || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_ipv || 0) > 0 ? '#ff9800' : '#f44336',
                           }}
                         >
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>IPV</Typography>
                             <Chip
-                              label={`Available: ${selectedEHFData.dose_ipv || 0}`}
-                              color={(selectedEHFData.dose_ipv || 0) > 100 ? "success" : (selectedEHFData.dose_ipv || 0) > 0 ? "warning" : "error"}
+                              label={`Maximum Stock: ${selectedEHFData?.dose_ipv || 0}`}
+                              color={(selectedEHFData?.dose_ipv || 0) > 100 ? "success" : (selectedEHFData?.dose_ipv || 0) > 0 ? "warning" : "error"}
                               size="small"
                             />
                           </Box>
                           <LinearProgress
                             variant="determinate"
-                            value={Math.min(((selectedEHFData.dose_ipv || 0) / 1000) * 100, 100)}
+                            value={Math.min(((selectedEHFData?.dose_ipv || 0) / 1000) * 100, 100)}
                             sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }}
                           />
                           <TextField
@@ -1897,11 +2249,11 @@ const VaccineAllocationStockList: React.FC = () => {
                             label="Quantity to Allocate"
                             value={allocationData.dose_ipv}
                             onChange={(e) => handleAllocationChange('dose_ipv', e.target.value)}
-                            inputProps={{ min: 0, max: selectedEHFData.dose_ipv || 0 }}
+                            inputProps={{ min: 0, max: selectedEHFData?.dose_ipv || 0 }}
                           />
                           {allocationData.dose_ipv && (
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                              Remaining: {(selectedEHFData.dose_ipv || 0) - (parseInt(allocationData.dose_ipv) || 0)}
+                              Remaining: {(selectedEHFData?.dose_ipv || 0) - (parseInt(allocationData.dose_ipv) || 0)}
                             </Typography>
                           )}
                           {parseInt(allocationData.dose_ipv) > 0 && (
@@ -1934,14 +2286,14 @@ const VaccineAllocationStockList: React.FC = () => {
 
                       {/* Measles */}
                       <Grid item xs={12} sm={6} md={4}>
-                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData.dose_mea || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_mea || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.dose_mea || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_mea || 0) > 0 ? '#ff9800' : '#f44336' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>Measles</Typography>
-                            <Chip label={`Available: ${selectedEHFData.dose_mea || 0}`} color={(selectedEHFData.dose_mea || 0) > 100 ? "success" : (selectedEHFData.dose_mea || 0) > 0 ? "warning" : "error"} size="small" />
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.dose_mea || 0}`} color={(selectedEHFData?.dose_mea || 0) > 100 ? "success" : (selectedEHFData?.dose_mea || 0) > 0 ? "warning" : "error"} size="small" />
                           </Box>
-                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData.dose_mea || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
-                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_mea} onChange={(e) => handleAllocationChange('dose_mea', e.target.value)} inputProps={{ min: 0, max: selectedEHFData.dose_mea || 0 }} />
-                          {allocationData.dose_mea && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData.dose_mea || 0) - (parseInt(allocationData.dose_mea) || 0)}</Typography>}
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.dose_mea || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_mea} onChange={(e) => handleAllocationChange('dose_mea', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.dose_mea || 0 }} />
+                          {allocationData.dose_mea && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.dose_mea || 0) - (parseInt(allocationData.dose_mea) || 0)}</Typography>}
                           {parseInt(allocationData.dose_mea) > 0 && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
@@ -1957,14 +2309,14 @@ const VaccineAllocationStockList: React.FC = () => {
 
                       {/* YF */}
                       <Grid item xs={12} sm={6} md={4}>
-                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData.dose_yf || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_yf || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.dose_yf || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_yf || 0) > 0 ? '#ff9800' : '#f44336' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>YF</Typography>
-                            <Chip label={`Available: ${selectedEHFData.dose_yf || 0}`} color={(selectedEHFData.dose_yf || 0) > 100 ? "success" : (selectedEHFData.dose_yf || 0) > 0 ? "warning" : "error"} size="small" />
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.dose_yf || 0}`} color={(selectedEHFData?.dose_yf || 0) > 100 ? "success" : (selectedEHFData?.dose_yf || 0) > 0 ? "warning" : "error"} size="small" />
                           </Box>
-                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData.dose_yf || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
-                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_yf} onChange={(e) => handleAllocationChange('dose_yf', e.target.value)} inputProps={{ min: 0, max: selectedEHFData.dose_yf || 0 }} />
-                          {allocationData.dose_yf && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData.dose_yf || 0) - (parseInt(allocationData.dose_yf) || 0)}</Typography>}
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.dose_yf || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_yf} onChange={(e) => handleAllocationChange('dose_yf', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.dose_yf || 0 }} />
+                          {allocationData.dose_yf && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.dose_yf || 0) - (parseInt(allocationData.dose_yf) || 0)}</Typography>}
                           {parseInt(allocationData.dose_yf) > 0 && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
@@ -1980,14 +2332,14 @@ const VaccineAllocationStockList: React.FC = () => {
 
                       {/* TD */}
                       <Grid item xs={12} sm={6} md={4}>
-                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData.dose_td || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_td || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.dose_td || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_td || 0) > 0 ? '#ff9800' : '#f44336' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>TD</Typography>
-                            <Chip label={`Available: ${selectedEHFData.dose_td || 0}`} color={(selectedEHFData.dose_td || 0) > 100 ? "success" : (selectedEHFData.dose_td || 0) > 0 ? "warning" : "error"} size="small" />
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.dose_td || 0}`} color={(selectedEHFData?.dose_td || 0) > 100 ? "success" : (selectedEHFData?.dose_td || 0) > 0 ? "warning" : "error"} size="small" />
                           </Box>
-                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData.dose_td || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
-                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_td} onChange={(e) => handleAllocationChange('dose_td', e.target.value)} inputProps={{ min: 0, max: selectedEHFData.dose_td || 0 }} />
-                          {allocationData.dose_td && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData.dose_td || 0) - (parseInt(allocationData.dose_td) || 0)}</Typography>}
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.dose_td || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_td} onChange={(e) => handleAllocationChange('dose_td', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.dose_td || 0 }} />
+                          {allocationData.dose_td && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.dose_td || 0) - (parseInt(allocationData.dose_td) || 0)}</Typography>}
                           {parseInt(allocationData.dose_td) > 0 && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
@@ -2003,14 +2355,14 @@ const VaccineAllocationStockList: React.FC = () => {
 
                       {/* MenA */}
                       <Grid item xs={12} sm={6} md={4}>
-                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData.dose_mena || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_mena || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.dose_mena || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_mena || 0) > 0 ? '#ff9800' : '#f44336' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>MenA</Typography>
-                            <Chip label={`Available: ${selectedEHFData.dose_mena || 0}`} color={(selectedEHFData.dose_mena || 0) > 100 ? "success" : (selectedEHFData.dose_mena || 0) > 0 ? "warning" : "error"} size="small" />
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.dose_mena || 0}`} color={(selectedEHFData?.dose_mena || 0) > 100 ? "success" : (selectedEHFData?.dose_mena || 0) > 0 ? "warning" : "error"} size="small" />
                           </Box>
-                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData.dose_mena || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
-                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_mena} onChange={(e) => handleAllocationChange('dose_mena', e.target.value)} inputProps={{ min: 0, max: selectedEHFData.dose_mena || 0 }} />
-                          {allocationData.dose_mena && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData.dose_mena || 0) - (parseInt(allocationData.dose_mena) || 0)}</Typography>}
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.dose_mena || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_mena} onChange={(e) => handleAllocationChange('dose_mena', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.dose_mena || 0 }} />
+                          {allocationData.dose_mena && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.dose_mena || 0) - (parseInt(allocationData.dose_mena) || 0)}</Typography>}
                           {parseInt(allocationData.dose_mena) > 0 && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
@@ -2026,14 +2378,14 @@ const VaccineAllocationStockList: React.FC = () => {
 
                       {/* Rota */}
                       <Grid item xs={12} sm={6} md={4}>
-                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData.dose_rota || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_rota || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.dose_rota || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_rota || 0) > 0 ? '#ff9800' : '#f44336' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>Rota</Typography>
-                            <Chip label={`Available: ${selectedEHFData.dose_rota || 0}`} color={(selectedEHFData.dose_rota || 0) > 100 ? "success" : (selectedEHFData.dose_rota || 0) > 0 ? "warning" : "error"} size="small" />
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.dose_rota || 0}`} color={(selectedEHFData?.dose_rota || 0) > 100 ? "success" : (selectedEHFData?.dose_rota || 0) > 0 ? "warning" : "error"} size="small" />
                           </Box>
-                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData.dose_rota || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
-                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_rota} onChange={(e) => handleAllocationChange('dose_rota', e.target.value)} inputProps={{ min: 0, max: selectedEHFData.dose_rota || 0 }} />
-                          {allocationData.dose_rota && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData.dose_rota || 0) - (parseInt(allocationData.dose_rota) || 0)}</Typography>}
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.dose_rota || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_rota} onChange={(e) => handleAllocationChange('dose_rota', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.dose_rota || 0 }} />
+                          {allocationData.dose_rota && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.dose_rota || 0) - (parseInt(allocationData.dose_rota) || 0)}</Typography>}
                           {parseInt(allocationData.dose_rota) > 0 && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
@@ -2049,14 +2401,14 @@ const VaccineAllocationStockList: React.FC = () => {
 
                       {/* HPV */}
                       <Grid item xs={12} sm={6} md={4}>
-                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData.dose_hpv || 0) > 100 ? '#4caf50' : (selectedEHFData.dose_hpv || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.dose_hpv || 0) > 100 ? '#4caf50' : (selectedEHFData?.dose_hpv || 0) > 0 ? '#ff9800' : '#f44336' }}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>HPV</Typography>
-                            <Chip label={`Available: ${selectedEHFData.dose_hpv || 0}`} color={(selectedEHFData.dose_hpv || 0) > 100 ? "success" : (selectedEHFData.dose_hpv || 0) > 0 ? "warning" : "error"} size="small" />
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.dose_hpv || 0}`} color={(selectedEHFData?.dose_hpv || 0) > 100 ? "success" : (selectedEHFData?.dose_hpv || 0) > 0 ? "warning" : "error"} size="small" />
                           </Box>
-                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData.dose_hpv || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
-                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_hpv} onChange={(e) => handleAllocationChange('dose_hpv', e.target.value)} inputProps={{ min: 0, max: selectedEHFData.dose_hpv || 0 }} />
-                          {allocationData.dose_hpv && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData.dose_hpv || 0) - (parseInt(allocationData.dose_hpv) || 0)}</Typography>}
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.dose_hpv || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_hpv} onChange={(e) => handleAllocationChange('dose_hpv', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.dose_hpv || 0 }} />
+                          {allocationData.dose_hpv && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.dose_hpv || 0) - (parseInt(allocationData.dose_hpv) || 0)}</Typography>}
                           {parseInt(allocationData.dose_hpv) > 0 && (
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>

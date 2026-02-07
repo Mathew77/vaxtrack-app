@@ -210,7 +210,7 @@ export const navData = [
     title: 'Vaccine Allocation',
     path: '/vaccine-allocation-page',
     icon: <MenuBookIcon />,
-    roles: ['ehf', 'uhf', 'threepl', 'conveyor'],
+    roles: ['ehf', 'uhf', 'conveyor'],
   },
   {
     title: 'Vaccine Allocation Stock',

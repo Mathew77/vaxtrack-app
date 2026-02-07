@@ -46,6 +46,8 @@ const PcvAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -60,18 +62,87 @@ const PcvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate PCV fields - max 2
-    // Exclude non-quantity fields like pcvEmptyVials, pcvSafetyBoxes, pcvUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedPcvFields = ['pcvEmptyVials', 'pcvSafetyBoxes', 'pcvUnusedVials'];
-    if (name.startsWith('pcv') && !excludedPcvFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 2) {
-        return;
+
+    // Handle PCV vaccine allocation - validate divisibility by 5 and auto-calculate syringes
+    if (name === 'pcvVaccineAllocated' && !excludedPcvFields.includes(name)) {
+      if (value !== '' && numValue % 5 !== 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 5' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          pcv05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 5 === 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          pcv05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          pcv05mlSyringeAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle PCV vaccine received - validate divisibility by 5 and auto-calculate syringes
+    else if (name === 'pcvVaccineReceived' && !excludedPcvFields.includes(name)) {
+      if (value !== '' && numValue % 5 !== 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 5' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          pcv05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 5 === 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          pcv05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          pcv05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other PCV fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -82,7 +153,7 @@ const PcvAllocationComponent = ({
         onDataChange(current);
         return current;
       });
-    }, 150); 
+    }, 150);
   }, [onDataChange]);
 
   useEffect(() => {
@@ -101,11 +172,11 @@ const PcvAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -211,7 +282,7 @@ const PcvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV Vaccine</Typography>
-                    <Tooltip title="Enter PCV vaccine quantity (max: 2)" arrow placement="top">
+                    <Tooltip title="Enter PCV vaccine quantity (5 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -222,7 +293,9 @@ const PcvAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 2, min: 0 }}
+                        error={!!errors.pcvVaccineAllocated}
+                        helperText={errors.pcvVaccineAllocated}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -230,18 +303,18 @@ const PcvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter PCV 0.5ml syringe quantity (max: 2)" arrow placement="top">
+                    <Tooltip title="Enter PCV 0.5ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="pcv05mlSyringeAllocated"
                         value={formData.pcv05mlSyringeAllocated}
                         onChange={handleChange}
-                       disabled={!canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 2, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -435,7 +508,7 @@ const PcvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV Vaccine</Typography>
-                    <Tooltip title="Enter PCV vaccine quantity received (max: 2)" arrow placement="top">
+                    <Tooltip title="Enter PCV vaccine quantity received (5 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -446,7 +519,9 @@ const PcvAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 2, min: 0 }}
+                        error={!!errors.pcvVaccineReceived}
+                        helperText={errors.pcvVaccineReceived}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -454,18 +529,18 @@ const PcvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>PCV 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter PCV 0.5ml syringe quantity received (max: 2)" arrow placement="top">
+                    <Tooltip title="Enter PCV 0.5ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="pcv05mlSyringeReceived"
                         value={formData.pcv05mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 2, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>

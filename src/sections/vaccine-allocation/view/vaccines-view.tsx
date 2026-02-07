@@ -69,20 +69,20 @@ export default function VaccineView() {
 
   const { data: allocationData, isView = false, isUpdate = false } = location.state || {};
 
-    const createAllocation = useCreateAllocation();
-    const [selectedEhf, setSelectedEhf] = useState<number | null>(null);
-    const [selectedEhfUniqueId, setSelectedEhfUniqueId] = useState<string | null>(null);
+  const createAllocation = useCreateAllocation();
+  const [selectedEhf, setSelectedEhf] = useState<number | null>(null);
+  const [selectedEhfUniqueId, setSelectedEhfUniqueId] = useState<string | null>(null);
 
-    // Track if initial setup has been done to prevent resetting tab on subsequent allEhf updates
-    const initialSetupDoneRef = useRef(false);
+  // Track if initial setup has been done to prevent resetting tab on subsequent allEhf updates
+  const initialSetupDoneRef = useRef(false);
 
-    // Fetch UHF based on selected EHF's assigned_unique_id
-    const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHFByEHF(selectedEhfUniqueId);
-    const [selectedUhf, setSelectedUhf] = useState<number | null>(null);
-    const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
-    const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
-    const [status, setStatus] = useState<number>(1);
-    const [mfaCode, setMfaCode] = useState<string>('');
+  // Fetch UHF based on selected EHF's assigned_unique_id
+  const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHFByEHF(selectedEhfUniqueId);
+  const [selectedUhf, setSelectedUhf] = useState<number | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
+  const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
+  const [status, setStatus] = useState<number>(1);
+  const [mfaCode, setMfaCode] = useState<string>('');
 
   const userRole = sessionStorage.getItem('userRole') || '';
 
@@ -106,7 +106,7 @@ export default function VaccineView() {
     if ((userRole === 'conveyor' || userRole === 'ehf') && userAssignedEhfs.length > 0) {
       const assignedId = userAssignedEhfs[0];
       if (typeof assignedId === 'string' && assignedId.includes('-')) {
-        return assignedId.split('-')[0]; 
+        return assignedId.split('-')[0];
       }
     }
     return null;
@@ -202,6 +202,22 @@ export default function VaccineView() {
     }
   }, [allocationData, allEhf]);
 
+  const validationRules: Record<string, number> = {
+    bcg: 20,
+    measles: 5,
+    yf: 10,
+    malaria: 10,
+    menA: 10,
+    rota: 10,
+    hpv: 1,
+    hepB: 10,
+    bopv: 20,
+    penta: 10,
+    ipv: 10,
+    pcv: 5,
+    td: 10
+  };
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setSelectedTab(newValue);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -209,6 +225,25 @@ export default function VaccineView() {
 
 
   const handleNext = () => {
+    // Validate current tab before moving to next
+    const rule = validationRules[selectedTab];
+    if (rule) {
+      const data = formDataCollection[selectedTab];
+      if (data) {
+        const allocatedVal = data[`${selectedTab}VaccineAllocated`] || '';
+        const receivedVal = data[`${selectedTab}VaccineReceived`] || '';
+
+        const allocated = parseInt(allocatedVal, 10) || 0;
+        const received = parseInt(receivedVal, 10) || 0;
+
+        if ((allocatedVal !== '' && allocated % rule !== 0) ||
+          (receivedVal !== '' && received % rule !== 0)) {
+          toast.error(`Quantity must be divisible by ${rule} for ${selectedTab.toUpperCase()}`);
+          return;
+        }
+      }
+    }
+
     const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
     const nextIndex = currentIndex + 1;
     if (nextIndex < vaccineOptions.length) {
@@ -218,88 +253,111 @@ export default function VaccineView() {
   };
 
   const handleEhfChange = (event: any, newValue: any) => {
-        setSelectedEhf(newValue?.id || null);
-        setSelectedEhfUniqueId(newValue?.assigned_unique_id || null);
-        setSelectedUhf(null);
-    };
+    setSelectedEhf(newValue?.id || null);
+    setSelectedEhfUniqueId(newValue?.assigned_unique_id || null);
+    setSelectedUhf(null);
+  };
 
-    const handleUhfChange = (event: any) => {
-        setSelectedUhf(event.target.value as number);
-    };
+  const handleUhfChange = (event: any) => {
+    setSelectedUhf(event.target.value as number);
+  };
 
-    const handleDataChange = useCallback(
-        (data: any) => {
-            setFormDataCollection((prev) => ({
-                ...prev,
-                [selectedTab]: { ...data, ehf_id: selectedEhf, uhf_id: selectedUhf },
-            }));
-        },
-        [selectedTab, selectedEhf, selectedUhf]
-    );
+  const handleDataChange = useCallback(
+    (data: any) => {
+      setFormDataCollection((prev) => ({
+        ...prev,
+        [selectedTab]: { ...data, ehf_id: selectedEhf, uhf_id: selectedUhf },
+      }));
+    },
+    [selectedTab, selectedEhf, selectedUhf]
+  );
 
-    const handleBack = () => {
-      const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
-      const prevIndex = currentIndex - 1;
-      if (prevIndex >= 0) {
-        setSelectedTab(vaccineOptions[prevIndex].value);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    };
+  const handleBack = () => {
+    const currentIndex = vaccineOptions.findIndex((v) => v.value === selectedTab);
+    const prevIndex = currentIndex - 1;
+    if (prevIndex >= 0) {
+      setSelectedTab(vaccineOptions[prevIndex].value);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
 
-    const handleSubmit = async () => {
-      const mfaValidation = await validateMfaForSubmission(mfaCode);
-      if (!mfaValidation.isValid) {
-        toast.error(mfaValidation.error);
+  const handleSubmit = async () => {
+    const mfaValidation = await validateMfaForSubmission(mfaCode);
+    if (!mfaValidation.isValid) {
+      toast.error(mfaValidation.error);
+      return;
+    }
+
+    if (!selectedEhf) {
+      toast.error('Please select EHF.');
+      return;
+    }
+
+    // Temporarily relaxed UHF requirement
+    // if (!selectedUhf) {
+    //   toast.error('Please select UHF.');
+    //   return;
+    // }
+
+    if (Object.keys(formDataCollection).length === 0) {
+      toast.error('Please fill out at least one vaccine form before submitting.');
+      return;
+    }
+
+    // Final validation of all filled forms
+    const invalidVaccine = Object.entries(formDataCollection).find(([type, data]) => {
+      const rule = validationRules[type];
+      if (!rule) return false;
+
+      const allocatedVal = data[`${type}VaccineAllocated`] || '';
+      const receivedVal = data[`${type}VaccineReceived`] || '';
+
+      const allocated = parseInt(allocatedVal, 10) || 0;
+      const received = parseInt(receivedVal, 10) || 0;
+
+      return (allocatedVal !== '' && allocated % rule !== 0) ||
+        (receivedVal !== '' && received % rule !== 0);
+    });
+
+    if (invalidVaccine) {
+      const [type] = invalidVaccine;
+      const rule = validationRules[type];
+      toast.error(`Validation failed for ${type.toUpperCase()}. Quantity must be divisible by ${rule}.`);
+      setSelectedTab(type); // Switch to the invalid tab
+      return;
+    }
+
+    if (isUpdate && !allocationData?.id) {
+      toast.error('Allocation ID is missing. Cannot update.');
+      return;
+    }
+
+    // Skip UHF validation for Conveyor since they work directly with EHF
+    let selectedUhfData: UHFType | undefined;
+    if (userRole !== 'conveyor') {
+      selectedUhfData = allUhf.find((uhf: UHFType) => uhf.id === selectedUhf);
+      if (!selectedUhfData) {
+        toast.error('Selected UHF not found. Please select a valid UHF.');
         return;
       }
+    }
 
-      if (!selectedEhf) {
-        toast.error('Please select EHF.');
-        return;
-      }
+    let newStatus = status;
+    // Conveyor enters data on behalf of EHF for both forward and reverse logistics
+    if (userRole === 'conveyor' && status === 1) {
+      newStatus = 6; // Forward: Conveyor allocates on behalf of EHF → jump to reverse logistics step
+    } else if (userRole === 'conveyor' && status === 6) {
+      newStatus = 7; // Reverse: Conveyor receives on behalf of EHF → completed
+    }
 
-      // Temporarily relaxed UHF requirement
-      // if (!selectedUhf) {
-      //   toast.error('Please select UHF.');
-      //   return;
-      // }
+    const request_id = isUpdate ? allocationData.vaccines_allocation_detail[0].request_id : uuidv4();
+    const username = sessionStorage.getItem('username') || '';
 
-      if (Object.keys(formDataCollection).length === 0) {
-        toast.error('Please fill out at least one vaccine form before submitting.');
-        return;
-      }
+    // Get selected EHF data for Conveyor to extract state/lga
+    const selectedEhfData = filteredEhf.find((ehf: any) => ehf.id === selectedEhf);
 
-      if (isUpdate && !allocationData?.id) {
-        toast.error('Allocation ID is missing. Cannot update.');
-        return;
-      }
-
-      // Skip UHF validation for Conveyor since they work directly with EHF
-      let selectedUhfData: UHFType | undefined;
-      if (userRole !== 'conveyor') {
-        selectedUhfData = allUhf.find((uhf: UHFType) => uhf.id === selectedUhf);
-        if (!selectedUhfData) {
-          toast.error('Selected UHF not found. Please select a valid UHF.');
-          return;
-        }
-      }
-
-      let newStatus = status;
-      // Conveyor enters data on behalf of EHF for both forward and reverse logistics
-      if (userRole === 'conveyor' && status === 1) {
-        newStatus = 6; // Forward: Conveyor allocates on behalf of EHF → jump to reverse logistics step
-      } else if (userRole === 'conveyor' && status === 6) {
-        newStatus = 7; // Reverse: Conveyor receives on behalf of EHF → completed
-      }
-
-      const request_id = isUpdate ? allocationData.vaccines_allocation_detail[0].request_id : uuidv4();
-      const username = sessionStorage.getItem('username') || '';
-
-      // Get selected EHF data for Conveyor to extract state/lga
-      const selectedEhfData = filteredEhf.find((ehf: any) => ehf.id === selectedEhf);
-
-      const vaccines_allocation_detail = Object.entries(formDataCollection)
+    const vaccines_allocation_detail = Object.entries(formDataCollection)
       .filter(([_, data]) => {
         // For Conveyor, only require ehf_id. For others, require both ehf_id and uhf_id
         if (userRole === 'conveyor') {
@@ -328,250 +386,250 @@ export default function VaccineView() {
       });
 
 
-      const payload: VaccineAllocationType = { vaccines_allocation_detail };
+    const payload: VaccineAllocationType = { vaccines_allocation_detail };
 
-      setStatus(newStatus);
+    setStatus(newStatus);
 
-      createAllocation.mutate(
-        { id: isUpdate ? allocationData.id : undefined, data: payload },
-        {
-          onSuccess: (response) => {
-            setFormDataCollection({});
-            setSelectedTab(vaccineOptions[0].value);
-            setSelectedEhf(null);
-            setSelectedUhf(null);
+    createAllocation.mutate(
+      { id: isUpdate ? allocationData.id : undefined, data: payload },
+      {
+        onSuccess: (response) => {
+          setFormDataCollection({});
+          setSelectedTab(vaccineOptions[0].value);
+          setSelectedEhf(null);
+          setSelectedUhf(null);
 
-            // Show different success message based on the new status
-            let successMessage = 'Vaccine Allocation Updated';
-            if (response?.status === 'success') {
-              if (newStatus === 6) {
-                successMessage = 'Vaccine Allocated Successfully';
-              } else if (newStatus === 7) {
-                successMessage = 'Vaccine Receipt Confirmed Successfully';
-              } else {
-                successMessage = 'Vaccine Allocation Updated Successfully';
-              }
+          // Show different success message based on the new status
+          let successMessage = 'Vaccine Allocation Updated';
+          if (response?.status === 'success') {
+            if (newStatus === 6) {
+              successMessage = 'Vaccine Allocated Successfully';
+            } else if (newStatus === 7) {
+              successMessage = 'Vaccine Receipt Confirmed Successfully';
+            } else {
+              successMessage = 'Vaccine Allocation Updated Successfully';
             }
+          }
 
-            toast.success(successMessage);
-            navigate('/vaccine-allocation-page');
-          },
-          onError: (error: any) => {
-            toast.error(error?.response?.data?.message || 'Failed to create vaccine allocation');
-          },
-        }
-      );
+          toast.success(successMessage);
+          navigate('/vaccine-allocation-page');
+        },
+        onError: (error: any) => {
+          toast.error(error?.response?.data?.message || 'Failed to create vaccine allocation');
+        },
+      }
+    );
+  };
+
+  const { currentIndex, isLastTab, isFirstTab, CurrentVaccineComponent } = useMemo(() => {
+    const index = vaccineOptions.findIndex((v) => v.value === selectedTab);
+    return {
+      currentIndex: index,
+      isLastTab: index === vaccineOptions.length - 1,
+      isFirstTab: index === 0,
+      CurrentVaccineComponent: vaccineOptions.find((v) => v.value === selectedTab)?.component
     };
+  }, [selectedTab]);
 
-    const { currentIndex, isLastTab, isFirstTab, CurrentVaccineComponent } = useMemo(() => {
-        const index = vaccineOptions.findIndex((v) => v.value === selectedTab);
-        return {
-            currentIndex: index,
-            isLastTab: index === vaccineOptions.length - 1,
-            isFirstTab: index === 0,
-            CurrentVaccineComponent: vaccineOptions.find((v) => v.value === selectedTab)?.component
-        };
-    }, [selectedTab]);
+  return (
+    <DashboardContent>
+      <Container maxWidth="xl" sx={{ textAlign: 'left' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
+            Vaccine Products
+            {/* (Status: {status}) */}
+          </Typography>
+          <Button
+            variant="text"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{ color: 'rgb(12, 125, 64)' }}
+          >
+            Back
+          </Button>
+        </Box>
 
-    return (
-        <DashboardContent>
-          <Container maxWidth="xl" sx={{ textAlign: 'left' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
-                  Vaccine Products
-                  {/* (Status: {status}) */}
-              </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={3}>
+            <Paper
+              sx={{
+                p: 2,
+                border: '2px solid rgb(12, 125, 64)',
+                borderRadius: 1,
+                height: 'fit-content',
+                maxHeight: 'calc(100vh - 150px)',
+                overflow: 'auto',
+                backgroundColor: 'rgb(12, 125, 64)',
+              }}
+            >
+              <Tabs
+                orientation="vertical"
+                variant="scrollable"
+                value={selectedTab}
+                onChange={handleTabChange}
+                sx={{ '& .MuiTabs-indicator': { backgroundColor: 'rgb(12, 125, 64)' } }}
+              >
+                {vaccineOptions.map((vaccine) => (
+                  <Tab
+                    key={vaccine.value}
+                    label={vaccine.label}
+                    value={vaccine.value}
+                    sx={{
+                      alignItems: 'flex-start',
+                      textAlign: 'left',
+                      color: 'white',
+                      mb: 0.5,
+                      borderRadius: 1,
+                      minHeight: 36,
+                      '&:hover': {
+                        bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.08))',
+                        color: 'white',
+                      },
+                      '&.Mui-selected': {
+                        fontWeight: 'fontWeightSemiBold',
+                        bgcolor: 'var(--layout-nav-item-active-bg, rgba(255, 255, 255, 0.16))',
+                        color: 'var(--layout-nav-item-active-color, white)',
+                        '&:hover': {
+                          bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.12))',
+                        },
+                      },
+                    }}
+                  />
+                ))}
+              </Tabs>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={9}>
+            <Box sx={{ mb: 2 }}>
+              <Autocomplete
+                fullWidth
+                sx={{ mb: 2 }}
+                options={filteredEhf}
+                getOptionLabel={(option: any) => option.name_of_ehf || option.ehf_name || ''}
+                value={filteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
+                onChange={handleEhfChange}
+                disabled={isEhfLoading || isView || createAllocation.isPending || status > 1}
+                loading={isEhfLoading}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search and Select EHF"
+                    placeholder="Type to search EHF..."
+                    variant="outlined"
+                  />
+                )}
+                renderOption={(props, option: any) => (
+                  <Box component="li" {...props} key={option.id}>
+                    <Box>
+                      <Typography variant="body1">{option.name_of_ehf || option.ehf_name}</Typography>
+                      {option.state && (
+                        <Typography variant="caption" color="text.secondary">
+                          State: {option.state} {option.assigned_unique_id ? `(${option.assigned_unique_id})` : ''}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+                filterOptions={(options, { inputValue }) =>
+                  options.filter((option: any) =>
+                    option.name_of_ehf?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                    option.ehf_name?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                    option.state?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                    option.assigned_unique_id?.toLowerCase().includes(inputValue.toLowerCase())
+                  )
+                }
+                noOptionsText="No EHF found"
+              />
+              {selectedEhf && (
+                <>
+                  {Array.isArray(allUhf) && allUhf.length > 0 && !isUhfLoading ? (
+                    <FormControl fullWidth>
+                      <InputLabel id="uhf-select-label">Select UHF</InputLabel>
+                      <Select
+                        labelId="uhf-select-label"
+                        value={selectedUhf ?? ''}
+                        label="Select UHF"
+                        onChange={handleUhfChange}
+                        disabled={isUhfLoading || isView || createAllocation.isPending || status > 1}
+                      >
+                        {allUhf.map((uhf: UHFType) => (
+                          <MenuItem key={uhf.id} value={uhf.id}>
+                            {uhf.uhf_name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    !isUhfLoading && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                        No UHF available for this EHF.
+                      </Typography>
+                    )
+                  )}
+                </>
+              )}
+            </Box>
+
+            {CurrentVaccineComponent && (
+              <Box sx={{ mb: 4 }}>
+                <CurrentVaccineComponent
+                  initialData={useMemo(() => formDataCollection[selectedTab] || {}, [formDataCollection, selectedTab])}
+                  onDataChange={handleDataChange}
+                  status={status}
+                  key={selectedTab}
+                  isView={isView}
+                  isUpdate={isUpdate}
+                />
+              </Box>
+            )}
+
+            {/* MFA Code Input - Show when user needs to submit or update */}
+            {!isView && isLastTab && selectedEhf && (userRole === 'conveyor' || selectedUhf) && (
+              <Box sx={{ mb: 3, width: "50%" }}>
+                <TextField
+                  label="MFA Code"
+                  placeholder="Enter your 4-digit MFA code"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  variant="outlined"
+                  size="medium"
+                  inputProps={{ maxLength: 4 }}
+                  helperText="Please enter your MFA code to proceed with submission"
+                />
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
               <Button
-                variant="text"
-                startIcon={<ArrowBackIcon />}
-                onClick={() => navigate(-1)}
-                sx={{ color: 'rgb(12, 125, 64)' }}
+                variant="contained"
+                color="inherit"
+                size="large"
+                onClick={handleBack}
+                disabled={isFirstTab}
               >
                 Back
               </Button>
+              {!isView && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  onClick={isLastTab ? handleSubmit : handleNext}
+                  disabled={isView || createAllocation.isPending}
+                >
+                  {isLastTab ?
+                    createAllocation.isPending ?
+                      (isUpdate ? 'Updating...' : 'Submitting...') :
+                      (isUpdate ? 'Update' : 'Submit')
+                    : 'Next'}
+                </Button>
+              )}
+
             </Box>
-
-            <Grid container spacing={2}>
-                <Grid item xs={3}>
-                    <Paper
-                        sx={{
-                            p: 2,
-                            border: '2px solid rgb(12, 125, 64)',
-                            borderRadius: 1,
-                            height: 'fit-content',
-                            maxHeight: 'calc(100vh - 150px)',
-                            overflow: 'auto',
-                            backgroundColor: 'rgb(12, 125, 64)',
-                        }}
-                    >
-                        <Tabs
-                            orientation="vertical"
-                            variant="scrollable"
-                            value={selectedTab}
-                            onChange={handleTabChange}
-                            sx={{ '& .MuiTabs-indicator': { backgroundColor: 'rgb(12, 125, 64)' } }}
-                        >
-                            {vaccineOptions.map((vaccine) => (
-                                <Tab
-                                  key={vaccine.value}
-                                  label={vaccine.label}
-                                  value={vaccine.value}
-                                  sx={{
-                                    alignItems: 'flex-start',
-                                    textAlign: 'left',
-                                    color: 'white',
-                                    mb: 0.5,
-                                    borderRadius: 1,
-                                    minHeight: 36,
-                                    '&:hover': {
-                                      bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.08))',
-                                      color: 'white',
-                                    },
-                                    '&.Mui-selected': {
-                                      fontWeight: 'fontWeightSemiBold',
-                                      bgcolor: 'var(--layout-nav-item-active-bg, rgba(255, 255, 255, 0.16))',
-                                      color: 'var(--layout-nav-item-active-color, white)',
-                                      '&:hover': {
-                                        bgcolor: 'var(--layout-nav-item-hover-bg, rgba(255, 255, 255, 0.12))',
-                                      },
-                                    },
-                                  }}
-                                />
-                            ))}
-                        </Tabs>
-                    </Paper>
-                </Grid>
-
-                <Grid item xs={9}>
-                  <Box sx={{ mb: 2 }}>
-                      <Autocomplete
-                          fullWidth
-                          sx={{ mb: 2 }}
-                          options={filteredEhf}
-                          getOptionLabel={(option: any) => option.name_of_ehf || option.ehf_name || ''}
-                          value={filteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
-                          onChange={handleEhfChange}
-                          disabled={isEhfLoading || isView || createAllocation.isPending || status > 1}
-                          loading={isEhfLoading}
-                          renderInput={(params) => (
-                              <TextField
-                                  {...params}
-                                  label="Search and Select EHF"
-                                  placeholder="Type to search EHF..."
-                                  variant="outlined"
-                              />
-                          )}
-                          renderOption={(props, option: any) => (
-                              <Box component="li" {...props} key={option.id}>
-                                  <Box>
-                                      <Typography variant="body1">{option.name_of_ehf || option.ehf_name}</Typography>
-                                      {option.state && (
-                                          <Typography variant="caption" color="text.secondary">
-                                              State: {option.state} {option.assigned_unique_id ? `(${option.assigned_unique_id})` : ''}
-                                          </Typography>
-                                      )}
-                                  </Box>
-                              </Box>
-                          )}
-                          filterOptions={(options, { inputValue }) =>
-                              options.filter((option: any) =>
-                                  option.name_of_ehf?.toLowerCase().includes(inputValue.toLowerCase()) ||
-                                  option.ehf_name?.toLowerCase().includes(inputValue.toLowerCase()) ||
-                                  option.state?.toLowerCase().includes(inputValue.toLowerCase()) ||
-                                  option.assigned_unique_id?.toLowerCase().includes(inputValue.toLowerCase())
-                              )
-                          }
-                          noOptionsText="No EHF found"
-                      />
-                      {selectedEhf && (
-                        <>
-                          {Array.isArray(allUhf) && allUhf.length > 0 && !isUhfLoading ? (
-                            <FormControl fullWidth>
-                              <InputLabel id="uhf-select-label">Select UHF</InputLabel>
-                              <Select
-                                labelId="uhf-select-label"
-                                value={selectedUhf ?? ''}
-                                label="Select UHF"
-                                onChange={handleUhfChange}
-                                disabled={isUhfLoading || isView || createAllocation.isPending || status > 1}
-                              >
-                                {allUhf.map((uhf: UHFType) => (
-                                  <MenuItem key={uhf.id} value={uhf.id}>
-                                    {uhf.uhf_name}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          ) : (
-                            !isUhfLoading && (
-                              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                                No UHF available for this EHF.
-                              </Typography>
-                            )
-                          )}
-                        </>
-                      )}
-                  </Box>
-
-                  {CurrentVaccineComponent && (
-                      <Box sx={{ mb: 4 }}>
-                          <CurrentVaccineComponent
-                              initialData={useMemo(() => formDataCollection[selectedTab] || {}, [formDataCollection, selectedTab])}
-                              onDataChange={handleDataChange}
-                              status={status}
-                              key={selectedTab}
-                              isView={isView}
-                              isUpdate={isUpdate}
-                          />
-                      </Box>
-                  )}
-
-                  {/* MFA Code Input - Show when user needs to submit or update */}
-                  {!isView && isLastTab && selectedEhf && (userRole === 'conveyor' || selectedUhf) && (
-                    <Box sx={{ mb: 3, width: "50%" }}>
-                      <TextField
-                        label="MFA Code"
-                        placeholder="Enter your 4-digit MFA code"
-                        value={mfaCode}
-                        onChange={(e) => setMfaCode(e.target.value)}
-                        variant="outlined"
-                        size="medium"
-                        inputProps={{ maxLength: 4 }}
-                        helperText="Please enter your MFA code to proceed with submission"
-                      />
-                    </Box>
-                  )}
-
-                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                      <Button
-                          variant="contained"
-                          color="inherit"
-                          size="large"
-                          onClick={handleBack}
-                          disabled={isFirstTab}
-                      >
-                          Back
-                      </Button>
-                      {!isView && (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="large"
-                          onClick={isLastTab ? handleSubmit : handleNext}
-                          disabled={isView || createAllocation.isPending} 
-                        >
-                          {isLastTab ?
-                            createAllocation.isPending ?
-                              (isUpdate ? 'Updating...' : 'Submitting...') :
-                              (isUpdate ? 'Update' : 'Submit')
-                            : 'Next'}
-                        </Button>
-                      )}
-                    
-                  </Box>
-                </Grid>
-            </Grid>
-        </Container>
+          </Grid>
+        </Grid>
+      </Container>
     </DashboardContent>
   );
 }

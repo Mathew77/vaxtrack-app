@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedMenAAllocationProps {
   initialData?: Partial<MenAAllocationData>;
   onDataChange: (data: MenAAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView: boolean;
   isUpdate: boolean;
@@ -19,7 +19,7 @@ interface ExtendedMenAAllocationProps {
 const MenAAllocationComponent = ({
   initialData = {},
   onDataChange,
-  status = 1, 
+  status = 1,
   isView = false,
   isUpdate = false,
 }: ExtendedMenAAllocationProps): JSX.Element => {
@@ -58,6 +58,8 @@ const MenAAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -72,8 +74,101 @@ const MenAAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Exclude non-quantity fields from validation
+    const excludedMenAFields = ['menAEmptyVials', 'menASafetyBoxes', 'menAUnusedVials'];
+
+    // Handle MenA vaccine allocation - validate divisibility by 10 and auto-calculate consumables
+    if (name === 'menAVaccineAllocated' && !excludedMenAFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          menADiluentAllocated: '',
+          menA5mlSyringeAllocated: '',
+          menA05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 10;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          menADiluentAllocated: vials.toString(),
+          menA5mlSyringeAllocated: vials.toString(),
+          menA05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          menADiluentAllocated: '',
+          menA5mlSyringeAllocated: '',
+          menA05mlSyringeAllocated: '',
+        }));
+      }
+    }
+    // Handle MenA vaccine received - validate divisibility by 10 and auto-calculate consumables
+    else if (name === 'menAVaccineReceived' && !excludedMenAFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          menADiluentReceived: '',
+          menA5mlSyringeReceived: '',
+          menA05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 10;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          menADiluentReceived: vials.toString(),
+          menA5mlSyringeReceived: vials.toString(),
+          menA05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          menADiluentReceived: '',
+          menA5mlSyringeReceived: '',
+          menA05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other MenA fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -84,7 +179,7 @@ const MenAAllocationComponent = ({
         onDataChange(current);
         return current;
       });
-    }, 150); 
+    }, 150);
   }, [onDataChange]);
 
   useEffect(() => {
@@ -103,11 +198,11 @@ const MenAAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -245,65 +340,73 @@ const MenAAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menAVaccineAllocated"
-                      value={formData.menAVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA vaccine quantity (10 doses per vial)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menAVaccineAllocated"
+                        value={formData.menAVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menADiluentAllocated"
-                      value={formData.menADiluentAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA diluent quantity" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menADiluentAllocated"
+                        value={formData.menADiluentAllocated}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menA05mlSyringeAllocated"
-                      value={formData.menA05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA 0.5ml syringe quantity" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menA05mlSyringeAllocated"
+                        value={formData.menA05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA 5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menA5mlSyringeAllocated"
-                      value={formData.menA5mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA 5ml syringe quantity" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menA5mlSyringeAllocated"
+                        value={formData.menA5mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -591,65 +694,73 @@ const MenAAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menAVaccineReceived"
-                      value={formData.menAVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA vaccine quantity received (10 doses per vial)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menAVaccineReceived"
+                        value={formData.menAVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA Diluent</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menADiluentReceived"
-                      value={formData.menADiluentReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA diluent quantity received" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menADiluentReceived"
+                        value={formData.menADiluentReceived}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menA05mlSyringeReceived"
-                      value={formData.menA05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA 0.5ml syringe quantity received" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menA05mlSyringeReceived"
+                        value={formData.menA05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>MenA 5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="menA5mlSyringeReceived"
-                      value={formData.menA5mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter MenA 5ml syringe quantity received" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="menA5mlSyringeReceived"
+                        value={formData.menA5mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

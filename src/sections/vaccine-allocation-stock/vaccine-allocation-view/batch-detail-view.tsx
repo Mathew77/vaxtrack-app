@@ -312,39 +312,51 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
         return baseActions;
     };
 
+    // Helper component for stacked Max/Allocated display
+    const StackedVaccineCell = ({ max, allocated }: { max: number; allocated: number }) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, py: 0.5 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+                Max: {max || 0}
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: 'rgb(12, 125, 64)', fontSize: '0.8rem' }}>
+                Allocated: {allocated || 0}
+            </Typography>
+        </Box>
+    );
+
     const columns = useMemo(
         () => [
             {
                 accessorKey: 'serial_no',
                 header: 'S/N',
-                size: 80,
+                size: 60,
                 enableSorting: false,
                 Cell: ({ row }: any) => row.index + 1,
             },
             {
                 accessorKey: 'name_of_ehf',
                 header: 'EHF Name',
-                size: 200,
+                size: 180,
             },
             {
                 accessorKey: 'state',
                 header: 'State',
-                size: 100,
+                size: 90,
             },
             {
                 accessorKey: 'lga',
                 header: 'LGA',
-                size: 120,
+                size: 100,
             },
             {
                 accessorKey: 'batch_no',
                 header: 'Batch No',
-                size: 120,
+                size: 110,
             },
             {
                 accessorKey: 'threepl',
                 header: '3PL',
-                size: 120,
+                size: 100,
                 Cell: ({ cell }: any) => {
                     const val = cell.getValue();
                     const pl = allThreePl?.find((p: any) => p?.id == val);
@@ -352,64 +364,136 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                 },
             },
             {
-                accessorKey: 'dose_bcg_allocated',
+                accessorKey: 'dose_bcg',
                 header: 'BCG',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_bcg_actual}
+                        allocated={row.original.dose_bcg_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_hepb_allocated',
+                accessorKey: 'dose_hepb',
                 header: 'HepB',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_hepb_actual}
+                        allocated={row.original.dose_hepb_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_bopv_allocated',
+                accessorKey: 'dose_bopv',
                 header: 'bOPV',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_bopv_actual}
+                        allocated={row.original.dose_bopv_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_penta_allocated',
+                accessorKey: 'dose_penta',
                 header: 'Penta',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_penta_actual}
+                        allocated={row.original.dose_penta_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_pcv_allocated',
+                accessorKey: 'dose_pcv',
                 header: 'PCV',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_pcv_actual}
+                        allocated={row.original.dose_pcv_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_ipv_allocated',
+                accessorKey: 'dose_ipv',
                 header: 'IPV',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_ipv_actual}
+                        allocated={row.original.dose_ipv_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_mea_allocated',
+                accessorKey: 'dose_mea',
                 header: 'Measles',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_mea_actual}
+                        allocated={row.original.dose_mea_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_yf_allocated',
+                accessorKey: 'dose_yf',
                 header: 'YF',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_yf_actual}
+                        allocated={row.original.dose_yf_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_td_allocated',
+                accessorKey: 'dose_td',
                 header: 'TD',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_td_actual}
+                        allocated={row.original.dose_td_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_mena_allocated',
+                accessorKey: 'dose_mena',
                 header: 'MenA',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_mena_actual}
+                        allocated={row.original.dose_mena_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_rota_allocated',
+                accessorKey: 'dose_rota',
                 header: 'Rota',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_rota_actual}
+                        allocated={row.original.dose_rota_allocated}
+                    />
+                ),
             },
             {
-                accessorKey: 'dose_hpv_allocated',
+                accessorKey: 'dose_hpv',
                 header: 'HPV',
-                size: 80,
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_hpv_actual}
+                        allocated={row.original.dose_hpv_allocated}
+                    />
+                ),
             },
             {
                 accessorKey: 'status',

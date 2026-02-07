@@ -58,6 +58,8 @@ const YfAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -72,18 +74,101 @@ const YfAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate YF fields - max 10
-    // Exclude non-quantity fields like yfEmptyVials, yfSafetyBoxes, yfUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedYfFields = ['yfEmptyVials', 'yfSafetyBoxes', 'yfUnusedVials'];
-    if (name.startsWith('yf') && !excludedYfFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 10) {
-        return;
+
+    // Handle YF vaccine allocation - validate divisibility by 10 and auto-calculate consumables
+    if (name === 'yfVaccineAllocated' && !excludedYfFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          yfDiluentAllocated: '',
+          yf5mlSyringeAllocated: '',
+          yf05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 10;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          yfDiluentAllocated: vials.toString(),
+          yf5mlSyringeAllocated: vials.toString(),
+          yf05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          yfDiluentAllocated: '',
+          yf5mlSyringeAllocated: '',
+          yf05mlSyringeAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle YF vaccine received - validate divisibility by 10 and auto-calculate consumables
+    else if (name === 'yfVaccineReceived' && !excludedYfFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          yfDiluentReceived: '',
+          yf5mlSyringeReceived: '',
+          yf05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 10;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          yfDiluentReceived: vials.toString(),
+          yf5mlSyringeReceived: vials.toString(),
+          yf05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          yfDiluentReceived: '',
+          yf5mlSyringeReceived: '',
+          yf05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other YF fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -255,7 +340,7 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Vaccine</Typography>
-                    <Tooltip title="Enter YF vaccine quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF vaccine quantity (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -266,6 +351,8 @@ const YfAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
+                        error={!!errors.yfVaccineAllocated}
+                        helperText={errors.yfVaccineAllocated}
                         inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
@@ -274,14 +361,14 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Diluent</Typography>
-                    <Tooltip title="Enter YF diluent quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF diluent quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="yfDiluentAllocated"
                         value={formData.yfDiluentAllocated}
                         onChange={handleChange}
-                        disabled={!canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -293,14 +380,14 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter YF 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF 0.5ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="yf05mlSyringeAllocated"
                         value={formData.yf05mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={!canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -312,14 +399,14 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 5ml Syringe</Typography>
-                    <Tooltip title="Enter YF 5ml syringe quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF 5ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="yf5mlSyringeAllocated"
                         value={formData.yf5mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={!canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -613,7 +700,7 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Vaccine</Typography>
-                    <Tooltip title="Enter YF vaccine quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF vaccine quantity received (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -624,6 +711,8 @@ const YfAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
+                        error={!!errors.yfVaccineReceived}
+                        helperText={errors.yfVaccineReceived}
                         inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
@@ -632,14 +721,14 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF Diluent</Typography>
-                    <Tooltip title="Enter YF diluent quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF diluent quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="yfDiluentReceived"
                         value={formData.yfDiluentReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -651,14 +740,14 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter YF 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF 0.5ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="yf05mlSyringeReceived"
                         value={formData.yf05mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -670,14 +759,14 @@ const YfAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>YF 5ml Syringe</Typography>
-                    <Tooltip title="Enter YF 5ml syringe quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter YF 5ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="yf5mlSyringeReceived"
                         value={formData.yf5mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}

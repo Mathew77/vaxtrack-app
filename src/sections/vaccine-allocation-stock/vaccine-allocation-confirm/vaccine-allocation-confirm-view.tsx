@@ -221,7 +221,9 @@ const VaccineAllocationConfirmView: React.FC = () => {
       {
         onSuccess: () => {
           toast.success(successMessage);
-          navigate('/vaccine-allocation-stock-page');
+          navigate('/vaccine-allocation-batch-detail', {
+            state: { batch_no: data.batch_no }
+          });
         },
         onError: () => {
           toast.error('Failed to confirm. Please try again.');

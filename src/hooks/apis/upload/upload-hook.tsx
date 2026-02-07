@@ -75,6 +75,17 @@ export const useFetchAllocatedVaccines = () => {
   });
 };
 
+// Fetch all individual allocations (not aggregated) to get facility count and threepl per batch
+export const useFetchAllIndividualAllocations = () => {
+  return useQuery<AllocatedVaccineData[], Error>({
+    queryKey: ['vaccine-allocation-stock-all'],
+    queryFn: async () => {
+      const response = await apiHelper.getResource<any>(`${url}v1/vaccine-allocation-stock/batch-upsert/`);
+      return response.results || response.data || response;
+    },
+  });
+};
+
 export const useFetchBatchAllocations = (batchNo?: string | null) => {
   return useQuery<AllocatedVaccineData[], Error>({
     queryKey: ['vaccine-allocation-batch', batchNo],

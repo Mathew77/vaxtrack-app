@@ -58,6 +58,8 @@ const MeaslesAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -72,18 +74,101 @@ const MeaslesAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate Measles fields - max 5
-    // Exclude non-quantity fields like measlesEmptyVials, measlesSafetyBoxes, measlesUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedMeaslesFields = ['measlesEmptyVials', 'measlesSafetyBoxes', 'measlesUnusedVials'];
-    if (name.startsWith('measles') && !excludedMeaslesFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 5) {
-        return;
+
+    // Handle Measles vaccine allocation - validate divisibility by 5 and auto-calculate consumables
+    if (name === 'measlesVaccineAllocated' && !excludedMeaslesFields.includes(name)) {
+      if (value !== '' && numValue % 5 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 5' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          measlesDiluentAllocated: '',
+          measles2mlSyringeAllocated: '',
+          measles05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 5 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 5;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          measlesDiluentAllocated: vials.toString(),
+          measles2mlSyringeAllocated: vials.toString(),
+          measles05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          measlesDiluentAllocated: '',
+          measles2mlSyringeAllocated: '',
+          measles05mlSyringeAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle Measles vaccine received - validate divisibility by 5 and auto-calculate consumables
+    else if (name === 'measlesVaccineReceived' && !excludedMeaslesFields.includes(name)) {
+      if (value !== '' && numValue % 5 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 5' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          measlesDiluentReceived: '',
+          measles2mlSyringeReceived: '',
+          measles05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 5 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 5;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          measlesDiluentReceived: vials.toString(),
+          measles2mlSyringeReceived: vials.toString(),
+          measles05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          measlesDiluentReceived: '',
+          measles2mlSyringeReceived: '',
+          measles05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other Measles fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -255,7 +340,7 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Vaccine</Typography>
-                    <Tooltip title="Enter Measles & Rubella vaccine quantity (5 doses per vial, max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella vaccine quantity (5 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -266,6 +351,8 @@ const MeaslesAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
+                        error={!!errors.measlesVaccineAllocated}
+                        helperText={errors.measlesVaccineAllocated}
                         inputProps={{ max: 5, min: 0 }}
                       />
                     </Tooltip>
@@ -274,14 +361,14 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Diluent</Typography>
-                    <Tooltip title="Enter Measles & Rubella diluent quantity (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella diluent quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="measlesDiluentAllocated"
                         value={formData.measlesDiluentAllocated}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -293,14 +380,14 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter Measles & Rubella 0.5ml syringe quantity (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella 0.5ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="measles05mlSyringeAllocated"
                         value={formData.measles05mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -312,14 +399,14 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 2ml Syringe</Typography>
-                    <Tooltip title="Enter Measles & Rubella 2ml syringe quantity (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella 2ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="measles2mlSyringeAllocated"
                         value={formData.measles2mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -613,7 +700,7 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Vaccine</Typography>
-                    <Tooltip title="Enter Measles & Rubella vaccine quantity received (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella vaccine quantity received (5 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -624,6 +711,8 @@ const MeaslesAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
+                        error={!!errors.measlesVaccineReceived}
+                        helperText={errors.measlesVaccineReceived}
                         inputProps={{ max: 5, min: 0 }}
                       />
                     </Tooltip>
@@ -632,14 +721,14 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Diluent</Typography>
-                    <Tooltip title="Enter Measles & Rubella diluent quantity received (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella diluent quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="measlesDiluentReceived"
                         value={formData.measlesDiluentReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -651,14 +740,14 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter Measles & Rubella 0.5ml syringe quantity received (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella 0.5ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="measles05mlSyringeReceived"
                         value={formData.measles05mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
@@ -670,14 +759,14 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella 2ml Syringe</Typography>
-                    <Tooltip title="Enter Measles & Rubella 2ml syringe quantity received (max: 5)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella 2ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="measles2mlSyringeReceived"
                         value={formData.measles2mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}

@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedBopvAllocationProps {
   initialData?: Partial<BopvAllocationData>;
   onDataChange: (data: BopvAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView: boolean;
   isUpdate: boolean;
@@ -46,6 +46,8 @@ const BopvAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -60,18 +62,89 @@ const BopvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate bOPV fields - max 20
-    // Exclude non-quantity fields like bopvEmptyVials, bopvSafetyBoxes, bopvUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedBopvFields = ['bopvEmptyVials', 'bopvSafetyBoxes', 'bopvUnusedVials'];
-    if (name.startsWith('bopv') && !excludedBopvFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 20) {
-        return;
+
+    // Handle bOPV vaccine allocation - validate divisibility by 20 and auto-calculate droppers
+    if (name === 'bopvVaccineAllocated' && !excludedBopvFields.includes(name)) {
+      if (value !== '' && numValue % 20 !== 0) {
+        // Invalid value - set error and clear droppers but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 20' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bopvDropperAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 20 === 0) {
+        // Valid value - clear error and auto-calculate droppers (1 dropper per vial of 20 doses)
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 20;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bopvDropperAllocated: vials.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and droppers
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bopvDropperAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle bOPV vaccine received - validate divisibility by 20 and auto-calculate droppers
+    else if (name === 'bopvVaccineReceived' && !excludedBopvFields.includes(name)) {
+      if (value !== '' && numValue % 20 !== 0) {
+        // Invalid value - set error and clear droppers but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 20' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bopvDropperReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 20 === 0) {
+        // Valid value - clear error and auto-calculate droppers
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 20;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bopvDropperReceived: vials.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and droppers
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bopvDropperReceived: '',
+        }));
+      }
+    }
+    // For other bOPV fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -101,11 +174,11 @@ const BopvAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -211,7 +284,7 @@ const BopvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Vaccine</Typography>
-                    <Tooltip title="Enter BOPV vaccine quantity (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BOPV vaccine quantity (20 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -222,7 +295,9 @@ const BopvAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        error={!!errors.bopvVaccineAllocated}
+                        helperText={errors.bopvVaccineAllocated}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -230,7 +305,7 @@ const BopvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Dropper</Typography>
-                    <Tooltip title="Enter BOPV dropper quantity (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BOPV dropper quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -241,7 +316,7 @@ const BopvAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -435,7 +510,7 @@ const BopvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Vaccine</Typography>
-                    <Tooltip title="Enter BOPV vaccine quantity received (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BOPV vaccine quantity received (20 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -446,7 +521,9 @@ const BopvAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        error={!!errors.bopvVaccineReceived}
+                        helperText={errors.bopvVaccineReceived}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -454,18 +531,18 @@ const BopvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BOPV Dropper</Typography>
-                    <Tooltip title="Enter BOPV dropper quantity received (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BOPV dropper quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bopvDropperReceived"
                         value={formData.bopvDropperReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>

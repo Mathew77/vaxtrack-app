@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedPentaAllocationProps {
   initialData?: Partial<PentaAllocationData>;
   onDataChange: (data: PentaAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView: boolean;
   isUpdate: boolean;
@@ -46,6 +46,8 @@ const PentaAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -60,18 +62,87 @@ const PentaAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate Penta fields - max 10
-    // Exclude non-quantity fields like pentaEmptyVials, pentaSafetyBoxes, pentaUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedPentaFields = ['pentaEmptyVials', 'pentaSafetyBoxes', 'pentaUnusedVials'];
-    if (name.startsWith('penta') && !excludedPentaFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 10) {
-        return;
+
+    // Handle Penta vaccine allocation - validate divisibility by 10 and auto-calculate syringes
+    if (name === 'pentaVaccineAllocated' && !excludedPentaFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          penta05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          penta05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          penta05mlSyringeAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle Penta vaccine received - validate divisibility by 10 and auto-calculate syringes
+    else if (name === 'pentaVaccineReceived' && !excludedPentaFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          penta05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          penta05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          penta05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other Penta fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -101,11 +172,11 @@ const PentaAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -211,7 +282,7 @@ const PentaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta Vaccine</Typography>
-                    <Tooltip title="Enter Penta vaccine quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter Penta vaccine quantity (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -222,7 +293,9 @@ const PentaAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        error={!!errors.pentaVaccineAllocated}
+                        helperText={errors.pentaVaccineAllocated}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -230,18 +303,18 @@ const PentaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter Penta 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter Penta 0.5ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="penta05mlSyringeAllocated"
                         value={formData.penta05mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={!canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -435,7 +508,7 @@ const PentaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta Vaccine</Typography>
-                    <Tooltip title="Enter Penta vaccine quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter Penta vaccine quantity received (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -446,7 +519,7 @@ const PentaAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -454,18 +527,18 @@ const PentaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Penta 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter Penta 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter Penta 0.5ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="penta05mlSyringeReceived"
                         value={formData.penta05mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>

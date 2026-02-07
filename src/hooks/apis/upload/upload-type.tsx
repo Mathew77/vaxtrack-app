@@ -48,6 +48,8 @@ export interface StockAtHandData {
   dose_mena: number;
   dose_rota: number;
   dose_hpv: number;
+  dose_malaria: number;
+  dose_mr: number;
   total_vaccine_storage_volume_utilized: string;
   remaining_cce_storage_capacity: string;
   remark: string | null;

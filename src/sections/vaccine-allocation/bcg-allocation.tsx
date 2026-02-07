@@ -11,7 +11,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedBcgAllocationProps {
   initialData?: Partial<BcgAllocationData>;
   onDataChange: (data: BcgAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView?: boolean;
   isUpdate?: boolean;
@@ -62,6 +62,8 @@ const BcgAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -76,18 +78,101 @@ const BcgAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate all BCG fields (vaccine, diluent, syringes) - max 20
-    // Exclude non-quantity fields like bcgEmptyVials, bcgSafetyBoxes, bcgUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedBcgFields = ['bcgEmptyVials', 'bcgSafetyBoxes', 'bcgUnusedVials'];
-    if (name.startsWith('bcg') && !excludedBcgFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 20) {
-        return;
+
+    // Handle BCG vaccine allocation - validate divisibility by 20 and auto-calculate consumables
+    if (name === 'bcgVaccineAllocated' && !excludedBcgFields.includes(name)) {
+      if (value !== '' && numValue % 20 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 20' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bcgDiluentAllocated: '',
+          bcg2mlSyringeAllocated: '',
+          bcg005mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 20 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 20;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bcgDiluentAllocated: vials.toString(),
+          bcg2mlSyringeAllocated: vials.toString(),
+          bcg005mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bcgDiluentAllocated: '',
+          bcg2mlSyringeAllocated: '',
+          bcg005mlSyringeAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle BCG vaccine received - validate divisibility by 20 and auto-calculate consumables
+    else if (name === 'bcgVaccineReceived' && !excludedBcgFields.includes(name)) {
+      if (value !== '' && numValue % 20 !== 0) {
+        // Invalid value - set error and clear consumables but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 20' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bcgDiluentReceived: '',
+          bcg2mlSyringeReceived: '',
+          bcg005mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 20 === 0) {
+        // Valid value - clear error and auto-calculate consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 20;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bcgDiluentReceived: vials.toString(),
+          bcg2mlSyringeReceived: vials.toString(),
+          bcg005mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and consumables
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          bcgDiluentReceived: '',
+          bcg2mlSyringeReceived: '',
+          bcg005mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other BCG fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -129,16 +214,16 @@ const BcgAllocationComponent = ({
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <Typography
         variant="h6"
-          sx={{
-            mb: 2,
-            border: '1px solid rgb(12, 125, 64)',
-            borderRadius: 1,
-            backgroundColor: 'rgb(12, 125, 64)',
-            color: 'white',
-            padding: 2,
-            textAlign: 'left',
-            width: '100%',
-          }}
+        sx={{
+          mb: 2,
+          border: '1px solid rgb(12, 125, 64)',
+          borderRadius: 1,
+          backgroundColor: 'rgb(12, 125, 64)',
+          color: 'white',
+          padding: 2,
+          textAlign: 'left',
+          width: '100%',
+        }}
       >
         BCG Allocation
       </Typography>
@@ -261,7 +346,7 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Vaccine</Typography>
-                    <Tooltip title="Enter BCG vaccine quantity (vials contain 20 doses, max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG vaccine quantity (vials contain 20 doses)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -272,7 +357,9 @@ const BcgAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        error={!!errors.bcgVaccineAllocated}
+                        helperText={errors.bcgVaccineAllocated}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -280,18 +367,18 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Diluent</Typography>
-                    <Tooltip title="Enter BCG diluent quantity (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG diluent quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bcgDiluentAllocated"
                         value={formData.bcgDiluentAllocated}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -299,18 +386,18 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 0.05ml Syringe</Typography>
-                    <Tooltip title="Enter BCG 0.05ml syringe quantity (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG 0.05ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bcg005mlSyringeAllocated"
                         value={formData.bcg005mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -318,18 +405,18 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 2ml Syringe</Typography>
-                    <Tooltip title="Enter BCG 2ml syringe quantity (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG 2ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bcg2mlSyringeAllocated"
                         value={formData.bcg2mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -620,7 +707,7 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Vaccine</Typography>
-                    <Tooltip title="Enter BCG vaccine quantity received (vials contain 20 doses, max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG vaccine quantity received (vials contain 20 doses)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -631,7 +718,9 @@ const BcgAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        error={!!errors.bcgVaccineReceived}
+                        helperText={errors.bcgVaccineReceived}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -639,18 +728,18 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG Diluent</Typography>
-                    <Tooltip title="Enter BCG diluent quantity received (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG diluent quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bcgDiluentReceived"
                         value={formData.bcgDiluentReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -658,18 +747,18 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 0.05ml Syringe</Typography>
-                    <Tooltip title="Enter BCG 0.05ml syringe quantity received (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG 0.05ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bcg005mlSyringeReceived"
                         value={formData.bcg005mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -677,18 +766,18 @@ const BcgAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>BCG 2ml Syringe</Typography>
-                    <Tooltip title="Enter BCG 2ml syringe quantity received (max: 20)" arrow placement="top">
+                    <Tooltip title="Enter BCG 2ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="bcg2mlSyringeReceived"
                         value={formData.bcg2mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 20, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>

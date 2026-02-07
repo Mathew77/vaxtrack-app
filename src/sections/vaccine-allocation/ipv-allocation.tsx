@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedIpvAllocationProps {
   initialData?: Partial<IpvAllocationData>;
   onDataChange: (data: IpvAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView: boolean;
   isUpdate: boolean;
@@ -46,6 +46,8 @@ const IpvAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -60,18 +62,87 @@ const IpvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    // Validate IPV fields - max 10
-    // Exclude non-quantity fields like ipvEmptyVials, ipvSafetyBoxes, ipvUnusedVials
+    // Exclude non-quantity fields from validation
     const excludedIpvFields = ['ipvEmptyVials', 'ipvSafetyBoxes', 'ipvUnusedVials'];
-    if (name.startsWith('ipv') && !excludedIpvFields.includes(name) && value !== '') {
-      const numValue = parseInt(value, 10);
-      if (numValue > 10) {
-        return;
+
+    // Handle IPV vaccine allocation - validate divisibility by 10 and auto-calculate syringes
+    if (name === 'ipvVaccineAllocated' && !excludedIpvFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          ipv05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          ipv05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          ipv05mlSyringeAllocated: '',
+        }));
       }
     }
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Handle IPV vaccine received - validate divisibility by 10 and auto-calculate syringes
+    else if (name === 'ipvVaccineReceived' && !excludedIpvFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          ipv05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          ipv05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          ipv05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other IPV fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -82,7 +153,7 @@ const IpvAllocationComponent = ({
         onDataChange(current);
         return current;
       });
-    }, 150); 
+    }, 150);
   }, [onDataChange]);
 
   useEffect(() => {
@@ -101,11 +172,11 @@ const IpvAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -211,7 +282,7 @@ const IpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV Vaccine</Typography>
-                    <Tooltip title="Enter IPV vaccine quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter IPV vaccine quantity (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -222,7 +293,9 @@ const IpvAllocationComponent = ({
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        error={!!errors.ipvVaccineAllocated}
+                        helperText={errors.ipvVaccineAllocated}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -230,18 +303,18 @@ const IpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter IPV 0.5ml syringe quantity (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter IPV 0.5ml syringe quantity" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="ipv05mlSyringeAllocated"
                         value={formData.ipv05mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={!canEditEHFAllocation}
+                        disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -435,7 +508,7 @@ const IpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV Vaccine</Typography>
-                    <Tooltip title="Enter IPV vaccine quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter IPV vaccine quantity received (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -446,7 +519,9 @@ const IpvAllocationComponent = ({
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        error={!!errors.ipvVaccineReceived}
+                        helperText={errors.ipvVaccineReceived}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -454,18 +529,18 @@ const IpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>IPV 0.5ml Syringe</Typography>
-                    <Tooltip title="Enter IPV 0.5ml syringe quantity received (max: 10)" arrow placement="top">
+                    <Tooltip title="Enter IPV 0.5ml syringe quantity received" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
                         name="ipv05mlSyringeReceived"
                         value={formData.ipv05mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={isView || !canEditEHFReceived}
+                        disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 10, min: 0 }}
+                        inputProps={{ min: 0 }}
                       />
                     </Tooltip>
                   </Box>

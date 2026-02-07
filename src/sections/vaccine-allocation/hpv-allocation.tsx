@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedHpvAllocationProps {
   initialData?: Partial<HpvAllocationData>;
   onDataChange: (data: HpvAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView: boolean;
   isUpdate: boolean;
@@ -46,6 +46,8 @@ const HpvAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -60,8 +62,87 @@ const HpvAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Exclude non-quantity fields from validation
+    const excludedHpvFields = ['hpvEmptyVials', 'hpvSafetyBoxes', 'hpvUnusedVials'];
+
+    // Handle HPV vaccine allocation - auto-calculate syringes (1 syringe per dose)
+    if (name === 'hpvVaccineAllocated' && !excludedHpvFields.includes(name)) {
+      if (value !== '' && numValue < 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be a positive number' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          hpv05mlSyringeAllocated: '',
+        }));
+      } else if (numValue > 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          hpv05mlSyringeAllocated: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          hpv05mlSyringeAllocated: '',
+        }));
+      }
+    }
+    // Handle HPV vaccine received - auto-calculate syringes
+    else if (name === 'hpvVaccineReceived' && !excludedHpvFields.includes(name)) {
+      if (value !== '' && numValue < 0) {
+        // Invalid value - set error and clear syringes but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be a positive number' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          hpv05mlSyringeReceived: '',
+        }));
+      } else if (numValue > 0) {
+        // Valid value - clear error and auto-calculate syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          hpv05mlSyringeReceived: numValue.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and syringes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          hpv05mlSyringeReceived: '',
+        }));
+      }
+    }
+    // For other HPV fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -91,11 +172,11 @@ const HpvAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -201,33 +282,37 @@ const HpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>HPV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="hpvVaccineAllocated"
-                      value={formData.hpvVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter HPV vaccine quantity (1 dose per vial)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="hpvVaccineAllocated"
+                        value={formData.hpvVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>HPV 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="hpv05mlSyringeAllocated"
-                      value={formData.hpv05mlSyringeAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter HPV 0.5ml syringe quantity" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="hpv05mlSyringeAllocated"
+                        value={formData.hpv05mlSyringeAllocated}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,33 +504,37 @@ const HpvAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>HPV Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="hpvVaccineReceived"
-                      value={formData.hpvVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter HPV vaccine quantity received (1 dose per vial)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="hpvVaccineReceived"
+                        value={formData.hpvVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>HPV 0.5ml Syringe</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="hpv05mlSyringeReceived"
-                      value={formData.hpv05mlSyringeReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter HPV 0.5ml syringe quantity received" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="hpv05mlSyringeReceived"
+                        value={formData.hpv05mlSyringeReceived}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

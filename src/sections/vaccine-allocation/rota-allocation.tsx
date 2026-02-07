@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Box, TextField, Typography, Grid, Tooltip } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -10,7 +10,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface ExtendedRotaAllocationProps {
   initialData?: Partial<RotaAllocationData>;
   onDataChange: (data: RotaAllocationData) => void;
-  status?: number; 
+  status?: number;
   key?: string;
   isView: boolean;
   isUpdate: boolean;
@@ -46,6 +46,8 @@ const RotaAllocationComponent = ({
     ...initialData,
   }));
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     setFormData((prev) => {
       const newFormData = { ...defaultFormData, ...initialData };
@@ -60,8 +62,89 @@ const RotaAllocationComponent = ({
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const numValue = parseInt(value, 10) || 0;
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Exclude non-quantity fields from validation
+    const excludedRotaFields = ['rotaEmptyVials', 'rotaSafetyBoxes', 'rotaUnusedVials'];
+
+    // Handle Rota vaccine allocation - validate divisibility by 10 and auto-calculate droppers
+    if (name === 'rotaVaccineAllocated' && !excludedRotaFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear droppers but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          rotaDropperAllocated: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate droppers (1 dropper per vial of 10 doses)
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 10;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          rotaDropperAllocated: vials.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and droppers
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          rotaDropperAllocated: '',
+        }));
+      }
+    }
+    // Handle Rota vaccine received - validate divisibility by 10 and auto-calculate droppers
+    else if (name === 'rotaVaccineReceived' && !excludedRotaFields.includes(name)) {
+      if (value !== '' && numValue % 10 !== 0) {
+        // Invalid value - set error and clear droppers but keep the value
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          rotaDropperReceived: '',
+        }));
+      } else if (numValue > 0 && numValue % 10 === 0) {
+        // Valid value - clear error and auto-calculate droppers
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        const vials = numValue / 10;
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          rotaDropperReceived: vials.toString(),
+        }));
+      } else {
+        // Empty or zero - clear error and droppers
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          rotaDropperReceived: '',
+        }));
+      }
+    }
+    // For other Rota fields, just update normally
+    else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -83,7 +166,7 @@ const RotaAllocationComponent = ({
     };
   }, []);
 
-   const userRole = sessionStorage.getItem('userRole');
+  const userRole = sessionStorage.getItem('userRole');
   // console.log(userRole);
   const isUHF = userRole === 'uhf';
   const isEHF = userRole === 'ehf';
@@ -91,11 +174,11 @@ const RotaAllocationComponent = ({
   const isThreePl = userRole === 'threepl'
 
   const canEditUHFRequest = (isUHF || isThreePl) && status === 1 && (isUpdate || !isView);
-  const canEditEHFAllocation = (isEHF || isConveyor) && status ===  1 && (isUpdate || !isView);
+  const canEditEHFAllocation = (isEHF || isConveyor) && status === 1 && (isUpdate || !isView);
   const canEditConveyorDelivered = (isConveyor || isThreePl) && status === 3 && (isUpdate || !isView);
   const canEditUHFReturned = (isUHF || isThreePl) && status === 4 && (isUpdate || !isView);
   const canEditConveyorReturned = (isConveyor || isThreePl) && status === 5 && (isUpdate || !isView);
-  const canEditEHFReceived = (isEHF || isConveyor) && status ===  6 && (isUpdate || !isView);
+  const canEditEHFReceived = (isEHF || isConveyor) && status === 6 && (isUpdate || !isView);
   const isReverseLogisticsEnabled = status >= 3;
 
   return (
@@ -201,33 +284,37 @@ const RotaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Rota Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="rotaVaccineAllocated"
-                      value={formData.rotaVaccineAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Rota vaccine quantity (10 doses per vial)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="rotaVaccineAllocated"
+                        value={formData.rotaVaccineAllocated}
+                        onChange={handleChange}
+                        disabled={!canEditEHFAllocation}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Rota Dropper</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="rotaDropperAllocated"
-                      value={formData.rotaDropperAllocated}
-                      onChange={handleChange}
-                      disabled={!canEditEHFAllocation}
-                      required={canEditEHFAllocation}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Rota dropper quantity" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="rotaDropperAllocated"
+                        value={formData.rotaDropperAllocated}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFAllocation}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
               </Grid>
@@ -419,33 +506,37 @@ const RotaAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Rota Vaccine</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="rotaVaccineReceived"
-                      value={formData.rotaVaccineReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Rota vaccine quantity received (10 doses per vial)" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="rotaVaccineReceived"
+                        value={formData.rotaVaccineReceived}
+                        onChange={handleChange}
+                        disabled={isView || !canEditEHFReceived}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Rota Dropper</Typography>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      name="rotaDropperReceived"
-                      value={formData.rotaDropperReceived}
-                      onChange={handleChange}
-                      disabled={isView || !canEditEHFReceived}
-                      required={canEditEHFReceived}
-                      type='number'
-                      onKeyDown={preventInvalidKeys}
-                    />
+                    <Tooltip title="Enter Rota dropper quantity received" arrow placement="top">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        name="rotaDropperReceived"
+                        value={formData.rotaDropperReceived}
+                        onChange={handleChange}
+                        disabled={true}
+                        required={canEditEHFReceived}
+                        type='number'
+                        onKeyDown={preventInvalidKeys}
+                      />
+                    </Tooltip>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>

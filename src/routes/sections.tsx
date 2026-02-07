@@ -84,6 +84,7 @@ export const VaccineAllocationConfirmPage = lazy(() => import('src/pages/vaccine
 export const VaccineAllocationMccoConfirmPage = lazy(() => import('src/pages/vaccine-allocation-mcco-confirm/index'));
 export const VaccineAllocationLcsReturnPage = lazy(() => import('src/pages/vaccine-allocation-lcs-return/index'));
 export const BatchDetailPage = lazy(() => import('src/pages/vaccine-allocation-stock/batch-detail'));
+export const VaccineAllocationBulkFormPage = lazy(() => import('src/pages/vaccine-allocation-bulk-form/index'));
 
 
 //Test page
@@ -290,6 +291,7 @@ export function Router() {
         { path: 'vaccine-allocation-mcco-confirm', element: <VaccineAllocationMccoConfirmPage /> },
         { path: 'vaccine-allocation-lcs-return', element: <VaccineAllocationLcsReturnPage /> },
         { path: 'vaccine-allocation-batch-detail', element: <BatchDetailPage /> },
+        { path: 'vaccine-allocation-bulk-form', element: <VaccineAllocationBulkFormPage /> },
 
         { path: 'report', element: <ReportForms /> },
         { path: 'maximum-stock', element: <UploadPage /> },
