@@ -133,11 +133,17 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
     const canBulkConfirm = is3PL && pendingPickupAllocations.length > 0;
 
     // Auto-open bulk confirm dialog if navigated with openBulkConfirm flag
+    // Auto-open bulk confirm dialog if navigated with openBulkConfirm flag
     useEffect(() => {
         if (openBulkConfirm && canBulkConfirm && !isBatchLoading) {
-            setBulkConfirmDialogOpen(true);
+            navigate('/vaccine-allocation-threepl-confirm', {
+                state: {
+                    batch_no: batch_no,
+                    allocations: pendingPickupAllocations,
+                },
+            });
         }
-    }, [openBulkConfirm, canBulkConfirm, isBatchLoading]);
+    }, [openBulkConfirm, canBulkConfirm, isBatchLoading, navigate, batch_no, pendingPickupAllocations]);
 
     // Get aggregated vaccine totals for the batch (for display in bulk confirm dialog)
     const batchVaccineTotals = useMemo(() => {
@@ -151,42 +157,16 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
         return totals;
     }, [pendingPickupAllocations]);
 
-    // Handle bulk VVM stage change
-    const handleBulkVvmChange = (vaccineKey: string, value: number) => {
-        setBulkVvmStages(prev => ({ ...prev, [vaccineKey]: value }));
-    };
-
     // Handle bulk confirm pickup
     const handleBulkConfirmPickup = () => {
-        setBulkConfirmDialogOpen(true);
-    };
-
-    // Confirm bulk pickup
-    const confirmBulkPickup = () => {
-        // Create VVM stages map for all allocations (same VVM stages for all)
-        const vvmStagesMap: Record<string, Record<string, number>> = {};
-        pendingPickupAllocations.forEach(allocation => {
-            vvmStagesMap[allocation.id.toString()] = { ...bulkVvmStages };
-        });
-
-        bulkUpdateMutation.mutate(
-            {
+        navigate('/vaccine-allocation-threepl-confirm', {
+            state: {
+                batch_no: batch_no,
                 allocations: pendingPickupAllocations,
-                status: 2, // Pending MCCO Confirmation
-                vvmStages: vvmStagesMap,
             },
-            {
-                onSuccess: () => {
-                    toast.success(`Bulk pickup confirmed for ${pendingPickupAllocations.length} facilities!`);
-                    setBulkConfirmDialogOpen(false);
-                    refetchBatch();
-                },
-                onError: (error: any) => {
-                    toast.error(error?.message || 'Failed to confirm bulk pickup');
-                },
-            }
-        );
+        });
     };
+
 
     // Handlers for individual actions
     const handleViewDetails = (data: EnrichedAllocatedVaccineData) => {
@@ -266,13 +246,13 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
             });
         }
 
-        if (is3PL && row.status === 1) {
-            baseActions.push({
-                display: "Confirm Pickup & Delivery",
-                handleClick: handleConfirmPickup,
-                icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
-            });
-        }
+        // if (is3PL && row.status === 1) {
+        //     baseActions.push({
+        //         display: "Confirm Pickup & Delivery",
+        //         handleClick: handleConfirmPickup,
+        //         icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+        //     });
+        // }
 
         if (isMCCO) {
             if (row.status === 2) {
@@ -522,7 +502,7 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                         color = 'success';
                     } else if (status === 5) {
                         const transferTo = rowData?.deficit_transfer_to;
-                        label = transferTo === 'lcs' ? 'Pending LCS Confirmation' : transferTo === 'ehf' ? 'Pending EHF Confirmation' : 'Pending Confirmation';
+                        label = transferTo === 'lcs' ? 'Pending LCS Confirmation' : transferTo === 'ehf' ? 'Pending EHF Confirmation' : transferTo === 'scs' ? 'Pending SCS Confirmation' : 'Pending Confirmation';
                         color = 'warning';
                     } else if (status === 6) {
                         label = 'Deficit & Pending MCCO Confirmation';
@@ -541,22 +521,6 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h4">Batch Details: {batch_no}</Typography>
                 <Box sx={{ display: 'flex', gap: 2 }}>
-                    {/* {canBulkConfirm && (
-                        <Button
-                            startIcon={<CheckCircleOutlineIcon />}
-                            onClick={handleBulkConfirmPickup}
-                            variant="contained"
-                            disabled={bulkUpdateMutation.isPending}
-                            sx={{
-                                background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
-                                },
-                            }}
-                        >
-                            {bulkUpdateMutation.isPending ? 'Confirming...' : `Bulk Confirm Pickup (${pendingPickupAllocations.length})`}
-                        </Button>
-                    )} */}
                     <Button
                         startIcon={<ArrowBackIcon />}
                         onClick={() => navigate('/vaccine-allocation-stock-page')}
@@ -575,6 +539,25 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                 getActionMenuItems={getActionItems}
             />
 
+            {canBulkConfirm && (
+                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                        startIcon={<CheckCircleOutlineIcon />}
+                        onClick={handleBulkConfirmPickup}
+                        variant="contained"
+                        disabled={bulkUpdateMutation.isPending}
+                        sx={{
+                            background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
+                            '&:hover': {
+                                background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                            },
+                        }}
+                    >
+                        {bulkUpdateMutation.isPending ? 'Confirming...' : `Bulk Confirm Pickup (${pendingPickupAllocations.length})`}
+                    </Button>
+                </Box>
+            )}
+
             {/* Delete Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
                 <DialogTitle>Confirm Delete</DialogTitle>
@@ -592,109 +575,6 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Bulk Confirm Pickup Dialog */}
-            <Dialog
-                open={bulkConfirmDialogOpen}
-                onClose={() => setBulkConfirmDialogOpen(false)}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle sx={{ bgcolor: 'rgb(12, 125, 64)', color: 'white' }}>
-                    Bulk Confirm Pickup & Delivery
-                </DialogTitle>
-                <DialogContent sx={{ mt: 2 }}>
-                    <Typography variant="body1" sx={{ mb: 3 }}>
-                        You are about to confirm pickup for <strong>{pendingPickupAllocations.length}</strong> facilities
-                        in batch <strong>{batch_no}</strong>.
-                    </Typography>
-
-                    {/* Summary Card */}
-                    <Card sx={{ mb: 3, bgcolor: '#f5f5f5' }}>
-                        <CardContent>
-                            <Typography variant="h6" gutterBottom>
-                                Total Vaccines to Pick Up
-                            </Typography>
-                            {/* <Grid container spacing={2}>
-                                {VACCINE_TYPES.filter(vaccine => batchVaccineTotals[vaccine.key] > 0).map(vaccine => (
-                                    <Grid item xs={6} sm={4} md={3} key={vaccine.key}>
-                                        <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'white', borderRadius: 1 }}>
-                                            <Typography variant="subtitle2" color="textSecondary">
-                                                {vaccine.label}
-                                            </Typography>
-                                            <Typography variant="h6" color="primary">
-                                                {batchVaccineTotals[vaccine.key]}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-                                ))}
-                            </Grid> */}
-                        </CardContent>
-                    </Card>
-
-                    {/* VVM Stage Inputs */}
-                    <Typography variant="h6" gutterBottom>
-                        Enter VVM Stages for Vaccines
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                        These VVM stages will be applied to all vaccines in this batch.
-                    </Typography>
-
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow sx={{ bgcolor: '#f0f0f0' }}>
-                                    <TableCell><strong>Vaccine</strong></TableCell>
-                                    <TableCell><strong>Total Doses</strong></TableCell>
-                                    <TableCell><strong>VVM Stage</strong></TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {VACCINE_TYPES.filter(vaccine => batchVaccineTotals[vaccine.key] > 0).map(vaccine => (
-                                    <TableRow key={vaccine.key}>
-                                        <TableCell>{vaccine.label}</TableCell>
-                                        <TableCell>{batchVaccineTotals[vaccine.key]}</TableCell>
-                                        <TableCell>
-                                            <FormControl size="small" sx={{ minWidth: 100 }}>
-                                                <Select
-                                                    value={bulkVvmStages[vaccine.key]}
-                                                    onChange={(e) => handleBulkVvmChange(vaccine.key, Number(e.target.value))}
-                                                >
-                                                    <MenuItem value={1}>Stage 1</MenuItem>
-                                                    <MenuItem value={2}>Stage 2</MenuItem>
-                                                    <MenuItem value={3}>Stage 3</MenuItem>
-                                                    <MenuItem value={4}>Stage 4</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </DialogContent>
-                <DialogActions sx={{ p: 2 }}>
-                    <Button
-                        onClick={() => setBulkConfirmDialogOpen(false)}
-                        color="inherit"
-                        disabled={bulkUpdateMutation.isPending}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={confirmBulkPickup}
-                        variant="contained"
-                        disabled={bulkUpdateMutation.isPending}
-                        sx={{
-                            background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
-                            '&:hover': {
-                                background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
-                            },
-                        }}
-                    >
-                        {bulkUpdateMutation.isPending ? 'Confirming...' : 'Confirm Bulk Pickup'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </DashboardContent>
     );
 };

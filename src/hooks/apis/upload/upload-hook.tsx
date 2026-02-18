@@ -161,7 +161,7 @@ export const useBulkUpdateAllocationStatus = () => {
     mutationFn: async ({ allocations, status, vvmStages }: {
       allocations: AllocatedVaccineData[];
       status: number;
-      vvmStages?: Record<string, Record<string, number>>;
+      vvmStages?: Record<string, Record<string, string>>;
     }) => {
       // Update each allocation in parallel
       const results = await Promise.all(
@@ -169,6 +169,7 @@ export const useBulkUpdateAllocationStatus = () => {
           const allocationVvmStages = vvmStages?.[allocation.id?.toString() || ''] || {};
 
           const updateData: any = {
+            uuid: allocation.uuid,
             assigned_unique_id: allocation.assigned_unique_id,
             period: allocation.period,
             dose_bcg_actual: allocation.dose_bcg_actual,
@@ -199,18 +200,18 @@ export const useBulkUpdateAllocationStatus = () => {
           };
 
           // Include VVM stages for 3PL confirmation - only for vaccines with allocations > 0
-          if (allocation.dose_bcg_allocated > 0) updateData.bcg_vvm_stage_threepl = allocationVvmStages.bcg || 0;
-          if (allocation.dose_hepb_allocated > 0) updateData.hepb_vvm_stage_threepl = allocationVvmStages.hepb || 0;
-          if (allocation.dose_bopv_allocated > 0) updateData.bopv_vvm_stage_threepl = allocationVvmStages.bopv || 0;
-          if (allocation.dose_penta_allocated > 0) updateData.penta_vvm_stage_threepl = allocationVvmStages.penta || 0;
-          if (allocation.dose_pcv_allocated > 0) updateData.pcv_vvm_stage_threepl = allocationVvmStages.pcv || 0;
-          if (allocation.dose_ipv_allocated > 0) updateData.ipv_vvm_stage_threepl = allocationVvmStages.ipv || 0;
-          if (allocation.dose_mea_allocated > 0) updateData.mea_vvm_stage_threepl = allocationVvmStages.mea || 0;
-          if (allocation.dose_yf_allocated > 0) updateData.yf_vvm_stage_threepl = allocationVvmStages.yf || 0;
-          if (allocation.dose_td_allocated > 0) updateData.td_vvm_stage_threepl = allocationVvmStages.td || 0;
-          if (allocation.dose_mena_allocated > 0) updateData.mena_vvm_stage_threepl = allocationVvmStages.mena || 0;
-          if (allocation.dose_rota_allocated > 0) updateData.rota_vvm_stage_threepl = allocationVvmStages.rota || 0;
-          if (allocation.dose_hpv_allocated > 0) updateData.hpv_vvm_stage_threepl = allocationVvmStages.hpv || 0;
+          if (allocation.dose_bcg_allocated > 0) updateData.bcg_vvm_stage_threepl = allocationVvmStages.bcg || '';
+          if (allocation.dose_hepb_allocated > 0) updateData.hepb_vvm_stage_threepl = allocationVvmStages.hepb || '';
+          if (allocation.dose_bopv_allocated > 0) updateData.bopv_vvm_stage_threepl = allocationVvmStages.bopv || '';
+          if (allocation.dose_penta_allocated > 0) updateData.penta_vvm_stage_threepl = allocationVvmStages.penta || '';
+          if (allocation.dose_pcv_allocated > 0) updateData.pcv_vvm_stage_threepl = allocationVvmStages.pcv || '';
+          if (allocation.dose_ipv_allocated > 0) updateData.ipv_vvm_stage_threepl = allocationVvmStages.ipv || '';
+          if (allocation.dose_mea_allocated > 0) updateData.mea_vvm_stage_threepl = allocationVvmStages.mea || '';
+          if (allocation.dose_yf_allocated > 0) updateData.yf_vvm_stage_threepl = allocationVvmStages.yf || '';
+          if (allocation.dose_td_allocated > 0) updateData.td_vvm_stage_threepl = allocationVvmStages.td || '';
+          if (allocation.dose_mena_allocated > 0) updateData.mena_vvm_stage_threepl = allocationVvmStages.mena || '';
+          if (allocation.dose_rota_allocated > 0) updateData.rota_vvm_stage_threepl = allocationVvmStages.rota || '';
+          if (allocation.dose_hpv_allocated > 0) updateData.hpv_vvm_stage_threepl = allocationVvmStages.hpv || '';
 
           const response = await apiHelper.putResource<any>(
             `${url}v1/vaccine-allocation-stock/${allocation.id}/`,

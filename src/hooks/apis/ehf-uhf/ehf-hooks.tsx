@@ -136,6 +136,31 @@ export const useFetchStates = () => {
     });
   };
 
+  // Fetch EHFs by a list of assigned_unique_ids - used by Conveyor role
+  export const useFetchEHFsByIds = (ids: string[]) => {
+    return useQuery({
+      queryKey: ['ehf-detail-routes-by-ids', ids],
+      queryFn: async (): Promise<any[]> => {
+        if (!ids || ids.length === 0) return [];
+        try {
+          const results = await Promise.all(
+            ids.map((id) =>
+              apiHelper.getResource<any[]>(
+                `${url}v1/ehf-detail-routes/?assigned_unique_id=${encodeURIComponent(id)}`
+              ).catch(() => [])
+            )
+          );
+          const flat = results.flat();
+          return Array.isArray(flat) ? flat : [];
+        } catch (error) {
+          console.error('API Error - EHF by IDs:', error);
+          return [];
+        }
+      },
+      enabled: ids.length > 0,
+    });
+  };
+
   // Fetch all EHF list for display - uses ehf-detail-routes
   export const useFetchEHFList = () => {
     return useQuery({

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import {
     Box,
     Typography,
@@ -203,9 +204,11 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         }
     };
 
+    const [globalSafetyBoxOverride, setGlobalSafetyBoxOverride] = useState<string | null>(null);
+
     // Calculate safety boxes based on total syringes (administration + reconstitution)
     // Safety box can contain 100 syringes, so divide by 100 and round up
-    const globalSafetyBox = useMemo(() => {
+    const calculatedSafetyBox = useMemo(() => {
         let totalSyringes = 0;
 
         // Add all administration syringes (0.5ml, 0.05ml)
@@ -230,6 +233,9 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         const safetyBoxes = Math.ceil(totalSyringes / 100);
         return safetyBoxes.toString();
     }, [consumablesData]);
+
+    // Use manual override if set, otherwise use auto-calculated value
+    const globalSafetyBox = globalSafetyBoxOverride !== null ? globalSafetyBoxOverride : calculatedSafetyBox;
 
     // Handle validation and auto-populate consumables when user finishes typing
     const handleAllocationBlur = (vaccine: string) => {
@@ -308,7 +314,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 case 'dose_bopv':
                     setConsumablesData(prev => ({
                         ...prev,
-                        bopv_dropper: numValue.toString(), // Dropper = allocation
+                        bopv_dropper: vials.toString(), // Dropper = vials (per user request)
                     }));
                     break;
 
@@ -370,7 +376,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 case 'dose_rota':
                     setConsumablesData(prev => ({
                         ...prev,
-                        rota_dropper: numValue.toString(), // Dropper = allocation
+                        rota_dropper: vials.toString(), // Dropper = vials (per user request)
                     }));
                     break;
 
@@ -560,7 +566,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         const multiples: Record<string, number> = {
             dose_bcg: 20,
             dose_bopv: 20,
-            dose_mea: 5,
+            dose_mea: 10,
             dose_yf: 10,
             dose_td: 10,
             dose_penta: 10,
@@ -626,6 +632,28 @@ const VaccineAllocationBulkFormView: React.FC = () => {
             return;
         }
 
+        // Validate metadata for allocated vaccines
+        for (const [key, value] of Object.entries(allocationData)) {
+            const numValue = parseInt(value) || 0;
+            if (numValue > 0) {
+                const metadata = metadataMap[key];
+                const vaccineLabel = vaccines.find(v => v.key === key)?.label || key;
+
+                if (!metadata.vvm_stage) {
+                    toast.error(`Please select VVM Stage for ${vaccineLabel}`);
+                    return;
+                }
+                if (!metadata.batch_number) {
+                    toast.error(`Please enter Batch Number for ${vaccineLabel}`);
+                    return;
+                }
+                if (!metadata.expire_date) {
+                    toast.error(`Please select Expiry Date for ${vaccineLabel}`);
+                    return;
+                }
+            }
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -634,164 +662,194 @@ const VaccineAllocationBulkFormView: React.FC = () => {
 
             // Prepare items array for the nested payload structure
             // Each facility gets proportional allocation based on: (facility max / total max) * user input
-            const items = selectedFacilities.map((facility: SelectedFacility) => ({
-                assigned_unique_id: facility.ehfId,
-                ehf_id: facility.stockId,
-                period: allocationDate,
+            // Consumables (syringes, diluents) are calculated based on the allocated amount for that facility
+            const items = selectedFacilities.map((facility: SelectedFacility) => {
+                // detailed allocation calculations
+                const bcgAllocated = calcAllocation(facility.stockData?.dose_bcg || 0, totalMaxStock.bcg || 0, parseInt(allocationData.dose_bcg) || 0, 'dose_bcg');
+                const hepbAllocated = calcAllocation(facility.stockData?.dose_hepb || 0, totalMaxStock.hepb || 0, parseInt(allocationData.dose_hepb) || 0, 'dose_hepb');
+                const bopvAllocated = calcAllocation(facility.stockData?.dose_bopv || 0, totalMaxStock.bopv || 0, parseInt(allocationData.dose_bopv) || 0, 'dose_bopv');
+                const pentaAllocated = calcAllocation(facility.stockData?.dose_penta || 0, totalMaxStock.penta || 0, parseInt(allocationData.dose_penta) || 0, 'dose_penta');
+                const pcvAllocated = calcAllocation(facility.stockData?.dose_pcv || 0, totalMaxStock.pcv || 0, parseInt(allocationData.dose_pcv) || 0, 'dose_pcv');
+                const ipvAllocated = calcAllocation(facility.stockData?.dose_ipv || 0, totalMaxStock.ipv || 0, parseInt(allocationData.dose_ipv) || 0, 'dose_ipv');
+                const meaAllocated = calcAllocation(facility.stockData?.dose_mea || 0, totalMaxStock.mea || 0, parseInt(allocationData.dose_mea) || 0, 'dose_mea');
+                const yfAllocated = calcAllocation(facility.stockData?.dose_yf || 0, totalMaxStock.yf || 0, parseInt(allocationData.dose_yf) || 0, 'dose_yf');
+                const tdAllocated = calcAllocation(facility.stockData?.dose_td || 0, totalMaxStock.td || 0, parseInt(allocationData.dose_td) || 0, 'dose_td');
+                const menaAllocated = calcAllocation(facility.stockData?.dose_mena || 0, totalMaxStock.mena || 0, parseInt(allocationData.dose_mena) || 0, 'dose_mena');
+                const rotaAllocated = calcAllocation(facility.stockData?.dose_rota || 0, totalMaxStock.rota || 0, parseInt(allocationData.dose_rota) || 0, 'dose_rota');
+                const hpvAllocated = calcAllocation(facility.stockData?.dose_hpv || 0, totalMaxStock.hpv || 0, parseInt(allocationData.dose_hpv) || 0, 'dose_hpv');
 
-                // BCG - proportional allocation
-                dose_bcg_actual: facility.stockData?.dose_bcg || 0,
-                dose_bcg_allocated: calcAllocation(facility.stockData?.dose_bcg || 0, totalMaxStock.bcg || 0, parseInt(allocationData.dose_bcg) || 0, 'dose_bcg'),
-                bcg_vvm_stage_scs: parseInt(metadataMap.dose_bcg.vvm_stage) || 0,
-                bcg_batch_number_scs: metadataMap.dose_bcg.batch_number || '',
-                bcg_expire_date_scs: metadataMap.dose_bcg.expire_date || null,
-                bcg_diluent: parseInt(consumablesData.bcg_diluent) || 0,
-                bcg_fiveml_syringe: 0, // Not used in UI, set to 0
-                bcg_twoml_syringe: parseInt(consumablesData.bcg_syringe_2ml) || 0,
-                bcg_zerofiveml_syringe: parseInt(consumablesData.bcg_syringe_005ml) || 0,
+                return {
+                    uuid: uuidv4(),
+                    assigned_unique_id: facility.ehfId,
+                    ehf_id: facility.stockId,
+                    period: allocationDate,
 
-                // HepB - proportional allocation
-                dose_hepb_actual: facility.stockData?.dose_hepb || 0,
-                dose_hepb_allocated: calcAllocation(facility.stockData?.dose_hepb || 0, totalMaxStock.hepb || 0, parseInt(allocationData.dose_hepb) || 0, 'dose_hepb'),
-                hepb_vvm_stage_scs: parseInt(metadataMap.dose_hepb.vvm_stage) || 0,
-                hepb_batch_number_scs: metadataMap.dose_hepb.batch_number || '',
-                hepb_expire_date_scs: metadataMap.dose_hepb.expire_date || null,
-                hepb_zerofiveml_syringe: parseInt(consumablesData.hepb_syringe_05ml) || 0,
+                    // BCG - proportional allocation
+                    dose_bcg_actual: facility.stockData?.dose_bcg || 0,
+                    dose_bcg_allocated: bcgAllocated,
+                    bcg_vvm_stage_scs: metadataMap.dose_bcg.vvm_stage || '',
+                    bcg_batch_number_scs: metadataMap.dose_bcg.batch_number || '',
+                    bcg_expire_date_scs: metadataMap.dose_bcg.expire_date || null,
+                    bcg_diluent: Math.ceil(bcgAllocated / 20),
+                    bcg_fiveml_syringe: 0, // Not used in UI, set to 0
+                    bcg_twoml_syringe: Math.ceil(bcgAllocated / 20),
+                    bcg_zerofiveml_syringe: bcgAllocated,
 
-                // bOPV - proportional allocation
-                dose_bopv_actual: facility.stockData?.dose_bopv || 0,
-                dose_bopv_allocated: calcAllocation(facility.stockData?.dose_bopv || 0, totalMaxStock.bopv || 0, parseInt(allocationData.dose_bopv) || 0, 'dose_bopv'),
-                bopv_vvm_stage_scs: parseInt(metadataMap.dose_bopv.vvm_stage) || 0,
-                bopv_batch_number_scs: metadataMap.dose_bopv.batch_number || '',
-                bopv_expire_date_scs: metadataMap.dose_bopv.expire_date || null,
-                bopv_dropper: parseInt(consumablesData.bopv_dropper) || 0,
+                    // HepB - proportional allocation
+                    dose_hepb_actual: facility.stockData?.dose_hepb || 0,
+                    dose_hepb_allocated: hepbAllocated,
+                    hepb_vvm_stage_scs: metadataMap.dose_hepb.vvm_stage || '',
+                    hepb_batch_number_scs: metadataMap.dose_hepb.batch_number || '',
+                    hepb_expire_date_scs: metadataMap.dose_hepb.expire_date || null,
+                    hepb_zerofiveml_syringe: hepbAllocated,
 
-                // Penta - proportional allocation
-                dose_penta_actual: facility.stockData?.dose_penta || 0,
-                dose_penta_allocated: calcAllocation(facility.stockData?.dose_penta || 0, totalMaxStock.penta || 0, parseInt(allocationData.dose_penta) || 0, 'dose_penta'),
-                penta_vvm_stage_scs: parseInt(metadataMap.dose_penta.vvm_stage) || 0,
-                penta_batch_number_scs: metadataMap.dose_penta.batch_number || '',
-                penta_expire_date_scs: metadataMap.dose_penta.expire_date || null,
-                penta_zerofive_syringe: parseInt(consumablesData.penta_syringe_05ml) || 0,
+                    // bOPV - proportional allocation
+                    dose_bopv_actual: facility.stockData?.dose_bopv || 0,
+                    dose_bopv_allocated: bopvAllocated,
+                    bopv_vvm_stage_scs: metadataMap.dose_bopv.vvm_stage || '',
+                    bopv_batch_number_scs: metadataMap.dose_bopv.batch_number || '',
+                    bopv_expire_date_scs: metadataMap.dose_bopv.expire_date || null,
+                    bopv_dropper: Math.ceil(bopvAllocated / 20),
 
-                // PCV - proportional allocation
-                dose_pcv_actual: facility.stockData?.dose_pcv || 0,
-                dose_pcv_allocated: calcAllocation(facility.stockData?.dose_pcv || 0, totalMaxStock.pcv || 0, parseInt(allocationData.dose_pcv) || 0, 'dose_pcv'),
-                pcv_vvm_stage_scs: parseInt(metadataMap.dose_pcv.vvm_stage) || 0,
-                pcv_batch_number_scs: metadataMap.dose_pcv.batch_number || '',
-                pcv_expire_date_scs: metadataMap.dose_pcv.expire_date || null,
-                pcv_zerofive_syringe: parseInt(consumablesData.pcv_syringe_05ml) || 0,
+                    // Penta - proportional allocation
+                    dose_penta_actual: facility.stockData?.dose_penta || 0,
+                    dose_penta_allocated: pentaAllocated,
+                    penta_vvm_stage_scs: metadataMap.dose_penta.vvm_stage || '',
+                    penta_batch_number_scs: metadataMap.dose_penta.batch_number || '',
+                    penta_expire_date_scs: metadataMap.dose_penta.expire_date || null,
+                    penta_zerofive_syringe: pentaAllocated,
 
-                // IPV - proportional allocation
-                dose_ipv_actual: facility.stockData?.dose_ipv || 0,
-                dose_ipv_allocated: calcAllocation(facility.stockData?.dose_ipv || 0, totalMaxStock.ipv || 0, parseInt(allocationData.dose_ipv) || 0, 'dose_ipv'),
-                ipv_vvm_stage_scs: parseInt(metadataMap.dose_ipv.vvm_stage) || 0,
-                ipv_batch_number_scs: metadataMap.dose_ipv.batch_number || '',
-                ipv_expire_date_scs: metadataMap.dose_ipv.expire_date || null,
-                ipv_zerofive_syringe: parseInt(consumablesData.ipv_syringe_05ml) || 0,
+                    // PCV - proportional allocation
+                    dose_pcv_actual: facility.stockData?.dose_pcv || 0,
+                    dose_pcv_allocated: pcvAllocated,
+                    pcv_vvm_stage_scs: metadataMap.dose_pcv.vvm_stage || '',
+                    pcv_batch_number_scs: metadataMap.dose_pcv.batch_number || '',
+                    pcv_expire_date_scs: metadataMap.dose_pcv.expire_date || null,
+                    pcv_zerofive_syringe: pcvAllocated,
 
-                // Measles - proportional allocation
-                dose_mea_actual: facility.stockData?.dose_mea || 0,
-                dose_mea_allocated: calcAllocation(facility.stockData?.dose_mea || 0, totalMaxStock.mea || 0, parseInt(allocationData.dose_mea) || 0, 'dose_mea'),
-                mea_vvm_stage_scs: parseInt(metadataMap.dose_mea.vvm_stage) || 0,
-                mea_batch_number_scs: metadataMap.dose_mea.batch_number || '',
-                mea_expire_date_scs: metadataMap.dose_mea.expire_date || null,
-                mea_diluent: parseInt(consumablesData.mea_diluent) || 0,
-                mea_fiveml_syringe: parseInt(consumablesData.mea_syringe_5ml) || 0,
-                mea_zerofiveml_syringe: parseInt(consumablesData.mea_syringe_05ml) || 0,
+                    // IPV - proportional allocation
+                    dose_ipv_actual: facility.stockData?.dose_ipv || 0,
+                    dose_ipv_allocated: ipvAllocated,
+                    ipv_vvm_stage_scs: metadataMap.dose_ipv.vvm_stage || '',
+                    ipv_batch_number_scs: metadataMap.dose_ipv.batch_number || '',
+                    ipv_expire_date_scs: metadataMap.dose_ipv.expire_date || null,
+                    ipv_zerofive_syringe: ipvAllocated,
 
-                // YF - proportional allocation
-                dose_yf_actual: facility.stockData?.dose_yf || 0,
-                dose_yf_allocated: calcAllocation(facility.stockData?.dose_yf || 0, totalMaxStock.yf || 0, parseInt(allocationData.dose_yf) || 0, 'dose_yf'),
-                yf_vvm_stage_scs: parseInt(metadataMap.dose_yf.vvm_stage) || 0,
-                yf_batch_number_scs: metadataMap.dose_yf.batch_number || '',
-                yf_expire_date_scs: metadataMap.dose_yf.expire_date || null,
-                yf_diluent: parseInt(consumablesData.yf_diluent) || 0,
-                yf_fiveml_syringe: parseInt(consumablesData.yf_syringe_5ml) || 0,
-                yf_zerofiveml_syringe: parseInt(consumablesData.yf_syringe_05ml) || 0,
+                    // Measles - proportional allocation
+                    dose_mea_actual: facility.stockData?.dose_mea || 0,
+                    dose_mea_allocated: meaAllocated,
+                    mea_vvm_stage_scs: metadataMap.dose_mea.vvm_stage || '',
+                    mea_batch_number_scs: metadataMap.dose_mea.batch_number || '',
+                    mea_expire_date_scs: metadataMap.dose_mea.expire_date || null,
+                    mea_diluent: Math.ceil(meaAllocated / 10),
+                    mea_fiveml_syringe: Math.ceil(meaAllocated / 10),
+                    mea_zerofiveml_syringe: meaAllocated,
 
-                // TD - proportional allocation
-                dose_td_actual: facility.stockData?.dose_td || 0,
-                dose_td_allocated: calcAllocation(facility.stockData?.dose_td || 0, totalMaxStock.td || 0, parseInt(allocationData.dose_td) || 0, 'dose_td'),
-                td_vvm_stage_scs: parseInt(metadataMap.dose_td.vvm_stage) || 0,
-                td_batch_number_scs: metadataMap.dose_td.batch_number || '',
-                td_expire_date_scs: metadataMap.dose_td.expire_date || null,
-                td_zerofiveml_syringe: parseInt(consumablesData.td_syringe_05ml) || 0,
+                    // YF - proportional allocation
+                    dose_yf_actual: facility.stockData?.dose_yf || 0,
+                    dose_yf_allocated: yfAllocated,
+                    yf_vvm_stage_scs: metadataMap.dose_yf.vvm_stage || '',
+                    yf_batch_number_scs: metadataMap.dose_yf.batch_number || '',
+                    yf_expire_date_scs: metadataMap.dose_yf.expire_date || null,
+                    yf_diluent: Math.ceil(yfAllocated / 10),
+                    yf_fiveml_syringe: Math.ceil(yfAllocated / 10),
+                    yf_zerofiveml_syringe: yfAllocated,
 
-                // MenA - proportional allocation
-                dose_mena_actual: facility.stockData?.dose_mena || 0,
-                dose_mena_allocated: calcAllocation(facility.stockData?.dose_mena || 0, totalMaxStock.mena || 0, parseInt(allocationData.dose_mena) || 0, 'dose_mena'),
-                mena_vvm_stage_scs: parseInt(metadataMap.dose_mena.vvm_stage) || 0,
-                mena_batch_number_scs: metadataMap.dose_mena.batch_number || '',
-                mena_expire_date_scs: metadataMap.dose_mena.expire_date || null,
-                mena_diluent: parseInt(consumablesData.mena_diluent) || 0,
-                mena_fiveml_syringe: parseInt(consumablesData.mena_syringe_5ml) || 0,
-                mena_zerofiveml_syringe: parseInt(consumablesData.mena_syringe_05ml) || 0,
+                    // TD - proportional allocation
+                    dose_td_actual: facility.stockData?.dose_td || 0,
+                    dose_td_allocated: tdAllocated,
+                    td_vvm_stage_scs: metadataMap.dose_td.vvm_stage || '',
+                    td_batch_number_scs: metadataMap.dose_td.batch_number || '',
+                    td_expire_date_scs: metadataMap.dose_td.expire_date || null,
+                    td_zerofiveml_syringe: tdAllocated,
 
-                // Rota - proportional allocation
-                dose_rota_actual: facility.stockData?.dose_rota || 0,
-                dose_rota_allocated: calcAllocation(facility.stockData?.dose_rota || 0, totalMaxStock.rota || 0, parseInt(allocationData.dose_rota) || 0, 'dose_rota'),
-                rota_vvm_stage_scs: parseInt(metadataMap.dose_rota.vvm_stage) || 0,
-                rota_batch_number_scs: metadataMap.dose_rota.batch_number || '',
-                rota_expire_date_scs: metadataMap.dose_rota.expire_date || null,
-                rota_dropper: parseInt(consumablesData.rota_dropper) || 0,
+                    // MenA - proportional allocation
+                    dose_mena_actual: facility.stockData?.dose_mena || 0,
+                    dose_mena_allocated: menaAllocated,
+                    mena_vvm_stage_scs: metadataMap.dose_mena.vvm_stage || '',
+                    mena_batch_number_scs: metadataMap.dose_mena.batch_number || '',
+                    mena_expire_date_scs: metadataMap.dose_mena.expire_date || null,
+                    mena_diluent: Math.ceil(menaAllocated / 10),
+                    mena_fiveml_syringe: Math.ceil(menaAllocated / 10),
+                    mena_zerofiveml_syringe: menaAllocated,
 
-                // HPV - proportional allocation
-                dose_hpv_actual: facility.stockData?.dose_hpv || 0,
-                dose_hpv_allocated: calcAllocation(facility.stockData?.dose_hpv || 0, totalMaxStock.hpv || 0, parseInt(allocationData.dose_hpv) || 0, 'dose_hpv'),
-                hpv_vvm_stage_scs: parseInt(metadataMap.dose_hpv.vvm_stage) || 0,
-                hpv_batch_number_scs: metadataMap.dose_hpv.batch_number || '',
-                hpv_expire_date_scs: metadataMap.dose_hpv.expire_date || null,
-                hpv_fiveml_syringe: parseInt(consumablesData.hpv_syringe_05ml) || 0,
+                    // Rota - proportional allocation
+                    dose_rota_actual: facility.stockData?.dose_rota || 0,
+                    dose_rota_allocated: rotaAllocated,
+                    rota_vvm_stage_scs: metadataMap.dose_rota.vvm_stage || '',
+                    rota_batch_number_scs: metadataMap.dose_rota.batch_number || '',
+                    rota_expire_date_scs: metadataMap.dose_rota.expire_date || null,
+                    rota_dropper: Math.ceil(rotaAllocated / 10),
 
-                // Malaria - set to 0 (not in use currently)
-                dose_mal_actual: 0,
-                dose_mal_allocated: 0,
-                dose_mal_received: 0,
-                dose_mal_return: 0,
-                mal_vvm_stage_scs: 0,
-                mal_vvm_stage_ehf: 0,
-                mal_vvm_stage_threepl: 0,
-                mal_batch_number_scs: '',
-                mal_batch_number: '',
-                mal_expire_date_scs: null,
-                mal_expire_date: null,
-                mal_diluent: 0,
-                mal_fiveml_syringe: 0,
-                mal_zerofiveml_syringe: 0,
-                mal_empty_vials: 0,
-                mal_unused_vials: 0,
-                mal_safety_boxes: 0,
+                    // HPV - proportional allocation
+                    dose_hpv_actual: facility.stockData?.dose_hpv || 0,
+                    dose_hpv_allocated: hpvAllocated,
+                    hpv_vvm_stage_scs: metadataMap.dose_hpv.vvm_stage || '',
+                    hpv_batch_number_scs: metadataMap.dose_hpv.batch_number || '',
+                    hpv_expire_date_scs: metadataMap.dose_hpv.expire_date || null,
+                    hpv_fiveml_syringe: hpvAllocated,
 
-                // MR - set to 0 (not in use currently)
-                dose_mr_actual: 0,
-                dose_mr_allocated: 0,
-                dose_mr_received: 0,
-                dose_mr_return: 0,
-                mr_vvm_stage_scs: 0,
-                mr_vvm_stage_ehf: 0,
-                mr_vvm_stage_threepl: 0,
-                mr_batch_number_scs: '',
-                mr_batch_number: '',
-                mr_expire_date_scs: null,
-                mr_expire_date: null,
-                mr_diluent: 0,
-                mr_fiveml_syringe: 0,
-                mr_zerofiveml_syringe: 0,
-                mr_empty_vials: 0,
-                mr_unused_vials: 0,
-                mr_safety_boxes: 0,
+                    // Malaria - set to 0 (not in use currently)
+                    dose_mal_actual: 0,
+                    dose_mal_allocated: 0,
+                    dose_mal_received: 0,
+                    dose_mal_return: 0,
+                    mal_vvm_stage_scs: '',
+                    mal_vvm_stage_ehf: '',
+                    mal_vvm_stage_threepl: '',
+                    mal_batch_number_scs: '',
+                    mal_batch_number: '',
+                    mal_expire_date_scs: null,
+                    mal_expire_date: null,
+                    mal_diluent: 0,
+                    mal_fiveml_syringe: 0,
+                    mal_zerofiveml_syringe: 0,
+                    mal_empty_vials: 0,
+                    mal_unused_vials: 0,
+                    mal_safety_boxes: 0,
 
-                slwg_user: userData?.id || null,
-                safty_box_empty: parseInt(globalSafetyBox) || 0,
-            }));
+                    // MR - set to 0 (not in use currently)
+                    dose_mr_actual: 0,
+                    dose_mr_allocated: 0,
+                    dose_mr_received: 0,
+                    dose_mr_return: 0,
+                    mr_vvm_stage_scs: '',
+                    mr_vvm_stage_ehf: '',
+                    mr_vvm_stage_threepl: '',
+                    mr_batch_number_scs: '',
+                    mr_batch_number: '',
+                    mr_expire_date_scs: null,
+                    mr_expire_date: null,
+                    mr_diluent: 0,
+                    mr_fiveml_syringe: 0,
+                    mr_zerofiveml_syringe: 0,
+                    mr_empty_vials: 0,
+                    mr_unused_vials: 0,
+                    mr_safety_boxes: 0,
+
+                    slwg_user: userData?.id || null,
+                    // Calculate safety boxes per facility (100 syringes per box)
+                    safty_box_empty: Math.ceil((
+                        (bcgAllocated + Math.ceil(bcgAllocated / 20)) + // BCG: admin + recon
+                        hepbAllocated + // HepB: admin
+                        // bOPV: droppers not included in safety box calc usually
+                        pentaAllocated + // Penta: admin
+                        pcvAllocated + // PCV: admin
+                        ipvAllocated + // IPV: admin
+                        (meaAllocated + Math.ceil(meaAllocated / 10)) + // Measles: admin + recon
+                        (yfAllocated + Math.ceil(yfAllocated / 10)) + // YF: admin + recon
+                        tdAllocated + // TD: admin
+                        (menaAllocated + Math.ceil(menaAllocated / 10)) + // MenA: admin + recon
+                        hpvAllocated // HPV: admin
+                    ) / 100) || 0,
+                };
+            });
 
             // Create the nested payload structure
             const nestedPayload = {
                 batch_no: singleBatchNumber,
                 period: allocationDate,
                 threepl: selectedThreePl,
-                safety_box: parseInt(globalSafetyBox) || 0,
                 status: userRole === 'scs' ? 1 : 0,
                 created_by: userData?.username || 'system',
                 items: items,
@@ -1009,11 +1067,11 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                             <TextField
                                 fullWidth
                                 type="number"
-                                label="Safety Box (Auto-calculated)"
+                                label="Safety Box"
                                 value={globalSafetyBox}
+                                onChange={(e) => setGlobalSafetyBoxOverride(e.target.value)}
                                 inputProps={{ min: 0 }}
-                                disabled
-                                helperText="Based on total syringes ÷ 100"
+                                helperText="Auto-calculated from syringes ÷ 100, editable"
                             />
                         </Grid>
                     </Grid>
@@ -1089,17 +1147,16 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                                 <Grid container spacing={1.5}>
                                                     <Grid item xs={12}>
                                                         <FormControl fullWidth size="small">
-                                                            <InputLabel>VVM Stage</InputLabel>
+                                                            <InputLabel required={allocated > 0}>VVM Stage</InputLabel>
                                                             <Select
                                                                 value={metadataMap[vaccine.key].vvm_stage}
                                                                 onChange={(e) => handleMetadataChange(vaccine.key, 'vvm_stage', e.target.value)}
                                                                 label="VVM Stage"
+                                                                required={allocated > 0}
                                                             >
                                                                 <MenuItem value="">Select Stage</MenuItem>
-                                                                <MenuItem value="1">Stage 1</MenuItem>
-                                                                <MenuItem value="2">Stage 2</MenuItem>
-                                                                <MenuItem value="3">Stage 3</MenuItem>
-                                                                <MenuItem value="4">Stage 4</MenuItem>
+                                                                <MenuItem value="Usable">Usable</MenuItem>
+                                                                <MenuItem value="Unusable">Unusable</MenuItem>
                                                             </Select>
                                                         </FormControl>
                                                     </Grid>
@@ -1111,6 +1168,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                                             value={metadataMap[vaccine.key].batch_number}
                                                             onChange={(e) => handleMetadataChange(vaccine.key, 'batch_number', e.target.value)}
                                                             placeholder="Enter batch number"
+                                                            required={allocated > 0}
                                                         />
                                                     </Grid>
                                                     <Grid item xs={12}>
@@ -1122,6 +1180,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                                             value={metadataMap[vaccine.key].expire_date}
                                                             onChange={(e) => handleMetadataChange(vaccine.key, 'expire_date', e.target.value)}
                                                             InputLabelProps={{ shrink: true }}
+                                                            required={allocated > 0}
                                                         />
                                                     </Grid>
                                                 </Grid>
@@ -1143,7 +1202,6 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                                                         value={consumablesData[consumable.key as keyof typeof consumablesData] || ''}
                                                                         onChange={(e) => handleConsumablesChange(consumable.key, e.target.value)}
                                                                         inputProps={{ min: 0 }}
-                                                                        disabled
                                                                     />
                                                                 </Grid>
                                                             ))}

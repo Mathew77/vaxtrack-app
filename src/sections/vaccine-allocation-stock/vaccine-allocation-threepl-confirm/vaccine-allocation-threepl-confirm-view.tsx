@@ -1,0 +1,211 @@
+import React, { useState, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Grid,
+    Button,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Select,
+    MenuItem,
+    FormControl,
+    Divider,
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { toast } from 'react-toastify';
+import { useBulkUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
+
+// Vaccine types for VVM stage inputs
+const VACCINE_TYPES = [
+    { key: 'bcg', label: 'BCG', doseKey: 'dose_bcg_allocated' },
+    { key: 'hepb', label: 'HepB', doseKey: 'dose_hepb_allocated' },
+    { key: 'bopv', label: 'bOPV', doseKey: 'dose_bopv_allocated' },
+    { key: 'penta', label: 'Penta', doseKey: 'dose_penta_allocated' },
+    { key: 'pcv', label: 'PCV', doseKey: 'dose_pcv_allocated' },
+    { key: 'ipv', label: 'IPV', doseKey: 'dose_ipv_allocated' },
+    { key: 'mea', label: 'Measles', doseKey: 'dose_mea_allocated' },
+    { key: 'yf', label: 'YF', doseKey: 'dose_yf_allocated' },
+    { key: 'td', label: 'TD', doseKey: 'dose_td_allocated' },
+    { key: 'mena', label: 'MenA', doseKey: 'dose_mena_allocated' },
+    { key: 'rota', label: 'Rota', doseKey: 'dose_rota_allocated' },
+    { key: 'hpv', label: 'HPV', doseKey: 'dose_hpv_allocated' },
+];
+
+const VaccineAllocationThreeplConfirmView: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { batch_no, allocations = [] } = location.state || {};
+
+    const bulkUpdateMutation = useBulkUpdateAllocationStatus();
+
+    const [vvmStages, setVvmStages] = useState<Record<string, string>>({
+        bcg: 'Usable',
+        hepb: 'Usable',
+        bopv: 'Usable',
+        penta: 'Usable',
+        pcv: 'Usable',
+        ipv: 'Usable',
+        mea: 'Usable',
+        yf: 'Usable',
+        td: 'Usable',
+        mena: 'Usable',
+        rota: 'Usable',
+        hpv: 'Usable',
+    });
+
+    // Get aggregated vaccine totals for the batch
+    const batchVaccineTotals = useMemo(() => {
+        const totals: Record<string, number> = {};
+        VACCINE_TYPES.forEach(vaccine => {
+            totals[vaccine.key] = allocations.reduce(
+                (sum: number, allocation: any) => sum + (allocation[vaccine.doseKey] || 0),
+                0
+            );
+        });
+        return totals;
+    }, [allocations]);
+
+    const handleVvmChange = (vaccineKey: string, value: string) => {
+        setVvmStages(prev => ({ ...prev, [vaccineKey]: value }));
+    };
+
+    const handleConfirm = () => {
+        // Create VVM stages map for all allocations (same VVM stages for all)
+        const vvmStagesMap: Record<string, Record<string, string>> = {};
+        allocations.forEach((allocation: any) => {
+            vvmStagesMap[allocation.id.toString()] = { ...vvmStages };
+        });
+
+        bulkUpdateMutation.mutate(
+            {
+                allocations: allocations,
+                status: 2, // Pending MCCO Confirmation
+                vvmStages: vvmStagesMap,
+            },
+            {
+                onSuccess: () => {
+                    toast.success(`Bulk pickup confirmed for ${allocations.length} facilities!`);
+                    navigate('/vaccine-allocation-stock-page');
+                },
+                onError: (error: any) => {
+                    toast.error(error?.message || 'Failed to confirm bulk pickup');
+                },
+            }
+        );
+    };
+
+    if (!allocations.length) {
+        return (
+            <DashboardContent>
+                <Typography variant="h6">No allocations selected.</Typography>
+                <Button onClick={() => navigate(-1)}>Back</Button>
+            </DashboardContent>
+        );
+    }
+
+    return (
+        <DashboardContent maxWidth="xl">
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h4">
+                    Confirm Pickup & Delivery (3PL)
+                </Typography>
+                <Button
+                    startIcon={<ArrowBackIcon />}
+                    onClick={() => navigate(-1)}
+                    variant="text"
+                >
+                    Back
+                </Button>
+            </Box>
+
+            <Typography variant="body1" sx={{ mb: 3 }}>
+                You are about to confirm pickup for <strong>{allocations.length}</strong> facilities
+                in batch <strong>{batch_no}</strong>.
+            </Typography>
+
+            <Card sx={{ mb: 3 }}>
+                <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                        Enter VVM Stages
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                        Select the VVM stage for each vaccine type. This will be applied to all allocations in this batch.
+                    </Typography>
+
+                    <TableContainer component={Paper} variant="outlined">
+                        <Table size="medium">
+                            <TableHead>
+                                <TableRow sx={{ bgcolor: '#f0f0f0' }}>
+                                    <TableCell><strong>Vaccine</strong></TableCell>
+                                    <TableCell><strong>Total Doses</strong></TableCell>
+                                    <TableCell><strong>VVM Stage</strong></TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {VACCINE_TYPES.filter(vaccine => batchVaccineTotals[vaccine.key] > 0).map(vaccine => (
+                                    <TableRow key={vaccine.key}>
+                                        <TableCell>{vaccine.label}</TableCell>
+                                        <TableCell>
+                                            <Typography fontWeight="bold">
+                                                {batchVaccineTotals[vaccine.key]}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <FormControl size="small" sx={{ minWidth: 150 }}>
+                                                <Select
+                                                    value={vvmStages[vaccine.key]}
+                                                    onChange={(e) => handleVvmChange(vaccine.key, e.target.value)}
+                                                >
+                                                    <MenuItem value="Usable">Usable</MenuItem>
+                                                    <MenuItem value="Unusable">Unusable</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+                    <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                        <Button
+                            variant="outlined"
+                            size="large"
+                            onClick={() => navigate(-1)}
+                            disabled={bulkUpdateMutation.isPending}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            startIcon={<CheckCircleOutlineIcon />}
+                            onClick={handleConfirm}
+                            disabled={bulkUpdateMutation.isPending}
+                            sx={{
+                                background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
+                                },
+                            }}
+                        >
+                            {bulkUpdateMutation.isPending ? 'Confirming...' : 'Confirm Pickup & Delivery'}
+                        </Button>
+                    </Box>
+                </CardContent>
+            </Card>
+        </DashboardContent>
+    );
+};
+
+export default VaccineAllocationThreeplConfirmView;

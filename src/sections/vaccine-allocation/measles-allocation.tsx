@@ -79,11 +79,10 @@ const MeaslesAllocationComponent = ({
     // Exclude non-quantity fields from validation
     const excludedMeaslesFields = ['measlesEmptyVials', 'measlesSafetyBoxes', 'measlesUnusedVials'];
 
-    // Handle Measles vaccine allocation - validate divisibility by 5 and auto-calculate consumables
     if (name === 'measlesVaccineAllocated' && !excludedMeaslesFields.includes(name)) {
-      if (value !== '' && numValue % 5 !== 0) {
+      if (value !== '' && numValue % 10 !== 0) {
         // Invalid value - set error and clear consumables but keep the value
-        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 5' }));
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
         setFormData((prev) => ({
           ...prev,
           [name]: value,
@@ -91,14 +90,14 @@ const MeaslesAllocationComponent = ({
           measles2mlSyringeAllocated: '',
           measles05mlSyringeAllocated: '',
         }));
-      } else if (numValue > 0 && numValue % 5 === 0) {
+      } else if (numValue > 0 && numValue % 10 === 0) {
         // Valid value - clear error and auto-calculate consumables
         setErrors((prev) => {
           const newErrors = { ...prev };
           delete newErrors[name];
           return newErrors;
         });
-        const vials = numValue / 5;
+        const vials = numValue / 10;
         setFormData((prev) => ({
           ...prev,
           [name]: value,
@@ -122,11 +121,11 @@ const MeaslesAllocationComponent = ({
         }));
       }
     }
-    // Handle Measles vaccine received - validate divisibility by 5 and auto-calculate consumables
+    // Handle Measles vaccine received - validate divisibility by 10 and auto-calculate consumables
     else if (name === 'measlesVaccineReceived' && !excludedMeaslesFields.includes(name)) {
-      if (value !== '' && numValue % 5 !== 0) {
+      if (value !== '' && numValue % 10 !== 0) {
         // Invalid value - set error and clear consumables but keep the value
-        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 5' }));
+        setErrors((prev) => ({ ...prev, [name]: 'Quantity must be divisible by 10' }));
         setFormData((prev) => ({
           ...prev,
           [name]: value,
@@ -134,14 +133,14 @@ const MeaslesAllocationComponent = ({
           measles2mlSyringeReceived: '',
           measles05mlSyringeReceived: '',
         }));
-      } else if (numValue > 0 && numValue % 5 === 0) {
+      } else if (numValue > 0 && numValue % 10 === 0) {
         // Valid value - clear error and auto-calculate consumables
         setErrors((prev) => {
           const newErrors = { ...prev };
           delete newErrors[name];
           return newErrors;
         });
-        const vials = numValue / 5;
+        const vials = numValue / 10;
         setFormData((prev) => ({
           ...prev,
           [name]: value,
@@ -340,7 +339,7 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Vaccine</Typography>
-                    <Tooltip title="Enter Measles & Rubella vaccine quantity (5 doses per vial)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella vaccine quantity (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -353,7 +352,7 @@ const MeaslesAllocationComponent = ({
                         onKeyDown={preventInvalidKeys}
                         error={!!errors.measlesVaccineAllocated}
                         helperText={errors.measlesVaccineAllocated}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -368,11 +367,11 @@ const MeaslesAllocationComponent = ({
                         name="measlesDiluentAllocated"
                         value={formData.measlesDiluentAllocated}
                         onChange={handleChange}
-                        disabled={true}
+                        // disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -387,11 +386,11 @@ const MeaslesAllocationComponent = ({
                         name="measles05mlSyringeAllocated"
                         value={formData.measles05mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={true}
+                        // disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -406,11 +405,11 @@ const MeaslesAllocationComponent = ({
                         name="measles2mlSyringeAllocated"
                         value={formData.measles2mlSyringeAllocated}
                         onChange={handleChange}
-                        disabled={true}
+                        // disabled={true}
                         required={canEditEHFAllocation}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -700,7 +699,7 @@ const MeaslesAllocationComponent = ({
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography>Measles & Rubella Vaccine</Typography>
-                    <Tooltip title="Enter Measles & Rubella vaccine quantity received (5 doses per vial)" arrow placement="top">
+                    <Tooltip title="Enter Measles & Rubella vaccine quantity received (10 doses per vial)" arrow placement="top">
                       <TextField
                         fullWidth
                         variant="outlined"
@@ -713,7 +712,7 @@ const MeaslesAllocationComponent = ({
                         onKeyDown={preventInvalidKeys}
                         error={!!errors.measlesVaccineReceived}
                         helperText={errors.measlesVaccineReceived}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -728,11 +727,11 @@ const MeaslesAllocationComponent = ({
                         name="measlesDiluentReceived"
                         value={formData.measlesDiluentReceived}
                         onChange={handleChange}
-                        disabled={true}
+                        // disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -747,11 +746,11 @@ const MeaslesAllocationComponent = ({
                         name="measles05mlSyringeReceived"
                         value={formData.measles05mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={true}
+                        // disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>
@@ -766,11 +765,11 @@ const MeaslesAllocationComponent = ({
                         name="measles2mlSyringeReceived"
                         value={formData.measles2mlSyringeReceived}
                         onChange={handleChange}
-                        disabled={true}
+                        // disabled={true}
                         required={canEditEHFReceived}
                         type='number'
                         onKeyDown={preventInvalidKeys}
-                        inputProps={{ max: 5, min: 0 }}
+                        inputProps={{ max: 10, min: 0 }}
                       />
                     </Tooltip>
                   </Box>

@@ -132,7 +132,7 @@ export function SignInView2() {
                 mb: 4
               }}
             >
-              VAXTRACK
+              {/* VAXTRACK */}
             </Typography>
 
           <Box component="form" onSubmit={handleSubmit}>
@@ -195,7 +195,7 @@ export function SignInView2() {
               </Typography>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mb: 2 }}>
+            {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mb: 2 }}>
               <Box
                 component="img"
                 src="/assets/images/sign-in/sign-in-logo-remove1.png"
@@ -208,7 +208,7 @@ export function SignInView2() {
                 alt="Sign in logo 2"
                 sx={{ height: 60, objectFit: 'contain' }}
               />
-            </Box>
+            </Box> */}
 
             {/* <Link
               component={RouterLink}

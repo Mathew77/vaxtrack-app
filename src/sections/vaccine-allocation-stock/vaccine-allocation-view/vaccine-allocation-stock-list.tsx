@@ -39,7 +39,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`scrollable-force-tab-${index}`}
       {...other}
     >
-      {value === index && <Box paddingY={1}>{children}</Box>}
+      {value === index && <Box paddingX={3} paddingY={1}>{children}</Box>}
     </Typography>
   );
 }
@@ -329,84 +329,84 @@ const VaccineAllocationStockList: React.FC = () => {
         // BCG
         dose_bcg_actual: entry.stockData.dose_bcg || 0,
         dose_bcg_allocated: parseInt(entry.allocations.dose_bcg) || 0,
-        bcg_vvm_stage_scs: parseInt(entry.metadata.dose_bcg.vvm_stage) || 0,
+        bcg_vvm_stage_scs: entry.metadata.dose_bcg.vvm_stage || '',
         bcg_batch_number_scs: entry.metadata.dose_bcg.batch_number || '',
         bcg_expire_date_scs: entry.metadata.dose_bcg.expire_date || null,
 
         // HepB
         dose_hepb_actual: entry.stockData.dose_hepb || 0,
         dose_hepb_allocated: parseInt(entry.allocations.dose_hepb) || 0,
-        hepb_vvm_stage_scs: parseInt(entry.metadata.dose_hepb.vvm_stage) || 0,
+        hepb_vvm_stage_scs: entry.metadata.dose_hepb.vvm_stage || '',
         hepb_batch_number_scs: entry.metadata.dose_hepb.batch_number || '',
         hepb_expire_date_scs: entry.metadata.dose_hepb.expire_date || null,
 
         // bOPV
         dose_bopv_actual: entry.stockData.dose_bopv || 0,
         dose_bopv_allocated: parseInt(entry.allocations.dose_bopv) || 0,
-        bopv_vvm_stage_scs: parseInt(entry.metadata.dose_bopv.vvm_stage) || 0,
+        bopv_vvm_stage_scs: entry.metadata.dose_bopv.vvm_stage || '',
         bopv_batch_number_scs: entry.metadata.dose_bopv.batch_number || '',
         bopv_expire_date_scs: entry.metadata.dose_bopv.expire_date || null,
 
         // Penta
         dose_penta_actual: entry.stockData.dose_penta || 0,
         dose_penta_allocated: parseInt(entry.allocations.dose_penta) || 0,
-        penta_vvm_stage_scs: parseInt(entry.metadata.dose_penta.vvm_stage) || 0,
+        penta_vvm_stage_scs: entry.metadata.dose_penta.vvm_stage || '',
         penta_batch_number_scs: entry.metadata.dose_penta.batch_number || '',
         penta_expire_date_scs: entry.metadata.dose_penta.expire_date || null,
 
         // PCV
         dose_pcv_actual: entry.stockData.dose_pcv || 0,
         dose_pcv_allocated: parseInt(entry.allocations.dose_pcv) || 0,
-        pcv_vvm_stage_scs: parseInt(entry.metadata.dose_pcv.vvm_stage) || 0,
+        pcv_vvm_stage_scs: entry.metadata.dose_pcv.vvm_stage || '',
         pcv_batch_number_scs: entry.metadata.dose_pcv.batch_number || '',
         pcv_expire_date_scs: entry.metadata.dose_pcv.expire_date || null,
 
         // IPV
         dose_ipv_actual: entry.stockData.dose_ipv || 0,
         dose_ipv_allocated: parseInt(entry.allocations.dose_ipv) || 0,
-        ipv_vvm_stage_scs: parseInt(entry.metadata.dose_ipv.vvm_stage) || 0,
+        ipv_vvm_stage_scs: entry.metadata.dose_ipv.vvm_stage || '',
         ipv_batch_number_scs: entry.metadata.dose_ipv.batch_number || '',
         ipv_expire_date_scs: entry.metadata.dose_ipv.expire_date || null,
 
         // Measles
         dose_mea_actual: entry.stockData.dose_mea || 0,
         dose_mea_allocated: parseInt(entry.allocations.dose_mea) || 0,
-        mea_vvm_stage_scs: parseInt(entry.metadata.dose_mea.vvm_stage) || 0,
+        mea_vvm_stage_scs: entry.metadata.dose_mea.vvm_stage || '',
         mea_batch_number_scs: entry.metadata.dose_mea.batch_number || '',
         mea_expire_date_scs: entry.metadata.dose_mea.expire_date || null,
 
         // YF
         dose_yf_actual: entry.stockData.dose_yf || 0,
         dose_yf_allocated: parseInt(entry.allocations.dose_yf) || 0,
-        yf_vvm_stage_scs: parseInt(entry.metadata.dose_yf.vvm_stage) || 0,
+        yf_vvm_stage_scs: entry.metadata.dose_yf.vvm_stage || '',
         yf_batch_number_scs: entry.metadata.dose_yf.batch_number || '',
         yf_expire_date_scs: entry.metadata.dose_yf.expire_date || null,
 
         // TD
         dose_td_actual: entry.stockData.dose_td || 0,
         dose_td_allocated: parseInt(entry.allocations.dose_td) || 0,
-        td_vvm_stage_scs: parseInt(entry.metadata.dose_td.vvm_stage) || 0,
+        td_vvm_stage_scs: entry.metadata.dose_td.vvm_stage || '',
         td_batch_number_scs: entry.metadata.dose_td.batch_number || '',
         td_expire_date_scs: entry.metadata.dose_td.expire_date || null,
 
         // MenA
         dose_mena_actual: entry.stockData.dose_mena || 0,
         dose_mena_allocated: parseInt(entry.allocations.dose_mena) || 0,
-        mena_vvm_stage_scs: parseInt(entry.metadata.dose_mena.vvm_stage) || 0,
+        mena_vvm_stage_scs: entry.metadata.dose_mena.vvm_stage || '',
         mena_batch_number_scs: entry.metadata.dose_mena.batch_number || '',
         mena_expire_date_scs: entry.metadata.dose_mena.expire_date || null,
 
         // Rota
         dose_rota_actual: entry.stockData.dose_rota || 0,
         dose_rota_allocated: parseInt(entry.allocations.dose_rota) || 0,
-        rota_vvm_stage_scs: parseInt(entry.metadata.dose_rota.vvm_stage) || 0,
+        rota_vvm_stage_scs: entry.metadata.dose_rota.vvm_stage || '',
         rota_batch_number_scs: entry.metadata.dose_rota.batch_number || '',
         rota_expire_date_scs: entry.metadata.dose_rota.expire_date || null,
 
         // HPV
         dose_hpv_actual: entry.stockData.dose_hpv || 0,
         dose_hpv_allocated: parseInt(entry.allocations.dose_hpv) || 0,
-        hpv_vvm_stage_scs: parseInt(entry.metadata.dose_hpv.vvm_stage) || 0,
+        hpv_vvm_stage_scs: entry.metadata.dose_hpv.vvm_stage || '',
         hpv_batch_number_scs: entry.metadata.dose_hpv.batch_number || '',
         hpv_expire_date_scs: entry.metadata.dose_hpv.expire_date || null,
 
@@ -1667,41 +1667,9 @@ const VaccineAllocationStockList: React.FC = () => {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} md={3}>
-                  {/* <FormControl fullWidth disabled={!selectedLGA || available3PLs.length === 0}>
-                    <InputLabel>Select 3PL</InputLabel>
-                    <Select
-                      value={selectedThreePl}
-                      onChange={handleThreePlChange}
-                      label="Select 3PL"
-                    >
-                      <MenuItem value="">
-                        <em>Select 3PL for Delivery</em>
-                      </MenuItem>
-                      {available3PLs.map((pl) => (
-                        <MenuItem key={pl.id} value={pl.id?.toString()}>
-                          {pl.threepl_name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl> */}
+
                 </Grid>
                 <Grid item xs={12} md={3}>
-                  {/* <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleAddFacilityToTable}
-                    disabled={!selectedEHF}
-                    startIcon={<AddCircleOutlineIcon />}
-                    sx={{
-                      height: '56px',
-                      background: 'linear-gradient(135deg, rgb(12, 125, 64) 0%, rgb(10, 105, 54) 100%)',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, rgb(10, 105, 54) 0%, rgb(12, 125, 64) 100%)',
-                      },
-                    }}
-                  >
-                    Add Facility
-                  </Button> */}
                   <Button variant="contained" color="primary" size="large" onClick={handleAddFacilityToTable}>
                     Add Facility
                   </Button>
@@ -1899,10 +1867,8 @@ const VaccineAllocationStockList: React.FC = () => {
                                       label="VVM Stage"
                                     >
                                       <MenuItem value="">Select Stage</MenuItem>
-                                      <MenuItem value="1">Stage 1</MenuItem>
-                                      <MenuItem value="2">Stage 2</MenuItem>
-                                      <MenuItem value="3">Stage 3</MenuItem>
-                                      <MenuItem value="4">Stage 4</MenuItem>
+                                      <MenuItem value="Usable">Usable</MenuItem>
+                                      <MenuItem value="Unusable">Unusable</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
@@ -1986,10 +1952,8 @@ const VaccineAllocationStockList: React.FC = () => {
                                       label="VVM Stage"
                                     >
                                       <MenuItem value="">Select Stage</MenuItem>
-                                      <MenuItem value="1">Stage 1</MenuItem>
-                                      <MenuItem value="2">Stage 2</MenuItem>
-                                      <MenuItem value="3">Stage 3</MenuItem>
-                                      <MenuItem value="4">Stage 4</MenuItem>
+                                      <MenuItem value="Usable">Usable</MenuItem>
+                                      <MenuItem value="Unusable">Unusable</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
@@ -2067,10 +2031,8 @@ const VaccineAllocationStockList: React.FC = () => {
                                     <InputLabel>VVM Stage</InputLabel>
                                     <Select value={metadataMap.dose_bopv.vvm_stage} onChange={(e) => handleMetadataChange('dose_bopv', 'vvm_stage', e.target.value)} label="VVM Stage">
                                       <MenuItem value="">Select Stage</MenuItem>
-                                      <MenuItem value="1">Stage 1</MenuItem>
-                                      <MenuItem value="2">Stage 2</MenuItem>
-                                      <MenuItem value="3">Stage 3</MenuItem>
-                                      <MenuItem value="4">Stage 4</MenuItem>
+                                      <MenuItem value="Usable">Usable</MenuItem>
+                                      <MenuItem value="Unusable">Unusable</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
@@ -2133,10 +2095,8 @@ const VaccineAllocationStockList: React.FC = () => {
                                     <InputLabel>VVM Stage</InputLabel>
                                     <Select value={metadataMap.dose_penta.vvm_stage} onChange={(e) => handleMetadataChange('dose_penta', 'vvm_stage', e.target.value)} label="VVM Stage">
                                       <MenuItem value="">Select Stage</MenuItem>
-                                      <MenuItem value="1">Stage 1</MenuItem>
-                                      <MenuItem value="2">Stage 2</MenuItem>
-                                      <MenuItem value="3">Stage 3</MenuItem>
-                                      <MenuItem value="4">Stage 4</MenuItem>
+                                      <MenuItem value="Usable">Usable</MenuItem>
+                                      <MenuItem value="Unusable">Unusable</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
@@ -2199,10 +2159,8 @@ const VaccineAllocationStockList: React.FC = () => {
                                     <InputLabel>VVM Stage</InputLabel>
                                     <Select value={metadataMap.dose_pcv.vvm_stage} onChange={(e) => handleMetadataChange('dose_pcv', 'vvm_stage', e.target.value)} label="VVM Stage">
                                       <MenuItem value="">Select Stage</MenuItem>
-                                      <MenuItem value="1">Stage 1</MenuItem>
-                                      <MenuItem value="2">Stage 2</MenuItem>
-                                      <MenuItem value="3">Stage 3</MenuItem>
-                                      <MenuItem value="4">Stage 4</MenuItem>
+                                      <MenuItem value="Usable">Usable</MenuItem>
+                                      <MenuItem value="Unusable">Unusable</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
@@ -2265,10 +2223,8 @@ const VaccineAllocationStockList: React.FC = () => {
                                     <InputLabel>VVM Stage</InputLabel>
                                     <Select value={metadataMap.dose_ipv.vvm_stage} onChange={(e) => handleMetadataChange('dose_ipv', 'vvm_stage', e.target.value)} label="VVM Stage">
                                       <MenuItem value="">Select Stage</MenuItem>
-                                      <MenuItem value="1">Stage 1</MenuItem>
-                                      <MenuItem value="2">Stage 2</MenuItem>
-                                      <MenuItem value="3">Stage 3</MenuItem>
-                                      <MenuItem value="4">Stage 4</MenuItem>
+                                      <MenuItem value="Usable">Usable</MenuItem>
+                                      <MenuItem value="Unusable">Unusable</MenuItem>
                                     </Select>
                                   </FormControl>
                                 </Grid>
@@ -2298,7 +2254,7 @@ const VaccineAllocationStockList: React.FC = () => {
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
                               <Grid container spacing={1.5}>
-                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_mea.vvm_stage} onChange={(e) => handleMetadataChange('dose_mea', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="1">Stage 1</MenuItem><MenuItem value="2">Stage 2</MenuItem><MenuItem value="3">Stage 3</MenuItem><MenuItem value="4">Stage 4</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_mea.vvm_stage} onChange={(e) => handleMetadataChange('dose_mea', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mea.batch_number} onChange={(e) => handleMetadataChange('dose_mea', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mea.expire_date} onChange={(e) => handleMetadataChange('dose_mea', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>
@@ -2321,7 +2277,7 @@ const VaccineAllocationStockList: React.FC = () => {
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
                               <Grid container spacing={1.5}>
-                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_yf.vvm_stage} onChange={(e) => handleMetadataChange('dose_yf', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="1">Stage 1</MenuItem><MenuItem value="2">Stage 2</MenuItem><MenuItem value="3">Stage 3</MenuItem><MenuItem value="4">Stage 4</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_yf.vvm_stage} onChange={(e) => handleMetadataChange('dose_yf', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_yf.batch_number} onChange={(e) => handleMetadataChange('dose_yf', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_yf.expire_date} onChange={(e) => handleMetadataChange('dose_yf', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>
@@ -2344,7 +2300,7 @@ const VaccineAllocationStockList: React.FC = () => {
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
                               <Grid container spacing={1.5}>
-                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_td.vvm_stage} onChange={(e) => handleMetadataChange('dose_td', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="1">Stage 1</MenuItem><MenuItem value="2">Stage 2</MenuItem><MenuItem value="3">Stage 3</MenuItem><MenuItem value="4">Stage 4</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_td.vvm_stage} onChange={(e) => handleMetadataChange('dose_td', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_td.batch_number} onChange={(e) => handleMetadataChange('dose_td', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_td.expire_date} onChange={(e) => handleMetadataChange('dose_td', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>
@@ -2367,7 +2323,7 @@ const VaccineAllocationStockList: React.FC = () => {
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
                               <Grid container spacing={1.5}>
-                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_mena.vvm_stage} onChange={(e) => handleMetadataChange('dose_mena', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="1">Stage 1</MenuItem><MenuItem value="2">Stage 2</MenuItem><MenuItem value="3">Stage 3</MenuItem><MenuItem value="4">Stage 4</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_mena.vvm_stage} onChange={(e) => handleMetadataChange('dose_mena', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mena.batch_number} onChange={(e) => handleMetadataChange('dose_mena', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mena.expire_date} onChange={(e) => handleMetadataChange('dose_mena', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>
@@ -2390,7 +2346,7 @@ const VaccineAllocationStockList: React.FC = () => {
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
                               <Grid container spacing={1.5}>
-                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_rota.vvm_stage} onChange={(e) => handleMetadataChange('dose_rota', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="1">Stage 1</MenuItem><MenuItem value="2">Stage 2</MenuItem><MenuItem value="3">Stage 3</MenuItem><MenuItem value="4">Stage 4</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_rota.vvm_stage} onChange={(e) => handleMetadataChange('dose_rota', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_rota.batch_number} onChange={(e) => handleMetadataChange('dose_rota', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_rota.expire_date} onChange={(e) => handleMetadataChange('dose_rota', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>
@@ -2413,7 +2369,7 @@ const VaccineAllocationStockList: React.FC = () => {
                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
                               <Grid container spacing={1.5}>
-                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_hpv.vvm_stage} onChange={(e) => handleMetadataChange('dose_hpv', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="1">Stage 1</MenuItem><MenuItem value="2">Stage 2</MenuItem><MenuItem value="3">Stage 3</MenuItem><MenuItem value="4">Stage 4</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_hpv.vvm_stage} onChange={(e) => handleMetadataChange('dose_hpv', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hpv.batch_number} onChange={(e) => handleMetadataChange('dose_hpv', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hpv.expire_date} onChange={(e) => handleMetadataChange('dose_hpv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>

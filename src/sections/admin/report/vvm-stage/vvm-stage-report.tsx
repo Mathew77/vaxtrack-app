@@ -151,6 +151,12 @@ const VvmStageReport: React.FC = () => {
         accessorKey: 'vvm_stage',
         header: 'VVM Stage',
         size: 120,
+        Cell: ({ cell }: any) => {
+          const val = cell.getValue();
+          if (val === 1 || val === '1') return 'Usable';
+          if (val === 2 || val === '2') return 'Unusable';
+          return val || '-';
+        },
       },
       {
         accessorKey: 'mismatch_indicators',

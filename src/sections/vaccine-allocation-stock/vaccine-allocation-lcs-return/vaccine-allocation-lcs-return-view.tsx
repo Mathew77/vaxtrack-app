@@ -203,6 +203,7 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
 
     // Prepare the data for update
     const updatePayload = {
+      uuid: data.uuid,
       ehf_id: data.ehf_id,
       assigned_unique_id: data.assigned_unique_id,
       period: data.period,
@@ -259,6 +260,7 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
       const transferTo = data?.deficit_transfer_to;
       if (transferTo === 'lcs') return 'Pending LCS Confirmation';
       if (transferTo === 'ehf') return 'Pending EHF Confirmation';
+      if (transferTo === 'scs') return 'Pending SCS Confirmation';
       return 'Pending Confirmation';
     }
     return 'Unknown';

@@ -4,8 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Popover from '@mui/material/Popover';
+import PersonIcon from '@mui/icons-material/Person';
 import Divider from '@mui/material/Divider';
 import MenuList from '@mui/material/MenuList';
 import Typography from '@mui/material/Typography';
@@ -78,15 +78,13 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           p: '2px',
           width: 40,
           height: 40,
-          background: (theme) =>
-            `conic-gradient(${theme.vars.palette.primary.light}, ${theme.vars.palette.warning.light}, ${theme.vars.palette.primary.light})`,
           ...sx,
         }}
         {...other}
       >
-        <Avatar src={userAccount.photoURL} alt={userAccount.displayName} sx={{ width: 1, height: 1 }}>
-          {userAccount.displayName.charAt(0).toUpperCase()}
-        </Avatar>
+        <Box sx={{ width: 36, height: 36, border: (theme) => `2px solid ${theme.vars.palette.primary.main}`, borderRadius: '50%', bgcolor: (theme) => `${theme.vars.palette.primary.main}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <PersonIcon sx={{ width: 24, height: 24, color: 'primary.main' }} />
+        </Box>
       </IconButton>
 
       <Popover

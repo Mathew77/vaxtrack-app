@@ -45,10 +45,15 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
   const [safetyBoxesEmpty, setSafetyBoxesEmpty] = useState(data?.safty_box_empty?.toString() || '');
   const [cceFunctionalStatus, setCceFunctionalStatus] = useState('');
 
-  // Helper function to convert VVM stage number to "Stage X" format
+  // Helper function to format VVM stage
   const formatVvmStage = (stage: any) => {
     if (!stage || stage === 0 || stage === '0') return '';
-    return `Stage ${stage}`;
+    // If it's already a descriptive string, return it
+    if (stage === 'Usable' || stage === 'Unusable') return stage;
+    // Handle legacy numeric values if they exist
+    if (stage === 1 || stage === '1') return 'Usable';
+    if (stage === 2 || stage === '2') return 'Unusable';
+    return stage;
   };
 
   // Helper function to format date from datetime string to YYYY-MM-DD
@@ -120,16 +125,71 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     setVaccines(updatedVaccines);
   };
 
+  // Define vaccine multiples for validation
+  const vaccineMultiples: Record<string, number> = {
+    'BCG': 20,
+    'Measles': 10,
+    'bOPV': 20,
+    'HepB': 10,
+    'Penta': 10,
+    'PCV': 5,
+    'IPV': 10,
+    'YF': 10,
+    'TD': 10,
+    'MenA': 10,
+    'Rota': 10,
+    'HPV': 1,
+    'Malaria': 10,
+    'MR': 10,
+  };
+
   const validateForm = () => {
+    // Only validate vaccines that have allocations > 0 or received > 0
+    const activeVaccines = vaccines.filter(v => v.allocated > 0 || (v.received && v.received > 0));
 
-    // Only validate vaccines that have allocations > 0
-    const allocatedVaccines = vaccines.filter(v => v.allocated > 0);
-
-    for (const vaccine of allocatedVaccines) {
-      if (!vaccine.received || vaccine.received <= 0) {
+    for (const vaccine of activeVaccines) {
+      if (vaccine.allocated > 0 && (!vaccine.received || vaccine.received <= 0)) {
         toast.error(`Please enter received amount for ${vaccine.name} (Allocated: ${vaccine.allocated})`);
         return false;
       }
+
+      if (vaccine.received > 0) {
+        // Validate multiples
+        const multiple = vaccineMultiples[vaccine.name] || 1;
+        if (Number(vaccine.received) % multiple !== 0) {
+          toast.error(`${vaccine.name} received quantity must be divisible by ${multiple}`);
+          return false;
+        }
+
+        // Validate metadata
+        if (!vaccine.vvmStage) {
+          toast.error(`Please select VVM Stage for ${vaccine.name}`);
+          return false;
+        }
+        if (!vaccine.batchNumber) {
+          toast.error(`Please enter Batch Number for ${vaccine.name}`);
+          return false;
+        }
+        if (!vaccine.expiryDate) {
+          toast.error(`Please select Expiry Date for ${vaccine.name}`);
+          return false;
+        }
+      }
+    }
+
+    if (!cceFunctionalStatus) {
+      toast.error('Please select CCE Functional Status');
+      return false;
+    }
+
+    if (safetyBoxesFilled === '') {
+      toast.error('Please enter Safety Boxes - Filled');
+      return false;
+    }
+
+    if (safetyBoxesEmpty === '') {
+      toast.error('Please enter Safety Boxes - Empty');
+      return false;
     }
 
     if (!mfaCode || mfaCode.length !== 4) {
@@ -139,6 +199,8 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
     return true;
   };
+
+
 
   const handleConfirm = () => {
     if (!validateForm()) {
@@ -191,10 +253,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
         // Only save fields that actually changed to EHF fields
         if (vvmChanged) {
-          const vvmStageNumber = v.vvmStage ? (
-            v.vvmStage.includes('Stage') ? parseInt(v.vvmStage.replace('Stage ', '')) : parseInt(v.vvmStage)
-          ) : 0;
-          vaccineData[`${fieldName}_vvm_stage_ehf`] = vvmStageNumber;
+          vaccineData[`${fieldName}_vvm_stage_ehf`] = v.vvmStage || '';
         }
 
         if (batchChanged) {
@@ -211,6 +270,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
     // Prepare the data for update - include all required fields plus vaccine data
     const updatePayload = {
+      uuid: data.uuid,
       ehf_id: data.ehf_id,
       assigned_unique_id: data.assigned_unique_id,
       period: data.period,
@@ -294,6 +354,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       const transferTo = data?.deficit_transfer_to;
       if (transferTo === 'lcs') return 'Pending LCS Confirmation';
       if (transferTo === 'ehf') return 'Pending EHF Confirmation';
+      if (transferTo === 'scs') return 'Pending SCS Confirmation';
       return 'Pending Confirmation';
     }
     return 'Unknown';
@@ -378,7 +439,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
           <Divider sx={{ my: 3 }} />
 
           <Typography variant="h6" gutterBottom>
-            Vaccine Details 
+            Vaccine Details
           </Typography>
 
           <Grid container spacing={3} sx={{ mt: 2 }}>
@@ -400,20 +461,25 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           onChange={(e) => handleVaccineChange(actualIndex, 'received', e.target.value)}
                           onKeyDown={preventInvalidKeys}
                           inputProps={{ min: 0 }}
+                          error={vaccine.received > 0 && Number(vaccine.received) % (vaccineMultiples[vaccine.name] || 1) !== 0}
+                          helperText={
+                            vaccine.received > 0 && Number(vaccine.received) % (vaccineMultiples[vaccine.name] || 1) !== 0
+                              ? `Must be divisible by ${vaccineMultiples[vaccine.name] || 1}`
+                              : ''
+                          }
                         />
                       </Grid>
                       <Grid item xs={12} md={3}>
                         <FormControl fullWidth>
-                          <InputLabel>VVM Stage</InputLabel>
+                          <InputLabel required={Number(vaccine.received) > 0}>VVM Stage</InputLabel>
                           <Select
                             value={vaccine.vvmStage}
                             onChange={(e) => handleVaccineChange(actualIndex, 'vvmStage', e.target.value)}
                             label="VVM Stage"
+                            required={Number(vaccine.received) > 0}
                           >
-                            <MenuItem value="Stage 1">Stage 1</MenuItem>
-                            <MenuItem value="Stage 2">Stage 2</MenuItem>
-                            <MenuItem value="Stage 3">Stage 3</MenuItem>
-                            <MenuItem value="Stage 4">Stage 4</MenuItem>
+                            <MenuItem value="Usable">Usable</MenuItem>
+                            <MenuItem value="Unusable">Unusable</MenuItem>
                           </Select>
                         </FormControl>
                       </Grid>
@@ -423,6 +489,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           label="Batch Number"
                           value={vaccine.batchNumber}
                           onChange={(e) => handleVaccineChange(actualIndex, 'batchNumber', e.target.value)}
+                          required={Number(vaccine.received) > 0}
                         />
                       </Grid>
                       <Grid item xs={12} md={3}>
@@ -436,6 +503,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           inputProps={{
                             min: new Date().toISOString().split('T')[0]
                           }}
+                          required={Number(vaccine.received) > 0}
                         />
                       </Grid>
                       <Grid item xs={12} md={4}>
@@ -485,12 +553,13 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
           </Typography>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
+              <FormControl fullWidth required>
                 <InputLabel>CCE Functional Status</InputLabel>
                 <Select
                   value={cceFunctionalStatus}
                   onChange={(e) => setCceFunctionalStatus(e.target.value)}
                   label="CCE Functional Status"
+                  required
                 >
                   <MenuItem value="">
                     <em>Select Status</em>
@@ -509,6 +578,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                 onChange={(e) => setSafetyBoxesFilled(e.target.value)}
                 onKeyDown={preventInvalidKeys}
                 inputProps={{ min: 0 }}
+                required
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -520,7 +590,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                 onChange={(e) => setSafetyBoxesEmpty(e.target.value)}
                 onKeyDown={preventInvalidKeys}
                 inputProps={{ min: 0 }}
-                disabled
+                required
               />
             </Grid>
           </Grid>

@@ -19,7 +19,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useCreateAllocation } from 'src/hooks/apis/ehf/ehf-hooks';
 import { VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
-import { useFetchEHFDetailRoutes } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
+import { useFetchEHFDetailRoutes, useFetchEHFsByIds } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { useFetchUHFByEHF } from 'src/hooks/apis/ehf-uhf/uhf-hooks';
 import { UHFType } from 'src/hooks/apis/ehf-uhf/uhf-type';
 import { toast } from 'react-toastify';
@@ -79,6 +79,8 @@ export default function VaccineView() {
   // Fetch UHF based on selected EHF's assigned_unique_id
   const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHFByEHF(selectedEhfUniqueId);
   const [selectedUhf, setSelectedUhf] = useState<number | null>(null);
+  const [selectedLGA, setSelectedLGA] = useState<string>('');
+  const [selectedWard, setSelectedWard] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
   const [status, setStatus] = useState<number>(1);
@@ -139,8 +141,27 @@ export default function VaccineView() {
 
   const userState = userStateFromAssignedId || userStateFromRoleList;
 
-  // Fetch EHF data based on user's state
-  const { data: allEhf = [], isLoading: isEhfLoading } = useFetchEHFDetailRoutes(userState || '', '');
+  // For conveyor: first fetch their assigned EHFs by ID to reliably determine their state
+  const isConveyor = userRole === 'conveyor';
+  const { data: ehfsByIds = [], isLoading: isEhfByIdsLoading } = useFetchEHFsByIds(
+    isConveyor ? userAssignedEhfs : []
+  );
+
+  // Derive the real state from the fetched EHF data (ID prefix like "xxx" is unreliable)
+  const conveyorState = useMemo(() => {
+    if (!isConveyor || ehfsByIds.length === 0) return '';
+    return ehfsByIds[0]?.state || '';
+  }, [isConveyor, ehfsByIds]);
+
+  // Fetch ALL EHFs in the state — used for LGA/Ward dropdowns
+  const effectiveState = isConveyor ? conveyorState : (userState || '');
+  const { data: allEhfByState = [], isLoading: isEhfByStateLoading } = useFetchEHFDetailRoutes(
+    effectiveState,
+    ''
+  );
+
+  const allEhf = allEhfByState;
+  const isEhfLoading = isConveyor ? (isEhfByIdsLoading || isEhfByStateLoading) : isEhfByStateLoading;
 
   // Filter EHF based on user role
   const filteredEhf = useMemo(() => {
@@ -174,6 +195,12 @@ export default function VaccineView() {
       if (!initialSetupDoneRef.current) {
         setSelectedEhf(firstDetail.ehf_id);
         setSelectedUhf(firstDetail.uhf_id);
+
+        // Auto-populate LGA and Ward from the EHF data
+        if (ehfData) {
+          if (ehfData.lga) setSelectedLGA(ehfData.lga);
+          if (ehfData.ward) setSelectedWard(ehfData.ward);
+        }
         setStatus(Number(firstDetail.status) || 1);
 
         const populatedFormData: Record<string, any> = {};
@@ -204,7 +231,7 @@ export default function VaccineView() {
 
   const validationRules: Record<string, number> = {
     bcg: 20,
-    measles: 5,
+    measles: 10,
     yf: 10,
     malaria: 10,
     menA: 10,
@@ -250,6 +277,43 @@ export default function VaccineView() {
       setSelectedTab(vaccineOptions[nextIndex].value);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const availableLGAs = useMemo(() => {
+    const lgas = allEhf.map((ehf: any) => ehf.lga).filter(Boolean);
+    return Array.from(new Set(lgas)).sort() as string[];
+  }, [allEhf]);
+
+  const availableWards = useMemo(() => {
+    if (!selectedLGA) return [];
+    const wards = allEhf
+      .filter((ehf: any) => ehf.lga === selectedLGA)
+      .map((ehf: any) => ehf.ward)
+      .filter(Boolean);
+    return Array.from(new Set(wards)).sort() as string[];
+  }, [allEhf, selectedLGA]);
+
+  const lgaWardFilteredEhf = useMemo(() => {
+    return filteredEhf.filter((ehf: any) => {
+      if (selectedLGA && ehf.lga !== selectedLGA) return false;
+      if (selectedWard && ehf.ward !== selectedWard) return false;
+      return true;
+    });
+  }, [filteredEhf, selectedLGA, selectedWard]);
+
+  const handleLGAChange = (event: any) => {
+    setSelectedLGA(event.target.value);
+    setSelectedWard('');
+    setSelectedEhf(null);
+    setSelectedEhfUniqueId(null);
+    setSelectedUhf(null);
+  };
+
+  const handleWardChange = (event: any) => {
+    setSelectedWard(event.target.value);
+    setSelectedEhf(null);
+    setSelectedEhfUniqueId(null);
+    setSelectedUhf(null);
   };
 
   const handleEhfChange = (event: any, newValue: any) => {
@@ -502,14 +566,45 @@ export default function VaccineView() {
 
           <Grid item xs={9}>
             <Box sx={{ mb: 2 }}>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={6}>
+                  <FormControl fullWidth disabled={isEhfLoading || isView || status > 1}>
+                    <InputLabel>Select LGA</InputLabel>
+                    <Select
+                      value={selectedLGA}
+                      label="Select LGA"
+                      onChange={handleLGAChange}
+                    >
+                      {availableLGAs.map((lga) => (
+                        <MenuItem key={lga} value={lga}>{lga}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControl fullWidth disabled={!selectedLGA || isView || status > 1}>
+                    <InputLabel>Select Ward</InputLabel>
+                    <Select
+                      value={selectedWard}
+                      label="Select Ward"
+                      onChange={handleWardChange}
+                    >
+                      {availableWards.map((ward) => (
+                        <MenuItem key={ward} value={ward}>{ward}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
               <Autocomplete
                 fullWidth
                 sx={{ mb: 2 }}
-                options={filteredEhf}
+                options={lgaWardFilteredEhf}
                 getOptionLabel={(option: any) => option.name_of_ehf || option.ehf_name || ''}
-                value={filteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
+                value={lgaWardFilteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
                 onChange={handleEhfChange}
-                disabled={isEhfLoading || isView || createAllocation.isPending || status > 1}
+                disabled={!selectedWard || isEhfLoading || isView || createAllocation.isPending || status > 1}
                 loading={isEhfLoading}
                 renderInput={(params) => (
                   <TextField

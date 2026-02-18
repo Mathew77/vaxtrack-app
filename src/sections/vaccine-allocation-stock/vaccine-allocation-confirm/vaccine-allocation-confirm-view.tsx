@@ -27,6 +27,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { toast } from 'react-toastify';
 import { useUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
 import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
+import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
 import { useFetchStockAtHand } from 'src/hooks/apis/upload/upload-hook';
 
 const VaccineAllocationConfirmView: React.FC = () => {
@@ -36,12 +37,13 @@ const VaccineAllocationConfirmView: React.FC = () => {
 
   const updateStatusMutation = useUpdateAllocationStatus();
 
-  // Fetch LCS and EHF data
+  // Fetch LCS, EHF and SCS data
   const { data: allLcs = [] } = useFetchLcs();
   const { data: allEhf = [] } = useFetchStockAtHand(null);
+  const { data: allScs = [] } = useFetchScs();
 
   // Transfer Deficit state - Initialize from saved data if available
-  const [transferType, setTransferType] = useState<'lcs' | 'ehf' | ''>(data?.deficit_transfer_to || '');
+  const [transferType, setTransferType] = useState<'lcs' | 'ehf' | 'scs' | ''>(data?.deficit_transfer_to || '');
   const [selectedFacility, setSelectedFacility] = useState<string>(
     data?.deficit_vaccine_location_id ? data.deficit_vaccine_location_id.toString() : ''
   );
@@ -80,12 +82,19 @@ const VaccineAllocationConfirmView: React.FC = () => {
     );
   }, [allEhf, data?.state, data?.lga]);
 
+  // Filter SCS by state
+  const scsInState = useMemo(() => {
+    if (!data?.state) return [];
+    return allScs.filter((scs: any) => scs.stat_id?.toUpperCase() === data.state.toUpperCase());
+  }, [allScs, data?.state]);
+
   // Get facilities based on transfer type
   const facilitiesList = useMemo(() => {
     if (transferType === 'lcs') return lcsInState;
     if (transferType === 'ehf') return ehfInState;
+    if (transferType === 'scs') return scsInState;
     return [];
-  }, [transferType, lcsInState, ehfInState]);
+  }, [transferType, lcsInState, ehfInState, scsInState]);
 
   // Show Transfer Deficit section when explicitly passed via navigation state
   const showTransferDeficit = showTransferDeficitProp === true;
@@ -122,6 +131,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
       const transferTo = data?.deficit_transfer_to;
       if (transferTo === 'lcs') return 'Pending LCS Confirmation';
       if (transferTo === 'ehf') return 'Pending EHF Confirmation';
+      if (transferTo === 'scs') return 'Pending SCS Confirmation';
       return 'Pending Confirmation';
     }
     return 'Unknown';
@@ -170,6 +180,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
 
     // Prepare the data for update - include all required fields
     const updatePayload = {
+      uuid: data.uuid,
       ehf_id: data.ehf_id,
       assigned_unique_id: data.assigned_unique_id,
       period: data.period,
@@ -201,18 +212,18 @@ const VaccineAllocationConfirmView: React.FC = () => {
       slwg_confirmed: confirmToEHF ? true : data.slwg_confirmed,
       // Include VVM stages if 3PL is confirming - only for vaccines with allocations > 0
       ...(userRole === 'threepl' && {
-        ...(data.dose_bcg_allocated > 0 && { bcg_vvm_stage_threepl: vvmStages.bcg || 0 }),
-        ...(data.dose_hepb_allocated > 0 && { hepb_vvm_stage_threepl: vvmStages.hepb || 0 }),
-        ...(data.dose_bopv_allocated > 0 && { bopv_vvm_stage_threepl: vvmStages.bopv || 0 }),
-        ...(data.dose_penta_allocated > 0 && { penta_vvm_stage_threepl: vvmStages.penta || 0 }),
-        ...(data.dose_pcv_allocated > 0 && { pcv_vvm_stage_threepl: vvmStages.pcv || 0 }),
-        ...(data.dose_ipv_allocated > 0 && { ipv_vvm_stage_threepl: vvmStages.ipv || 0 }),
-        ...(data.dose_mea_allocated > 0 && { mea_vvm_stage_threepl: vvmStages.mea || 0 }),
-        ...(data.dose_yf_allocated > 0 && { yf_vvm_stage_threepl: vvmStages.yf || 0 }),
-        ...(data.dose_td_allocated > 0 && { td_vvm_stage_threepl: vvmStages.td || 0 }),
-        ...(data.dose_mena_allocated > 0 && { mena_vvm_stage_threepl: vvmStages.mena || 0 }),
-        ...(data.dose_rota_allocated > 0 && { rota_vvm_stage_threepl: vvmStages.rota || 0 }),
-        ...(data.dose_hpv_allocated > 0 && { hpv_vvm_stage_threepl: vvmStages.hpv || 0 }),
+        ...(data.dose_bcg_allocated > 0 && { bcg_vvm_stage_threepl: vvmStages.bcg || '' }),
+        ...(data.dose_hepb_allocated > 0 && { hepb_vvm_stage_threepl: vvmStages.hepb || '' }),
+        ...(data.dose_bopv_allocated > 0 && { bopv_vvm_stage_threepl: vvmStages.bopv || '' }),
+        ...(data.dose_penta_allocated > 0 && { penta_vvm_stage_threepl: vvmStages.penta || '' }),
+        ...(data.dose_pcv_allocated > 0 && { pcv_vvm_stage_threepl: vvmStages.pcv || '' }),
+        ...(data.dose_ipv_allocated > 0 && { ipv_vvm_stage_threepl: vvmStages.ipv || '' }),
+        ...(data.dose_mea_allocated > 0 && { mea_vvm_stage_threepl: vvmStages.mea || '' }),
+        ...(data.dose_yf_allocated > 0 && { yf_vvm_stage_threepl: vvmStages.yf || '' }),
+        ...(data.dose_td_allocated > 0 && { td_vvm_stage_threepl: vvmStages.td || '' }),
+        ...(data.dose_mena_allocated > 0 && { mena_vvm_stage_threepl: vvmStages.mena || '' }),
+        ...(data.dose_rota_allocated > 0 && { rota_vvm_stage_threepl: vvmStages.rota || '' }),
+        ...(data.dose_hpv_allocated > 0 && { hpv_vvm_stage_threepl: vvmStages.hpv || '' }),
       }),
     };
 
@@ -233,7 +244,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
   };
 
   // Helper: Show EHF value if changed, otherwise fallback to SCS value
-  const getVvmStage = (ehf: number, scs: number) => (ehf && ehf > 0) ? ehf : (scs || 0);
+  const getVvmStage = (ehf: any, scs: any) => (ehf && ehf !== '0' && ehf !== 0) ? ehf : (scs || '');
   const getBatchNumber = (ehf: string | null, scs: string | null) => ehf || scs || null;
   const getExpiryDate = (ehf: string | null, scs: string | null) => ehf || scs || null;
 
@@ -363,7 +374,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                     <Select
                       value={transferType}
                       onChange={(e) => {
-                        setTransferType(e.target.value as 'lcs' | 'ehf' | '');
+                        setTransferType(e.target.value as 'lcs' | 'ehf' | 'scs' | '');
                         setSelectedFacility(''); // Reset facility selection when type changes
                       }}
                       label="Transfer To"
@@ -374,6 +385,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                       </MenuItem>
                       <MenuItem value="lcs">LCS</MenuItem>
                       <MenuItem value="ehf">EHF</MenuItem>
+                      <MenuItem value="scs">SCS</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -382,12 +394,12 @@ const VaccineAllocationConfirmView: React.FC = () => {
                   <Grid item xs={12} md={6}>
                     <FormControl fullWidth>
                       <InputLabel>
-                        {transferType === 'lcs' ? 'Select LCS' : 'Select EHF'}
+                        {transferType === 'lcs' ? 'Select LCS' : transferType === 'scs' ? 'Select SCS' : 'Select EHF'}
                       </InputLabel>
                       <Select
                         value={selectedFacility}
                         onChange={(e) => setSelectedFacility(e.target.value)}
-                        label={transferType === 'lcs' ? 'Select LCS' : 'Select EHF'}
+                        label={transferType === 'lcs' ? 'Select LCS' : transferType === 'scs' ? 'Select SCS' : 'Select EHF'}
                         disabled={isTransferConfirmed}
                       >
                         <MenuItem value="">
@@ -396,10 +408,12 @@ const VaccineAllocationConfirmView: React.FC = () => {
                         {facilitiesList.map((facility: any) => (
                           <MenuItem
                             key={facility.id}
-                            value={transferType === 'lcs' ? facility.id : facility.assigned_unique_id}
+                            value={facility.id}
                           >
                             {transferType === 'lcs'
                               ? `${facility.lcs_name || 'N/A'} - ${facility.lga_id || 'N/A'}`
+                              : transferType === 'scs'
+                              ? `${facility.scs_name || 'N/A'} - ${facility.stat_id || 'N/A'}`
                               : `${facility.name_of_ehf || 'N/A'} - ${facility.lga || 'N/A'}`
                             }
                           </MenuItem>
@@ -499,10 +513,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
                             displayEmpty
                           >
                             <MenuItem value="">Select Stage</MenuItem>
-                            <MenuItem value="1">Stage 1</MenuItem>
-                            <MenuItem value="2">Stage 2</MenuItem>
-                            <MenuItem value="3">Stage 3</MenuItem>
-                            <MenuItem value="4">Stage 4</MenuItem>
+                            <MenuItem value="Usable">Usable</MenuItem>
+                            <MenuItem value="Unusable">Unusable</MenuItem>
                           </Select>
                         </FormControl>
                       </Grid> */}
@@ -599,7 +611,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {vaccine.vvmStage ? `Stage ${vaccine.vvmStage}` : '-'}
+                              {vaccine.vvmStage === 'Usable' || vaccine.vvmStage === '1' || vaccine.vvmStage === 1 ? 'Usable' :
+                                (vaccine.vvmStage === 'Unusable' || vaccine.vvmStage === '2' || vaccine.vvmStage === 2) ? 'Unusable' : '-'}
                             </Typography>
                           </TableCell>
                           <TableCell>
