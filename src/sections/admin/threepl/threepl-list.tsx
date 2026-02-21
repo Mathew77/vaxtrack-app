@@ -9,6 +9,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { useNavigate } from 'react-router-dom';
 import { useFetchThreePl, useDeleteThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
+import { useFetchEHFList } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { FaEye } from 'react-icons/fa';
 
 interface TableRow {
@@ -61,6 +62,17 @@ const ThreeplList: React.FC = () => {
 
   const { data: threepl = [], isLoading } = useFetchThreePl();
   const deleteThreepl = useDeleteThreepl();
+  const { data: ehfList = [] } = useFetchEHFList();
+
+  const ehfNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    ehfList.forEach((ehf: any) => {
+      if (ehf.assigned_unique_id) {
+        map[ehf.assigned_unique_id] = ehf.name_of_ehf || ehf.ehf_name || ehf.assigned_unique_id;
+      }
+    });
+    return map;
+  }, [ehfList]);
 
   const [value, setValue] = useState<number>(0);
 
@@ -97,10 +109,7 @@ const ThreeplList: React.FC = () => {
         header: "3PL Name",
         size: 250,
         Cell: ({ row }: { row: { original: TableRow } }) => {
-          const threeplName = row.original.threepl_name;
-          const ehfList = row.original.ehf_list || [];
-          const ehfNames = ehfList.length > 0 ? ehfList.join(', ') : '';
-          return ehfNames ? `${threeplName} - ( ${ehfNames} )` : threeplName;
+          return row.original.threepl_name || 'N/A';
         },
       },
       {
@@ -109,11 +118,11 @@ const ThreeplList: React.FC = () => {
         size: 200,
         Cell: ({ cell }: { cell: { getValue: () => unknown } }) => {
           const ehf_list = cell.getValue() as string[];
-          return ehf_list.join(',  ');
+          return ehf_list.map((id) => ehfNameMap[id] || id).join(',  ');
         },
       },
     ],
-    []
+    [ehfNameMap]
   );
 
   const getTabType = () => 'threepl';

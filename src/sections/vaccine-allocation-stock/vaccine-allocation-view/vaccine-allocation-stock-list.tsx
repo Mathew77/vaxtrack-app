@@ -182,6 +182,7 @@ const VaccineAllocationStockList: React.FC = () => {
     dose_mena: '',
     dose_rota: '',
     dose_hpv: '',
+    dose_mr: '',
   });
 
   // Metadata state for each vaccine (VVM stage, batch number, expiry date)
@@ -198,6 +199,7 @@ const VaccineAllocationStockList: React.FC = () => {
     dose_mena: { vvm_stage: '', batch_number: '', expire_date: '' },
     dose_rota: { vvm_stage: '', batch_number: '', expire_date: '' },
     dose_hpv: { vvm_stage: '', batch_number: '', expire_date: '' },
+    dose_mr: { vvm_stage: '', batch_number: '', expire_date: '' },
   });
 
   // Handle metadata change
@@ -410,6 +412,13 @@ const VaccineAllocationStockList: React.FC = () => {
         hpv_batch_number_scs: entry.metadata.dose_hpv.batch_number || '',
         hpv_expire_date_scs: entry.metadata.dose_hpv.expire_date || null,
 
+        // MR
+        dose_mr_actual: entry.stockData.mr || 0,
+        dose_mr_allocated: parseInt(entry.allocations.dose_mr) || 0,
+        mr_vvm_stage_scs: entry.metadata.dose_mr.vvm_stage || '',
+        mr_batch_number_scs: entry.metadata.dose_mr.batch_number || '',
+        mr_expire_date_scs: entry.metadata.dose_mr.expire_date || null,
+
         slwg_user: userData?.id || null,
       }));
 
@@ -475,6 +484,7 @@ const VaccineAllocationStockList: React.FC = () => {
       dose_mena: '',
       dose_rota: '',
       dose_hpv: '',
+      dose_mr: '',
     });
     setMetadataMap({
       dose_bcg: { vvm_stage: '', batch_number: '', expire_date: '' },
@@ -489,6 +499,7 @@ const VaccineAllocationStockList: React.FC = () => {
       dose_mena: { vvm_stage: '', batch_number: '', expire_date: '' },
       dose_rota: { vvm_stage: '', batch_number: '', expire_date: '' },
       dose_hpv: { vvm_stage: '', batch_number: '', expire_date: '' },
+      dose_mr: { vvm_stage: '', batch_number: '', expire_date: '' },
     });
   };
 
@@ -612,11 +623,12 @@ const VaccineAllocationStockList: React.FC = () => {
 
   // Get available 3PLs based on selected facilities' LGAs (for bulk allocation)
   const facilityBased3PLs = useMemo(() => {
-    if (selectedFacilities.length === 0) return allThreePl;
+    if (selectedFacilities.length === 0) 
+      return allThreePl;
     // Get unique LGAs from selected facilities
-    const facilityLGAs = [...new Set(selectedFacilities.map((f: SelectedFacility) => f.lga?.toUpperCase()))];
+    // const facilityLGAs = [...new Set(selectedFacilities.map((f: SelectedFacility) => f.lga?.toUpperCase()))];
     // Return 3PLs that serve any of the selected facilities' LGAs
-    return allThreePl.filter(pl => facilityLGAs.includes(pl.lga?.toUpperCase()));
+    return allThreePl;
   }, [allThreePl, selectedFacilities]);
 
   // Filter stock data based on state (for SCS/SLWG users), selected LGA, Ward, and EHF
@@ -855,6 +867,12 @@ const VaccineAllocationStockList: React.FC = () => {
         size: 70,
         Cell: ({ row }: any) => row.original.stockData?.dose_hpv || 0,
       },
+      {
+        accessorKey: 'stockData.mr',
+        header: 'Maximum MR',
+        size: 70,
+        Cell: ({ row }: any) => row.original.stockData?.mr || 0,
+      },
     ],
     []
   );
@@ -959,6 +977,11 @@ const VaccineAllocationStockList: React.FC = () => {
       {
         accessorKey: 'dose_hpv',
         header: 'HPV',
+        size: 80,
+      },
+      {
+        accessorKey: 'mr',
+        header: 'MR',
         size: 80,
       },
       {
@@ -1119,15 +1142,36 @@ const VaccineAllocationStockList: React.FC = () => {
     setAllocationToDelete(null);
   };
 
-  // Action items for SCS users - only show confirm if status = 0
+  // Action items for SCS users - view details, and confirm return if deficit transferred to SCS
   const getScsActionItems = (row: any): ActionMenuItem<any>[] => {
-    return [
+    const actions: ActionMenuItem<any>[] = [
       {
         display: "View Details",
         handleClick: handleViewAllocation,
         icon: <VisibilityOutlinedIcon sx={{ color: "#1976D2" }} />,
       },
     ];
+
+    // Check if any allocation in this batch has been transferred to SCS (status 5, deficit_transfer_to = 'scs')
+    const batchNo = row.batch_no;
+    const batchAllocations = allocationsByBatch[batchNo] || [];
+    const hasScsTransfer = batchAllocations.some((alloc: any) =>
+      alloc.status === 5 && alloc.deficit_transfer_to === 'scs'
+    );
+
+    if (hasScsTransfer) {
+      actions.push({
+        display: "Confirm Return",
+        handleClick: (data: any) => {
+          navigate('/vaccine-allocation-batch-detail', {
+            state: { batch_no: data.batch_no }
+          });
+        },
+        icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+      });
+    }
+
+    return actions;
   };
 
   // Action items for 3PL users - show bulk confirm if batch_status = 1
@@ -1354,6 +1398,11 @@ const VaccineAllocationStockList: React.FC = () => {
         size: 80,
       },
       {
+        accessorKey: 'others.dose_mr_allocated',
+        header: 'MR',
+        size: 80,
+      },
+      {
         accessorKey: 'batch_status',
         header: 'Status',
         size: 200,
@@ -1563,6 +1612,12 @@ const VaccineAllocationStockList: React.FC = () => {
       {
         accessorKey: 'allocations.dose_hpv',
         header: 'HPV',
+        size: 70,
+        Cell: ({ cell }: any) => cell.getValue() || '-',
+      },
+      {
+        accessorKey: 'allocations.dose_mr',
+        header: 'MR',
         size: 70,
         Cell: ({ cell }: any) => cell.getValue() || '-',
       },
@@ -2372,6 +2427,29 @@ const VaccineAllocationStockList: React.FC = () => {
                                 <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_hpv.vvm_stage} onChange={(e) => handleMetadataChange('dose_hpv', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_hpv.batch_number} onChange={(e) => handleMetadataChange('dose_hpv', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
                                 <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_hpv.expire_date} onChange={(e) => handleMetadataChange('dose_hpv', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
+                              </Grid>
+                            </Box>
+                          )}
+                        </Paper>
+                      </Grid>
+
+                      {/* MR */}
+                      <Grid item xs={12} sm={6} md={4}>
+                        <Paper elevation={3} sx={{ p: 2, borderRadius: 2, border: '2px solid', borderColor: (selectedEHFData?.mr || 0) > 100 ? '#4caf50' : (selectedEHFData?.mr || 0) > 0 ? '#ff9800' : '#f44336' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>MR</Typography>
+                            <Chip label={`Maximum Stock: ${selectedEHFData?.mr || 0}`} color={(selectedEHFData?.mr || 0) > 100 ? "success" : (selectedEHFData?.mr || 0) > 0 ? "warning" : "error"} size="small" />
+                          </Box>
+                          <LinearProgress variant="determinate" value={Math.min(((selectedEHFData?.mr || 0) / 1000) * 100, 100)} sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', mb: 2 }} />
+                          <TextField type="number" fullWidth size="small" label="Quantity to Allocate" value={allocationData.dose_mr} onChange={(e) => handleAllocationChange('dose_mr', e.target.value)} inputProps={{ min: 0, max: selectedEHFData?.mr || 0 }} />
+                          {allocationData.dose_mr && <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>Remaining: {(selectedEHFData?.mr || 0) - (parseInt(allocationData.dose_mr) || 0)}</Typography>}
+                          {parseInt(allocationData.dose_mr) > 0 && (
+                            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
+                              <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>Vaccine Details</Typography>
+                              <Grid container spacing={1.5}>
+                                <Grid item xs={12}><FormControl fullWidth size="small"><InputLabel>VVM Stage</InputLabel><Select value={metadataMap.dose_mr.vvm_stage} onChange={(e) => handleMetadataChange('dose_mr', 'vvm_stage', e.target.value)} label="VVM Stage"><MenuItem value="">Select Stage</MenuItem><MenuItem value="Usable">Usable</MenuItem><MenuItem value="Unusable">Unusable</MenuItem></Select></FormControl></Grid>
+                                <Grid item xs={12}><TextField fullWidth size="small" label="Batch Number" value={metadataMap.dose_mr.batch_number} onChange={(e) => handleMetadataChange('dose_mr', 'batch_number', e.target.value)} placeholder="Enter batch number" /></Grid>
+                                <Grid item xs={12}><TextField fullWidth size="small" type="date" label="Earliest Expiry Date" value={metadataMap.dose_mr.expire_date} onChange={(e) => handleMetadataChange('dose_mr', 'expire_date', e.target.value)} InputLabelProps={{ shrink: true }} /></Grid>
                               </Grid>
                             </Box>
                           )}

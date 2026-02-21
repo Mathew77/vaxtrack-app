@@ -271,14 +271,20 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
             }
         }
 
-        if (isLCS) {
-            if (row.status === 3 || row.status === 5) {
-                baseActions.push({
-                    display: row.status === 3 ? "Pending return confirmation" : "Confirm Return",
-                    handleClick: handleLcsReview,
-                    icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
-                });
-            }
+        if (isLCS && row.status === 5 && (row as any).deficit_transfer_to === 'lcs') {
+            baseActions.push({
+                display: "Confirm Return",
+                handleClick: handleLcsReview,
+                icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+            });
+        }
+
+        if (isSCS && row.status === 5 && (row as any).deficit_transfer_to === 'scs') {
+            baseActions.push({
+                display: "Confirm Return",
+                handleClick: handleLcsReview,
+                icon: <CheckCircleOutlineIcon sx={{ color: "#0C7D40" }} />,
+            });
         }
 
         if (isSLWG && row.status === 0) {
@@ -472,6 +478,17 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                     <StackedVaccineCell
                         max={row.original.dose_hpv_actual}
                         allocated={row.original.dose_hpv_allocated}
+                    />
+                ),
+            },
+            {
+                accessorKey: 'dose_mr',
+                header: 'MR',
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_mr_actual}
+                        allocated={row.original.dose_mr_allocated}
                     />
                 ),
             },

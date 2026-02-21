@@ -54,7 +54,7 @@ const ThreePlVaccineStockTable = () => {
     return 'Over-stocked - Above Max. Need';
   };
 
-  const vaccines = ['BCG', 'BOPV', 'HPV', 'HEPB', 'IPV', 'MEASLES', 'MENA', 'PCV', 'PENTA', 'ROTA', 'TD', 'YF'];
+  const vaccines = ['BCG', 'BOPV', 'HPV', 'HEPB', 'IPV', 'MEASLES', 'MENA', 'MR', 'PCV', 'PENTA', 'ROTA', 'TD', 'YF'];
 
   const formatNumber = (num: number | null) => {
     if (num === null || num === undefined) return '-';
@@ -81,7 +81,8 @@ const ThreePlVaccineStockTable = () => {
     'PENTA': 'dose_penta',
     'ROTA': 'dose_rota',
     'TD': 'dose_td',
-    'YF': 'dose_yf'
+    'YF': 'dose_yf',
+    'MR': 'dose_mr',
   };
 
   if (isLoading) {

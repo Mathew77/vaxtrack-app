@@ -80,7 +80,6 @@ export default function VaccineView() {
   const { data: allUhf = [], isLoading: isUhfLoading } = useFetchUHFByEHF(selectedEhfUniqueId);
   const [selectedUhf, setSelectedUhf] = useState<number | null>(null);
   const [selectedLGA, setSelectedLGA] = useState<string>('');
-  const [selectedWard, setSelectedWard] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState<string>(vaccineOptions[0].value);
   const [formDataCollection, setFormDataCollection] = useState<Record<string, any>>({});
   const [status, setStatus] = useState<number>(1);
@@ -199,7 +198,6 @@ export default function VaccineView() {
         // Auto-populate LGA and Ward from the EHF data
         if (ehfData) {
           if (ehfData.lga) setSelectedLGA(ehfData.lga);
-          if (ehfData.ward) setSelectedWard(ehfData.ward);
         }
         setStatus(Number(firstDetail.status) || 1);
 
@@ -284,33 +282,15 @@ export default function VaccineView() {
     return Array.from(new Set(lgas)).sort() as string[];
   }, [allEhf]);
 
-  const availableWards = useMemo(() => {
-    if (!selectedLGA) return [];
-    const wards = allEhf
-      .filter((ehf: any) => ehf.lga === selectedLGA)
-      .map((ehf: any) => ehf.ward)
-      .filter(Boolean);
-    return Array.from(new Set(wards)).sort() as string[];
-  }, [allEhf, selectedLGA]);
-
   const lgaWardFilteredEhf = useMemo(() => {
     return filteredEhf.filter((ehf: any) => {
       if (selectedLGA && ehf.lga !== selectedLGA) return false;
-      if (selectedWard && ehf.ward !== selectedWard) return false;
       return true;
     });
-  }, [filteredEhf, selectedLGA, selectedWard]);
+  }, [filteredEhf, selectedLGA]);
 
   const handleLGAChange = (event: any) => {
     setSelectedLGA(event.target.value);
-    setSelectedWard('');
-    setSelectedEhf(null);
-    setSelectedEhfUniqueId(null);
-    setSelectedUhf(null);
-  };
-
-  const handleWardChange = (event: any) => {
-    setSelectedWard(event.target.value);
     setSelectedEhf(null);
     setSelectedEhfUniqueId(null);
     setSelectedUhf(null);
@@ -567,7 +547,7 @@ export default function VaccineView() {
           <Grid item xs={9}>
             <Box sx={{ mb: 2 }}>
               <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <FormControl fullWidth disabled={isEhfLoading || isView || status > 1}>
                     <InputLabel>Select LGA</InputLabel>
                     <Select
@@ -581,20 +561,6 @@ export default function VaccineView() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={6}>
-                  <FormControl fullWidth disabled={!selectedLGA || isView || status > 1}>
-                    <InputLabel>Select Ward</InputLabel>
-                    <Select
-                      value={selectedWard}
-                      label="Select Ward"
-                      onChange={handleWardChange}
-                    >
-                      {availableWards.map((ward) => (
-                        <MenuItem key={ward} value={ward}>{ward}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
               </Grid>
 
               <Autocomplete
@@ -604,7 +570,7 @@ export default function VaccineView() {
                 getOptionLabel={(option: any) => option.name_of_ehf || option.ehf_name || ''}
                 value={lgaWardFilteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
                 onChange={handleEhfChange}
-                disabled={!selectedWard || isEhfLoading || isView || createAllocation.isPending || status > 1}
+                disabled={!selectedLGA || isEhfLoading || isView || createAllocation.isPending || status > 1}
                 loading={isEhfLoading}
                 renderInput={(params) => (
                   <TextField

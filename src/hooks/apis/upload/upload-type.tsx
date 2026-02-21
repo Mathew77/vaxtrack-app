@@ -48,8 +48,7 @@ export interface StockAtHandData {
   dose_mena: number;
   dose_rota: number;
   dose_hpv: number;
-  dose_malaria: number;
-  dose_mr: number;
+  mr: number;
   total_vaccine_storage_volume_utilized: string;
   remaining_cce_storage_capacity: string;
   remark: string | null;
@@ -189,6 +188,11 @@ export interface AllocationItemData {
   hpv_vvm_stage_scs?: string;
   hpv_batch_number_scs?: string;
   hpv_expire_date_scs?: string | null;
+  dose_mr_actual?: number;
+  dose_mr_allocated?: number;
+  mr_vvm_stage_scs?: string;
+  mr_batch_number_scs?: string;
+  mr_expire_date_scs?: string | null;
   slwg_user?: number | null;
 }
 
@@ -269,6 +273,8 @@ export interface AllocatedVaccineData {
   hpv_empty_vials?: number;
   hpv_safety_boxes?: number;
   hpv_unused_vials?: number;
+  dose_mr_actual?: number;
+  dose_mr_allocated?: number;
   slwg_user: string | null;
   status: number;
   created_by: string;

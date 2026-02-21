@@ -159,21 +159,21 @@ const EhfUHFList: React.FC = () => {
         header: 'UHF Name',
         size: 150,
       },
-      {
-        accessorKey: 'contact_person_name',
-        header: 'Contact Person',
-        size: 150,
-      },
-      {
-        accessorKey: 'contact_person_phone',
-        header: 'Phone',
-        size: 120,
-      },
-      {
-        accessorKey: 'contact_person_email',
-        header: 'Email',
-        size: 200,
-      },
+      // {
+      //   accessorKey: 'contact_person_name',
+      //   header: 'Contact Person',
+      //   size: 150,
+      // },
+      // {
+      //   accessorKey: 'contact_person_phone',
+      //   header: 'Phone',
+      //   size: 120,
+      // },
+      // {
+      //   accessorKey: 'contact_person_email',
+      //   header: 'Email',
+      //   size: 200,
+      // },
     ],
     []
   );
@@ -258,7 +258,7 @@ const EhfUHFList: React.FC = () => {
         aria-label="scrollable force tabs"
       >
         <Tab style={{ textTransform: 'none' }} label="Equipped Health Facility" {...a11yProps(0)} />
-        {/* <Tab style={{ textTransform: 'none' }} label="Unequipped Health Facility" {...a11yProps(1)} /> */}
+        <Tab style={{ textTransform: 'none' }} label="Unequipped Health Facility" {...a11yProps(1)} />
       </Tabs>
 
       <TabPanel value={value} index={0}>

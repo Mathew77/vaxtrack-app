@@ -39,6 +39,7 @@ const VACCINE_TYPES = [
     { key: 'mena', label: 'MenA', doseKey: 'dose_mena_allocated' },
     { key: 'rota', label: 'Rota', doseKey: 'dose_rota_allocated' },
     { key: 'hpv', label: 'HPV', doseKey: 'dose_hpv_allocated' },
+    { key: 'mr', label: 'MR', doseKey: 'dose_mr_allocated' },
 ];
 
 const VaccineAllocationThreeplConfirmView: React.FC = () => {
@@ -61,6 +62,7 @@ const VaccineAllocationThreeplConfirmView: React.FC = () => {
         mena: 'Usable',
         rota: 'Usable',
         hpv: 'Usable',
+        mr: 'Usable',
     });
 
     // Get aggregated vaccine totals for the batch

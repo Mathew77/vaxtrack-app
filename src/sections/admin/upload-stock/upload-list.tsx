@@ -167,6 +167,11 @@ const UploadList: React.FC = () => {
         size: 80,
       },
       {
+        accessorKey: 'mr',
+        header: 'MR',
+        size: 80,
+      },
+      {
         accessorKey: 'total_vaccine_storage_volume_utilized',
         header: 'Storage Used (L)',
         size: 130,
@@ -250,7 +255,7 @@ const UploadList: React.FC = () => {
             tableHeader="Maximum Stock"
             customRightButton
             customRightButtonIcon={<CloudUploadOutlinedIcon />}
-            customRightButtonText="Upload Stock"
+            customRightButtonText="Upload Stockss"
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={uploadActionItems}
             showDownloadButton={false}

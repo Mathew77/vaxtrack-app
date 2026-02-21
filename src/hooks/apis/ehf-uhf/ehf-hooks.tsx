@@ -158,6 +158,7 @@ export const useFetchStates = () => {
         }
       },
       enabled: ids.length > 0,
+      staleTime: 10 * 60 * 1000, // 10 minutes — EHF state doesn't change mid-session
     });
   };
 

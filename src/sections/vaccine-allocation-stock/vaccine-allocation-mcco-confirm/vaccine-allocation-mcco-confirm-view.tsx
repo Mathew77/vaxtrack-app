@@ -82,6 +82,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     mena: { vvmStage: formatVvmStage(data?.mena_vvm_stage_scs), batchNumber: data?.mena_batch_number_scs || '', expiryDate: formatDate(data?.mena_expire_date_scs) },
     rota: { vvmStage: formatVvmStage(data?.rota_vvm_stage_scs), batchNumber: data?.rota_batch_number_scs || '', expiryDate: formatDate(data?.rota_expire_date_scs) },
     hpv: { vvmStage: formatVvmStage(data?.hpv_vvm_stage_scs), batchNumber: data?.hpv_batch_number_scs || '', expiryDate: formatDate(data?.hpv_expire_date_scs) },
+    mr: { vvmStage: formatVvmStage(data?.mr_vvm_stage_scs), batchNumber: data?.mr_batch_number_scs || '', expiryDate: formatDate(data?.mr_expire_date_scs) },
   };
 
   const [vaccines, setVaccines] = useState<VaccineData[]>([
@@ -97,6 +98,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: 0, vvmStage: originalScsValues.mena.vvmStage, batchNumber: originalScsValues.mena.batchNumber, expiryDate: originalScsValues.mena.expiryDate, emptyVials: 0, unusedVials: 0 },
     { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: 0, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate, emptyVials: 0, unusedVials: 0 },
     { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: 0, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'MR', allocated: data?.dose_mr_allocated || 0, received: 0, vvmStage: originalScsValues.mr.vvmStage, batchNumber: originalScsValues.mr.batchNumber, expiryDate: originalScsValues.mr.expiryDate, emptyVials: 0, unusedVials: 0 },
   ]);
 
   if (!data) {
@@ -139,7 +141,6 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     'MenA': 10,
     'Rota': 10,
     'HPV': 1,
-    'Malaria': 10,
     'MR': 10,
   };
 
@@ -158,6 +159,12 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
         const multiple = vaccineMultiples[vaccine.name] || 1;
         if (Number(vaccine.received) % multiple !== 0) {
           toast.error(`${vaccine.name} received quantity must be divisible by ${multiple}`);
+          return false;
+        }
+
+        // Validate physical stock at hand multiples
+        if (Number(vaccine.unusedVials) > 0 && Number(vaccine.unusedVials) % multiple !== 0) {
+          toast.error(`${vaccine.name} physical stock at hand must be divisible by ${multiple}`);
           return false;
         }
 
@@ -221,12 +228,13 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       'MenA': 'mena',
       'Rota': 'rota',
       'HPV': 'hpv',
+      'MR': 'mr',
     };
 
     // Build vaccine data with received amounts, VVM stages, batch numbers, and expiry dates
     // Logic: Only save fields to EHF that MCCO actually changed from SCS values
     const vaccineData: any = {};
-    const scsKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv'];
+    const scsKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv', 'mr'];
 
     vaccines.forEach((v, idx) => {
       const fieldName = vaccineFieldMap[v.name];
@@ -298,6 +306,8 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       dose_rota_allocated: data.dose_rota_allocated,
       dose_hpv_actual: data.dose_hpv_actual,
       dose_hpv_allocated: data.dose_hpv_allocated,
+      dose_mr_actual: data.dose_mr_actual,
+      dose_mr_allocated: data.dose_mr_allocated,
       // Add vaccine data (received, vvm_stage, batch_number, expire_date)
       ...vaccineData,
       mcco_mfa_code: mfaCode,
@@ -537,6 +547,12 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           onChange={(e) => handleVaccineChange(actualIndex, 'unusedVials', e.target.value)}
                           onKeyDown={preventInvalidKeys}
                           inputProps={{ min: 0 }}
+                          error={Number(vaccine.unusedVials) > 0 && Number(vaccine.unusedVials) % (vaccineMultiples[vaccine.name] || 1) !== 0}
+                          helperText={
+                            Number(vaccine.unusedVials) > 0 && Number(vaccine.unusedVials) % (vaccineMultiples[vaccine.name] || 1) !== 0
+                              ? `Must be divisible by ${vaccineMultiples[vaccine.name] || 1}`
+                              : ''
+                          }
                         />
                       </Grid>
                     </Grid>

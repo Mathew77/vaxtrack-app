@@ -62,6 +62,8 @@ export interface ThreePlFacilityType {
   dose_mena_allocated: number | null;
   dose_rota_allocated: number | null;
   dose_hpv_allocated: number | null;
+  dose_mr: number | null;
+  dose_mr_allocated: number | null;
 }
 
 // Vaccine summary at EHF level
@@ -90,6 +92,8 @@ export interface ThreePlVaccineSummary {
   dose_mena_allocated: number | null;
   dose_rota_allocated: number | null;
   dose_hpv_allocated: number | null;
+  dose_mr: number | null;
+  dose_mr_allocated: number | null;
 }
 
 // EHF with facilities

@@ -28,7 +28,6 @@ import { toast } from 'react-toastify';
 import { useUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
 import { useFetchLcs } from 'src/hooks/apis/lcs-scs/lcs-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
-import { useFetchStockAtHand } from 'src/hooks/apis/upload/upload-hook';
 
 const VaccineAllocationConfirmView: React.FC = () => {
   const location = useLocation();
@@ -37,13 +36,12 @@ const VaccineAllocationConfirmView: React.FC = () => {
 
   const updateStatusMutation = useUpdateAllocationStatus();
 
-  // Fetch LCS, EHF and SCS data
+  // Fetch LCS and SCS data
   const { data: allLcs = [] } = useFetchLcs();
-  const { data: allEhf = [] } = useFetchStockAtHand(null);
   const { data: allScs = [] } = useFetchScs();
 
   // Transfer Deficit state - Initialize from saved data if available
-  const [transferType, setTransferType] = useState<'lcs' | 'ehf' | 'scs' | ''>(data?.deficit_transfer_to || '');
+  const [transferType, setTransferType] = useState<'lcs' | 'scs' | ''>(data?.deficit_transfer_to || '');
   const [selectedFacility, setSelectedFacility] = useState<string>(
     data?.deficit_vaccine_location_id ? data.deficit_vaccine_location_id.toString() : ''
   );
@@ -73,15 +71,6 @@ const VaccineAllocationConfirmView: React.FC = () => {
     return allLcs.filter(lcs => lcs.stat_id?.toUpperCase() === data.state.toUpperCase());
   }, [allLcs, data?.state]);
 
-  // Filter EHF by state and LGA
-  const ehfInState = useMemo(() => {
-    if (!data?.state) return [];
-    return allEhf.filter(ehf =>
-      ehf.state?.toUpperCase() === data.state.toUpperCase() &&
-      ehf.lga?.toUpperCase() === data.lga?.toUpperCase()
-    );
-  }, [allEhf, data?.state, data?.lga]);
-
   // Filter SCS by state
   const scsInState = useMemo(() => {
     if (!data?.state) return [];
@@ -91,10 +80,9 @@ const VaccineAllocationConfirmView: React.FC = () => {
   // Get facilities based on transfer type
   const facilitiesList = useMemo(() => {
     if (transferType === 'lcs') return lcsInState;
-    if (transferType === 'ehf') return ehfInState;
     if (transferType === 'scs') return scsInState;
     return [];
-  }, [transferType, lcsInState, ehfInState, scsInState]);
+  }, [transferType, lcsInState, scsInState]);
 
   // Show Transfer Deficit section when explicitly passed via navigation state
   const showTransferDeficit = showTransferDeficitProp === true;
@@ -374,7 +362,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                     <Select
                       value={transferType}
                       onChange={(e) => {
-                        setTransferType(e.target.value as 'lcs' | 'ehf' | 'scs' | '');
+                        setTransferType(e.target.value as 'lcs' | 'scs' | '');
                         setSelectedFacility(''); // Reset facility selection when type changes
                       }}
                       label="Transfer To"
@@ -384,7 +372,6 @@ const VaccineAllocationConfirmView: React.FC = () => {
                         <em>Select type</em>
                       </MenuItem>
                       <MenuItem value="lcs">LCS</MenuItem>
-                      <MenuItem value="ehf">EHF</MenuItem>
                       <MenuItem value="scs">SCS</MenuItem>
                     </Select>
                   </FormControl>
@@ -394,12 +381,12 @@ const VaccineAllocationConfirmView: React.FC = () => {
                   <Grid item xs={12} md={6}>
                     <FormControl fullWidth>
                       <InputLabel>
-                        {transferType === 'lcs' ? 'Select LCS' : transferType === 'scs' ? 'Select SCS' : 'Select EHF'}
+                        {transferType === 'lcs' ? 'Select LCS' : 'Select SCS'}
                       </InputLabel>
                       <Select
                         value={selectedFacility}
                         onChange={(e) => setSelectedFacility(e.target.value)}
-                        label={transferType === 'lcs' ? 'Select LCS' : transferType === 'scs' ? 'Select SCS' : 'Select EHF'}
+                        label={transferType === 'lcs' ? 'Select LCS' : 'Select SCS'}
                         disabled={isTransferConfirmed}
                       >
                         <MenuItem value="">
@@ -412,9 +399,7 @@ const VaccineAllocationConfirmView: React.FC = () => {
                           >
                             {transferType === 'lcs'
                               ? `${facility.lcs_name || 'N/A'} - ${facility.lga_id || 'N/A'}`
-                              : transferType === 'scs'
-                              ? `${facility.scs_name || 'N/A'} - ${facility.stat_id || 'N/A'}`
-                              : `${facility.name_of_ehf || 'N/A'} - ${facility.lga || 'N/A'}`
+                              : `${facility.scs_name || 'N/A'} - ${facility.stat_id || 'N/A'}`
                             }
                           </MenuItem>
                         ))}

@@ -62,13 +62,13 @@ const initialValues: ThreePlType = {
           ...initialValues,
           ...threePlData,
           state: threePlData.state || '',
-          lga: threePlData.lga || '',
+          // lga: threePlData.lga || '',
           state_list: threePlData.state_list || [],
           category_type: threePlData.category_type || '',
           ccw: threePlData.ccw || '',
         });
         setSelectedState(threePlData.state || '');
-        setSelectedLga(threePlData.lga || '');
+        // setSelectedLga(threePlData.lga || '');
         setIsUpdate(state.isUpdate || false);
         setIsView(state.isView || false);
       }
@@ -87,13 +87,13 @@ const initialValues: ThreePlType = {
         temp.state = data.state 
           ? '' 
           : 'State is required';
-        temp.lga = data.lga ? '' : 'LGA is required';
+        // temp.lga = data.lga ? '' : 'LGA is required';
         temp.ehf_list = data.ehf_list.length > 0 ? '' : 'EHF required';
         temp.state_list = ''; 
       } else if (data.category_type === 'National') {
         temp.state_list = data.state_list.length > 0 ? '' : 'At least a state is required';
         temp.state = ''; 
-        temp.lga = '';
+        // temp.lga = '';
         temp.ehf_list = '';
       }
 
@@ -115,7 +115,7 @@ const initialValues: ThreePlType = {
       ...prev,
       category_type: levelValue,
       state: '',
-      lga: '',
+      // lga: '',
       ehf_list: [],
       state_list: [],
       ccw: '',
@@ -131,24 +131,24 @@ const initialValues: ThreePlType = {
     }));
   };
 
-  const GetLGA = (e: any) => {
-    const stateValue = e.target.value;
-    setSelectedState(stateValue);
-    setSelectedLga(''); 
-    setData((prev) => ({
-      ...prev,
-      state: stateValue,
-      lga: '', 
-      ehf_list: [],
-    }));
-  };
+  // const GetLGA = (e: any) => {
+  //   const stateValue = e.target.value;
+  //   setSelectedState(stateValue);
+  //   setSelectedLga(''); 
+  //   setData((prev) => ({
+  //     ...prev,
+  //     state: stateValue,
+  //     lga: '', 
+  //     ehf_list: [],
+  //   }));
+  // };
 
   const GetEHF = (e: any) => {
-    const lgaValue = e.target.value;
-    setSelectedLga(lgaValue); 
+    const stateValue = e.target.value;
+    setSelectedState(stateValue); 
     setData((prev) => ({
       ...prev,
-      lga: lgaValue, 
+      state: stateValue, 
       ehf_list: [],
     }));
   };
@@ -313,7 +313,7 @@ const initialValues: ThreePlType = {
                   id="state"
                   name="state"
                   value={data.state}
-                  onChange={GetLGA}
+                  onChange={GetEHF}
                   sx={{ width: '100%' }}
                   displayEmpty
                   variant="outlined"
@@ -334,7 +334,7 @@ const initialValues: ThreePlType = {
               </FormControl>
             </Grid>
 
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <FormControl sx={{ m: 0, width: '100%' }}>
                 <Typography component="label" htmlFor="lga" sx={{ mb: 1 }}>
                   LGA <span style={{ fontWeight: 'bold', color: '#DC143C' }}>*</span>
@@ -362,7 +362,7 @@ const initialValues: ThreePlType = {
                   </Typography>
                 )}
               </FormControl>
-            </Grid>
+            </Grid> */}
 
             {/* <Grid item xs={6}>
               <FormControl sx={{ m: 0, width: '100%' }}>
@@ -409,9 +409,9 @@ const initialValues: ThreePlType = {
                     moveAllToSelected: <DoubleArrowRightIcon sx={{ fontSize: '16px' }} />,
                   }}
                 />
-                {ehfOptions.length === 0 && data.state && data.lga && (
+                {ehfOptions.length === 0 && data.state && (
                   <Typography sx={{ color: '#DC143C', fontSize: '13px', mt: 1 }}>
-                    No EHFs available for selected State/LGA
+                    No EHFs available for selected State
                   </Typography>
                 )}
                 {errors.ehf_list && (

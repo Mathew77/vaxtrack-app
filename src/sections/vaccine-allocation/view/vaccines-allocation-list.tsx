@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import Tabs from '@mui/material/Tabs';
@@ -12,7 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import { useFetchThreePl, useDeleteThreepl } from 'src/hooks/apis/threepl/threepl-hooks';
 import { FaEye } from 'react-icons/fa';
 import { useFetchAllocation, useFetchUHF, useDeleteAllocation } from 'src/hooks/apis/ehf/ehf-hooks';
-import { UHFType, VaccineAllocationDetail, VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
+import { VaccineAllocationDetail, VaccineAllocationType } from 'src/hooks/apis/ehf/ehf-type';
+import { useFetchEHFsByIds } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 import { keyframes } from '@mui/system';
 
 // Blinking animation for pending statuses
@@ -71,7 +72,7 @@ function a11yProps(index: number) {
 const VaccineAllocationList: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: allocationList = [], isLoading } = useFetchAllocation();
+  const { data: allocationList = [], isLoading, isFetching } = useFetchAllocation();
   const { data: uhfList = [] } = useFetchUHF(null);
   const deleteAllocation = useDeleteAllocation();
 
@@ -83,80 +84,90 @@ const VaccineAllocationList: React.FC = () => {
   const isThreePL = userRole === 'threepl';
   const isConveyor = userRole === 'conveyor';
 
-  // Get Conveyor's state from ehf_list
-  const conveyorState = useMemo(() => {
-    if (!isConveyor) return null;
+  // Get Conveyor's assigned EHF IDs from sessionStorage
+  const conveyorAssignedEhfs = useMemo(() => {
+    if (!isConveyor) return [];
     try {
       const ehfListData = sessionStorage.getItem('ehf_list');
       if (ehfListData) {
-        const ehfList = JSON.parse(ehfListData);
-        if (Array.isArray(ehfList) && ehfList.length > 0) {
-          const assignedId = ehfList[0];
-          if (typeof assignedId === 'string' && assignedId.includes('-')) {
-            return assignedId.split('-')[0];
-          }
-        }
+        const parsed = JSON.parse(ehfListData);
+        return Array.isArray(parsed) ? parsed : [];
       }
     } catch (error) {
-      console.error('Error parsing conveyor state:', error);
+      console.error('Error parsing ehf_list:', error);
     }
-    return null;
+    return [];
   }, [isConveyor]);
+
+  // Fetch real EHF data to get the actual state name
+  const { data: conveyorEhfs = [], isLoading: isConveyorLoading } = useFetchEHFsByIds(isConveyor ? conveyorAssignedEhfs : []);
+
+  const conveyorState = useMemo(() => {
+    if (!isConveyor || conveyorEhfs.length === 0) return null;
+    return conveyorEhfs[0]?.state || null;
+  }, [isConveyor, conveyorEhfs]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   const transformedAllocationList: TableRow[] = useMemo(() => {
-    return allocationList
+
+    if (!allocationList || allocationList.length === 0) {
+        return [];
+    }
+
+    // Wait for conveyor's state to load before filtering
+    if (isConveyor && isConveyorLoading) {
+      return [];
+    }
+
+    const processed = allocationList
       .filter((allocation: VaccineAllocationType) => {
-        // Filter by state for Conveyor
+        // --- DEBUG: Temporarily bypass filter to see if data appears ---
         if (isConveyor && conveyorState) {
-          const firstDetail = allocation.vaccines_allocation_detail?.[0];
-          return firstDetail?.state?.toUpperCase() === conveyorState.toUpperCase();
+          const details = allocation.vaccines_allocation_detail || [];
+          const matches = details.some(
+            (d) => d?.state?.toUpperCase() === conveyorState.toUpperCase()
+          );
+          return matches; 
         }
-        return true; // Show all for other roles
+        return true; 
       })
       .map((allocation: VaccineAllocationType) => {
-        if (
-          !allocation.vaccines_allocation_detail ||
-          !Array.isArray(allocation.vaccines_allocation_detail) ||
-          allocation.vaccines_allocation_detail.length === 0
-        ) {
+        const details = allocation.vaccines_allocation_detail || [];
+        
+        // If details is empty, we still want to see the row ID in the table
+        if (details.length === 0) {
           return {
-            id: allocation.id || 0,
-            request_id: 'N/A',
+            id: allocation.id,
+            request_id: 'EMPTY-DETAIL',
             uhf_id: 0,
             ehf_id: 0,
-            uhf_name: 'N/A',
+            uhf_name: 'No Details',
             state: 'N/A',
             lga: 'N/A',
             status: 0,
           };
         }
 
-        const firstDetail = allocation.vaccines_allocation_detail[0];
-
-        const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
-        let uhfName = firstDetail.uhf_name || 'No UHF Available';
-        if (!firstDetail.uhf_name) {
-          const uhf = uhfList.find((u: UHFType) => u.id === firstDetail.uhf_id);
-          uhfName = uhf?.uhf_name || 'No UHF Available';
-        }
-
+        const firstDetail = details[0];
+        
         return {
           id: allocation.id,
-          request_id: firstDetail.request_id,
+          request_id: firstDetail.request_id || 'N/A',
           uhf_id: firstDetail.uhf_id,
-          uhf_name: uhfName,
+          uhf_name: firstDetail.uhf_name || 'Unnamed UHF',
           ehf_id: firstDetail.ehf_id,
-          state: firstDetail.state,
-          lga: firstDetail.lga,
+          state: firstDetail.state || 'N/A',
+          lga: firstDetail.lga || 'N/A',
           status: firstDetail.status,
         };
       })
-      .sort((a, b) => (b.id || 0) - (a.id || 0)); // Sort by ID descending (latest first)
-  }, [allocationList, uhfList, isConveyor, conveyorState]);
+      .sort((a, b) => (b.id || 0) - (a.id || 0));
+
+    return processed;
+  }, [allocationList, uhfList, isConveyor, conveyorState, isConveyorLoading]);
 
   interface DisplayStatus {
     [key: number]: string;
@@ -348,7 +359,7 @@ const VaccineAllocationList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={allocationItem}
             showDownloadButton={false}
-            loading={isLoading}
+            loading={isLoading || isFetching || (isConveyor && isConveyorLoading)}
             getRowStyles={(row: any) => {
               // Highlight rows with status 6 (Quantity Allocated by EHF)
               if (row.status === 6) {

@@ -89,7 +89,7 @@ type ApiResponse<T> = {
           ? apiHelper.putResource<VaccineAllocationType>(`${url}v1/vaccine-allocation/${id}/`, data)
           : apiHelper.postResource<VaccineAllocationType>(`${url}v1/vaccine-allocation/`, data),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['vaccine'] });
+        queryClient.invalidateQueries({ queryKey: ['vaccine-allocations'] });
       },
     });
   };

@@ -292,7 +292,7 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
       <Card>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h5">LCS Vaccine Return Processing</Typography>
+            <Typography variant="h5">{userRole === 'scs' ? 'SCS' : 'LCS'} Vaccine Return Processing</Typography>
             <Chip
               label={getStatusLabel(data.status)}
               color={getStatusColor(data.status)}
