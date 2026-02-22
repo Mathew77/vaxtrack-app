@@ -13,5 +13,5 @@
 
 
 export const url = process.env.NODE_ENV === 'production'
-  ? 'https://vaxtracklmd.net/api/'
-  : 'https://vaxtracklmd.net/api/';
+  ? 'https://dnoapi.t4ef.org/api/'
+  : 'https://dnoapi.t4ef.org/api/';
