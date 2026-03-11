@@ -250,7 +250,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
         const unusedVialsNumber = typeof v.unusedVials === 'string' ? parseInt(v.unusedVials, 10) : v.unusedVials;
 
         vaccineData[`${fieldName}_empty_vials`] = emptyVialsNumber || 0;
-        vaccineData[`${fieldName}_unused_vials`] = unusedVialsNumber || 0;
+        vaccineData[`${fieldName}_physical_stock_balance`] = unusedVialsNumber || 0;
 
         const originalValues = originalScsValues[scsKey as keyof typeof originalScsValues];
 

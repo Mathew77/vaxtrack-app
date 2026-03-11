@@ -8,6 +8,33 @@ type ApiResponse<T> = {
   data: T;
 };
 
+export const useUploadUHFData = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const token = localStorage.getItem('token');
+      const response = await apiHelper.postResource<UploadResponse>(
+        `${url}v1/uhf/upload-excel/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      );
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['uhf'] });
+    },
+  });
+};
+
 export const useUploadStockData = () => {
   const queryClient = useQueryClient();
 

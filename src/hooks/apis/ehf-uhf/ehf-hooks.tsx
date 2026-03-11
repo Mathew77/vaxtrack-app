@@ -124,9 +124,11 @@ export const useFetchStates = () => {
             apiUrl += `&lga=${encodeURIComponent(lga.trim())}`;
           }
 
-          const response = await apiHelper.getResource<any[]>(apiUrl);
+          const response = await apiHelper.getResource<any>(apiUrl);
 
-          return Array.isArray(response) ? response : [];
+          if (Array.isArray(response)) return response;
+          if (response && Array.isArray(response.results)) return response.results;
+          return [];
         } catch (error) {
           console.error('API Error - EHF Detail Routes:', error);
           return [];
@@ -168,11 +170,13 @@ export const useFetchStates = () => {
       queryKey: ['ehf-list-all'],
       queryFn: async (): Promise<any[]> => {
         try {
-          const response = await apiHelper.getResource<any[]>(
+          const response = await apiHelper.getResource<any>(
             `${url}v1/ehf-detail-routes/`
           );
 
-          return Array.isArray(response) ? response : [];
+          if (Array.isArray(response)) return response;
+          if (response && Array.isArray(response.results)) return response.results;
+          return [];
         } catch (error) {
           console.error('API Error - EHF List:', error);
           return [];

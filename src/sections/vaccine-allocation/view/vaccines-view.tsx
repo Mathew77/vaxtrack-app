@@ -152,33 +152,35 @@ export default function VaccineView() {
     return ehfsByIds[0]?.state || '';
   }, [isConveyor, ehfsByIds]);
 
-  // Fetch ALL EHFs in the state — used for LGA/Ward dropdowns
+  // Fetch ALL EHFs in the state — used for LGA dropdown
   const effectiveState = isConveyor ? conveyorState : (userState || '');
   const { data: allEhfByState = [], isLoading: isEhfByStateLoading } = useFetchEHFDetailRoutes(
     effectiveState,
     ''
   );
 
+  // Fetch EHFs filtered by selected LGA from the API
+  const { data: ehfByLga = [], isLoading: isEhfByLgaLoading } = useFetchEHFDetailRoutes(
+    effectiveState,
+    selectedLGA
+  );
+
   const allEhf = allEhfByState;
   const isEhfLoading = isConveyor ? (isEhfByIdsLoading || isEhfByStateLoading) : isEhfByStateLoading;
+  const isAnyEhfLoading = isEhfLoading || (!!selectedLGA && isEhfByLgaLoading);
 
-  // Filter EHF based on user role
+  // Filter EHF based on user role — use LGA-filtered API data when LGA is selected
   const filteredEhf = useMemo(() => {
+    const baseEhfs = selectedLGA ? ehfByLga : allEhf;
+
     // For Conveyor/EHF/3PL: only show their assigned EHF
     if ((userRole === 'conveyor' || userRole === 'ehf' || userRole === 'threepl') && userAssignedEhfs.length > 0) {
-      const filtered = allEhf.filter((ehf: any) => userAssignedEhfs.includes(ehf.assigned_unique_id));
-      return filtered;
+      return baseEhfs.filter((ehf: any) => userAssignedEhfs.includes(ehf.assigned_unique_id));
     }
 
-    // For other roles: show all EHFs in their state
-    if (userState) {
-      const filtered = allEhf.filter((ehf: any) => ehf.state?.toUpperCase() === userState.toUpperCase());
-      return filtered;
-    }
-
-    // Default: show all
-    return allEhf;
-  }, [allEhf, userRole, userAssignedEhfs, userState]);
+    // API already filters by state — return data as-is
+    return baseEhfs;
+  }, [allEhf, ehfByLga, selectedLGA, userRole, userAssignedEhfs]);
 
   useEffect(() => {
     if (allocationData && allocationData.vaccines_allocation_detail?.length > 0) {
@@ -282,12 +284,8 @@ export default function VaccineView() {
     return Array.from(new Set(lgas)).sort() as string[];
   }, [allEhf]);
 
-  const lgaWardFilteredEhf = useMemo(() => {
-    return filteredEhf.filter((ehf: any) => {
-      if (selectedLGA && ehf.lga !== selectedLGA) return false;
-      return true;
-    });
-  }, [filteredEhf, selectedLGA]);
+  // API already filters by LGA — filteredEhf is the final list
+  const lgaWardFilteredEhf = filteredEhf;
 
   const handleLGAChange = (event: any) => {
     setSelectedLGA(event.target.value);
@@ -548,7 +546,7 @@ export default function VaccineView() {
             <Box sx={{ mb: 2 }}>
               <Grid container spacing={2} sx={{ mb: 2 }}>
                 <Grid item xs={12}>
-                  <FormControl fullWidth disabled={isEhfLoading || isView || status > 1}>
+                  <FormControl fullWidth disabled={isAnyEhfLoading || isView || status > 1}>
                     <InputLabel>Select LGA</InputLabel>
                     <Select
                       value={selectedLGA}
@@ -570,8 +568,8 @@ export default function VaccineView() {
                 getOptionLabel={(option: any) => option.name_of_ehf || option.ehf_name || ''}
                 value={lgaWardFilteredEhf.find((ehf: any) => ehf.id === selectedEhf) || null}
                 onChange={handleEhfChange}
-                disabled={!selectedLGA || isEhfLoading || isView || createAllocation.isPending || status > 1}
-                loading={isEhfLoading}
+                disabled={!selectedLGA || isAnyEhfLoading || isView || createAllocation.isPending || status > 1}
+                loading={isAnyEhfLoading}
                 renderInput={(params) => (
                   <TextField
                     {...params}

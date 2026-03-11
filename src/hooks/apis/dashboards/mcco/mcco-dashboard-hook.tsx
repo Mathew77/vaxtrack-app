@@ -103,32 +103,26 @@ const transformRowsToEHFs = (rows: any[]): MccoDashboardType => {
     // Initialize EHF if not exists
     if (!ehfMap[ehfKey]) {
       const emptySummary: MccoVaccineSummary = {
-        dose_bcg: 0,
-        dose_hepb: 0,
-        dose_bopv: 0,
-        dose_penta: 0,
-        dose_pcv: 0,
-        dose_ipv: 0,
-        dose_mea: 0,
-        dose_yf: 0,
-        dose_td: 0,
-        dose_mena: 0,
-        dose_rota: 0,
-        dose_hpv: 0,
-        dose_mr: 0,
-        dose_bcg_allocated: 0,
-        dose_hepb_allocated: 0,
-        dose_bopv_allocated: 0,
-        dose_penta_allocated: 0,
-        dose_pcv_allocated: 0,
-        dose_ipv_allocated: 0,
-        dose_mea_allocated: 0,
-        dose_yf_allocated: 0,
-        dose_td_allocated: 0,
-        dose_mena_allocated: 0,
-        dose_rota_allocated: 0,
-        dose_hpv_allocated: 0,
+        dose_bcg: 0, dose_hepb: 0, dose_bopv: 0, dose_penta: 0, dose_pcv: 0,
+        dose_ipv: 0, dose_mea: 0, dose_yf: 0, dose_td: 0, dose_mena: 0,
+        dose_rota: 0, dose_hpv: 0, dose_mr: 0,
+        dose_bcg_allocated: 0, dose_hepb_allocated: 0, dose_bopv_allocated: 0,
+        dose_penta_allocated: 0, dose_pcv_allocated: 0, dose_ipv_allocated: 0,
+        dose_mea_allocated: 0, dose_yf_allocated: 0, dose_td_allocated: 0,
+        dose_mena_allocated: 0, dose_rota_allocated: 0, dose_hpv_allocated: 0,
         dose_mr_allocated: 0,
+        dose_bcg_received: 0, dose_hepb_received: 0, dose_bopv_received: 0,
+        dose_penta_received: 0, dose_pcv_received: 0, dose_ipv_received: 0,
+        dose_mea_received: 0, dose_yf_received: 0, dose_td_received: 0,
+        dose_mena_received: 0, dose_rota_received: 0, dose_hpv_received: 0,
+        dose_mr_received: 0,
+        bcg_physical_stock_balance: 0, hepb_physical_stock_balance: 0,
+        bopv_physical_stock_balance: 0, penta_physical_stock_balance: 0,
+        pcv_physical_stock_balance: 0, ipv_physical_stock_balance: 0,
+        mea_physical_stock_balance: 0, yf_physical_stock_balance: 0,
+        td_physical_stock_balance: 0, mena_physical_stock_balance: 0,
+        rota_physical_stock_balance: 0, hpv_physical_stock_balance: 0,
+        mr_physical_stock_balance: 0,
       };
 
       ehfMap[ehfKey] = {
@@ -174,39 +168,53 @@ const transformRowsToEHFs = (rows: any[]): MccoDashboardType => {
       dose_rota_allocated: row.dose_rota_allocated ?? null,
       dose_hpv_allocated: row.dose_hpv_allocated ?? null,
       dose_mr_allocated: row.dose_mr_allocated ?? row.mr_allocated ?? null,
+
+      // Received doses
+      dose_bcg_received: row.dose_bcg_received ?? null,
+      dose_hepb_received: row.dose_hepb_received ?? null,
+      dose_bopv_received: row.dose_bopv_received ?? null,
+      dose_penta_received: row.dose_penta_received ?? null,
+      dose_pcv_received: row.dose_pcv_received ?? null,
+      dose_ipv_received: row.dose_ipv_received ?? null,
+      dose_mea_received: row.dose_mea_received ?? null,
+      dose_yf_received: row.dose_yf_received ?? null,
+      dose_td_received: row.dose_td_received ?? null,
+      dose_mena_received: row.dose_mena_received ?? null,
+      dose_rota_received: row.dose_rota_received ?? null,
+      dose_hpv_received: row.dose_hpv_received ?? null,
+      dose_mr_received: row.dose_mr_received ?? null,
+
+      // Physical stock balance
+      bcg_physical_stock_balance: row.bcg_physical_stock_balance ?? null,
+      hepb_physical_stock_balance: row.hepb_physical_stock_balance ?? null,
+      bopv_physical_stock_balance: row.bopv_physical_stock_balance ?? null,
+      penta_physical_stock_balance: row.penta_physical_stock_balance ?? null,
+      pcv_physical_stock_balance: row.pcv_physical_stock_balance ?? null,
+      ipv_physical_stock_balance: row.ipv_physical_stock_balance ?? null,
+      mea_physical_stock_balance: row.mea_physical_stock_balance ?? null,
+      yf_physical_stock_balance: row.yf_physical_stock_balance ?? null,
+      td_physical_stock_balance: row.td_physical_stock_balance ?? null,
+      mena_physical_stock_balance: row.mena_physical_stock_balance ?? null,
+      rota_physical_stock_balance: row.rota_physical_stock_balance ?? null,
+      hpv_physical_stock_balance: row.hpv_physical_stock_balance ?? null,
+      mr_physical_stock_balance: row.mr_physical_stock_balance ?? null,
     };
 
     ehfMap[ehfKey].facilities.push(facility);
 
     // Accumulate sums at EHF level
     const ehfSum = ehfMap[ehfKey].sum_of_vaccine_at_ehf_level;
-    ehfSum.dose_bcg += row.dose_bcg || 0;
-    ehfSum.dose_hepb += row.dose_hepb || 0;
-    ehfSum.dose_bopv += row.dose_bopv || 0;
-    ehfSum.dose_penta += row.dose_penta || 0;
-    ehfSum.dose_pcv += row.dose_pcv || 0;
-    ehfSum.dose_ipv += row.dose_ipv || 0;
-    ehfSum.dose_mea += row.dose_mea || 0;
-    ehfSum.dose_yf += row.dose_yf || 0;
-    ehfSum.dose_td += row.dose_td || 0;
-    ehfSum.dose_mena += row.dose_mena || 0;
-    ehfSum.dose_rota += row.dose_rota || 0;
-    ehfSum.dose_hpv += row.dose_hpv || 0;
+    const vaccines = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv'];
+    vaccines.forEach(v => {
+      (ehfSum as any)[`dose_${v}`] += row[`dose_${v}`] || 0;
+      (ehfSum as any)[`dose_${v}_allocated`] += row[`dose_${v}_allocated`] || 0;
+      (ehfSum as any)[`dose_${v}_received`] += row[`dose_${v}_received`] || 0;
+      (ehfSum as any)[`${v}_physical_stock_balance`] += row[`${v}_physical_stock_balance`] || 0;
+    });
     ehfSum.dose_mr += row.dose_mr ?? row.mr ?? 0;
-
-    ehfSum.dose_bcg_allocated += row.dose_bcg_allocated || 0;
-    ehfSum.dose_hepb_allocated += row.dose_hepb_allocated || 0;
-    ehfSum.dose_bopv_allocated += row.dose_bopv_allocated || 0;
-    ehfSum.dose_penta_allocated += row.dose_penta_allocated || 0;
-    ehfSum.dose_pcv_allocated += row.dose_pcv_allocated || 0;
-    ehfSum.dose_ipv_allocated += row.dose_ipv_allocated || 0;
-    ehfSum.dose_mea_allocated += row.dose_mea_allocated || 0;
-    ehfSum.dose_yf_allocated += row.dose_yf_allocated || 0;
-    ehfSum.dose_td_allocated += row.dose_td_allocated || 0;
-    ehfSum.dose_mena_allocated += row.dose_mena_allocated || 0;
-    ehfSum.dose_rota_allocated += row.dose_rota_allocated || 0;
-    ehfSum.dose_hpv_allocated += row.dose_hpv_allocated || 0;
     ehfSum.dose_mr_allocated += row.dose_mr_allocated ?? row.mr_allocated ?? 0;
+    (ehfSum as any).dose_mr_received += row.dose_mr_received || 0;
+    (ehfSum as any).mr_physical_stock_balance += row.mr_physical_stock_balance || 0;
   });
 
   return Object.values(ehfMap);

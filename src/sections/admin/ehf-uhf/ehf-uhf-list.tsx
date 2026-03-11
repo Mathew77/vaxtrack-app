@@ -159,6 +159,11 @@ const EhfUHFList: React.FC = () => {
         header: 'UHF Name',
         size: 150,
       },
+      {
+        accessorKey: 'assigned_ehf_unique_id',
+        header: 'EHF Unique ID',
+        size: 150,
+      },
       // {
       //   accessorKey: 'contact_person_name',
       //   header: 'Contact Person',
@@ -208,6 +213,10 @@ const EhfUHFList: React.FC = () => {
 
   const handleAddNew = () => {
     navigate(`/${getTabType()}-setup`, { state: { activeTab: value } });
+  };
+
+  const handleUploadUHF = () => {
+    navigate('/uhf-upload-view');
   };
 
   const ehfItem: ActionMenuItem<TableRow>[] = [
@@ -286,8 +295,8 @@ const EhfUHFList: React.FC = () => {
             tableHeader="Unequipped Health Facility List"
             customRightButton
             customRightButtonIcon={<AddOutlinedIcon />}
-            customRightButtonText="ADD UNEQUIPPED HEALTH FACILITY"
-            customRightButtonCallBackFunction={handleAddNew}
+            customRightButtonText="UPLOAD UNEQUIPPED HEALTH FACILITY"
+            customRightButtonCallBackFunction={handleUploadUHF}
             actionMenuItems={uhfItem}
             showDownloadButton={false}
             loading={isUhfLoading}

@@ -99,6 +99,7 @@ export interface AdminFacilityType {
   dose_mena: number | null;
   dose_rota: number | null;
   dose_hpv: number | null;
+  mr: number | null;
 
   // Allocated stock
   dose_bcg_allocated: number | null;
@@ -113,6 +114,52 @@ export interface AdminFacilityType {
   dose_mena_allocated: number | null;
   dose_rota_allocated: number | null;
   dose_hpv_allocated: number | null;
+  dose_mr_allocated: number | null;
+
+  // Actual (max need)
+  dose_bcg_actual: number | null;
+  dose_hepb_actual: number | null;
+  dose_bopv_actual: number | null;
+  dose_penta_actual: number | null;
+  dose_pcv_actual: number | null;
+  dose_ipv_actual: number | null;
+  dose_mea_actual: number | null;
+  dose_yf_actual: number | null;
+  dose_td_actual: number | null;
+  dose_mena_actual: number | null;
+  dose_rota_actual: number | null;
+  dose_hpv_actual: number | null;
+  dose_mr_actual: number | null;
+
+  // Received stock
+  dose_bcg_received: number | null;
+  dose_hepb_received: number | null;
+  dose_bopv_received: number | null;
+  dose_penta_received: number | null;
+  dose_pcv_received: number | null;
+  dose_ipv_received: number | null;
+  dose_mea_received: number | null;
+  dose_yf_received: number | null;
+  dose_td_received: number | null;
+  dose_mena_received: number | null;
+  dose_rota_received: number | null;
+  dose_hpv_received: number | null;
+  dose_mr_received: number | null;
+
+  // Physical stock balance
+  bcg_physical_stock_balance: number | null;
+  hepb_physical_stock_balance: number | null;
+  bopv_physical_stock_balance: number | null;
+  penta_physical_stock_balance: number | null;
+  pcv_physical_stock_balance: number | null;
+  ipv_physical_stock_balance: number | null;
+  mea_physical_stock_balance: number | null;
+  yf_physical_stock_balance: number | null;
+  td_physical_stock_balance: number | null;
+  mena_physical_stock_balance: number | null;
+  rota_physical_stock_balance: number | null;
+  hpv_physical_stock_balance: number | null;
+  mr_physical_stock_balance: number | null;
 }
 
 // Ward vaccine summary
@@ -129,6 +176,7 @@ export interface AdminWardVaccineSummary {
   dose_mena: number | null;
   dose_rota: number | null;
   dose_hpv: number | null;
+  mr: number | null;
   dose_bcg_allocated: number | null;
   dose_hepb_allocated: number | null;
   dose_bopv_allocated: number | null;
@@ -141,6 +189,52 @@ export interface AdminWardVaccineSummary {
   dose_mena_allocated: number | null;
   dose_rota_allocated: number | null;
   dose_hpv_allocated: number | null;
+  dose_mr_allocated: number | null;
+
+  // Actual (max need)
+  dose_bcg_actual: number | null;
+  dose_hepb_actual: number | null;
+  dose_bopv_actual: number | null;
+  dose_penta_actual: number | null;
+  dose_pcv_actual: number | null;
+  dose_ipv_actual: number | null;
+  dose_mea_actual: number | null;
+  dose_yf_actual: number | null;
+  dose_td_actual: number | null;
+  dose_mena_actual: number | null;
+  dose_rota_actual: number | null;
+  dose_hpv_actual: number | null;
+  dose_mr_actual: number | null;
+
+  // Received stock
+  dose_bcg_received: number | null;
+  dose_hepb_received: number | null;
+  dose_bopv_received: number | null;
+  dose_penta_received: number | null;
+  dose_pcv_received: number | null;
+  dose_ipv_received: number | null;
+  dose_mea_received: number | null;
+  dose_yf_received: number | null;
+  dose_td_received: number | null;
+  dose_mena_received: number | null;
+  dose_rota_received: number | null;
+  dose_hpv_received: number | null;
+  dose_mr_received: number | null;
+
+  // Physical stock balance
+  bcg_physical_stock_balance: number | null;
+  hepb_physical_stock_balance: number | null;
+  bopv_physical_stock_balance: number | null;
+  penta_physical_stock_balance: number | null;
+  pcv_physical_stock_balance: number | null;
+  ipv_physical_stock_balance: number | null;
+  mea_physical_stock_balance: number | null;
+  yf_physical_stock_balance: number | null;
+  td_physical_stock_balance: number | null;
+  mena_physical_stock_balance: number | null;
+  rota_physical_stock_balance: number | null;
+  hpv_physical_stock_balance: number | null;
+  mr_physical_stock_balance: number | null;
 }
 
 // Ward with facilities

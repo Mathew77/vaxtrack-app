@@ -51,6 +51,7 @@ export const NcsPage = lazy(() => import('src/pages/admin/ncs/index'));
 export const ReportForms = lazy(() => import('src/pages/admin/report'));
 export const UploadPage = lazy(() => import('src/pages/admin/upload-stock'));
 export const UploadView = lazy(() => import('src/sections/admin/upload-stock/upload-view'));
+export const UhfUploadView = lazy(() => import('src/sections/admin/upload-stock/uhf-upload-view'));
 export const StockEditView = lazy(() => import('src/sections/admin/upload-stock/stock-edit-view'));
 
 // export const ScsSetup = lazy(() => import('src/pages/admin/lcs-scs/scs/scs-setup'));
@@ -298,6 +299,7 @@ export function Router() {
         { path: 'report', element: <ReportForms /> },
         { path: 'maximum-stock', element: <UploadPage /> },
         { path: 'upload-view', element: <UploadView /> },
+        { path: 'uhf-upload-view', element: <UhfUploadView /> },
         { path: 'stock-edit-view', element: <StockEditView /> },
 
 
