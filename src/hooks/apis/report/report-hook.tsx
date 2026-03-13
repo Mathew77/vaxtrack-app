@@ -184,3 +184,30 @@ export const useFetchMaximumStockReport = (state?: string, lga?: string, ward?: 
     enabled: enabled && !!state,
   });
 };
+
+export const useFetchPeriodReport = (
+  endpoint: string,
+  queryKey: string,
+  state?: string,
+  period_from?: string,
+  period_to?: string,
+  lga?: string,
+  ward?: string,
+  enabled: boolean = false
+) => {
+  return useQuery({
+    queryKey: [queryKey, state, period_from, period_to, lga, ward],
+    queryFn: async (): Promise<any> => {
+      const params = new URLSearchParams();
+      if (state && state !== 'all-states') params.append('state', state);
+      if (period_from) params.append('period_from', period_from);
+      if (period_to) params.append('period_to', period_to);
+      if (lga) params.append('lga', lga);
+      if (ward) params.append('ward', ward);
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${url}${endpoint}?${queryString}` : `${url}${endpoint}`;
+      return await apiHelper.getResource<any>(fullUrl);
+    },
+    enabled: enabled && !!state,
+  });
+};

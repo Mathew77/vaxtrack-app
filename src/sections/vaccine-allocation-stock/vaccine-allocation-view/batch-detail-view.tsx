@@ -33,7 +33,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import {
     useFetchBatchAllocations,
     useFetchStockAtHand,
-    useDeleteAllocation,
+    useDeleteAllocationByFacility,
+    useDeleteAllocationByPeriod,
     useBulkUpdateAllocationStatus,
 } from 'src/hooks/apis/upload/upload-hook';
 import { useFetchThreePl } from 'src/hooks/apis/threepl/threepl-hooks';
@@ -69,6 +70,8 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [allocationToDelete, setAllocationToDelete] = useState<EnrichedAllocatedVaccineData | null>(null);
+    const [deletePeriodDialogOpen, setDeletePeriodDialogOpen] = useState(false);
+    const [recordToDelete, setRecordToDelete] = useState<EnrichedAllocatedVaccineData | null>(null);
 
     // Bulk confirm dialog state
     const [bulkConfirmDialogOpen, setBulkConfirmDialogOpen] = useState(false);
@@ -93,6 +96,7 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
     const is3PL = userRole === 'threepl';
     const isMCCO = userRole === 'mcco' || userRole === 'conveyor';
     const isLCS = userRole === 'lcs';
+    const isAdmin = userRole === 'admin';
 
     const userState = sessionStorage.getItem('userState') || null;
     const parsedUserState = useMemo(() => {
@@ -108,7 +112,8 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
     const { data: batchData = [], isLoading: isBatchLoading, refetch: refetchBatch } = useFetchBatchAllocations(batch_no);
     const { data: stockData = [], isLoading: isStockLoading } = useFetchStockAtHand(parsedUserState);
     const { data: allThreePl = [] } = useFetchThreePl();
-    const deleteAllocationMutation = useDeleteAllocation();
+    const deleteByFacilityMutation = useDeleteAllocationByFacility();
+    const deleteByPeriodMutation = useDeleteAllocationByPeriod();
     const bulkUpdateMutation = useBulkUpdateAllocationStatus();
 
     const enrichedData = useMemo((): EnrichedAllocatedVaccineData[] => {
@@ -214,17 +219,40 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
         setDeleteDialogOpen(true);
     };
 
+    const handleDeleteRecordClick = (data: EnrichedAllocatedVaccineData) => {
+        setRecordToDelete(data);
+        setDeletePeriodDialogOpen(true);
+    };
+
+    const confirmDeleteRecord = () => {
+        if (!recordToDelete?.assigned_unique_id || !recordToDelete?.period) return;
+        deleteByPeriodMutation.mutate(
+            { assigned_unique_id: recordToDelete.assigned_unique_id, period: recordToDelete.period },
+            {
+                onSuccess: () => {
+                    toast.success('Record deleted successfully!');
+                    setDeletePeriodDialogOpen(false);
+                    setRecordToDelete(null);
+                    refetchBatch();
+                },
+                onError: (error: any) => {
+                    toast.error(error?.message || 'Failed to delete record');
+                },
+            }
+        );
+    };
+
     const confirmDelete = () => {
-        if (!allocationToDelete?.id) return;
-        deleteAllocationMutation.mutate(allocationToDelete.id, {
+        if (!allocationToDelete?.assigned_unique_id) return;
+        deleteByFacilityMutation.mutate(allocationToDelete.assigned_unique_id, {
             onSuccess: () => {
-                toast.success('Allocation deleted successfully!');
+                toast.success('Facility allocation deleted successfully!');
                 setDeleteDialogOpen(false);
                 setAllocationToDelete(null);
                 refetchBatch();
             },
             onError: (error: any) => {
-                toast.error(error?.message || 'Failed to delete allocation');
+                toast.error(error?.message || 'Failed to delete facility allocation');
             },
         });
     };
@@ -287,11 +315,17 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
             });
         }
 
-        if (isSLWG && row.status === 0) {
+
+        if (isAdmin) {
             baseActions.push({
-                display: "Delete",
+                display: "Delete Facility",
                 handleClick: handleDeleteClick,
                 icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
+            });
+            baseActions.push({
+                display: "Delete Record",
+                handleClick: handleDeleteRecordClick,
+                icon: <DeleteForeverOutlinedIcon sx={{ color: "orange" }} />,
             });
         }
 
@@ -575,19 +609,37 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                 </Box>
             )}
 
-            {/* Delete Confirmation Dialog */}
+            {/* Delete Facility Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogTitle>Confirm Delete Facility</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Are you sure you want to delete this vaccine allocation for{' '}
-                        <strong>{allocationToDelete?.name_of_ehf}</strong>? This action cannot be undone.
+                        Are you sure you want to delete <strong>all allocations</strong> for{' '}
+                        <strong>{allocationToDelete?.name_of_ehf}</strong> across all periods? This action cannot be undone.
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDeleteDialogOpen(false)} color="inherit">Cancel</Button>
                     <Button onClick={confirmDelete} color="error" variant="contained">
-                        {deleteAllocationMutation.isPending ? 'Deleting...' : 'Delete'}
+                        {deleteByFacilityMutation.isPending ? 'Deleting...' : 'Delete Facility'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Record (by period) Confirmation Dialog */}
+            <Dialog open={deletePeriodDialogOpen} onClose={() => setDeletePeriodDialogOpen(false)}>
+                <DialogTitle>Confirm Delete Record</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete the record for{' '}
+                        <strong>{recordToDelete?.name_of_ehf}</strong> for period{' '}
+                        <strong>{recordToDelete?.period}</strong>? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeletePeriodDialogOpen(false)} color="inherit">Cancel</Button>
+                    <Button onClick={confirmDeleteRecord} color="error" variant="contained">
+                        {deleteByPeriodMutation.isPending ? 'Deleting...' : 'Delete Record'}
                     </Button>
                 </DialogActions>
             </Dialog>

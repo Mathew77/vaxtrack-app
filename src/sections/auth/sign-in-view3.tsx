@@ -37,6 +37,7 @@ export function SignInView3() {
     conveyor: 'conveyor',
     mcco: 'mcco',
     admin: 'admin',
+    superadmin: 'superadmin',
     guest: 'guest',
   };
 

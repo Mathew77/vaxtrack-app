@@ -38,6 +38,7 @@ export function SignInView2() {
     conveyor: 'conveyor',
     mcco: 'mcco',
     admin: 'admin',
+    superadmin: 'superadmin',
     guest: 'guest',
   };
 

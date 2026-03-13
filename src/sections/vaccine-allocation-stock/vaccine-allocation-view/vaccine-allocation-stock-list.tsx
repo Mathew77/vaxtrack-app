@@ -12,7 +12,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { useFetchStockAtHand, useFetchAllocatedVaccines, useFetchAllIndividualAllocations, useDeleteAllocation, useSubmitAllocation } from 'src/hooks/apis/upload/upload-hook';
+import { useFetchStockAtHand, useFetchAllocatedVaccines, useFetchAllIndividualAllocations, useDeleteAllocation, useDeleteAllocationByBatch, useSubmitAllocation } from 'src/hooks/apis/upload/upload-hook';
 import { StockAtHandData, AllocatedVaccineData } from 'src/hooks/apis/upload/upload-type';
 import { useFetchUsers } from 'src/hooks/apis/user/user-hooks';
 import { useFetchScs } from 'src/hooks/apis/lcs-scs/scs-hooks';
@@ -83,8 +83,9 @@ const VaccineAllocationStockList: React.FC = () => {
   const isSLWG = userRole === 'slwg';
   const isSCS = userRole === 'scs';
   const is3PL = userRole === 'threepl';
-  const isMCCO = userRole === 'mcco' || userRole === 'conveyor'; // Support both role names
+  const isMCCO = userRole === 'mcco' || userRole === 'conveyor';
   const isLCS = userRole === 'lcs';
+  const isAdmin = userRole === 'admin';
 
   // SCS can see Maximum Stock tab to allocate, SLWG can see to view only
   const showStockAtHandTab = isSLWG || isSCS;
@@ -151,6 +152,7 @@ const VaccineAllocationStockList: React.FC = () => {
     }
   }, [isLCS, allLcs]);
   const deleteAllocationMutation = useDeleteAllocation();
+  const deleteByBatchMutation = useDeleteAllocationByBatch();
   const submitAllocation = useSubmitAllocation();
   const [value, setValue] = useState<number>(0);
   const [selectedLGA, setSelectedLGA] = useState<string>('');
@@ -162,6 +164,8 @@ const VaccineAllocationStockList: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [allocationToDelete, setAllocationToDelete] = useState<any>(null);
+  const [deleteBatchDialogOpen, setDeleteBatchDialogOpen] = useState(false);
+  const [batchToDelete, setBatchToDelete] = useState<any>(null);
   const [allocationDialogOpen, setAllocationDialogOpen] = useState(false);
   // Batch number will be generated automatically, no state needed for input
 
@@ -1142,6 +1146,31 @@ const VaccineAllocationStockList: React.FC = () => {
     setAllocationToDelete(null);
   };
 
+  const handleDeleteBatch = (data: any) => {
+    setBatchToDelete(data);
+    setDeleteBatchDialogOpen(true);
+  };
+
+  const confirmDeleteBatch = () => {
+    if (!batchToDelete) return;
+    deleteByBatchMutation.mutate(batchToDelete.batch_no, {
+      onSuccess: () => {
+        toast.success('Batch deleted successfully!');
+        setDeleteBatchDialogOpen(false);
+        setBatchToDelete(null);
+      },
+      onError: (error: any) => {
+        toast.error(error?.message || 'Failed to delete batch');
+        setDeleteBatchDialogOpen(false);
+      },
+    });
+  };
+
+  const cancelDeleteBatch = () => {
+    setDeleteBatchDialogOpen(false);
+    setBatchToDelete(null);
+  };
+
   // Action items for SCS users - view details, and confirm return if deficit transferred to SCS
   const getScsActionItems = (row: any): ActionMenuItem<any>[] => {
     const actions: ActionMenuItem<any>[] = [
@@ -1281,7 +1310,7 @@ const VaccineAllocationStockList: React.FC = () => {
   //     });
   //   };
 
-  // Action items for SLWG - can only delete if status = 0 (not yet confirmed by SCS)
+  // Action items for SLWG - view only
   const getSlwgActionItems = (row: any): ActionMenuItem<any>[] => {
     return [
       {
@@ -1292,8 +1321,23 @@ const VaccineAllocationStockList: React.FC = () => {
     ];
   };
 
+  // Action items for Admin - view + delete batch
+  const getAdminActionItems = (row: any): ActionMenuItem<any>[] => {
+    return [
+      {
+        display: "View Details",
+        handleClick: handleViewAllocation,
+        icon: <VisibilityOutlinedIcon sx={{ color: "#1976D2" }} />,
+      },
+      {
+        display: "Delete Batch",
+        handleClick: handleDeleteBatch,
+        icon: <DeleteForeverOutlinedIcon sx={{ color: "red" }} />,
+      },
+    ];
+  };
+
   // Choose action items based on user role
-  // All roles now use dynamic functions that check status
   const getActionItems = isSCS
     ? getScsActionItems
     : is3PL
@@ -1304,7 +1348,9 @@ const VaccineAllocationStockList: React.FC = () => {
           ? getLcsActionItems
           : isSLWG
             ? getSlwgActionItems
-            : undefined;
+            : isAdmin
+              ? getAdminActionItems
+              : undefined;
 
   const allocatedColumns = useMemo(
     () => [
@@ -2626,6 +2672,34 @@ const VaccineAllocationStockList: React.FC = () => {
             disabled={deleteAllocationMutation.isPending}
           >
             {deleteAllocationMutation.isPending ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Batch Confirmation Dialog (Superadmin only) */}
+      <Dialog
+        open={deleteBatchDialogOpen}
+        onClose={cancelDeleteBatch}
+        aria-labelledby="delete-batch-dialog-title"
+      >
+        <DialogTitle id="delete-batch-dialog-title">Delete Batch</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete all allocations for batch{' '}
+            <strong>{batchToDelete?.batch_no}</strong>? This will remove all facility records in this batch and cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDeleteBatch} color="inherit">
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDeleteBatch}
+            color="error"
+            variant="contained"
+            disabled={deleteByBatchMutation.isPending}
+          >
+            {deleteByBatchMutation.isPending ? 'Deleting...' : 'Delete Batch'}
           </Button>
         </DialogActions>
       </Dialog>

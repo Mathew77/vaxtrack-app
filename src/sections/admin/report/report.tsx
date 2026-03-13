@@ -1,113 +1,43 @@
-
 import React, { useState } from 'react';
-import { Box, Typography, Tabs, Tab } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import StockOutReport from './stock-out/stock-out-report';
-import MinimumStockReport from './minmum-stock/minimum-stock-report';
-import MaximumStockReport from './maximum-stock/maximum-stock';
-import VvmStageReport from './vvm-stage/vvm-stage-report';
-import ColdChainReport from './cold-chain/cold-chain-status-report';
+import { Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import PeriodReport from './period-reports/period-report';
 
-interface TabPanelProps {
-    children?: React.ReactNode;
-    value: number;
-    index: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <Typography
-            component="div"
-            role="tabpanel"
-            hidden={value !== index}
-            id={`scrollable-force-tabpanel-${index}`}
-            aria-labelledby={`scrollable-force-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box paddingY={1}>{children}</Box>}
-        </Typography>
-    );
-}
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.any.isRequired,
-    value: PropTypes.any.isRequired,
-};
-
-function a11yProps(index: number) {
-    return {
-        id: `scrollable-force-tab-${index}`,
-        'aria-controls': `scrollable-force-tabpanel-${index}`,
-    };
-}
+const REPORTS = [
+  { value: 'empty-vials-retrieved', label: 'Empty Vials Retrieved Report' },
+  { value: 'syringes-by-lga', label: 'Syringes Received Report' },
+  { value: 'empty-vials-by-lga', label: 'Empty Vials Report' },
+  { value: 'zero-stock-percentage', label: 'Zero Stock Percentage Report' },
+  { value: 'vaccine-antigen-by-lga', label: 'Vaccine Antigen Quantity Report' },
+  { value: 'vaccine-antigen-received', label: 'Vaccine Antigen Quantity Received Report' },
+  { value: 'safety-boxes-retrieved', label: 'Safety Boxes Retrieved Report' },
+  { value: 'non-functional-ehf', label: 'Non-Functional EHF During Delivery Report' },
+  { value: 'functional-ehf-vaccine-received', label: 'Functional EHF Vaccine Received Report' },
+];
 
 const ReportsSections: React.FC = () => {
-    //const navigate = useNavigate();
-    const location = useLocation();
-    const { state } = location;
-    const initialTab = state?.activeTab || 0;
+  const [selectedReport, setSelectedReport] = useState<string>('empty-vials-retrieved');
 
-    const [value, setValue] = useState<number>(initialTab);
+  return (
+    <Box sx={{ px: 2 }}>
+      <FormControl sx={{ mb: 3, width: 350 }}>
+        <InputLabel id="report-select-label">Select Report</InputLabel>
+        <Select
+          labelId="report-select-label"
+          value={selectedReport}
+          label="Select Report"
+          onChange={(e) => setSelectedReport(e.target.value)}
+        >
+          {REPORTS.map((r) => (
+            <MenuItem key={r.value} value={r.value}>
+              {r.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-    //const { data: rawUploadHistory = [] } = useFetchUploadHistory();
-
-
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-        setValue(newValue);
-    };
-
-
-
-    return (
-        <>
-            <Tabs
-                value={value}
-                onChange={handleChange}
-                variant="scrollable"
-                scrollButtons="auto"
-                textColor="primary"
-                aria-label="scrollable force tabs"
-            >
-                <Tab style={{ textTransform: 'none' }} label="Stock Out Report For Vaccine" {...a11yProps(0)} />
-                <Tab style={{ textTransform: 'none' }} label="⁠Minimum Stock Report" {...a11yProps(1)} />
-                <Tab style={{ textTransform: 'none' }} label="Maximum Stock Report" {...a11yProps(2)} />
-                <Tab style={{ textTransform: 'none' }} label="⁠VVM Stage Report" {...a11yProps(3)} />
-                <Tab style={{ textTransform: 'none' }} label="⁠Cold Chain Status Report" {...a11yProps(4)} />
-
-            </Tabs>
-
-            <TabPanel value={value} index={0}>
-                <Box>
-                    <StockOutReport />
-                </Box>
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-                <Box>
-                    <MinimumStockReport />
-                </Box>
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-                <Box>
-                    <MaximumStockReport />
-                </Box>
-            </TabPanel>
-            <TabPanel value={value} index={3}>
-                <Box>
-                    <VvmStageReport />
-                </Box>
-            </TabPanel>
-            <TabPanel value={value} index={4}>
-                <Box>
-                    <ColdChainReport />
-                </Box>
-            </TabPanel>
-
-        </>
-    );
+      <PeriodReport reportType={selectedReport} />
+    </Box>
+  );
 };
 
 export default ReportsSections;

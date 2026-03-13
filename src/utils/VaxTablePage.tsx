@@ -241,7 +241,7 @@ const VaxTable = <TData extends MRT_RowData>({
     ),
     enableRowActions: actionMenuItems.length > 0 || !!getActionMenuItems,
     positionActionsColumn: 'last',
-    renderRowActionMenuItems: ({ row }) => {
+    renderRowActionMenuItems: ({ row, closeMenu }) => {
       // Use dynamic function if provided, otherwise use static array
       const items = getActionMenuItems ? getActionMenuItems(row.original) : actionMenuItems;
 
@@ -260,7 +260,10 @@ const VaxTable = <TData extends MRT_RowData>({
             sx={{ display: 'flex', alignItems: 'center' }}
             id={`${displayText}:${index}`}
             key={`${displayText}:${index}`}
-            onClick={() => (item.handleClick ? item.handleClick(row.original) : undefined)}
+            onClick={() => {
+              closeMenu();
+              if (item.handleClick) item.handleClick(row.original);
+            }}
           >
             {item.icon && <span style={{ marginRight: '10px', color: 'rgb(12, 125, 64)' }}>{item.icon}</span>}
             <span>{displayText}</span>

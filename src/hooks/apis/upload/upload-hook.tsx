@@ -180,6 +180,58 @@ export const useDeleteAllocation = () => {
   });
 };
 
+export const useDeleteAllocationByBatch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (batch_no: string) => {
+      const response = await apiHelper.deleteResource<any>(
+        `${url}v1/vaccine-allocation-stock/batch-upsert/?batch_no=${batch_no}`
+      );
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vaccine-allocation-stock'] });
+      queryClient.invalidateQueries({ queryKey: ['vaccine-allocation-stock-all'] });
+      queryClient.invalidateQueries({ queryKey: ['vaccine-allocation-batch'] });
+    },
+  });
+};
+
+export const useDeleteAllocationByFacility = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (assigned_unique_id: string) => {
+      const response = await apiHelper.deleteResource<any>(
+        `${url}v1/vaccine-allocation-stock/batch-upsert/?assigned_unique_id=${assigned_unique_id}`
+      );
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vaccine-allocation-batch'] });
+      queryClient.invalidateQueries({ queryKey: ['allocated-vaccines'] });
+    },
+  });
+};
+
+export const useDeleteAllocationByPeriod = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ assigned_unique_id, period }: { assigned_unique_id: string; period: string }) => {
+      const response = await apiHelper.deleteResource<any>(
+        `${url}v1/vaccine-allocation-stock/batch-upsert/?assigned_unique_id=${assigned_unique_id}&period=${period}`
+      );
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vaccine-allocation-batch'] });
+      queryClient.invalidateQueries({ queryKey: ['allocated-vaccines'] });
+    },
+  });
+};
+
 // Bulk update allocation status for 3PL bulk pickup
 export const useBulkUpdateAllocationStatus = () => {
   const queryClient = useQueryClient();

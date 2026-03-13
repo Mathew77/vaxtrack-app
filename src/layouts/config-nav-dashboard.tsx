@@ -216,7 +216,7 @@ export const navData = [
     title: 'Vaccine Allocation Stock',
     path: '/vaccine-allocation-stock-page',
     icon: icon('ic-community'),
-    roles: ['slwg', 'scs', 'threepl', 'mcco', 'lcs'],
+    roles: ['slwg', 'scs', 'threepl', 'mcco', 'lcs', 'admin', 'superadmin'],
   },
   // {
   //   title: 'WayBill / Invoice',
