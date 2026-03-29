@@ -231,6 +231,61 @@ const VaccineAllocationBulkFormView: React.FC = () => {
     // Use manual override if set, otherwise use auto-calculated value
     const globalSafetyBox = globalSafetyBoxOverride !== null ? globalSafetyBoxOverride : calculatedSafetyBox;
 
+    // Sum of all 0.5ml syringes across all vaccines
+    const total05mlSyringes = useMemo(() => {
+        return (
+            (parseInt(consumablesData.hepb_syringe_05ml) || 0) +
+            (parseInt(consumablesData.penta_syringe_05ml) || 0) +
+            (parseInt(consumablesData.pcv_syringe_05ml) || 0) +
+            (parseInt(consumablesData.ipv_syringe_05ml) || 0) +
+            (parseInt(consumablesData.mea_syringe_05ml) || 0) +
+            (parseInt(consumablesData.yf_syringe_05ml) || 0) +
+            (parseInt(consumablesData.td_syringe_05ml) || 0) +
+            (parseInt(consumablesData.mena_syringe_05ml) || 0) +
+            (parseInt(consumablesData.hpv_syringe_05ml) || 0) +
+            (parseInt(consumablesData.mr_syringe_05ml) || 0)
+        );
+    }, [consumablesData]);
+
+    // Sum of all droppers (bOPV + Rota)
+    const totalDroppers = useMemo(() => {
+        return (
+            (parseInt(consumablesData.bopv_dropper) || 0) +
+            (parseInt(consumablesData.rota_dropper) || 0)
+        );
+    }, [consumablesData]);
+
+    // Sum of all diluents across all vaccines
+    const totalDiluent = useMemo(() => {
+        return (
+            (parseInt(consumablesData.bcg_diluent) || 0) +
+            (parseInt(consumablesData.mea_diluent) || 0) +
+            (parseInt(consumablesData.yf_diluent) || 0) +
+            (parseInt(consumablesData.mena_diluent) || 0) +
+            (parseInt(consumablesData.mr_diluent) || 0)
+        );
+    }, [consumablesData]);
+
+    // Sum of all 2ml syringes
+    const total2mlSyringes = useMemo(() => {
+        return (parseInt(consumablesData.bcg_syringe_2ml) || 0);
+    }, [consumablesData]);
+
+    // Sum of all 0.05ml syringes (BCG)
+    const total005mlSyringes = useMemo(() => {
+        return (parseInt(consumablesData.bcg_syringe_005ml) || 0);
+    }, [consumablesData]);
+
+    // Sum of all 5ml syringes (Measles, YF, MenA, MR - reconstitution)
+    const total5mlSyringes = useMemo(() => {
+        return (
+            (parseInt(consumablesData.mea_syringe_5ml) || 0) +
+            (parseInt(consumablesData.yf_syringe_5ml) || 0) +
+            (parseInt(consumablesData.mena_syringe_5ml) || 0) +
+            (parseInt(consumablesData.mr_syringe_5ml) || 0)
+        );
+    }, [consumablesData]);
+
     // Handle validation and auto-populate consumables when user finishes typing
     const handleAllocationBlur = (vaccine: string) => {
         const value = allocationData[vaccine as keyof typeof allocationData];
@@ -821,6 +876,12 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 status: userRole === 'scs' ? 1 : 0,
                 created_by: userData?.username || 'system',
                 items: items,
+                sum_zerofive_syringe: total05mlSyringes,
+                sum_dropper: totalDroppers,
+                sum_twoml_syringe: total2mlSyringes,
+                sum_zerofiveml_syringe: total005mlSyringes,
+                sum_fiveml_syringe: total5mlSyringes,
+                sum_diluent: totalDiluent,
             };
 
             await submitAllocation.mutateAsync(nestedPayload);
@@ -1029,7 +1090,66 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                 value={globalSafetyBox}
                                 onChange={(e) => setGlobalSafetyBoxOverride(e.target.value)}
                                 inputProps={{ min: 0 }}
-                                helperText="Auto-calculated from syringes ÷ 100, editable"
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all 0.5ml syringes"
+                                value={total05mlSyringes}
+                                InputProps={{ readOnly: true }}
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all droppers"
+                                value={totalDroppers}
+                                InputProps={{ readOnly: true }}
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all diluents"
+                                value={totalDiluent}
+                                InputProps={{ readOnly: true }}
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all 2ml syringes"
+                                value={total2mlSyringes}
+                                InputProps={{ readOnly: true }}
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all 0.05ml syringes"
+                                value={total005mlSyringes}
+                                InputProps={{ readOnly: true }}
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all 5ml syringes"
+                                value={total5mlSyringes}
+                                InputProps={{ readOnly: true }}
+                                inputProps={{ min: 0 }}
                             />
                         </Grid>
                     </Grid>

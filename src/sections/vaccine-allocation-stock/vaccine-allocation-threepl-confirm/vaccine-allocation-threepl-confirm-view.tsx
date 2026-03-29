@@ -18,6 +18,7 @@ import {
     MenuItem,
     FormControl,
     Divider,
+    TextField,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -64,6 +65,19 @@ const VaccineAllocationThreeplConfirmView: React.FC = () => {
         hpv: 'Usable',
         mr: 'Usable',
     });
+
+    // Read pre-computed sum fields from the first allocation (batch-level totals saved on each item)
+    const consumableSums = useMemo(() => {
+        const first = allocations[0] || {};
+        return {
+            zerofive: parseInt(first.sum_zerofive_syringe) || 0,
+            dropper: parseInt(first.sum_dropper) || 0,
+            diluent: parseInt(first.sum_diluent) || 0,
+            twoml: parseInt(first.sum_twoml_syringe) || 0,
+            zerofiveml: parseInt(first.sum_zerofiveml_syringe) || 0,
+            fiveml: parseInt(first.sum_fiveml_syringe) || 0,
+        };
+    }, [allocations]);
 
     // Get aggregated vaccine totals for the batch
     const batchVaccineTotals = useMemo(() => {
@@ -134,6 +148,34 @@ const VaccineAllocationThreeplConfirmView: React.FC = () => {
                 You are about to confirm pickup for <strong>{allocations.length}</strong> facilities
                 in batch <strong>{batch_no}</strong>.
             </Typography>
+
+            <Card sx={{ mb: 3 }}>
+                <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'rgb(12, 125, 64)' }}>
+                        Consumables Summary
+                    </Typography>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of all 0.5ml syringes" value={consumableSums.zerofive} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of all droppers" value={consumableSums.dropper} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of all diluents" value={consumableSums.diluent} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of all 2ml syringes" value={consumableSums.twoml} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of all 0.05ml syringes" value={consumableSums.zerofiveml} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of all 5ml syringes" value={consumableSums.fiveml} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                    </Grid>
+                </CardContent>
+            </Card>
 
             <Card sx={{ mb: 3 }}>
                 <CardContent>

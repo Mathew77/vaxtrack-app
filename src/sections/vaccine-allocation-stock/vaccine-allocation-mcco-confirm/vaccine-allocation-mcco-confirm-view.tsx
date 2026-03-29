@@ -25,7 +25,7 @@ import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 interface VaccineData {
   name: string;
   allocated: number;
-  received: number;
+  received: number | null | string;
   vvmStage: string;
   batchNumber: string;
   expiryDate: string;
@@ -86,19 +86,19 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
   };
 
   const [vaccines, setVaccines] = useState<VaccineData[]>([
-    { name: 'BCG', allocated: data?.dose_bcg_allocated || 0, received: 0, vvmStage: originalScsValues.bcg.vvmStage, batchNumber: originalScsValues.bcg.batchNumber, expiryDate: originalScsValues.bcg.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'HepB', allocated: data?.dose_hepb_allocated || 0, received: 0, vvmStage: originalScsValues.hepb.vvmStage, batchNumber: originalScsValues.hepb.batchNumber, expiryDate: originalScsValues.hepb.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'bOPV', allocated: data?.dose_bopv_allocated || 0, received: 0, vvmStage: originalScsValues.bopv.vvmStage, batchNumber: originalScsValues.bopv.batchNumber, expiryDate: originalScsValues.bopv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'Penta', allocated: data?.dose_penta_allocated || 0, received: 0, vvmStage: originalScsValues.penta.vvmStage, batchNumber: originalScsValues.penta.batchNumber, expiryDate: originalScsValues.penta.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'PCV', allocated: data?.dose_pcv_allocated || 0, received: 0, vvmStage: originalScsValues.pcv.vvmStage, batchNumber: originalScsValues.pcv.batchNumber, expiryDate: originalScsValues.pcv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'IPV', allocated: data?.dose_ipv_allocated || 0, received: 0, vvmStage: originalScsValues.ipv.vvmStage, batchNumber: originalScsValues.ipv.batchNumber, expiryDate: originalScsValues.ipv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'Measles', allocated: data?.dose_mea_allocated || 0, received: 0, vvmStage: originalScsValues.mea.vvmStage, batchNumber: originalScsValues.mea.batchNumber, expiryDate: originalScsValues.mea.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'YF', allocated: data?.dose_yf_allocated || 0, received: 0, vvmStage: originalScsValues.yf.vvmStage, batchNumber: originalScsValues.yf.batchNumber, expiryDate: originalScsValues.yf.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'TD', allocated: data?.dose_td_allocated || 0, received: 0, vvmStage: originalScsValues.td.vvmStage, batchNumber: originalScsValues.td.batchNumber, expiryDate: originalScsValues.td.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: 0, vvmStage: originalScsValues.mena.vvmStage, batchNumber: originalScsValues.mena.batchNumber, expiryDate: originalScsValues.mena.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: 0, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: 0, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'MR', allocated: data?.dose_mr_allocated || 0, received: 0, vvmStage: originalScsValues.mr.vvmStage, batchNumber: originalScsValues.mr.batchNumber, expiryDate: originalScsValues.mr.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'BCG', allocated: data?.dose_bcg_allocated || 0, received: null, vvmStage: originalScsValues.bcg.vvmStage, batchNumber: originalScsValues.bcg.batchNumber, expiryDate: originalScsValues.bcg.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'HepB', allocated: data?.dose_hepb_allocated || 0, received: null, vvmStage: originalScsValues.hepb.vvmStage, batchNumber: originalScsValues.hepb.batchNumber, expiryDate: originalScsValues.hepb.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'bOPV', allocated: data?.dose_bopv_allocated || 0, received: null, vvmStage: originalScsValues.bopv.vvmStage, batchNumber: originalScsValues.bopv.batchNumber, expiryDate: originalScsValues.bopv.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'Penta', allocated: data?.dose_penta_allocated || 0, received: null, vvmStage: originalScsValues.penta.vvmStage, batchNumber: originalScsValues.penta.batchNumber, expiryDate: originalScsValues.penta.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'PCV', allocated: data?.dose_pcv_allocated || 0, received: null, vvmStage: originalScsValues.pcv.vvmStage, batchNumber: originalScsValues.pcv.batchNumber, expiryDate: originalScsValues.pcv.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'IPV', allocated: data?.dose_ipv_allocated || 0, received: null, vvmStage: originalScsValues.ipv.vvmStage, batchNumber: originalScsValues.ipv.batchNumber, expiryDate: originalScsValues.ipv.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'Measles', allocated: data?.dose_mea_allocated || 0, received: null, vvmStage: originalScsValues.mea.vvmStage, batchNumber: originalScsValues.mea.batchNumber, expiryDate: originalScsValues.mea.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'YF', allocated: data?.dose_yf_allocated || 0, received: null, vvmStage: originalScsValues.yf.vvmStage, batchNumber: originalScsValues.yf.batchNumber, expiryDate: originalScsValues.yf.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'TD', allocated: data?.dose_td_allocated || 0, received: null, vvmStage: originalScsValues.td.vvmStage, batchNumber: originalScsValues.td.batchNumber, expiryDate: originalScsValues.td.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: null, vvmStage: originalScsValues.mena.vvmStage, batchNumber: originalScsValues.mena.batchNumber, expiryDate: originalScsValues.mena.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: null, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: null, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'MR', allocated: data?.dose_mr_allocated || 0, received: null, vvmStage: originalScsValues.mr.vvmStage, batchNumber: originalScsValues.mr.batchNumber, expiryDate: originalScsValues.mr.expiryDate, emptyVials: 0, unusedVials: 0 },
   ]);
 
   if (!data) {
@@ -122,7 +122,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     const updatedVaccines = [...vaccines];
     // Convert numeric fields to number for proper comparison
     const numericFields = ['received', 'emptyVials', 'unusedVials'];
-    const updatedValue = numericFields.includes(field) ? Number(value) || 0 : value;
+    const updatedValue = numericFields.includes(field) ? (value === '' ? '' : Number(value)) : value;
     updatedVaccines[index] = { ...updatedVaccines[index], [field]: updatedValue };
     setVaccines(updatedVaccines);
   };
@@ -146,15 +146,15 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
   const validateForm = () => {
     // Only validate vaccines that have allocations > 0 or received > 0
-    const activeVaccines = vaccines.filter(v => v.allocated > 0 || (v.received && v.received > 0));
+    const activeVaccines = vaccines.filter(v => v.allocated > 0 || Number(v.received) > 0);
 
     for (const vaccine of activeVaccines) {
-      if (vaccine.allocated > 0 && (!vaccine.received || vaccine.received <= 0)) {
+      if (vaccine.allocated > 0 && (vaccine.received === null || vaccine.received === undefined)) {
         toast.error(`Please enter received amount for ${vaccine.name} (Allocated: ${vaccine.allocated})`);
         return false;
       }
 
-      if (vaccine.received > 0) {
+      if (Number(vaccine.received) > 0) {
         // Validate multiples
         const multiple = vaccineMultiples[vaccine.name] || 1;
         if (Number(vaccine.received) % multiple !== 0) {
@@ -242,7 +242,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
       if (fieldName && scsKey) {
         // CRITICAL: Ensure received is ALWAYS a number by parsing it
-        const receivedNumber = typeof v.received === 'string' ? parseInt(v.received, 10) : v.received;
+        const receivedNumber = v.received === null || v.received === undefined ? 0 : typeof v.received === 'string' ? parseInt(v.received, 10) : v.received;
         vaccineData[`dose_${fieldName}_received`] = receivedNumber || 0;
 
         // Add new fields: empty_vials, unused_vials
@@ -467,13 +467,13 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           fullWidth
                           label="Received Doses"
                           type="number"
-                          value={vaccine.received || ''}
+                          value={vaccine.received ?? ''}
                           onChange={(e) => handleVaccineChange(actualIndex, 'received', e.target.value)}
                           onKeyDown={preventInvalidKeys}
                           inputProps={{ min: 0 }}
-                          error={vaccine.received > 0 && Number(vaccine.received) % (vaccineMultiples[vaccine.name] || 1) !== 0}
+                          error={Number(vaccine.received) > 0 && Number(vaccine.received) % (vaccineMultiples[vaccine.name] || 1) !== 0}
                           helperText={
-                            vaccine.received > 0 && Number(vaccine.received) % (vaccineMultiples[vaccine.name] || 1) !== 0
+                            Number(vaccine.received) > 0 && Number(vaccine.received) % (vaccineMultiples[vaccine.name] || 1) !== 0
                               ? `Must be divisible by ${vaccineMultiples[vaccine.name] || 1}`
                               : ''
                           }
@@ -568,6 +568,24 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
             Additional Information
           </Typography>
           <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of all 0.5ml syringes" value={data?.sum_zerofive_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of all droppers" value={data?.sum_dropper || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of all diluents" value={data?.sum_diluent || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of all 2ml syringes" value={data?.sum_twoml_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of all 0.05ml syringes" value={data?.sum_zerofiveml_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of all 5ml syringes" value={data?.sum_fiveml_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
                 <InputLabel>CCE Functional Status</InputLabel>

@@ -625,15 +625,11 @@ const VaccineAllocationStockList: React.FC = () => {
     return allThreePl.filter(pl => pl.lga?.toUpperCase() === selectedLGA.toUpperCase());
   }, [allThreePl, selectedLGA]);
 
-  // Get available 3PLs based on selected facilities' LGAs (for bulk allocation)
+  // Get available 3PLs based on the current user's state
   const facilityBased3PLs = useMemo(() => {
-    if (selectedFacilities.length === 0) 
-      return allThreePl;
-    // Get unique LGAs from selected facilities
-    // const facilityLGAs = [...new Set(selectedFacilities.map((f: SelectedFacility) => f.lga?.toUpperCase()))];
-    // Return 3PLs that serve any of the selected facilities' LGAs
-    return allThreePl;
-  }, [allThreePl, selectedFacilities]);
+    if (!scsState) return allThreePl;
+    return allThreePl.filter(pl => pl.state?.toUpperCase() === scsState.toUpperCase());
+  }, [allThreePl, scsState]);
 
   // Filter stock data based on state (for SCS/SLWG users), selected LGA, Ward, and EHF
   const filteredStockData = useMemo(() => {

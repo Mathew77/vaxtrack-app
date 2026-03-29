@@ -72,6 +72,7 @@ const VaxTable = <TData extends MRT_RowData>({
   });
 
   const handleExportData = () => {
+    if (!data || data.length === 0) return;
     const csv = generateCsv(csvConfig)(data);
     download(csvConfig)(csv);
   };
