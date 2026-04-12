@@ -14,6 +14,7 @@ interface ExtendedRotaAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const RotaAllocationComponent = ({
@@ -22,6 +23,7 @@ const RotaAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedRotaAllocationProps): JSX.Element => {
   const defaultFormData: RotaAllocationData = {
     rotaVaccineAllocated: '',
@@ -199,7 +201,7 @@ const RotaAllocationComponent = ({
         Rota Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

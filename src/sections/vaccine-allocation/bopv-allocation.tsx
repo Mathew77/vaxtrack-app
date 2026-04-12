@@ -14,6 +14,7 @@ interface ExtendedBopvAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const BopvAllocationComponent = ({
@@ -22,6 +23,7 @@ const BopvAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedBopvAllocationProps): JSX.Element => {
   const defaultFormData: BopvAllocationData = {
     bopvVaccineAllocated: '',
@@ -199,7 +201,7 @@ const BopvAllocationComponent = ({
         BOPV Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

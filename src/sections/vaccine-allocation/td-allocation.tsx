@@ -14,6 +14,7 @@ interface ExtendedTdAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const TdAllocationComponent = ({
@@ -22,6 +23,7 @@ const TdAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedTdAllocationProps): JSX.Element => {
   const defaultFormData: TdAllocationData = {
     tdVaccineAllocated: '',
@@ -197,7 +199,7 @@ const TdAllocationComponent = ({
         TD Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

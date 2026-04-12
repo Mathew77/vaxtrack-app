@@ -14,6 +14,7 @@ interface ExtendedIpvAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const IpvAllocationComponent = ({
@@ -22,6 +23,7 @@ const IpvAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedIpvAllocationProps): JSX.Element => {
   const defaultFormData: IpvAllocationData = {
     ipvVaccineAllocated: '',
@@ -197,7 +199,7 @@ const IpvAllocationComponent = ({
         IPV Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

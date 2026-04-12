@@ -639,6 +639,10 @@ export default function VaccineView() {
                   key={selectedTab}
                   isView={isView}
                   isUpdate={isUpdate}
+                  isHealthFacilitySelected={
+                    isView || isUpdate ||
+                    (!!selectedEhf && (userRole === 'conveyor' || !allUhf.length || !!selectedUhf))
+                  }
                 />
               </Box>
             )}

@@ -14,6 +14,7 @@ interface ExtendedHepBAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const HepBAllocationComponent = ({
@@ -22,6 +23,7 @@ const HepBAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedHepBAllocationProps): JSX.Element => {
   const defaultFormData: HepBAllocationData = {
     hepBVaccineAllocated: '',
@@ -197,7 +199,7 @@ const HepBAllocationComponent = ({
         HepB Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

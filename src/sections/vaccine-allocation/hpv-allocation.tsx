@@ -14,6 +14,7 @@ interface ExtendedHpvAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const HpvAllocationComponent = ({
@@ -22,6 +23,7 @@ const HpvAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedHpvAllocationProps): JSX.Element => {
   const defaultFormData: HpvAllocationData = {
     hpvVaccineAllocated: '',
@@ -197,7 +199,7 @@ const HpvAllocationComponent = ({
         HPV Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

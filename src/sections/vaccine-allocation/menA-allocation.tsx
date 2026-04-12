@@ -14,6 +14,7 @@ interface ExtendedMenAAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const MenAAllocationComponent = ({
@@ -22,6 +23,7 @@ const MenAAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedMenAAllocationProps): JSX.Element => {
   const defaultFormData: MenAAllocationData = {
     menAVaccineAllocated: '',
@@ -223,7 +225,7 @@ const MenAAllocationComponent = ({
         MenA Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

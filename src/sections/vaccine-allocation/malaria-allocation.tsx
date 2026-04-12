@@ -14,6 +14,7 @@ interface ExtendedMalariaAllocationProps {
   key?: string;
   isView?: boolean;
   isUpdate?: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const MalariaAllocationComponent = ({
@@ -22,6 +23,7 @@ const MalariaAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedMalariaAllocationProps): JSX.Element => {
   const defaultFormData: MalariaAllocationData = {
     malariaVaccineAllocated: '',
@@ -223,7 +225,7 @@ const MalariaAllocationComponent = ({
         Malaria Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

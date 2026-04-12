@@ -14,6 +14,7 @@ interface ExtendedPcvAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const PcvAllocationComponent = ({
@@ -22,6 +23,7 @@ const PcvAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedPcvAllocationProps): JSX.Element => {
   const defaultFormData: PcvAllocationData = {
     pcvVaccineAllocated: '',
@@ -197,7 +199,7 @@ const PcvAllocationComponent = ({
         PCV Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

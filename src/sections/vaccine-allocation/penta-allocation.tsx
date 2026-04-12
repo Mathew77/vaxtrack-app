@@ -14,6 +14,7 @@ interface ExtendedPentaAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const PentaAllocationComponent = ({
@@ -22,6 +23,7 @@ const PentaAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedPentaAllocationProps): JSX.Element => {
   const defaultFormData: PentaAllocationData = {
     pentaVaccineAllocated: '',
@@ -197,7 +199,7 @@ const PentaAllocationComponent = ({
         Penta Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

@@ -14,6 +14,7 @@ interface ExtendedMeaslesAllocationProps {
   key?: string;
   isView?: boolean;
   isUpdate?: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const MeaslesAllocationComponent = ({
@@ -22,6 +23,7 @@ const MeaslesAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedMeaslesAllocationProps): JSX.Element => {
   const defaultFormData: MeaslesAllocationData = {
     measlesVaccineAllocated: '',
@@ -222,7 +224,7 @@ const MeaslesAllocationComponent = ({
         Measles & Rubella Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

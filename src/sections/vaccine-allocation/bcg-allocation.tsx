@@ -15,6 +15,7 @@ interface ExtendedBcgAllocationProps {
   key?: string;
   isView?: boolean;
   isUpdate?: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const BcgAllocationComponent = ({
@@ -22,7 +23,8 @@ const BcgAllocationComponent = ({
   onDataChange,
   status = 1,
   isView = false,
-  isUpdate = false
+  isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedBcgAllocationProps): JSX.Element => {
 
   const userPermission = useFetchUsers()
@@ -228,7 +230,7 @@ const BcgAllocationComponent = ({
         BCG Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"

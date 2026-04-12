@@ -107,6 +107,9 @@ const VaccineAllocationBulkFormView: React.FC = () => {
     // Validation errors state
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
+    // Warnings state (non-blocking — user is alerted but can still submit)
+    const [warnings, setWarnings] = useState<Record<string, string>>({});
+
     // Global fields for date and safety box
     const [allocationDate, setAllocationDate] = useState(() => {
         const today = new Date();
@@ -186,7 +189,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         // Update allocation data immediately to allow typing
         setAllocationData(prev => ({ ...prev, [vaccine]: value }));
 
-        // Clear error when user starts typing again
+        // Clear error and warning when user starts typing again
         if (validationErrors[vaccine]) {
             setValidationErrors(prev => {
                 const newErrors = { ...prev };
@@ -194,9 +197,25 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 return newErrors;
             });
         }
+        if (warnings[vaccine]) {
+            setWarnings(prev => {
+                const newWarnings = { ...prev };
+                delete newWarnings[vaccine];
+                return newWarnings;
+            });
+        }
     };
 
     const [globalSafetyBoxOverride, setGlobalSafetyBoxOverride] = useState<string | null>(null);
+
+    // Manual overrides for sum fields (null = use auto-calculated value)
+    const [override05mlSyringes, setOverride05mlSyringes] = useState<string | null>(null);
+    const [overrideBopvDroppers, setOverrideBopvDroppers] = useState<string | null>(null);
+    const [overrideRotaDroppers, setOverrideRotaDroppers] = useState<string | null>(null);
+    const [overrideDiluent, setOverrideDiluent] = useState<string | null>(null);
+    const [override2mlSyringes, setOverride2mlSyringes] = useState<string | null>(null);
+    const [override005mlSyringes, setOverride005mlSyringes] = useState<string | null>(null);
+    const [override5mlSyringes, setOverride5mlSyringes] = useState<string | null>(null);
 
     // Calculate safety boxes based on total syringes (administration + reconstitution)
     // Safety box can contain 100 syringes, so divide by 100 and round up
@@ -247,12 +266,14 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         );
     }, [consumablesData]);
 
-    // Sum of all droppers (bOPV + Rota)
-    const totalDroppers = useMemo(() => {
-        return (
-            (parseInt(consumablesData.bopv_dropper) || 0) +
-            (parseInt(consumablesData.rota_dropper) || 0)
-        );
+    // Sum of bOPV droppers
+    const totalBopvDroppers = useMemo(() => {
+        return parseInt(consumablesData.bopv_dropper) || 0;
+    }, [consumablesData]);
+
+    // Sum of Rota droppers
+    const totalRotaDroppers = useMemo(() => {
+        return parseInt(consumablesData.rota_dropper) || 0;
     }, [consumablesData]);
 
     // Sum of all diluents across all vaccines
@@ -285,6 +306,15 @@ const VaccineAllocationBulkFormView: React.FC = () => {
             (parseInt(consumablesData.mr_syringe_5ml) || 0)
         );
     }, [consumablesData]);
+
+    // Effective sum values — use manual override if set, otherwise auto-calculated
+    const effective05mlSyringes = override05mlSyringes !== null ? override05mlSyringes : total05mlSyringes.toString();
+    const effectiveBopvDroppers = overrideBopvDroppers !== null ? overrideBopvDroppers : totalBopvDroppers.toString();
+    const effectiveRotaDroppers = overrideRotaDroppers !== null ? overrideRotaDroppers : totalRotaDroppers.toString();
+    const effectiveDiluent = overrideDiluent !== null ? overrideDiluent : totalDiluent.toString();
+    const effective2mlSyringes = override2mlSyringes !== null ? override2mlSyringes : total2mlSyringes.toString();
+    const effective005mlSyringes = override005mlSyringes !== null ? override005mlSyringes : total005mlSyringes.toString();
+    const effective5mlSyringes = override5mlSyringes !== null ? override5mlSyringes : total5mlSyringes.toString();
 
     // Handle validation and auto-populate consumables when user finishes typing
     const handleAllocationBlur = (vaccine: string) => {
@@ -321,15 +351,19 @@ const VaccineAllocationBulkFormView: React.FC = () => {
             }
         }
 
-        // Validate: cannot allocate more than max total stock
+        // Warn (non-blocking): allocating more than max total stock is allowed but flagged
         if (numValue > maxStock) {
-            const errorMsg = `Cannot exceed max stock (${maxStock})`;
-            setValidationErrors(prev => ({ ...prev, [vaccine]: errorMsg }));
-            toast.error(`${vaccine.replace('dose_', '').toUpperCase()} allocation (${numValue}) cannot exceed total max stock (${maxStock}).`);
-            return;
+            setWarnings(prev => ({ ...prev, [vaccine]: `Exceeds max stock (${maxStock})` }));
+            toast.warning(`${vaccine.replace('dose_', '').toUpperCase()} allocation (${numValue}) exceeds total max stock (${maxStock}). You may still proceed.`);
+        } else {
+            setWarnings(prev => {
+                const newWarnings = { ...prev };
+                delete newWarnings[vaccine];
+                return newWarnings;
+            });
         }
 
-        // Clear any existing errors if validation passes
+        // Clear any existing errors if divisibility validation passes
         if (validationErrors[vaccine]) {
             setValidationErrors(prev => {
                 const newErrors = { ...prev };
@@ -876,12 +910,13 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 status: userRole === 'scs' ? 1 : 0,
                 created_by: userData?.username || 'system',
                 items: items,
-                sum_zerofive_syringe: total05mlSyringes,
-                sum_dropper: totalDroppers,
-                sum_twoml_syringe: total2mlSyringes,
-                sum_zerofiveml_syringe: total005mlSyringes,
-                sum_fiveml_syringe: total5mlSyringes,
-                sum_diluent: totalDiluent,
+                sum_zerofive_syringe: parseInt(effective05mlSyringes) || 0,
+                sum_bopv_dropper: parseInt(effectiveBopvDroppers) || 0,
+                sum_rota_dropper: parseInt(effectiveRotaDroppers) || 0,
+                sum_twoml_syringe: parseInt(effective2mlSyringes) || 0,
+                sum_zerofiveml_syringe: parseInt(effective005mlSyringes) || 0,
+                sum_fiveml_syringe: parseInt(effective5mlSyringes) || 0,
+                sum_diluent: parseInt(effectiveDiluent) || 0,
             };
 
             await submitAllocation.mutateAsync(nestedPayload);
@@ -1097,8 +1132,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                 fullWidth
                                 type="number"
                                 label="Sum of all 0.5ml syringes"
-                                value={total05mlSyringes}
-                                InputProps={{ readOnly: true }}
+                                value={effective05mlSyringes}
+                                onChange={(e) => setOverride05mlSyringes(e.target.value)}
                                 inputProps={{ min: 0 }}
                             />
                         </Grid>
@@ -1106,9 +1141,19 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                             <TextField
                                 fullWidth
                                 type="number"
-                                label="Sum of all droppers"
-                                value={totalDroppers}
-                                InputProps={{ readOnly: true }}
+                                label="Sum of all bOPV droppers"
+                                value={effectiveBopvDroppers}
+                                onChange={(e) => setOverrideBopvDroppers(e.target.value)}
+                                inputProps={{ min: 0 }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                                fullWidth
+                                type="number"
+                                label="Sum of all Rota droppers"
+                                value={effectiveRotaDroppers}
+                                onChange={(e) => setOverrideRotaDroppers(e.target.value)}
                                 inputProps={{ min: 0 }}
                             />
                         </Grid>
@@ -1117,8 +1162,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                 fullWidth
                                 type="number"
                                 label="Sum of all diluents"
-                                value={totalDiluent}
-                                InputProps={{ readOnly: true }}
+                                value={effectiveDiluent}
+                                onChange={(e) => setOverrideDiluent(e.target.value)}
                                 inputProps={{ min: 0 }}
                             />
                         </Grid>
@@ -1127,8 +1172,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                 fullWidth
                                 type="number"
                                 label="Sum of all 2ml syringes"
-                                value={total2mlSyringes}
-                                InputProps={{ readOnly: true }}
+                                value={effective2mlSyringes}
+                                onChange={(e) => setOverride2mlSyringes(e.target.value)}
                                 inputProps={{ min: 0 }}
                             />
                         </Grid>
@@ -1137,8 +1182,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                 fullWidth
                                 type="number"
                                 label="Sum of all 0.05ml syringes"
-                                value={total005mlSyringes}
-                                InputProps={{ readOnly: true }}
+                                value={effective005mlSyringes}
+                                onChange={(e) => setOverride005mlSyringes(e.target.value)}
                                 inputProps={{ min: 0 }}
                             />
                         </Grid>
@@ -1147,8 +1192,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                 fullWidth
                                 type="number"
                                 label="Sum of all 5ml syringes"
-                                value={total5mlSyringes}
-                                InputProps={{ readOnly: true }}
+                                value={effective5mlSyringes}
+                                onChange={(e) => setOverride5mlSyringes(e.target.value)}
                                 inputProps={{ min: 0 }}
                             />
                         </Grid>
@@ -1215,7 +1260,10 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                             onBlur={() => handleAllocationBlur(vaccine.key)}
                                             inputProps={{ min: 0 }}
                                             error={!!validationErrors[vaccine.key]}
-                                            helperText={validationErrors[vaccine.key] || (vaccine.key === 'dose_pcv' ? 'Must be divisible by 4 or 5' : `Must be divisible by ${getVaccineMultiple(vaccine.key)}`)}
+                                            helperText={validationErrors[vaccine.key] || warnings[vaccine.key] || (vaccine.key === 'dose_pcv' ? 'Must be divisible by 4 or 5' : `Must be divisible by ${getVaccineMultiple(vaccine.key)}`)}
+                                            FormHelperTextProps={{
+                                                sx: warnings[vaccine.key] && !validationErrors[vaccine.key] ? { color: 'warning.main', fontWeight: 600 } : undefined
+                                            }}
                                         />
                                         {allocated > 0 && (
                                             <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
@@ -1263,8 +1311,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                                     </Grid>
                                                 </Grid>
 
-                                                {/* Consumables Section */}
-                                                {vaccine.consumables && vaccine.consumables.length > 0 && (
+                                                {/* Consumables Section — hidden from UI, values are auto-calculated and sent to backend */}
+                                                {/* {vaccine.consumables && vaccine.consumables.length > 0 && (
                                                     <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
                                                         <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#666' }}>
                                                             Consumables
@@ -1285,7 +1333,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                                                             ))}
                                                         </Grid>
                                                     </Box>
-                                                )}
+                                                )} */}
                                             </Box>
                                         )}
                                     </Paper>

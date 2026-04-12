@@ -14,6 +14,7 @@ interface ExtendedYfAllocationProps {
   key?: string;
   isView: boolean;
   isUpdate: boolean;
+  isHealthFacilitySelected?: boolean;
 }
 
 const YfAllocationComponent = ({
@@ -22,6 +23,7 @@ const YfAllocationComponent = ({
   status = 1,
   isView = false,
   isUpdate = false,
+  isHealthFacilitySelected = true,
 }: ExtendedYfAllocationProps): JSX.Element => {
   const defaultFormData: YfAllocationData = {
     yfVaccineAllocated: '',
@@ -223,7 +225,7 @@ const YfAllocationComponent = ({
         YF Allocation
       </Typography>
 
-      <Accordion>
+      <Accordion disabled={!isHealthFacilitySelected}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
           aria-controls="forward-logistics-content"
