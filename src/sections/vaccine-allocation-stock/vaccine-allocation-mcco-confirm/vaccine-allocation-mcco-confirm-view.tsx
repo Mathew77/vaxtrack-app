@@ -572,7 +572,10 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
               <TextField fullWidth type="number" label="Sum of all 0.5ml syringes" value={data?.sum_zerofive_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of all droppers" value={data?.sum_dropper || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of bOPV droppers" value={data?.sum_bopv_dropper || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField fullWidth type="number" label="Sum of Rota droppers" value={data?.sum_rota_dropper || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
               <TextField fullWidth type="number" label="Sum of all diluents" value={data?.sum_diluent || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />

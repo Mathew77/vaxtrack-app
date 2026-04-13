@@ -71,7 +71,8 @@ const VaccineAllocationThreeplConfirmView: React.FC = () => {
         const first = allocations[0] || {};
         return {
             zerofive: parseInt(first.sum_zerofive_syringe) || 0,
-            dropper: parseInt(first.sum_dropper) || 0,
+            bopv_dropper: parseInt(first.sum_bopv_dropper) || 0,
+            rota_dropper: parseInt(first.sum_rota_dropper) || 0,
             diluent: parseInt(first.sum_diluent) || 0,
             twoml: parseInt(first.sum_twoml_syringe) || 0,
             zerofiveml: parseInt(first.sum_zerofiveml_syringe) || 0,
@@ -159,7 +160,10 @@ const VaccineAllocationThreeplConfirmView: React.FC = () => {
                             <TextField fullWidth type="number" label="Sum of all 0.5ml syringes" value={consumableSums.zerofive} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
                         </Grid>
                         <Grid item xs={12} md={4}>
-                            <TextField fullWidth type="number" label="Sum of all droppers" value={consumableSums.dropper} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                            <TextField fullWidth type="number" label="Sum of bOPV droppers" value={consumableSums.bopv_dropper} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <TextField fullWidth type="number" label="Sum of Rota droppers" value={consumableSums.rota_dropper} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <TextField fullWidth type="number" label="Sum of all diluents" value={consumableSums.diluent} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
