@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -21,6 +21,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { toast } from 'react-toastify';
 import { useUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
 import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
+import { useFetchEHFDetailRoutes } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
 interface VaccineData {
   name: string;
@@ -29,8 +30,8 @@ interface VaccineData {
   vvmStage: string;
   batchNumber: string;
   expiryDate: string;
-  emptyVials: number;
-  unusedVials: number;
+  emptyVials: number | null;
+  unusedVials: number | null;
 }
 
 const VaccineAllocationMccoConfirmView: React.FC = () => {
@@ -44,6 +45,22 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
   const [safetyBoxesFilled, setSafetyBoxesFilled] = useState('');
   const [safetyBoxesEmpty, setSafetyBoxesEmpty] = useState(data?.safty_box_empty?.toString() || '');
   const [cceFunctionalStatus, setCceFunctionalStatus] = useState('');
+  const [contingencyEhfName, setContingencyEhfName] = useState('');
+
+  const { data: ehfsInLga = [] } = useFetchEHFDetailRoutes(data?.state || '', data?.lga || '');
+
+  const contingencyEhfs = useMemo(
+    () => ehfsInLga.filter((ehf: any) => ehf.id !== data?.ehf_id),
+    [ehfsInLga, data?.ehf_id]
+  );
+
+  const [sumZerofiveSyringe, setSumZerofiveSyringe] = useState<number | string>(data?.sum_zerofive_syringe ?? '');
+  const [sumBopvDropper, setSumBopvDropper] = useState<number | string>(data?.sum_bopv_dropper ?? '');
+  const [sumRotaDropper, setSumRotaDropper] = useState<number | string>(data?.sum_rota_dropper ?? '');
+  const [sumDiluent, setSumDiluent] = useState<number | string>(data?.sum_diluent ?? '');
+  const [sumTwomlSyringe, setSumTwomlSyringe] = useState<number | string>(data?.sum_twoml_syringe ?? '');
+  const [sumZerofivemlSyringe, setSumZerofivemlSyringe] = useState<number | string>(data?.sum_zerofiveml_syringe ?? '');
+  const [sumFivemlSyringe, setSumFivemlSyringe] = useState<number | string>(data?.sum_fiveml_syringe ?? '');
 
   // Helper function to format VVM stage
   const formatVvmStage = (stage: any) => {
@@ -86,19 +103,19 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
   };
 
   const [vaccines, setVaccines] = useState<VaccineData[]>([
-    { name: 'BCG', allocated: data?.dose_bcg_allocated || 0, received: null, vvmStage: originalScsValues.bcg.vvmStage, batchNumber: originalScsValues.bcg.batchNumber, expiryDate: originalScsValues.bcg.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'HepB', allocated: data?.dose_hepb_allocated || 0, received: null, vvmStage: originalScsValues.hepb.vvmStage, batchNumber: originalScsValues.hepb.batchNumber, expiryDate: originalScsValues.hepb.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'bOPV', allocated: data?.dose_bopv_allocated || 0, received: null, vvmStage: originalScsValues.bopv.vvmStage, batchNumber: originalScsValues.bopv.batchNumber, expiryDate: originalScsValues.bopv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'Penta', allocated: data?.dose_penta_allocated || 0, received: null, vvmStage: originalScsValues.penta.vvmStage, batchNumber: originalScsValues.penta.batchNumber, expiryDate: originalScsValues.penta.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'PCV', allocated: data?.dose_pcv_allocated || 0, received: null, vvmStage: originalScsValues.pcv.vvmStage, batchNumber: originalScsValues.pcv.batchNumber, expiryDate: originalScsValues.pcv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'IPV', allocated: data?.dose_ipv_allocated || 0, received: null, vvmStage: originalScsValues.ipv.vvmStage, batchNumber: originalScsValues.ipv.batchNumber, expiryDate: originalScsValues.ipv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'Measles', allocated: data?.dose_mea_allocated || 0, received: null, vvmStage: originalScsValues.mea.vvmStage, batchNumber: originalScsValues.mea.batchNumber, expiryDate: originalScsValues.mea.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'YF', allocated: data?.dose_yf_allocated || 0, received: null, vvmStage: originalScsValues.yf.vvmStage, batchNumber: originalScsValues.yf.batchNumber, expiryDate: originalScsValues.yf.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'TD', allocated: data?.dose_td_allocated || 0, received: null, vvmStage: originalScsValues.td.vvmStage, batchNumber: originalScsValues.td.batchNumber, expiryDate: originalScsValues.td.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: null, vvmStage: originalScsValues.mena.vvmStage, batchNumber: originalScsValues.mena.batchNumber, expiryDate: originalScsValues.mena.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: null, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: null, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate, emptyVials: 0, unusedVials: 0 },
-    { name: 'MR', allocated: data?.dose_mr_allocated || 0, received: null, vvmStage: originalScsValues.mr.vvmStage, batchNumber: originalScsValues.mr.batchNumber, expiryDate: originalScsValues.mr.expiryDate, emptyVials: 0, unusedVials: 0 },
+    { name: 'BCG', allocated: data?.dose_bcg_allocated || 0, received: null, vvmStage: originalScsValues.bcg.vvmStage, batchNumber: originalScsValues.bcg.batchNumber, expiryDate: originalScsValues.bcg.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'HepB', allocated: data?.dose_hepb_allocated || 0, received: null, vvmStage: originalScsValues.hepb.vvmStage, batchNumber: originalScsValues.hepb.batchNumber, expiryDate: originalScsValues.hepb.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'bOPV', allocated: data?.dose_bopv_allocated || 0, received: null, vvmStage: originalScsValues.bopv.vvmStage, batchNumber: originalScsValues.bopv.batchNumber, expiryDate: originalScsValues.bopv.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'Penta', allocated: data?.dose_penta_allocated || 0, received: null, vvmStage: originalScsValues.penta.vvmStage, batchNumber: originalScsValues.penta.batchNumber, expiryDate: originalScsValues.penta.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'PCV', allocated: data?.dose_pcv_allocated || 0, received: null, vvmStage: originalScsValues.pcv.vvmStage, batchNumber: originalScsValues.pcv.batchNumber, expiryDate: originalScsValues.pcv.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'IPV', allocated: data?.dose_ipv_allocated || 0, received: null, vvmStage: originalScsValues.ipv.vvmStage, batchNumber: originalScsValues.ipv.batchNumber, expiryDate: originalScsValues.ipv.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'Measles', allocated: data?.dose_mea_allocated || 0, received: null, vvmStage: originalScsValues.mea.vvmStage, batchNumber: originalScsValues.mea.batchNumber, expiryDate: originalScsValues.mea.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'YF', allocated: data?.dose_yf_allocated || 0, received: null, vvmStage: originalScsValues.yf.vvmStage, batchNumber: originalScsValues.yf.batchNumber, expiryDate: originalScsValues.yf.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'TD', allocated: data?.dose_td_allocated || 0, received: null, vvmStage: originalScsValues.td.vvmStage, batchNumber: originalScsValues.td.batchNumber, expiryDate: originalScsValues.td.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'MenA', allocated: data?.dose_mena_allocated || 0, received: null, vvmStage: originalScsValues.mena.vvmStage, batchNumber: originalScsValues.mena.batchNumber, expiryDate: originalScsValues.mena.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: null, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: null, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'MR', allocated: data?.dose_mr_allocated || 0, received: null, vvmStage: originalScsValues.mr.vvmStage, batchNumber: originalScsValues.mr.batchNumber, expiryDate: originalScsValues.mr.expiryDate, emptyVials: null, unusedVials: null },
   ]);
 
   if (!data) {
@@ -186,6 +203,11 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
 
     if (!cceFunctionalStatus) {
       toast.error('Please select CCE Functional Status');
+      return false;
+    }
+
+    if (cceFunctionalStatus === 'Non-functional' && !contingencyEhfName) {
+      toast.error('Please select a Contingency Equipped Health Facility');
       return false;
     }
 
@@ -314,6 +336,14 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       safty_box_filled: parseInt(safetyBoxesFilled) || 0,
       safty_box_empty: parseInt(safetyBoxesEmpty) || 0,
       cc_functional_status: cceFunctionalStatus || '',
+      contingency_ehf_id: cceFunctionalStatus === 'Non-functional' ? contingencyEhfName : null,
+      sum_zerofive_syringe: Number(sumZerofiveSyringe) || 0,
+      sum_bopv_dropper: Number(sumBopvDropper) || 0,
+      sum_rota_dropper: Number(sumRotaDropper) || 0,
+      sum_diluent: Number(sumDiluent) || 0,
+      sum_twoml_syringe: Number(sumTwomlSyringe) || 0,
+      sum_zerofiveml_syringe: Number(sumZerofivemlSyringe) || 0,
+      sum_fiveml_syringe: Number(sumFivemlSyringe) || 0,
     };
 
     // Check if all received quantities match allocated quantities
@@ -444,6 +474,32 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                 {data.lga || 'N/A'}
               </Typography>
             </Grid>
+
+            {data.contingency_ehf_id && (
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Contingency EHF
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={{ color: '#d32f2f', fontWeight: 600 }}>
+                  {data.contingency_ehf_id}
+                </Typography>
+              </Grid>
+            )}
+
+            {data.cc_functional_status && (
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  CCE Functional Status
+                </Typography>
+                <Typography
+                  variant="body1"
+                  gutterBottom
+                  sx={{ color: data.cc_functional_status === 'Non-functional' ? '#d32f2f' : '#2e7d32', fontWeight: 600 }}
+                >
+                  {data.cc_functional_status}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
 
           <Divider sx={{ my: 3 }} />
@@ -521,7 +577,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           fullWidth
                           label="Empty Vials"
                           type="number"
-                          value={vaccine.emptyVials || ''}
+                          value={vaccine.emptyVials ?? ''}
                           onChange={(e) => handleVaccineChange(actualIndex, 'emptyVials', e.target.value)}
                           onKeyDown={preventInvalidKeys}
                           inputProps={{ min: 0 }}
@@ -543,7 +599,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                           fullWidth
                           label="Physical Stock at Hand"
                           type="number"
-                          value={vaccine.unusedVials || ''}
+                          value={vaccine.unusedVials ?? ''}
                           onChange={(e) => handleVaccineChange(actualIndex, 'unusedVials', e.target.value)}
                           onKeyDown={preventInvalidKeys}
                           inputProps={{ min: 0 }}
@@ -569,25 +625,25 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
           </Typography>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of all 0.5ml syringes" value={data?.sum_zerofive_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of all 0.5ml syringes" value={sumZerofiveSyringe} onChange={(e) => setSumZerofiveSyringe(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of bOPV droppers" value={data?.sum_bopv_dropper || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of bOPV droppers" value={sumBopvDropper} onChange={(e) => setSumBopvDropper(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of Rota droppers" value={data?.sum_rota_dropper || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of Rota droppers" value={sumRotaDropper} onChange={(e) => setSumRotaDropper(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of all diluents" value={data?.sum_diluent || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of all diluents" value={sumDiluent} onChange={(e) => setSumDiluent(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of all 2ml syringes" value={data?.sum_twoml_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of all 2ml syringes" value={sumTwomlSyringe} onChange={(e) => setSumTwomlSyringe(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of all 0.05ml syringes" value={data?.sum_zerofiveml_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of all 0.05ml syringes" value={sumZerofivemlSyringe} onChange={(e) => setSumZerofivemlSyringe(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField fullWidth type="number" label="Sum of all 5ml syringes" value={data?.sum_fiveml_syringe || 0} InputProps={{ readOnly: true }} inputProps={{ min: 0 }} />
+              <TextField fullWidth type="number" label="Sum of all 5ml syringes" value={sumFivemlSyringe} onChange={(e) => setSumFivemlSyringe(e.target.value === '' ? '' : Number(e.target.value))} onKeyDown={preventInvalidKeys} inputProps={{ min: 0 }} />
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
@@ -606,6 +662,27 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
+            {cceFunctionalStatus === 'Non-functional' && (
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>Contingency Equipped Health Facility</InputLabel>
+                  <Select
+                    value={contingencyEhfName}
+                    onChange={(e) => setContingencyEhfName(e.target.value)}
+                    label="Contingency Equipped Health Facility"
+                  >
+                    <MenuItem value="">
+                      <em>Select facility</em>
+                    </MenuItem>
+                    {contingencyEhfs.map((ehf: any) => (
+                      <MenuItem key={ehf.id} value={ehf.name_of_ehf || ehf.ehf_name}>
+                        {ehf.name_of_ehf || ehf.ehf_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth

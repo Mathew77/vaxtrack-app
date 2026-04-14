@@ -344,6 +344,32 @@ const VaccineAllocationConfirmView: React.FC = () => {
                 {new Date(data.date_created).toLocaleString()}
               </Typography>
             </Grid>
+
+            {data.cc_functional_status && (
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  CCE Functional Status
+                </Typography>
+                <Typography
+                  variant="body1"
+                  gutterBottom
+                  sx={{ color: data.cc_functional_status === 'Non-functional' ? '#d32f2f' : '#2e7d32', fontWeight: 600 }}
+                >
+                  {data.cc_functional_status}
+                </Typography>
+              </Grid>
+            )}
+
+            {data.contingency_ehf_id && (
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Contingency EHF
+                </Typography>
+                <Typography variant="body1" gutterBottom sx={{ color: '#d32f2f', fontWeight: 600 }}>
+                  {data.contingency_ehf_id}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
 
           {/* Transfer Deficit Section - Only for MCCO when viewing */}

@@ -336,11 +336,10 @@ export default function VaccineView() {
       return;
     }
 
-    // Temporarily relaxed UHF requirement
-    // if (!selectedUhf) {
-    //   toast.error('Please select UHF.');
-    //   return;
-    // }
+    if (!selectedUhf) {
+      toast.error('Please select a UHF before proceeding.');
+      return;
+    }
 
     if (Object.keys(formDataCollection).length === 0) {
       toast.error('Please fill out at least one vaccine form before submitting.');
@@ -375,14 +374,10 @@ export default function VaccineView() {
       return;
     }
 
-    // Skip UHF validation for Conveyor since they work directly with EHF
-    let selectedUhfData: UHFType | undefined;
-    if (userRole !== 'conveyor') {
-      selectedUhfData = allUhf.find((uhf: UHFType) => uhf.id === selectedUhf);
-      if (!selectedUhfData) {
-        toast.error('Selected UHF not found. Please select a valid UHF.');
-        return;
-      }
+    const selectedUhfData = allUhf.find((uhf: UHFType) => uhf.id === selectedUhf);
+    if (!selectedUhfData) {
+      toast.error('Selected UHF not found. Please select a valid UHF.');
+      return;
     }
 
     let newStatus = status;
@@ -400,13 +395,7 @@ export default function VaccineView() {
     const selectedEhfData = filteredEhf.find((ehf: any) => ehf.id === selectedEhf);
 
     const vaccines_allocation_detail = Object.entries(formDataCollection)
-      .filter(([_, data]) => {
-        // For Conveyor, only require ehf_id. For others, require both ehf_id and uhf_id
-        if (userRole === 'conveyor') {
-          return data && Object.keys(data).length > 0 && data.ehf_id;
-        }
-        return data && Object.keys(data).length > 0 && data.ehf_id && data.uhf_id;
-      })
+      .filter(([_, data]) => data && Object.keys(data).length > 0 && data.ehf_id && data.uhf_id)
       .map(([type, data]) => {
         const { status, ...allData } = data;
 
@@ -641,14 +630,14 @@ export default function VaccineView() {
                   isUpdate={isUpdate}
                   isHealthFacilitySelected={
                     isView || isUpdate ||
-                    (!!selectedEhf && (userRole === 'conveyor' || !allUhf.length || !!selectedUhf))
+                    (!!selectedEhf && !isUhfLoading && !!selectedUhf)
                   }
                 />
               </Box>
             )}
 
             {/* MFA Code Input - Show when user needs to submit or update */}
-            {!isView && isLastTab && selectedEhf && (userRole === 'conveyor' || selectedUhf) && (
+            {!isView && isLastTab && selectedEhf && !isUhfLoading && !!selectedUhf && (
               <Box sx={{ mb: 3, width: "50%" }}>
                 <TextField
                   label="MFA Code"
