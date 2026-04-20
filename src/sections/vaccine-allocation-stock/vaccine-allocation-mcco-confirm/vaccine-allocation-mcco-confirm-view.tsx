@@ -19,7 +19,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { toast } from 'react-toastify';
-import { useUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
+import { useUpdateAllocationStatus, useBulkUpdateAllocationStatus } from 'src/hooks/apis/upload/upload-hook';
 import { preventInvalidKeys } from 'src/utils/preventInvalidkeys';
 import { useFetchEHFDetailRoutes } from 'src/hooks/apis/ehf-uhf/ehf-hooks';
 
@@ -37,9 +37,10 @@ interface VaccineData {
 const VaccineAllocationMccoConfirmView: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { data, userRole } = location.state || {};
+  const { data, userRole, batchFacilities = [] } = location.state || {};
 
   const updateStatusMutation = useUpdateAllocationStatus();
+  const bulkUpdateMutation = useBulkUpdateAllocationStatus();
 
   const [mfaCode, setMfaCode] = useState('');
   const [safetyBoxesFilled, setSafetyBoxesFilled] = useState('');
@@ -346,35 +347,103 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       sum_fiveml_syringe: Number(sumFivemlSyringe) || 0,
     };
 
-    // Check if all received quantities match allocated quantities
-    // If ALL match → Status 4 (Completed)
-    // If ANY don't match → Status 3 (Pending LCS Review)
-    const hasDiscrepancies = vaccines.some(v => {
-      // Only check vaccines that have allocations
+    // Build a map of current facility's received values by vaccine key
+    const currentReceivedMap: Record<string, number> = {};
+    vaccines.forEach((v) => {
+      const key = vaccineFieldMap[v.name];
+      if (key) {
+        currentReceivedMap[key] = typeof v.received === 'string' ? parseInt(v.received, 10) || 0 : Number(v.received) || 0;
+      }
+    });
+
+    const vaccineKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv', 'mr'];
+
+    // Other facilities in the same batch (excluding current)
+    const otherFacilities = batchFacilities.filter((f: any) => f.id !== data.id);
+
+    // This is the last confirmation if no other facility is still at status 2
+    const isLastConfirmation = otherFacilities.length === 0 || otherFacilities.every((f: any) => f.status !== 2);
+
+    let newStatus: number;
+    let successMessage: string;
+
+    // Per-facility check (used as fallback and for non-last confirmations)
+    const perFacilityHasDiscrepancy = vaccines.some((v) => {
       if (v.allocated > 0) {
-        // CRITICAL: Convert both to numbers for comparison
-        const allocatedNum = Number(v.allocated);
         const receivedNum = typeof v.received === 'string' ? parseInt(v.received, 10) : Number(v.received);
-        const mismatch = receivedNum !== allocatedNum;
-        return mismatch;
+        return receivedNum !== Number(v.allocated);
       }
       return false;
     });
 
-    const newStatus = hasDiscrepancies ? 3 : 4;
-    const successMessage = hasDiscrepancies
-      ? 'Deficit detected. Please transfer the deficit.'
-      : 'All vaccines received match allocation! Status: Completed.';
+    if (isLastConfirmation) {
+      // Check batch totals across all facilities
+      let batchHasDiscrepancy = false;
 
+      for (const key of vaccineKeys) {
+        const batchTotalAllocated = batchFacilities.length > 0
+          ? batchFacilities.reduce((sum: number, f: any) => sum + (Number(f[`dose_${key}_allocated`]) || 0), 0)
+          : Number(data[`dose_${key}_allocated`]) || 0;
+
+        if (batchTotalAllocated === 0) continue;
+
+        const batchTotalReceived = batchFacilities.length > 0
+          ? batchFacilities.reduce((sum: number, f: any) => {
+              if (f.id === data.id) return sum + (currentReceivedMap[key] || 0);
+              return sum + (Number(f[`dose_${key}_received`]) || 0);
+            }, 0)
+          : (currentReceivedMap[key] || 0);
+
+        if (batchTotalReceived !== batchTotalAllocated) {
+          batchHasDiscrepancy = true;
+          break;
+        }
+      }
+
+      if (!batchHasDiscrepancy) {
+        newStatus = 4;
+        successMessage = 'Batch total received matches allocation! Status: Completed.';
+      } else {
+        newStatus = perFacilityHasDiscrepancy ? 3 : 4;
+        successMessage = perFacilityHasDiscrepancy
+          ? 'Deficit detected. Please transfer the deficit.'
+          : 'All vaccines received match allocation! Status: Completed.';
+      }
+    } else {
+      // Not the last facility — use per-facility check
+      newStatus = perFacilityHasDiscrepancy ? 3 : 4;
+      successMessage = perFacilityHasDiscrepancy
+        ? 'Deficit detected. Please transfer the deficit.'
+        : 'All vaccines received match allocation! Status: Completed.';
+    }
+
+    // If this is the last confirmation and batch balances, upgrade any status-3 facilities to completed
+    const facilitiesToComplete = (newStatus === 4 && isLastConfirmation)
+      ? otherFacilities.filter((f: any) => f.status === 3)
+      : [];
 
     updateStatusMutation.mutate(
       { id: data.id, status: newStatus, data: updatePayload },
       {
         onSuccess: () => {
-          toast.success(successMessage);
-          navigate('/vaccine-allocation-batch-detail', {
-            state: { batch_no: data.batch_no }
-          });
+          if (facilitiesToComplete.length > 0) {
+            bulkUpdateMutation.mutate(
+              { allocations: facilitiesToComplete, status: 4 },
+              {
+                onSuccess: () => {
+                  toast.success(successMessage);
+                  navigate('/vaccine-allocation-batch-detail', { state: { batch_no: data.batch_no } });
+                },
+                onError: () => {
+                  toast.success(successMessage);
+                  navigate('/vaccine-allocation-batch-detail', { state: { batch_no: data.batch_no } });
+                },
+              }
+            );
+          } else {
+            toast.success(successMessage);
+            navigate('/vaccine-allocation-batch-detail', { state: { batch_no: data.batch_no } });
+          }
         },
         onError: () => {
           toast.error('Failed to confirm. Please try again.');

@@ -198,7 +198,7 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
 
     const handleMccoConfirm = (data: any) => {
         navigate('/vaccine-allocation-mcco-confirm', {
-            state: { data: data, userRole: userRole },
+            state: { data: data, userRole: userRole, batchFacilities: enrichedData },
         });
     };
 

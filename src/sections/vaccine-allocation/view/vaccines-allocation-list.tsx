@@ -84,28 +84,29 @@ const VaccineAllocationList: React.FC = () => {
   const isThreePL = userRole === 'threepl';
   const isConveyor = userRole === 'conveyor';
 
-  // Get Conveyor's assigned EHF IDs from sessionStorage
-  const conveyorAssignedEhfs = useMemo(() => {
+  // Get the first valid EHF ID to fetch state — 1 API call instead of 300+
+  const firstEhfId = useMemo(() => {
     if (!isConveyor) return [];
     try {
       const ehfListData = sessionStorage.getItem('ehf_list');
-      if (ehfListData) {
-        const parsed = JSON.parse(ehfListData);
-        return Array.isArray(parsed) ? parsed : [];
+      if (!ehfListData) return [];
+      const parsed = JSON.parse(ehfListData);
+      if (Array.isArray(parsed)) {
+        const first = parsed.find((id: any) => typeof id === 'string' && id.includes('-'));
+        return first ? [first] : [];
       }
-    } catch (error) {
-      console.error('Error parsing ehf_list:', error);
+    } catch {
+      return [];
     }
     return [];
   }, [isConveyor]);
 
-  // Fetch real EHF data to get the actual state name
-  const { data: conveyorEhfs = [], isLoading: isConveyorLoading } = useFetchEHFsByIds(isConveyor ? conveyorAssignedEhfs : []);
+  const { data: firstEhfData = [] } = useFetchEHFsByIds(firstEhfId);
 
   const conveyorState = useMemo(() => {
-    if (!isConveyor || conveyorEhfs.length === 0) return null;
-    return conveyorEhfs[0]?.state || null;
-  }, [isConveyor, conveyorEhfs]);
+    if (!isConveyor || firstEhfData.length === 0) return null;
+    return firstEhfData[0]?.state || null;
+  }, [isConveyor, firstEhfData]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -115,11 +116,6 @@ const VaccineAllocationList: React.FC = () => {
 
     if (!allocationList || allocationList.length === 0) {
         return [];
-    }
-
-    // Wait for conveyor's state to load before filtering
-    if (isConveyor && isConveyorLoading) {
-      return [];
     }
 
     const processed = allocationList
@@ -167,7 +163,7 @@ const VaccineAllocationList: React.FC = () => {
       .sort((a, b) => (b.id || 0) - (a.id || 0));
 
     return processed;
-  }, [allocationList, uhfList, isConveyor, conveyorState, isConveyorLoading]);
+  }, [allocationList, uhfList, isConveyor, conveyorState]);
 
   interface DisplayStatus {
     [key: number]: string;
@@ -359,7 +355,7 @@ const VaccineAllocationList: React.FC = () => {
             customRightButtonCallBackFunction={handleAddNew}
             actionMenuItems={allocationItem}
             showDownloadButton={false}
-            loading={isLoading || isFetching || (isConveyor && isConveyorLoading)}
+            loading={isLoading || isFetching}
             getRowStyles={(row: any) => {
               // Highlight rows with status 6 (Quantity Allocated by EHF)
               if (row.status === 6) {

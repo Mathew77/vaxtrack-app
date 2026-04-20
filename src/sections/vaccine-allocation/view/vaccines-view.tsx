@@ -140,17 +140,20 @@ export default function VaccineView() {
 
   const userState = userStateFromAssignedId || userStateFromRoleList;
 
-  // For conveyor: first fetch their assigned EHFs by ID to reliably determine their state
+  // Fetch only the first assigned EHF to get the conveyor's state — 1 API call instead of 300+
   const isConveyor = userRole === 'conveyor';
-  const { data: ehfsByIds = [], isLoading: isEhfByIdsLoading } = useFetchEHFsByIds(
-    isConveyor ? userAssignedEhfs : []
-  );
+  const firstConveyorEhfId = useMemo(() => {
+    if (!isConveyor) return [];
+    const first = userAssignedEhfs.find((id: any) => typeof id === 'string' && id.includes('-'));
+    return first ? [first] : [];
+  }, [isConveyor, userAssignedEhfs]);
 
-  // Derive the real state from the fetched EHF data (ID prefix like "xxx" is unreliable)
+  const { data: firstConveyorEhfData = [] } = useFetchEHFsByIds(firstConveyorEhfId);
+
   const conveyorState = useMemo(() => {
-    if (!isConveyor || ehfsByIds.length === 0) return '';
-    return ehfsByIds[0]?.state || '';
-  }, [isConveyor, ehfsByIds]);
+    if (!isConveyor || firstConveyorEhfData.length === 0) return '';
+    return firstConveyorEhfData[0]?.state || '';
+  }, [isConveyor, firstConveyorEhfData]);
 
   // Fetch ALL EHFs in the state — used for LGA dropdown
   const effectiveState = isConveyor ? conveyorState : (userState || '');
@@ -166,7 +169,7 @@ export default function VaccineView() {
   );
 
   const allEhf = allEhfByState;
-  const isEhfLoading = isConveyor ? (isEhfByIdsLoading || isEhfByStateLoading) : isEhfByStateLoading;
+  const isEhfLoading = isEhfByStateLoading;
   const isAnyEhfLoading = isEhfLoading || (!!selectedLGA && isEhfByLgaLoading);
 
   // Filter EHF based on user role — use LGA-filtered API data when LGA is selected
@@ -668,7 +671,7 @@ export default function VaccineView() {
                   color="primary"
                   size="large"
                   onClick={isLastTab ? handleSubmit : handleNext}
-                  disabled={isView || createAllocation.isPending}
+                  disabled={isView || createAllocation.isPending || (isLastTab && Object.keys(formDataCollection).length === 0)}
                 >
                   {isLastTab ?
                     createAllocation.isPending ?
