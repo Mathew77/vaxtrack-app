@@ -59,6 +59,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
     mena: data?.mena_vvm_stage_threepl || '',
     rota: data?.rota_vvm_stage_threepl || '',
     hpv: data?.hpv_vvm_stage_threepl || '',
+    mr: data?.mr_vvm_stage_threepl || '',
+    malaria: data?.malaria_vvm_stage_threepl || '',
   });
 
   const handleVvmChange = (vaccineKey: string, value: string) => {
@@ -196,6 +198,10 @@ const VaccineAllocationConfirmView: React.FC = () => {
       dose_rota_allocated: data.dose_rota_allocated,
       dose_hpv_actual: data.dose_hpv_actual,
       dose_hpv_allocated: data.dose_hpv_allocated,
+      dose_mr_actual: data.dose_mr_actual,
+      dose_mr_allocated: data.dose_mr_allocated,
+      dose_malaria_actual: data.dose_malaria_actual,
+      dose_malaria_allocated: data.dose_malaria_allocated,
       // Mark as SLWG confirmed if applicable
       slwg_confirmed: confirmToEHF ? true : data.slwg_confirmed,
       // Include VVM stages if 3PL is confirming - only for vaccines with allocations > 0
@@ -212,6 +218,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
         ...(data.dose_mena_allocated > 0 && { mena_vvm_stage_threepl: vvmStages.mena || '' }),
         ...(data.dose_rota_allocated > 0 && { rota_vvm_stage_threepl: vvmStages.rota || '' }),
         ...(data.dose_hpv_allocated > 0 && { hpv_vvm_stage_threepl: vvmStages.hpv || '' }),
+        ...(data.dose_mr_allocated > 0 && { mr_vvm_stage_threepl: vvmStages.mr || '' }),
+        ...(data.dose_malaria_allocated > 0 && { malaria_vvm_stage_threepl: vvmStages.malaria || '' }),
       }),
     };
 
@@ -249,6 +257,8 @@ const VaccineAllocationConfirmView: React.FC = () => {
     { name: 'MenA', key: 'mena', allocated: data.dose_mena_allocated, actual: data.dose_mena_actual, received: data.dose_mena_received, returned: data.dose_mena_return, vvmStage: getVvmStage(data.mena_vvm_stage_ehf, data.mena_vvm_stage_scs), vvmStage3PL: data.mena_vvm_stage_threepl, batchNumber: getBatchNumber(data.mena_batch_number, data.mena_batch_number_scs), expiryDate: getExpiryDate(data.mena_expire_date, data.mena_expire_date_scs) },
     { name: 'Rota', key: 'rota', allocated: data.dose_rota_allocated, actual: data.dose_rota_actual, received: data.dose_rota_received, returned: data.dose_rota_return, vvmStage: getVvmStage(data.rota_vvm_stage_ehf, data.rota_vvm_stage_scs), vvmStage3PL: data.rota_vvm_stage_threepl, batchNumber: getBatchNumber(data.rota_batch_number, data.rota_batch_number_scs), expiryDate: getExpiryDate(data.rota_expire_date, data.rota_expire_date_scs) },
     { name: 'HPV', key: 'hpv', allocated: data.dose_hpv_allocated, actual: data.dose_hpv_actual, received: data.dose_hpv_received, returned: data.dose_hpv_return, vvmStage: getVvmStage(data.hpv_vvm_stage_ehf, data.hpv_vvm_stage_scs), vvmStage3PL: data.hpv_vvm_stage_threepl, batchNumber: getBatchNumber(data.hpv_batch_number, data.hpv_batch_number_scs), expiryDate: getExpiryDate(data.hpv_expire_date, data.hpv_expire_date_scs) },
+    { name: 'MR', key: 'mr', allocated: data.dose_mr_allocated, actual: data.dose_mr_actual, received: data.dose_mr_received, returned: data.dose_mr_return, vvmStage: getVvmStage(data.mr_vvm_stage_ehf, data.mr_vvm_stage_scs), vvmStage3PL: data.mr_vvm_stage_threepl, batchNumber: getBatchNumber(data.mr_batch_number, data.mr_batch_number_scs), expiryDate: getExpiryDate(data.mr_expire_date, data.mr_expire_date_scs) },
+    { name: 'Malaria', key: 'malaria', allocated: data.dose_malaria_allocated, actual: data.dose_malaria_actual, received: data.dose_malaria_received, returned: data.dose_malaria_return, vvmStage: getVvmStage(data.malaria_vvm_stage_ehf, data.malaria_vvm_stage_scs), vvmStage3PL: data.malaria_vvm_stage_threepl, batchNumber: getBatchNumber(data.malaria_batch_number, data.malaria_batch_number_scs), expiryDate: getExpiryDate(data.malaria_expire_date, data.malaria_expire_date_scs) },
   ];
 
   // Check if 3PL is confirming to show VVM input fields

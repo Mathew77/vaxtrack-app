@@ -61,6 +61,8 @@ const VACCINE_TYPES = [
     { key: 'mena', label: 'MenA', doseKey: 'dose_mena_allocated' },
     { key: 'rota', label: 'Rota', doseKey: 'dose_rota_allocated' },
     { key: 'hpv', label: 'HPV', doseKey: 'dose_hpv_allocated' },
+    { key: 'mr', label: 'MR', doseKey: 'dose_mr_allocated' },
+    { key: 'malaria', label: 'Malaria', doseKey: 'dose_malaria_allocated' },
 ];
 
 export const VaccineAllocationBatchDetailView: React.FC = () => {
@@ -88,6 +90,8 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
         mena: 1,
         rota: 1,
         hpv: 1,
+        mr: 1,
+        malaria: 1,
     });
 
     const userRole = useMemo(() => sessionStorage.getItem('userRole') || '', []);
@@ -523,6 +527,17 @@ export const VaccineAllocationBatchDetailView: React.FC = () => {
                     <StackedVaccineCell
                         max={row.original.dose_mr_actual}
                         allocated={row.original.dose_mr_allocated}
+                    />
+                ),
+            },
+            {
+                accessorKey: 'dose_malaria',
+                header: 'Malaria',
+                size: 95,
+                Cell: ({ row }: any) => (
+                    <StackedVaccineCell
+                        max={row.original.dose_malaria_actual}
+                        allocated={row.original.dose_malaria_allocated}
                     />
                 ),
             },

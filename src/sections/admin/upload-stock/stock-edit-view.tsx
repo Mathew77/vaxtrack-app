@@ -34,6 +34,7 @@ export default function StockEditView() {
     dose_mena: '',
     dose_rota: '',
     dose_hpv: '',
+    dose_malaria: '',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,7 @@ export default function StockEditView() {
         dose_mena: String(stockData.dose_mena || 0),
         dose_rota: String(stockData.dose_rota || 0),
         dose_hpv: String(stockData.dose_hpv || 0),
+        dose_malaria: String(stockData.dose_malaria || 0),
       });
     }
   }, [stockData]);
@@ -85,6 +87,7 @@ export default function StockEditView() {
         dose_mena: parseInt(formData.dose_mena) || 0,
         dose_rota: parseInt(formData.dose_rota) || 0,
         dose_hpv: parseInt(formData.dose_hpv) || 0,
+        dose_malaria: parseInt(formData.dose_malaria) || 0,
       };
 
       await updateMutation.mutateAsync(updateData);
@@ -315,6 +318,17 @@ export default function StockEditView() {
                 label="HPV"
                 value={formData.dose_hpv}
                 onChange={(e) => handleInputChange('dose_hpv', e.target.value)}
+                disabled={isReadOnly}
+                inputProps={{ min: 0 }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Malaria"
+                value={formData.dose_malaria}
+                onChange={(e) => handleInputChange('dose_malaria', e.target.value)}
                 disabled={isReadOnly}
                 inputProps={{ min: 0 }}
               />

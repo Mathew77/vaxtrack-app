@@ -172,6 +172,11 @@ const UploadList: React.FC = () => {
         size: 80,
       },
       {
+        accessorKey: 'dose_malaria',
+        header: 'Malaria',
+        size: 80,
+      },
+      {
         accessorKey: 'total_vaccine_storage_volume_utilized',
         header: 'Storage Used (L)',
         size: 130,

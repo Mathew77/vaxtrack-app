@@ -41,6 +41,7 @@ const VACCINE_TYPES = [
     { key: 'rota', label: 'Rota', doseKey: 'dose_rota_allocated' },
     { key: 'hpv', label: 'HPV', doseKey: 'dose_hpv_allocated' },
     { key: 'mr', label: 'MR', doseKey: 'dose_mr_allocated' },
+    { key: 'malaria', label: 'Malaria', doseKey: 'dose_malaria_allocated' },
 ];
 
 const VaccineAllocationThreeplConfirmView: React.FC = () => {
@@ -64,6 +65,7 @@ const VaccineAllocationThreeplConfirmView: React.FC = () => {
         rota: 'Usable',
         hpv: 'Usable',
         mr: 'Usable',
+        malaria: 'Usable',
     });
 
     // Read pre-computed sum fields from the first allocation (batch-level totals saved on each item)

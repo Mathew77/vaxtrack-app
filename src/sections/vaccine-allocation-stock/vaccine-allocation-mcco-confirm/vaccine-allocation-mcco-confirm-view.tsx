@@ -101,6 +101,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     rota: { vvmStage: formatVvmStage(data?.rota_vvm_stage_scs), batchNumber: data?.rota_batch_number_scs || '', expiryDate: formatDate(data?.rota_expire_date_scs) },
     hpv: { vvmStage: formatVvmStage(data?.hpv_vvm_stage_scs), batchNumber: data?.hpv_batch_number_scs || '', expiryDate: formatDate(data?.hpv_expire_date_scs) },
     mr: { vvmStage: formatVvmStage(data?.mr_vvm_stage_scs), batchNumber: data?.mr_batch_number_scs || '', expiryDate: formatDate(data?.mr_expire_date_scs) },
+    malaria: { vvmStage: formatVvmStage(data?.malaria_vvm_stage_scs), batchNumber: data?.malaria_batch_number_scs || '', expiryDate: formatDate(data?.malaria_expire_date_scs) },
   };
 
   const [vaccines, setVaccines] = useState<VaccineData[]>([
@@ -117,6 +118,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     { name: 'Rota', allocated: data?.dose_rota_allocated || 0, received: null, vvmStage: originalScsValues.rota.vvmStage, batchNumber: originalScsValues.rota.batchNumber, expiryDate: originalScsValues.rota.expiryDate, emptyVials: null, unusedVials: null },
     { name: 'HPV', allocated: data?.dose_hpv_allocated || 0, received: null, vvmStage: originalScsValues.hpv.vvmStage, batchNumber: originalScsValues.hpv.batchNumber, expiryDate: originalScsValues.hpv.expiryDate, emptyVials: null, unusedVials: null },
     { name: 'MR', allocated: data?.dose_mr_allocated || 0, received: null, vvmStage: originalScsValues.mr.vvmStage, batchNumber: originalScsValues.mr.batchNumber, expiryDate: originalScsValues.mr.expiryDate, emptyVials: null, unusedVials: null },
+    { name: 'Malaria', allocated: data?.dose_malaria_allocated || 0, received: null, vvmStage: originalScsValues.malaria.vvmStage, batchNumber: originalScsValues.malaria.batchNumber, expiryDate: originalScsValues.malaria.expiryDate, emptyVials: null, unusedVials: null },
   ]);
 
   if (!data) {
@@ -160,6 +162,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
     'Rota': 10,
     'HPV': 1,
     'MR': 10,
+    'Malaria': 10,
   };
 
   const validateForm = () => {
@@ -252,12 +255,14 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       'Rota': 'rota',
       'HPV': 'hpv',
       'MR': 'mr',
+      'Malaria': 'malaria',
     };
 
     // Build vaccine data with received amounts, VVM stages, batch numbers, and expiry dates
     // Logic: Only save fields to EHF that MCCO actually changed from SCS values
     const vaccineData: any = {};
-    const scsKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv', 'mr'];
+    const scsKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv', 'mr', 'malaria'];
+    // note: 'malaria' key maps to originalScsValues.malaria and vaccineFieldMap['Malaria'] = 'malaria'
 
     vaccines.forEach((v, idx) => {
       const fieldName = vaccineFieldMap[v.name];
@@ -331,6 +336,8 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       dose_hpv_allocated: data.dose_hpv_allocated,
       dose_mr_actual: data.dose_mr_actual,
       dose_mr_allocated: data.dose_mr_allocated,
+      dose_malaria_actual: data.dose_malaria_actual,
+      dose_malaria_allocated: data.dose_malaria_allocated,
       // Add vaccine data (received, vvm_stage, batch_number, expire_date)
       ...vaccineData,
       mcco_mfa_code: mfaCode,
@@ -356,7 +363,7 @@ const VaccineAllocationMccoConfirmView: React.FC = () => {
       }
     });
 
-    const vaccineKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv', 'mr'];
+    const vaccineKeys = ['bcg', 'hepb', 'bopv', 'penta', 'pcv', 'ipv', 'mea', 'yf', 'td', 'mena', 'rota', 'hpv', 'mr', 'malaria'];
 
     // Other facilities in the same batch (excluding current)
     const otherFacilities = batchFacilities.filter((f: any) => f.id !== data.id);

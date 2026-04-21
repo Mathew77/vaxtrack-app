@@ -291,6 +291,7 @@ export const useBulkUpdateAllocationStatus = () => {
           if (allocation.dose_mena_allocated > 0) updateData.mena_vvm_stage_threepl = allocationVvmStages.mena || '';
           if (allocation.dose_rota_allocated > 0) updateData.rota_vvm_stage_threepl = allocationVvmStages.rota || '';
           if (allocation.dose_hpv_allocated > 0) updateData.hpv_vvm_stage_threepl = allocationVvmStages.hpv || '';
+          if ((allocation.dose_malaria_allocated || 0) > 0) updateData.malaria_vvm_stage_threepl = allocationVvmStages.malaria || '';
 
           const response = await apiHelper.putResource<any>(
             `${url}v1/vaccine-allocation-stock/${allocation.id}/`,

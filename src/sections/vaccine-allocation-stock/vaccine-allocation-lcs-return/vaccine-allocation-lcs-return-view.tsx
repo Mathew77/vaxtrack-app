@@ -124,6 +124,20 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
       difference: Math.max(0, (data?.dose_hpv_allocated || 0) - (data?.dose_hpv_received || 0)),
       returned: 0,
     },
+    {
+      name: 'MR',
+      allocated: data?.dose_mr_allocated || 0,
+      received: data?.dose_mr_received || 0,
+      difference: Math.max(0, (data?.dose_mr_allocated || 0) - (data?.dose_mr_received || 0)),
+      returned: 0,
+    },
+    {
+      name: 'Malaria',
+      allocated: data?.dose_malaria_allocated || 0,
+      received: data?.dose_malaria_received || 0,
+      difference: Math.max(0, (data?.dose_malaria_allocated || 0) - (data?.dose_malaria_received || 0)),
+      returned: 0,
+    },
   ]);
 
   if (!data) {
@@ -186,6 +200,8 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
       'MenA': 'mena',
       'Rota': 'rota',
       'HPV': 'hpv',
+      'MR': 'mr',
+      'Malaria': 'malaria',
     };
 
     // Build vaccine return data
@@ -231,6 +247,10 @@ const VaccineAllocationLcsReturnView: React.FC = () => {
       dose_rota_allocated: data.dose_rota_allocated,
       dose_hpv_actual: data.dose_hpv_actual,
       dose_hpv_allocated: data.dose_hpv_allocated,
+      dose_mr_actual: data.dose_mr_actual,
+      dose_mr_allocated: data.dose_mr_allocated,
+      dose_malaria_actual: data.dose_malaria_actual,
+      dose_malaria_allocated: data.dose_malaria_allocated,
       // Add vaccine return data
       ...vaccineReturnData,
     };

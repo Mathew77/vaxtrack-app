@@ -12,6 +12,8 @@ const REPORTS = [
   { value: 'safety-boxes-retrieved', label: 'Safety Boxes Retrieved Report' },
   { value: 'non-functional-ehf', label: 'Non-Functional EHF During Delivery Report' },
   { value: 'functional-ehf-vaccine-received', label: 'Functional EHF Vaccine Received Report' },
+  { value: 'delivery-completed', label: 'Total Vaccine Delivery Completed Report' },
+  { value: 'vaccine-deficit', label: 'Total Vaccine Deficit Report' },
 ];
 
 const ReportsSections: React.FC = () => {

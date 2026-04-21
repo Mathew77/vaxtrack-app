@@ -83,6 +83,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 rota: (acc.rota || 0) + (facility.stockData?.dose_rota || 0),
                 hpv: (acc.hpv || 0) + (facility.stockData?.dose_hpv || 0),
                 mr: (acc.mr || 0) + (facility.stockData?.mr || 0),
+                malaria: (acc.malaria || 0) + (facility.stockData?.dose_malaria || 0),
             };
         }, {});
     }, [selectedFacilities]);
@@ -101,7 +102,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         dose_mena: '',
         dose_rota: '',
         dose_hpv: '',
-        dose_mr: ''
+        dose_mr: '',
+        dose_malaria: '',
     });
 
     // Validation errors state
@@ -131,6 +133,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         dose_rota: { vvm_stage: '', batch_number: '', expire_date: '' },
         dose_hpv: { vvm_stage: '', batch_number: '', expire_date: '' },
         dose_mr: { vvm_stage: '', batch_number: '', expire_date: '' },
+        dose_malaria: { vvm_stage: '', batch_number: '', expire_date: '' },
     });
 
     // Consumables state for each vaccine (diluents, syringes, droppers)
@@ -172,6 +175,10 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         mr_diluent: '',
         mr_syringe_05ml: '',
         mr_syringe_5ml: '',
+        // Malaria consumables
+        mal_diluent: '',
+        mal_syringe_05ml: '',
+        mal_syringe_2ml: '',
     });
 
     // Handle consumables input change
@@ -234,9 +241,11 @@ const VaccineAllocationBulkFormView: React.FC = () => {
         totalSyringes += parseInt(consumablesData.mena_syringe_05ml) || 0;
         totalSyringes += parseInt(consumablesData.hpv_syringe_05ml) || 0;
         totalSyringes += parseInt(consumablesData.mr_syringe_05ml) || 0;
+        totalSyringes += parseInt(consumablesData.mal_syringe_05ml) || 0;
 
         // Add all reconstitution syringes (2ml, 5ml)
         totalSyringes += parseInt(consumablesData.bcg_syringe_2ml) || 0;
+        totalSyringes += parseInt(consumablesData.mal_syringe_2ml) || 0;
         totalSyringes += parseInt(consumablesData.mea_syringe_5ml) || 0;
         totalSyringes += parseInt(consumablesData.yf_syringe_5ml) || 0;
         totalSyringes += parseInt(consumablesData.mena_syringe_5ml) || 0;
@@ -262,7 +271,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
             (parseInt(consumablesData.td_syringe_05ml) || 0) +
             (parseInt(consumablesData.mena_syringe_05ml) || 0) +
             (parseInt(consumablesData.hpv_syringe_05ml) || 0) +
-            (parseInt(consumablesData.mr_syringe_05ml) || 0)
+            (parseInt(consumablesData.mr_syringe_05ml) || 0) +
+            (parseInt(consumablesData.mal_syringe_05ml) || 0)
         );
     }, [consumablesData]);
 
@@ -283,13 +293,17 @@ const VaccineAllocationBulkFormView: React.FC = () => {
             (parseInt(consumablesData.mea_diluent) || 0) +
             (parseInt(consumablesData.yf_diluent) || 0) +
             (parseInt(consumablesData.mena_diluent) || 0) +
-            (parseInt(consumablesData.mr_diluent) || 0)
+            (parseInt(consumablesData.mr_diluent) || 0) +
+            (parseInt(consumablesData.mal_diluent) || 0)
         );
     }, [consumablesData]);
 
     // Sum of all 2ml syringes
     const total2mlSyringes = useMemo(() => {
-        return (parseInt(consumablesData.bcg_syringe_2ml) || 0);
+        return (
+            (parseInt(consumablesData.bcg_syringe_2ml) || 0) +
+            (parseInt(consumablesData.mal_syringe_2ml) || 0)
+        );
     }, [consumablesData]);
 
     // Sum of all 0.05ml syringes (BCG)
@@ -474,8 +488,17 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                     setConsumablesData(prev => ({
                         ...prev,
                         mr_diluent: vials.toString(),
-                        mr_syringe_5ml: vials.toString(), // Reconstitution syringe = diluent
-                        mr_syringe_05ml: numValue.toString(), // Administration syringe = allocation
+                        mr_syringe_5ml: vials.toString(),
+                        mr_syringe_05ml: numValue.toString(),
+                    }));
+                    break;
+
+                case 'dose_malaria':
+                    setConsumablesData(prev => ({
+                        ...prev,
+                        mal_diluent: vials.toString(),
+                        mal_syringe_2ml: vials.toString(),
+                        mal_syringe_05ml: numValue.toString(),
                     }));
                     break;
             }
@@ -582,6 +605,15 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                         mr_syringe_05ml: '',
                     }));
                     break;
+
+                case 'dose_malaria':
+                    setConsumablesData(prev => ({
+                        ...prev,
+                        mal_diluent: '',
+                        mal_syringe_2ml: '',
+                        mal_syringe_05ml: '',
+                    }));
+                    break;
             }
         }
     };
@@ -642,6 +674,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
             dose_rota: 10,
             dose_hpv: 1,
             dose_mr: 5,
+            dose_malaria: 10,
         };
         return multiples[vaccineKey] || 1;
     };
@@ -742,6 +775,7 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 const rotaAllocated = calcAllocation(facility.stockData?.dose_rota || 0, totalMaxStock.rota || 0, parseInt(allocationData.dose_rota) || 0, 'dose_rota');
                 const hpvAllocated = calcAllocation(facility.stockData?.dose_hpv || 0, totalMaxStock.hpv || 0, parseInt(allocationData.dose_hpv) || 0, 'dose_hpv');
                 const mrAllocated = calcAllocation(facility.stockData?.mr || 0, totalMaxStock.mr || 0, parseInt(allocationData.dose_mr) || 0, 'dose_mr');
+                const malariaAllocated = calcAllocation(facility.stockData?.dose_malaria || 0, totalMaxStock.malaria || 0, parseInt(allocationData.dose_malaria) || 0, 'dose_malaria');
 
                 return {
                     uuid: uuidv4(),
@@ -854,24 +888,15 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                     hpv_expire_date_scs: metadataMap.dose_hpv.expire_date || null,
                     hpv_fiveml_syringe: hpvAllocated,
 
-                    // Malaria - set to 0 (not in use currently)
-                    dose_mal_actual: 0,
-                    dose_mal_allocated: 0,
-                    dose_mal_received: 0,
-                    dose_mal_return: 0,
-                    mal_vvm_stage_scs: '',
-                    mal_vvm_stage_ehf: '',
-                    mal_vvm_stage_threepl: '',
-                    mal_batch_number_scs: '',
-                    mal_batch_number: '',
-                    mal_expire_date_scs: null,
-                    mal_expire_date: null,
-                    mal_diluent: 0,
-                    mal_fiveml_syringe: 0,
-                    mal_zerofiveml_syringe: 0,
-                    mal_empty_vials: 0,
-                    mal_unused_vials: 0,
-                    mal_safety_boxes: 0,
+                    // Malaria
+                    dose_malaria_actual: facility.stockData?.dose_malaria || 0,
+                    dose_malaria_allocated: malariaAllocated,
+                    malaria_vvm_stage_scs: metadataMap.dose_malaria.vvm_stage || '',
+                    malaria_batch_number_scs: metadataMap.dose_malaria.batch_number || '',
+                    malaria_expire_date_scs: metadataMap.dose_malaria.expire_date || null,
+                    malaria_diluent: Math.ceil(malariaAllocated / 10),
+                    malaria_fiveml_syringe: Math.ceil(malariaAllocated / 10),
+                    malaria_zerofiveml_syringe: malariaAllocated,
 
                     // MR - proportional allocation
                     dose_mr_actual: facility.stockData?.mr || 0,
@@ -897,7 +922,8 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                         tdAllocated + // TD: admin
                         (menaAllocated + Math.ceil(menaAllocated / 10)) + // MenA: admin + recon
                         hpvAllocated + // HPV: admin
-                        (mrAllocated + Math.ceil(mrAllocated / 10)) // MR: admin + recon
+                        (mrAllocated + Math.ceil(mrAllocated / 10)) + // MR: admin + recon
+                        (malariaAllocated + Math.ceil(malariaAllocated / 10)) // Malaria: admin + recon
                     ) / 100) || 0,
                 };
             });
@@ -1047,6 +1073,16 @@ const VaccineAllocationBulkFormView: React.FC = () => {
                 { key: 'mr_diluent', label: 'MR Diluent' },
                 { key: 'mr_syringe_05ml', label: 'MR 0.5ml Syringe' },
                 { key: 'mr_syringe_5ml', label: 'MR 5ml Syringe' },
+            ]
+        },
+        {
+            key: 'dose_malaria',
+            label: 'Malaria',
+            maxKey: 'malaria',
+            consumables: [
+                { key: 'mal_diluent', label: 'Malaria Diluent' },
+                { key: 'mal_syringe_05ml', label: 'Malaria 0.5ml Syringe' },
+                { key: 'mal_syringe_2ml', label: 'Malaria 2ml Syringe' },
             ]
         },
     ];
